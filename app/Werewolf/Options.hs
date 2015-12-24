@@ -1,0 +1,99 @@
+{-|
+Module      : Werewolf.Options
+Description : Optparse utilities.
+
+Copyright   : (c) Henry J. Wylde, 2015
+License     : BSD3
+Maintainer  : public@hjwylde.com
+
+Optparse utilities.
+-}
+
+module Werewolf.Options (
+    -- * Options
+    Options(..), Command(..),
+
+    -- * Optparse
+    werewolfPrefs, werewolfInfo, werewolf,
+) where
+
+import           Data.Text    (Text)
+import qualified Data.Text    as T
+import           Data.Version (showVersion)
+
+import qualified Werewolf.Commands.Help      as Help
+import qualified Werewolf.Commands.Interpret as Interpret
+import qualified Werewolf.Commands.Start     as Start
+import qualified Werewolf.Commands.Vote      as Vote
+import           Werewolf.Version            as This
+
+import Options.Applicative
+
+-- | Options.
+data Options = Options
+    { optCaller  :: Text
+    , argCommand :: Command
+    } deriving (Eq, Show)
+
+-- | Command.
+data Command
+    = End
+    | Help Help.Options
+    | Interpret Interpret.Options
+    | Start Start.Options
+    | Vote Vote.Options
+    deriving (Eq, Show)
+
+-- | The default preferences.
+--   Limits the help output to 100 columns.
+werewolfPrefs :: ParserPrefs
+werewolfPrefs = prefs $ columns 100
+
+-- | An optparse parser of a werewolf command.
+werewolfInfo :: ParserInfo Options
+werewolfInfo = info (infoOptions <*> werewolf) (fullDesc <> header' <> progDesc')
+    where
+        infoOptions = helper <*> version
+        version     = infoOption ("Version " ++ showVersion This.version) $ mconcat [
+            long "version", short 'V', hidden,
+            help "Show this binary's version"
+            ]
+
+        header'     = header "A game engine for running werewolf in a chat client."
+        progDesc'   = progDesc "This engine is based off of Werewolves of Millers Hollow (http://www.games-wiki.org/wiki/Werewolves_of_Millers_Hollow/). See https://github.com/hjwylde/werewolf for help on writing chat interfaces."
+
+-- | An options parser.
+werewolf :: Parser Options
+werewolf = Options
+    <$> fmap T.pack (strOption $ mconcat [
+        long "caller", metavar "PLAYER",
+        help "Specify the calling player's name"
+        ])
+    <*> subparser (mconcat [
+        command "end"       $ info (helper <*> end)         (fullDesc <> progDesc "End the current game"),
+        command "help"      $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents"),
+        command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command"),
+        command "start"     $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game"),
+        command "vote"      $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
+        ])
+
+end :: Parser Command
+end = pure End
+
+help_ :: Parser Command
+help_ = Help . Help.Options
+    <$> optional (subparser $ mconcat [
+        command "commands"      $ info (pure Help.Commands)     (fullDesc <> progDesc "Print the in-game commands"),
+        command "description"   $ info (pure Help.Description)  (fullDesc <> progDesc "Print the game description"),
+        command "rules"         $ info (pure Help.Rules)        (fullDesc <> progDesc "Print the game rules"),
+        command "roles"         $ info (pure Help.Roles)        (fullDesc <> progDesc "Print the roles and their descriptions")
+        ])
+
+interpret :: Parser Command
+interpret = Interpret . Interpret.Options <$> many (T.pack <$> strArgument (metavar "COMMAND ARG..."))
+
+start :: Parser Command
+start = Start . Start.Options <$> many (T.pack <$> strArgument (metavar "PLAYER..."))
+
+vote :: Parser Command
+vote = Vote . Vote.Options . T.pack <$> strArgument (metavar "PLAYER")

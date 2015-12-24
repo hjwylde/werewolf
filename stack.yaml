@@ -1,0 +1,6 @@
+resolver: lts-3.19
+ghc-options:
+    werewolf: -Werror -Wall -fno-warn-name-shadowing
+
+packages:
+- '.'
