@@ -1,17 +1,17 @@
 {-|
-Module      : Werewolf.Commands.Vote
-Description : Options and handler for the vote subcommand.
+Module      : Werewolf.Commands.See
+Description : Options and handler for the see subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Options and handler for the vote subcommand.
+Options and handler for the see subcommand.
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Werewolf.Commands.Vote (
+module Werewolf.Commands.See (
     -- * Options
     Options(..),
 
@@ -19,19 +19,15 @@ module Werewolf.Commands.Vote (
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
-import Data.Maybe
-import Data.Text  (Text)
+import Data.Text (Text)
 
 import Game.Werewolf.Command
 import Game.Werewolf.Engine
-import Game.Werewolf.Game
-import Game.Werewolf.Player   as Player
 import Game.Werewolf.Response
 
 -- | Options.
@@ -46,10 +42,7 @@ handle callerName (Options targetName) = do
 
     game <- readGame
 
-    let mCaller = findByName callerName (game ^. players)
-    when (isNothing mCaller) $ exitWith failure { messages = [playerDoesNotExistMessage callerName callerName] }
-
-    let command = (if isVillager (fromJust mCaller) then lynchVoteCommand else killVoteCommand) callerName targetName
+    let command = seeCommand callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

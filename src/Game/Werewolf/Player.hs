@@ -23,10 +23,10 @@ module Game.Werewolf.Player (
     findByName, findByName_,
 
     -- ** Filters
-    filterVillagers, filterWerewolves,
+    filterSeers, filterVillagers, filterWerewolves,
 
     -- ** Queries
-    doesPlayerExist, isVillager, isWerewolf, isAlive, isDead,
+    doesPlayerExist, isSeer, isVillager, isWerewolf, isAlive, isDead,
 
     -- * State
     State(..),
@@ -84,23 +84,26 @@ findByName name = find ((==) name . _name)
 findByName_ :: Text -> [Player] -> Player
 findByName_ name = fromJust . findByName name
 
-filterRole :: Role -> [Player] -> [Player]
-filterRole role = filter ((==) role . _role)
+filterSeers :: [Player] -> [Player]
+filterSeers = filter isSeer
 
 filterVillagers :: [Player] -> [Player]
-filterVillagers = filterRole villager
+filterVillagers = filter isVillager
 
 filterWerewolves :: [Player] -> [Player]
-filterWerewolves = filterRole werewolf
+filterWerewolves = filter isWerewolf
 
 doesPlayerExist :: Text -> [Player] -> Bool
 doesPlayerExist name = isJust . findByName name
 
+isSeer :: Player -> Bool
+isSeer player = player ^. role == seerRole
+
 isVillager :: Player -> Bool
-isVillager player = player ^. role == villager
+isVillager player = player ^. role == villagerRole
 
 isWerewolf :: Player -> Bool
-isWerewolf player = player ^. role == werewolf
+isWerewolf player = player ^. role == werewolfRole
 
 isAlive :: Player -> Bool
 isAlive player = player ^. state == Alive
@@ -108,11 +111,8 @@ isAlive player = player ^. state == Alive
 isDead :: Player -> Bool
 isDead player = player ^. state == Dead
 
-filterState :: State -> [Player] -> [Player]
-filterState state = filter ((==) state . _state)
-
 filterAlive :: [Player] -> [Player]
-filterAlive = filterState Alive
+filterAlive = filter isAlive
 
 filterDead :: [Player] -> [Player]
-filterDead = filterState Dead
+filterDead = filter isDead

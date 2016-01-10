@@ -18,6 +18,7 @@ import Options.Applicative
 import qualified Werewolf.Commands.End       as End
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
+import qualified Werewolf.Commands.See       as See
 import qualified Werewolf.Commands.Start     as Start
 import qualified Werewolf.Commands.Vote      as Vote
 import           Werewolf.Options
@@ -30,5 +31,6 @@ handle (Options caller command) = case command of
     End                 -> End.handle caller
     Help options        -> Help.handle caller options
     Interpret options   -> Interpret.handle caller options
+    See options         -> See.handle caller options
     Start options       -> Start.handle caller options
     Vote options        -> Vote.handle caller options

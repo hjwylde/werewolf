@@ -20,6 +20,7 @@ For the werewolves: kill all of the villagers.
 #### Roles
 
 The current implemented roles are:
+* Seer.
 * Villager.
 * Werewolf.
 
@@ -53,7 +54,7 @@ E.g., to start a game:
 > werewolf --caller @foo start @foo @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[{"to":null,"message":"Night falls, the town is asleep. The werewolves wake
 up, recognise one another and choose a new victim."},{"to":["@foo"],"message":"You slip away
-silently from your home."},{"to":["@bar"],"message":"ZzzZZzzz, you're sound asleep."},...]}
+silently from your home."},{"to":["@bar"],"message":"ZzZZzz, you're sound asleep."},...]}
 ```
 
 In this example, user _@foo_ ran the `start` command with the player names as arguments.

@@ -25,6 +25,7 @@ import Data.Text (Text)
 
 import qualified Werewolf.Commands.End   as End
 import qualified Werewolf.Commands.Help  as Help
+import qualified Werewolf.Commands.See   as See
 import qualified Werewolf.Commands.Start as Start
 import qualified Werewolf.Commands.Vote  as Vote
 
@@ -43,6 +44,7 @@ interpret callerName ["help"]                   = Help.handle callerName (Help.O
 interpret callerName ("help":["description"])   = Help.handle callerName (Help.Options $ Just Help.Description)
 interpret callerName ("help":["rules"])         = Help.handle callerName (Help.Options $ Just Help.Rules)
 interpret callerName ("help":["roles"])         = Help.handle callerName (Help.Options $ Just Help.Roles)
+interpret callerName ("see":[targetName])       = See.handle callerName (See.Options targetName)
 interpret callerName ("start":playerNames)      = Start.handle callerName (Start.Options playerNames)
 interpret callerName ("vote":[targetName])      = Vote.handle callerName (Vote.Options targetName)
 interpret callerName _                          = Help.handle callerName (Help.Options $ Just Help.Commands)

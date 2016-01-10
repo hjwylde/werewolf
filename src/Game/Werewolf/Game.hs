@@ -21,12 +21,12 @@ module Game.Werewolf.Game (
     Game(..), turn, players,
     newGame,
 
-    -- * Turn
-    Turn(..), votes,
-    newVillagersTurn, newWerewolvesTurn,
-
     -- ** Queries
-    isVillagersTurn, isWerewolvesTurn, isGameOver,
+    isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver,
+
+    -- * Turn
+    Turn(..), sees, votes,
+    newSeersTurn, newVillagersTurn, newWerewolvesTurn,
 ) where
 
 import Control.Lens
@@ -56,7 +56,8 @@ instance ToJSON Game where
 #endif
 
 data Turn
-    = Villagers { _votes :: Map Text Text }
+    = Seers { _sees :: Map Text Text }
+    | Villagers { _votes :: Map Text Text }
     | Werewolves { _votes :: Map Text Text }
     | NoOne
     deriving (Eq, Generic, Show)
@@ -74,13 +75,20 @@ makeLenses ''Game
 makeLenses ''Turn
 
 newGame :: [Player] -> Game
-newGame = Game newWerewolvesTurn
+newGame = Game newSeersTurn
+
+newSeersTurn :: Turn
+newSeersTurn = Seers Map.empty
 
 newVillagersTurn :: Turn
 newVillagersTurn = Villagers Map.empty
 
 newWerewolvesTurn :: Turn
 newWerewolvesTurn = Werewolves Map.empty
+
+isSeersTurn :: Game -> Bool
+isSeersTurn (Game (Seers {}) _) = True
+isSeersTurn _                   = False
 
 isVillagersTurn :: Game -> Bool
 isVillagersTurn (Game (Villagers {}) _) = True

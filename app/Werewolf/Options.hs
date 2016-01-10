@@ -23,6 +23,7 @@ import           Data.Version (showVersion)
 
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
+import qualified Werewolf.Commands.See       as See
 import qualified Werewolf.Commands.Start     as Start
 import qualified Werewolf.Commands.Vote      as Vote
 import           Werewolf.Version            as This
@@ -40,6 +41,7 @@ data Command
     = End
     | Help Help.Options
     | Interpret Interpret.Options
+    | See See.Options
     | Start Start.Options
     | Vote Vote.Options
     deriving (Eq, Show)
@@ -73,6 +75,7 @@ werewolf = Options
         command "end"       $ info (helper <*> end)         (fullDesc <> progDesc "End the current game"),
         command "help"      $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents"),
         command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command"),
+        command "see"       $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance"),
         command "start"     $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game"),
         command "vote"      $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
         ])
@@ -91,6 +94,9 @@ help_ = Help . Help.Options
 
 interpret :: Parser Command
 interpret = Interpret . Interpret.Options <$> many (T.pack <$> strArgument (metavar "COMMAND ARG..."))
+
+see :: Parser Command
+see = See . See.Options . T.pack <$> strArgument (metavar "PLAYER")
 
 start :: Parser Command
 start = Start . Start.Options <$> many (T.pack <$> strArgument (metavar "PLAYER..."))
