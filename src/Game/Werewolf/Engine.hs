@@ -20,15 +20,22 @@ module Game.Werewolf.Engine (
 
     -- * Game
 
-    -- ** Manipulating
-    startGame, isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver, getPlayerSee,
-    getPlayerVote,
+    -- ** Manipulations
+    startGame,
+
+    -- ** Queries
+    isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
 
     -- * Player
-    createPlayers, doesPlayerExist, killPlayer,
+
+    -- ** Manipulations
+    createPlayers, killPlayer,
+
+    -- ** Queries
+    doesPlayerExist, isPlayerSeer, isPlayerVillager, isPlayerWerewolf, isPlayerAlive, isPlayerDead,
 
     -- * Role
     randomiseRoles,
@@ -89,11 +96,11 @@ isWerewolvesTurn = gets Game.isWerewolvesTurn
 isGameOver :: MonadState Game m => m Bool
 isGameOver = gets Game.isGameOver
 
-getPlayerSee :: MonadState Game m => Player -> m (Maybe Text)
-getPlayerSee player = use $ turn . sees . at (player ^. Player.name)
+getPlayerSee :: MonadState Game m => Text -> m (Maybe Text)
+getPlayerSee playerName = use $ turn . sees . at playerName
 
-getPlayerVote :: MonadState Game m => Player -> m (Maybe Text)
-getPlayerVote player = use $ turn . votes . at (player ^. Player.name)
+getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
+getPlayerVote playerName = use $ turn . votes . at playerName
 
 defaultFilePath :: MonadIO m => m FilePath
 defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory
@@ -116,11 +123,26 @@ doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
 createPlayers :: MonadIO m => [Text] -> m [Player]
 createPlayers playerNames = zipWith newPlayer playerNames <$> randomiseRoles (length playerNames)
 
+killPlayer :: MonadState Game m => Player -> m ()
+killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
+
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = uses players $ Player.doesPlayerExist name
 
-killPlayer :: MonadState Game m => Player -> m ()
-killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
+isPlayerSeer :: MonadState Game m => Text -> m Bool
+isPlayerSeer name = uses players $ isSeer . findByName_ name
+
+isPlayerVillager :: MonadState Game m => Text -> m Bool
+isPlayerVillager name = uses players $ isVillager . findByName_ name
+
+isPlayerWerewolf :: MonadState Game m => Text -> m Bool
+isPlayerWerewolf name = uses players $ isWerewolf . findByName_ name
+
+isPlayerAlive :: MonadState Game m => Text -> m Bool
+isPlayerAlive name = uses players $ isAlive . findByName_ name
+
+isPlayerDead :: MonadState Game m => Text -> m Bool
+isPlayerDead name = uses players $ isDead . findByName_ name
 
 randomiseRoles :: MonadIO m => Int -> m [Role]
 randomiseRoles n = liftIO . evalRandIO . shuffleM $ seerRoles ++ werewolfRoles ++ villagerRoles

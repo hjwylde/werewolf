@@ -44,20 +44,11 @@ data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState
 
 seeCommand :: Text -> Text -> Command
 seeCommand callerName targetName = Command $ do
-    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
-    unlessM isSeersTurn                     $ throwError [playerCannotDoThatMessage callerName]
-    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
-    unlessM (doesPlayerExist targetName)    $ throwError [playerDoesNotExistMessage callerName targetName]
+    validateArguments callerName targetName
 
-    caller <- uses players (findByName_ callerName)
-    target <- uses players (findByName_ targetName)
-
-    when (isDead caller) $ throwError [playerIsDeadMessage callerName]
-    when (isDead target) $ throwError [targetIsDeadMessage callerName targetName]
-
-    unless (isSeer caller) $ throwError [playerCannotDoThatMessage callerName]
-
-    whenJustM (getPlayerSee caller) $ const (throwError [playerHasAlreadySeenMessage callerName])
+    unlessM isSeersTurn                         $ throwError [playerCannotDoThatMessage callerName]
+    unlessM (isPlayerSeer callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    whenJustM (getPlayerSee callerName) . const $ throwError [playerHasAlreadySeenMessage callerName]
 
     turn . sees %= Map.insert callerName targetName
 
@@ -75,20 +66,11 @@ seeCommand callerName targetName = Command $ do
 
 killVoteCommand :: Text -> Text -> Command
 killVoteCommand callerName targetName = Command $ do
-    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
-    unlessM isWerewolvesTurn                $ throwError [playerCannotDoThatMessage callerName]
-    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
-    unlessM (doesPlayerExist targetName)    $ throwError [playerDoesNotExistMessage callerName targetName]
+    validateArguments callerName targetName
 
-    caller <- uses players (findByName_ callerName)
-    target <- uses players (findByName_ targetName)
-
-    when (isDead caller) $ throwError [playerIsDeadMessage callerName]
-    when (isDead target) $ throwError [targetIsDeadMessage callerName targetName]
-
-    unless (isWerewolf caller) $ throwError [playerCannotDoThatMessage callerName]
-
-    whenJustM (getPlayerVote caller) $ const (throwError [playerHasAlreadyVotedMessage callerName])
+    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatMessage callerName]
+    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
 
     turn . votes %= Map.insert callerName targetName
 
@@ -113,18 +95,10 @@ killVoteCommand callerName targetName = Command $ do
 
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
-    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
-    unlessM isVillagersTurn                 $ throwError [playerCannotDoThatMessage callerName]
-    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
-    unlessM (doesPlayerExist targetName)    $ throwError [playerDoesNotExistMessage callerName targetName]
+    validateArguments callerName targetName
 
-    caller <- uses players (findByName_ callerName)
-    target <- uses players (findByName_ targetName)
-
-    when (isDead caller) $ throwError [playerIsDeadMessage callerName]
-    when (isDead target) $ throwError [targetIsDeadMessage callerName targetName]
-
-    whenJustM (getPlayerVote caller) $ const (throwError [playerHasAlreadyVotedMessage callerName])
+    unlessM isVillagersTurn                         $ throwError [playerCannotDoThatMessage callerName]
+    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
 
     turn . votes %= Map.insert callerName targetName
 
@@ -145,6 +119,15 @@ lynchVoteCommand callerName targetName = Command $ do
 
         turn .= newSeersTurn
         use players >>= tell . seersTurnMessages . filterSeers
+
+validateArguments :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
+validateArguments callerName targetName = do
+    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
+    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
+    unlessM (doesPlayerExist targetName)    $ throwError [playerDoesNotExistMessage callerName targetName]
+
+    whenM (isPlayerDead callerName) $ throwError [playerIsDeadMessage callerName]
+    whenM (isPlayerDead targetName) $ throwError [targetIsDeadMessage callerName targetName]
 
 only :: [a] -> Maybe a
 only [a]    = Just a
