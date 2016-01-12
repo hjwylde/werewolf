@@ -47,9 +47,9 @@ prop_startGameStartsWithSeersTurn players = and [
     ] ==> isSeersTurn (fromRight . runExcept $ startGame "" players)
 
 prop_startGameUsesGivenPlayers :: [Player] -> Property
-prop_startGameUsesGivenPlayers players_ = and [
-    isRight . runExcept $ startGame "" players_
-    ] ==> (fromRight . runExcept $ startGame "" players_) ^. players == players_
+prop_startGameUsesGivenPlayers players' = and [
+    isRight . runExcept $ startGame "" players'
+    ] ==> (fromRight . runExcept $ startGame "" players') ^. players == players'
 
 prop_startGameErrorsUnlessUniquePlayerNames :: [Player] -> Property
 prop_startGameErrorsUnlessUniquePlayerNames players = and [

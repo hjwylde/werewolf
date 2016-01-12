@@ -44,6 +44,6 @@ handle callerName (Options targetName) = do
 
     let command = seeCommand callerName targetName
 
-    case runExcept (runWriterT $ execStateT (apply command >> checkGameOver) game) of
+    case runExcept (runWriterT $ execStateT (apply command >> advanceTurn >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }

@@ -30,4 +30,4 @@ prop_newGameStartsWithVotesEmpty :: [Player] -> Bool
 prop_newGameStartsWithVotesEmpty players = Map.null $ newGame players ^. votes
 
 prop_newGameUsesGivenPlayers :: [Player] -> Bool
-prop_newGameUsesGivenPlayers players_ = newGame players_ ^. players == players_
+prop_newGameUsesGivenPlayers players' = newGame players' ^. players == players'

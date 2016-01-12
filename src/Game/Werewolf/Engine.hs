@@ -43,6 +43,7 @@ module Game.Werewolf.Engine (
 
 import Control.Lens         hiding (only)
 import Control.Monad.Except
+import Control.Monad.Extra
 import Control.Monad.Random
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
@@ -50,6 +51,7 @@ import Control.Monad.Writer
 import           Data.Aeson           hiding ((.=))
 import qualified Data.ByteString.Lazy as BS
 import           Data.List.Extra
+import qualified Data.Map             as Map
 import           Data.Text            (Text)
 
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
@@ -58,7 +60,7 @@ import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     as Role
+import           Game.Werewolf.Role     as Role hiding (Villagers, Werewolves)
 
 import System.Directory
 import System.Exit
@@ -66,7 +68,70 @@ import System.FilePath
 import System.Random.Shuffle
 
 advanceTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
-advanceTurn = undefined
+advanceTurn = get >>= \game -> advanceTurn' >> get >>= \game' -> unless (game == game') advanceTurn
+
+advanceTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
+advanceTurn' = use turn >>= \turn' -> case turn' of
+    Seers -> do
+        seersCount <- uses players (length . filterAlive . filterSeers)
+        votes'     <- use votes
+
+        when (seersCount == Map.size votes') $ do
+            forM_ (Map.toList votes') $ \(seerName, targetName) -> do
+                target <- uses players (findByName_ targetName)
+
+                tell [playerSeenMessage seerName target]
+
+            turn .= Werewolves
+            votes .= Map.empty
+            tell werewolvesTurnMessages
+
+    Werewolves -> do
+        werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
+        votes'          <- use votes
+
+        when (werewolvesCount == Map.size votes') $ do
+            werewolfNames <- uses players (map Player._name . filterWerewolves)
+            tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
+
+            turn .= Villagers
+            votes .= Map.empty
+            tell villagersTurnMessages
+
+            let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
+            case mTargetName of
+                Nothing         -> tell [noPlayerKilledMessage]
+                Just targetName -> do
+                    target <- uses players (findByName_ targetName)
+
+                    killPlayer target
+                    tell [playerKilledMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
+
+    Villagers -> do
+        playersCount    <- uses players (length . filterAlive)
+        votes           <- use votes
+
+        when (playersCount == Map.size votes) $ do
+            tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes)
+
+            let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes)) (nub $ Map.elems votes)
+            case mLynchedName of
+                Nothing             -> tell [noPlayerLynchedMessage]
+                Just lynchedName    -> do
+                    target <- uses players (findByName_ lynchedName)
+
+                    killPlayer target
+                    tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
+
+            turn .= Seers
+            sees .= Map.empty
+            use players >>= tell . seersTurnMessages . filterSeers
+
+    NoOne -> return ()
+
+only :: [a] -> Maybe a
+only [a]    = Just a
+only _      = Nothing
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do

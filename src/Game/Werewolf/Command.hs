@@ -28,17 +28,13 @@ import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
-import           Data.List.Extra
-import qualified Data.Map        as Map
-import           Data.Text       (Text)
+import qualified Data.Map  as Map
+import           Data.Text (Text)
 
-import           Game.Werewolf.Engine
-import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
-                                         isWerewolvesTurn, killPlayer)
-import           Game.Werewolf.Player   hiding (doesPlayerExist)
-import qualified Game.Werewolf.Player   as Player
-import           Game.Werewolf.Response
-import           Game.Werewolf.Role     as Role hiding (Villagers, Werewolves)
+import Game.Werewolf.Engine
+import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn, isWerewolvesTurn,
+                               killPlayer)
+import Game.Werewolf.Response
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 
@@ -52,19 +48,6 @@ seeCommand callerName targetName = Command $ do
 
     sees %= Map.insert callerName targetName
 
-    seersCount <- uses players (length . filterAlive . filterSeers)
-    votes'     <- use votes
-
-    when (seersCount == Map.size votes') $ do
-        forM_ (Map.toList votes') $ \(seerName, targetName) -> do
-            target <- uses players (findByName_ targetName)
-
-            tell [playerSeenMessage seerName target]
-
-        turn .= Werewolves
-        votes .= Map.empty
-        tell werewolvesTurnMessages
-
 killVoteCommand :: Text -> Text -> Command
 killVoteCommand callerName targetName = Command $ do
     validateArguments callerName targetName
@@ -75,26 +58,6 @@ killVoteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
-    votes'           <- use votes
-
-    when (werewolvesCount == Map.size votes') $ do
-        werewolfNames <- uses players (map Player._name . filterWerewolves)
-        tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
-
-        turn .= Villagers
-        votes .= Map.empty
-        tell villagersTurnMessages
-
-        let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
-        case mTargetName of
-            Nothing         -> tell [noPlayerKilledMessage]
-            Just targetName -> do
-                target <- uses players (findByName_ targetName)
-
-                killPlayer target
-                tell [playerKilledMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
-
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
     validateArguments callerName targetName
@@ -104,25 +67,6 @@ lynchVoteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    playersCount    <- uses players (length . filterAlive)
-    votes           <- use votes
-
-    when (playersCount == Map.size votes) $ do
-        tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes)
-
-        let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes)) (nub $ Map.elems votes)
-        case mLynchedName of
-            Nothing             -> tell [noPlayerLynchedMessage]
-            Just lynchedName    -> do
-                target <- uses players (findByName_ lynchedName)
-
-                killPlayer target
-                tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
-
-        turn .= Seers
-        sees .= Map.empty
-        use players >>= tell . seersTurnMessages . filterSeers
-
 validateArguments :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
 validateArguments callerName targetName = do
     whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
@@ -131,7 +75,3 @@ validateArguments callerName targetName = do
 
     whenM (isPlayerDead callerName) $ throwError [playerIsDeadMessage callerName]
     whenM (isPlayerDead targetName) $ throwError [targetIsDeadMessage callerName targetName]
-
-only :: [a] -> Maybe a
-only [a]    = Just a
-only _      = Nothing
