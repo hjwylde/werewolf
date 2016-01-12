@@ -9,7 +9,9 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Game.Werewolf.Test.Arbitrary (
-    arbitraryCommand, arbitraryNewGame, arbitraryNewPlayer,
+    -- * Contextual arbitraries
+    arbitraryCommand, arbitrarySeeCommand, arbitraryKillVoteCommand, arbitraryLynchVoteCommand,
+    arbitraryNewGame, arbitraryPlayer, arbitrarySeer, arbitraryVillager, arbitraryWerewolf,
 ) where
 
 import Control.Lens hiding (elements)
@@ -20,39 +22,72 @@ import Data.Text       (Text, pack)
 import Game.Werewolf.Command
 import Game.Werewolf.Game
 import Game.Werewolf.Player
-import Game.Werewolf.Role    hiding (_name)
+import Game.Werewolf.Role    hiding (name, _name)
 
 import Test.QuickCheck
 
-instance Arbitrary Command where
-    arbitrary = Vote <$> arbitrary <*> arbitrary
+instance Show Command where
+    show _ = "command"
 
 arbitraryCommand :: Game -> Gen Command
-arbitraryCommand game = Vote <$> elements (game ^. players) <*> elements (game ^. players)
+arbitraryCommand game = oneof [arbitrarySeeCommand game, arbitraryKillVoteCommand game, arbitraryLynchVoteCommand game]
+
+arbitrarySeeCommand :: Game -> Gen Command
+arbitrarySeeCommand game = do
+    caller <- arbitrarySeer game
+    target <- arbitraryPlayer game
+
+    return $ seeCommand (caller ^. name) (target ^. name)
+
+arbitraryKillVoteCommand :: Game -> Gen Command
+arbitraryKillVoteCommand game = do
+    caller <- arbitraryWerewolf game
+    target <- arbitraryPlayer game
+
+    return $ killVoteCommand (caller ^. name) (target ^. name)
+
+arbitraryLynchVoteCommand :: Game -> Gen Command
+arbitraryLynchVoteCommand game = do
+    caller <- arbitraryPlayer game
+    target <- arbitraryPlayer game
+
+    return $ lynchVoteCommand (caller ^. name) (target ^. name)
 
 instance Arbitrary Game where
     arbitrary = do
-        n <- choose (7, 24)
+        game <- arbitraryNewGame
         turn <- arbitrary
-        players <- infiniteList
 
-        return $ Game turn (take n $ nubOn _name players)
+        return $ game { _turn = turn }
 
 arbitraryNewGame :: Gen Game
 arbitraryNewGame = do
     n <- choose (7, 24)
-    players <- infiniteListOf arbitraryNewPlayer
+    players <- nubOn _name <$> infiniteList
 
-    return $ newGame (take n $ nubOn _name players)
+    let seer        = head $ filterSeers players
+    let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
+    let villagers   = take (n - 1 - (length werewolves)) $ filterVillagers players
+
+    return $ newGame (seer:werewolves ++ villagers)
 
 instance Arbitrary Turn where
-    arbitrary = elements [newVillagersTurn, newWerewolvesTurn, NoOne]
+    arbitrary = elements [newSeersTurn, newVillagersTurn, newWerewolvesTurn, NoOne]
 
 instance Arbitrary Player where
-    arbitrary = Player <$> arbitrary <*> arbitrary <*> arbitrary
+    arbitrary = newPlayer <$> arbitrary <*> arbitrary
 
-arbitraryNewPlayer :: Gen Player
-arbitraryNewPlayer = newPlayer <$> arbitrary <*> arbitrary
+arbitraryPlayer :: Game -> Gen Player
+arbitraryPlayer = elements . filterAlive . _players
+
+arbitrarySeer :: Game -> Gen Player
+arbitrarySeer = elements . filterSeers . filterAlive . _players
+
+arbitraryVillager :: Game -> Gen Player
+arbitraryVillager = elements . filterWerewolves . filterAlive . _players
+
+arbitraryWerewolf :: Game -> Gen Player
+arbitraryWerewolf = elements . filterWerewolves . filterAlive . _players
 
 instance Arbitrary State where
     arbitrary = elements [Alive, Dead]

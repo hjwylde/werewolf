@@ -95,6 +95,8 @@ test-suite werewolf-test
     ghc-options:    -threaded -Wall -Werror -fno-warn-name-shadowing
     other-modules:
         Game.Werewolf.Test.Arbitrary
+        Game.Werewolf.Test.Command
+        Game.Werewolf.Test.Engine
         Game.Werewolf.Test.Game
         Game.Werewolf.Test.Player
 

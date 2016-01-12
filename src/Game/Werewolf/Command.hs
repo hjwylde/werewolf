@@ -34,7 +34,7 @@ import           Data.Text       (Text)
 
 import           Game.Werewolf.Engine
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
-                                         isWerewolvesTurn)
+                                         isWerewolvesTurn, killPlayer)
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response

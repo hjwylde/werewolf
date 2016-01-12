@@ -21,6 +21,9 @@ module Game.Werewolf.Game (
     Game(..), turn, players,
     newGame,
 
+    -- ** Manipulations
+    killPlayer,
+
     -- ** Queries
     isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver,
 
@@ -76,6 +79,9 @@ makeLenses ''Turn
 
 newGame :: [Player] -> Game
 newGame = Game newSeersTurn
+
+killPlayer :: Game -> Player -> Game
+killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
 
 newSeersTurn :: Turn
 newSeersTurn = Seers Map.empty

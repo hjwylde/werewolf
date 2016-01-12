@@ -9,7 +9,8 @@ Maintainer  : public@hjwylde.com
 {-# LANGUAGE OverloadedStrings #-}
 
 module Game.Werewolf.Test.Game (
-    prop_newGameStartsWithWerewolvesTurn, check_newVillagersTurn, check_newWerewolvesTurn,
+    prop_newGameStartsWithSeersTurn, prop_newGameUsesGivenPlayers, check_newSeersTurn,
+    check_newVillagersTurn, check_newWerewolvesTurn,
 ) where
 
 import Control.Lens
@@ -21,8 +22,14 @@ import Game.Werewolf.Player
 
 import Test.HUnit
 
-prop_newGameStartsWithWerewolvesTurn :: [Player] -> Bool
-prop_newGameStartsWithWerewolvesTurn players = newGame players ^. turn == newWerewolvesTurn
+prop_newGameStartsWithSeersTurn :: [Player] -> Bool
+prop_newGameStartsWithSeersTurn players = isSeersTurn $ newGame players
+
+prop_newGameUsesGivenPlayers :: [Player] -> Bool
+prop_newGameUsesGivenPlayers players_ = newGame players_ ^. players == players_
+
+check_newSeersTurn :: Assertion
+check_newSeersTurn = newSeersTurn @?= Seers Map.empty
 
 check_newVillagersTurn :: Assertion
 check_newVillagersTurn = newVillagersTurn @?= Villagers Map.empty

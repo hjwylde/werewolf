@@ -21,7 +21,7 @@ module Game.Werewolf.Engine (
     -- * Game
 
     -- ** Manipulations
-    startGame,
+    startGame, killPlayer,
 
     -- ** Queries
     isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
@@ -32,7 +32,7 @@ module Game.Werewolf.Engine (
     -- * Player
 
     -- ** Manipulations
-    createPlayers, killPlayer,
+    createPlayers,
 
     -- ** Queries
     doesPlayerExist, isPlayerSeer, isPlayerVillager, isPlayerWerewolf, isPlayerAlive, isPlayerDead,
@@ -53,7 +53,7 @@ import           Data.List.Extra
 import           Data.Text            (Text)
 
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
-                                         isWerewolvesTurn)
+                                         isWerewolvesTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -83,6 +83,9 @@ startGame callerName players = do
     return $ newGame players
     where
         playerNames = map Player._name players
+
+killPlayer :: MonadState Game m => Player -> m ()
+killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
 
 isSeersTurn :: MonadState Game m => m Bool
 isSeersTurn = gets Game.isSeersTurn
@@ -122,9 +125,6 @@ doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
 
 createPlayers :: MonadIO m => [Text] -> m [Player]
 createPlayers playerNames = zipWith newPlayer playerNames <$> randomiseRoles (length playerNames)
-
-killPlayer :: MonadState Game m => Player -> m ()
-killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = uses players $ Player.doesPlayerExist name
