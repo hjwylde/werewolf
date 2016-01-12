@@ -38,7 +38,7 @@ import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVilla
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     as Role
+import           Game.Werewolf.Role     as Role hiding (Villagers, Werewolves)
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 
@@ -50,18 +50,19 @@ seeCommand callerName targetName = Command $ do
     unlessM (isPlayerSeer callerName)           $ throwError [playerCannotDoThatMessage callerName]
     whenJustM (getPlayerSee callerName) . const $ throwError [playerHasAlreadySeenMessage callerName]
 
-    turn . sees %= Map.insert callerName targetName
+    sees %= Map.insert callerName targetName
 
     seersCount <- uses players (length . filterAlive . filterSeers)
-    votes      <- use $ turn . votes
+    votes'     <- use votes
 
-    when (seersCount == Map.size votes) $ do
-        forM_ (Map.toList votes) $ \(seerName, targetName) -> do
+    when (seersCount == Map.size votes') $ do
+        forM_ (Map.toList votes') $ \(seerName, targetName) -> do
             target <- uses players (findByName_ targetName)
 
             tell [playerSeenMessage seerName target]
 
-        turn .= newWerewolvesTurn
+        turn .= Werewolves
+        votes .= Map.empty
         tell werewolvesTurnMessages
 
 killVoteCommand :: Text -> Text -> Command
@@ -72,19 +73,20 @@ killVoteCommand callerName targetName = Command $ do
     unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
 
-    turn . votes %= Map.insert callerName targetName
+    votes %= Map.insert callerName targetName
 
     werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
-    votes           <- use $ turn . votes
+    votes'           <- use votes
 
-    when (werewolvesCount == Map.size votes) $ do
+    when (werewolvesCount == Map.size votes') $ do
         werewolfNames <- uses players (map Player._name . filterWerewolves)
-        tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes)
+        tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
 
-        turn .= newVillagersTurn
+        turn .= Villagers
+        votes .= Map.empty
         tell villagersTurnMessages
 
-        let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes)) (nub $ Map.elems votes)
+        let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
         case mTargetName of
             Nothing         -> tell [noPlayerKilledMessage]
             Just targetName -> do
@@ -100,10 +102,10 @@ lynchVoteCommand callerName targetName = Command $ do
     unlessM isVillagersTurn                         $ throwError [playerCannotDoThatMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
 
-    turn . votes %= Map.insert callerName targetName
+    votes %= Map.insert callerName targetName
 
     playersCount    <- uses players (length . filterAlive)
-    votes           <- use $ turn . votes
+    votes           <- use votes
 
     when (playersCount == Map.size votes) $ do
         tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes)
@@ -117,7 +119,8 @@ lynchVoteCommand callerName targetName = Command $ do
                 killPlayer target
                 tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
 
-        turn .= newSeersTurn
+        turn .= Seers
+        sees .= Map.empty
         use players >>= tell . seersTurnMessages . filterSeers
 
 validateArguments :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()

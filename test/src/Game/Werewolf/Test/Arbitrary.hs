@@ -22,7 +22,7 @@ import Data.Text       (Text, pack)
 import Game.Werewolf.Command
 import Game.Werewolf.Game
 import Game.Werewolf.Player
-import Game.Werewolf.Role    hiding (name, _name)
+import Game.Werewolf.Role    hiding (Villagers, Werewolves, name, _name)
 
 import Test.QuickCheck
 
@@ -72,7 +72,7 @@ arbitraryNewGame = do
     return $ newGame (seer:werewolves ++ villagers)
 
 instance Arbitrary Turn where
-    arbitrary = elements [newSeersTurn, newVillagersTurn, newWerewolvesTurn, NoOne]
+    arbitrary = elements [Seers, Villagers, Werewolves, NoOne]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary

@@ -29,7 +29,6 @@ module Game.Werewolf.Game (
 
     -- * Turn
     Turn(..), sees, votes,
-    newSeersTurn, newVillagersTurn, newWerewolvesTurn,
 ) where
 
 import Control.Lens
@@ -48,6 +47,8 @@ import GHC.Generics
 data Game = Game
     { _turn    :: Turn
     , _players :: [Player]
+    , _sees    :: Map Text Text
+    , _votes   :: Map Text Text
     } deriving (Eq, Generic, Show)
 
 instance FromJSON Game
@@ -58,11 +59,7 @@ instance ToJSON Game where
     toEncoding  = genericToEncoding defaultOptions
 #endif
 
-data Turn
-    = Seers { _sees :: Map Text Text }
-    | Villagers { _votes :: Map Text Text }
-    | Werewolves { _votes :: Map Text Text }
-    | NoOne
+data Turn = Seers | Villagers | Werewolves | NoOne
     deriving (Eq, Generic, Show)
 
 instance FromJSON Turn
@@ -78,31 +75,19 @@ makeLenses ''Game
 makeLenses ''Turn
 
 newGame :: [Player] -> Game
-newGame = Game newSeersTurn
+newGame players = Game Seers players Map.empty Map.empty
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
 
-newSeersTurn :: Turn
-newSeersTurn = Seers Map.empty
-
-newVillagersTurn :: Turn
-newVillagersTurn = Villagers Map.empty
-
-newWerewolvesTurn :: Turn
-newWerewolvesTurn = Werewolves Map.empty
-
 isSeersTurn :: Game -> Bool
-isSeersTurn (Game (Seers {}) _) = True
-isSeersTurn _                   = False
+isSeersTurn game = game ^. turn == Seers
 
 isVillagersTurn :: Game -> Bool
-isVillagersTurn (Game (Villagers {}) _) = True
-isVillagersTurn _                       = False
+isVillagersTurn game = game ^. turn == Villagers
 
 isWerewolvesTurn :: Game -> Bool
-isWerewolvesTurn (Game (Werewolves {}) _)   = True
-isWerewolvesTurn _                          = False
+isWerewolvesTurn game = game ^. turn == Werewolves
 
 isGameOver :: Game -> Bool
-isGameOver (Game turn _) = turn == NoOne
+isGameOver game = game ^. turn == NoOne

@@ -16,7 +16,7 @@ Engine functions.
 
 module Game.Werewolf.Engine (
     -- * Loop
-    checkGameOver,
+    advanceTurn, checkGameOver,
 
     -- * Game
 
@@ -65,6 +65,9 @@ import System.Exit
 import System.FilePath
 import System.Random.Shuffle
 
+advanceTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
+advanceTurn = undefined
+
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
     alivePlayers <- uses players filterAlive
@@ -100,10 +103,10 @@ isGameOver :: MonadState Game m => m Bool
 isGameOver = gets Game.isGameOver
 
 getPlayerSee :: MonadState Game m => Text -> m (Maybe Text)
-getPlayerSee playerName = use $ turn . sees . at playerName
+getPlayerSee playerName = use $ sees . at playerName
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
-getPlayerVote playerName = use $ turn . votes . at playerName
+getPlayerVote playerName = use $ votes . at playerName
 
 defaultFilePath :: MonadIO m => m FilePath
 defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory

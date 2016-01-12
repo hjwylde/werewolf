@@ -18,7 +18,6 @@ import Game.Werewolf.Test.Game
 import Game.Werewolf.Test.Player
 
 import Test.Tasty
-import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
 
 main :: IO ()
@@ -76,10 +75,9 @@ allEngineTests = [
 allGameTests :: [TestTree]
 allGameTests = [
     testProperty "PROP: new game starts with seers turn" prop_newGameStartsWithSeersTurn,
-    testProperty "PROP: new game uses given players" prop_newGameUsesGivenPlayers,
-    testCase "CHCK: newSeersTurn" check_newSeersTurn,
-    testCase "CHCK: newVillagersTurn" check_newVillagersTurn,
-    testCase "CHCK: newWerewolvesTurn" check_newWerewolvesTurn
+    testProperty "PROP: new game starts with sees empty" prop_newGameStartsWithSeesEmpty,
+    testProperty "PROP: new game starts with votes empty" prop_newGameStartsWithVotesEmpty,
+    testProperty "PROP: new game uses given players" prop_newGameUsesGivenPlayers
     ]
 
 allPlayerTests :: [TestTree]
