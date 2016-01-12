@@ -43,7 +43,6 @@ module Game.Werewolf.Engine (
 
 import Control.Lens         hiding (only)
 import Control.Monad.Except
-import Control.Monad.Extra
 import Control.Monad.Random
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
