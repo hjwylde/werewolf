@@ -52,6 +52,7 @@ import qualified Data.ByteString.Lazy as BS
 import           Data.List.Extra
 import qualified Data.Map             as Map
 import           Data.Text            (Text)
+import qualified Data.Text            as T
 
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
                                          isWerewolvesTurn, killPlayer)
@@ -72,8 +73,8 @@ advanceTurn = get >>= \game -> advanceTurn' >> get >>= \game' -> unless (game ==
 advanceTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceTurn' = use turn >>= \turn' -> case turn' of
     Seers -> do
-        seersCount <- uses players (length . filterAlive . filterSeers)
-        votes'     <- use votes
+        seersCount  <- uses players (length . filterAlive . filterSeers)
+        votes'      <- use sees
 
         when (seersCount == Map.size votes') $ do
             forM_ (Map.toList votes') $ \(seerName, targetName) -> do
@@ -82,7 +83,7 @@ advanceTurn' = use turn >>= \turn' -> case turn' of
                 tell [playerSeenMessage seerName target]
 
             turn .= Werewolves
-            votes .= Map.empty
+            sees .= Map.empty
             tell werewolvesTurnMessages
 
     Werewolves -> do
@@ -108,12 +109,12 @@ advanceTurn' = use turn >>= \turn' -> case turn' of
 
     Villagers -> do
         playersCount    <- uses players (length . filterAlive)
-        votes           <- use votes
+        votes'          <- use votes
 
-        when (playersCount == Map.size votes) $ do
-            tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes)
+        when (playersCount == Map.size votes') $ do
+            tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes')
 
-            let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes)) (nub $ Map.elems votes)
+            let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
             case mLynchedName of
                 Nothing             -> tell [noPlayerLynchedMessage]
                 Just lynchedName    -> do
@@ -123,7 +124,7 @@ advanceTurn' = use turn >>= \turn' -> case turn' of
                     tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
 
             turn .= Seers
-            sees .= Map.empty
+            votes .= Map.empty
             use players >>= tell . seersTurnMessages . filterSeers
 
     NoOne -> return ()
@@ -134,11 +135,11 @@ only _      = Nothing
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
-    alivePlayers <- uses players filterAlive
+    aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
 
-    case length alivePlayers of
+    case length aliveAllegiances of
         0 -> turn .= NoOne >> tell [gameOverMessage Nothing]
-        1 -> turn .= NoOne >> tell [gameOverMessage . Just $ head alivePlayers ^. Player.role . Role.name]
+        1 -> turn .= NoOne >> tell [gameOverMessage . Just . T.pack . show $ head aliveAllegiances]
         _ -> return ()
 
 startGame :: MonadError [Message] m => Text -> [Player] -> m Game

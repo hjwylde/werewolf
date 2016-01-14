@@ -30,10 +30,7 @@ module Game.Werewolf.Test.Command (
     prop_lynchVoteCommandErrorsWhenCallerHasVoted, prop_lynchVoteCommandUpdatesVotes,
 ) where
 
-import Control.Lens         hiding (elements)
-import Control.Monad.Except
-import Control.Monad.State  hiding (state)
-import Control.Monad.Writer
+import Control.Lens hiding (elements)
 
 import Data.Either.Extra
 import Data.Map          as Map
@@ -41,7 +38,6 @@ import Data.Map          as Map
 import Game.Werewolf.Command
 import Game.Werewolf.Game
 import Game.Werewolf.Player
-import Game.Werewolf.Response
 import Game.Werewolf.Test.Arbitrary
 
 import Test.QuickCheck
@@ -83,10 +79,10 @@ prop_seeCommandErrorsWhenCallerHasSeen game =
     isSeersTurn game ==>
     forAll (arbitrarySeer game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target ->
-    let command = seeCommand (caller ^. name) (target ^. name) in verbose_runCommandErrors (runCommand_ command game) command
+    let command = seeCommand (caller ^. name) (target ^. name) in verbose_runCommandErrors (run_ (apply command) game) command
 
 prop_seeCommandUpdatesSees :: Game -> Property
-prop_seeCommandUpdatesSees game = isSeersTurn game ==> forAll (arbitrarySeeCommand game) $ \command -> Map.size (runCommand_ command game ^. sees) == 1
+prop_seeCommandUpdatesSees game = isSeersTurn game ==> forAll (arbitrarySeeCommand game) $ \command -> Map.size (run_ (apply command) game ^. sees) == 1
 
 prop_killVoteCommandErrorsWhenGameIsOver :: Game -> Property
 prop_killVoteCommandErrorsWhenGameIsOver game = isGameOver game
@@ -125,10 +121,10 @@ prop_killVoteCommandErrorsWhenCallerHasVoted game =
     isWerewolvesTurn game ==>
     forAll (arbitraryWerewolf game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target ->
-    let command = killVoteCommand (caller ^. name) (target ^. name) in verbose_runCommandErrors (runCommand_ command game) command
+    let command = killVoteCommand (caller ^. name) (target ^. name) in verbose_runCommandErrors (run_ (apply command) game) command
 
 prop_killVoteCommandUpdatesVotes :: Game -> Property
-prop_killVoteCommandUpdatesVotes game = isWerewolvesTurn game ==> forAll (arbitraryKillVoteCommand game) $ \command -> Map.size (runCommand_ command game ^. votes) == 1
+prop_killVoteCommandUpdatesVotes game = isWerewolvesTurn game ==> forAll (arbitraryKillVoteCommand game) $ \command -> Map.size (run_ (apply command) game ^. votes) == 1
 
 prop_lynchVoteCommandErrorsWhenGameIsOver :: Game -> Property
 prop_lynchVoteCommandErrorsWhenGameIsOver game = isGameOver game
@@ -162,19 +158,13 @@ prop_lynchVoteCommandErrorsWhenCallerHasVoted game =
     isVillagersTurn game ==>
     forAll (arbitraryPlayer game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target ->
-    let command = lynchVoteCommand (caller ^. name) (target ^. name) in verbose_runCommandErrors (runCommand_ command game) command
+    let command = lynchVoteCommand (caller ^. name) (target ^. name) in verbose_runCommandErrors (run_ (apply command) game) command
 
 prop_lynchVoteCommandUpdatesVotes :: Game -> Property
 prop_lynchVoteCommandUpdatesVotes game =
     isVillagersTurn game ==>
     forAll (arbitraryLynchVoteCommand game) $ \command ->
-    Map.size (runCommand_ command game ^. votes) == 1
+    Map.size (run_ (apply command) game ^. votes) == 1
 
 verbose_runCommandErrors :: Game -> Command -> Property
-verbose_runCommandErrors game command = whenFail (mapM_ putStrLn [show game, show command, show . fromRight $ runCommand command game]) (isLeft $ runCommand command game)
-
-runCommand :: Command -> Game -> Either [Message] (Game, [Message])
-runCommand command game = runExcept . runWriterT $ execStateT (apply command) game
-
-runCommand_ :: Command -> Game -> Game
-runCommand_ command = fst . fromRight . runCommand command
+verbose_runCommandErrors game command = whenFail (mapM_ putStrLn [show game, show command, show . fromRight $ run (apply command) game]) (isLeft $ run (apply command) game)

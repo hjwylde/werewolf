@@ -19,7 +19,7 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    seeCommand, killVoteCommand, lynchVoteCommand,
+    seeCommand, killVoteCommand, lynchVoteCommand, noopCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -66,6 +66,9 @@ lynchVoteCommand callerName targetName = Command $ do
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
 
     votes %= Map.insert callerName targetName
+
+noopCommand :: Command
+noopCommand = Command $ return ()
 
 validateArguments :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
 validateArguments callerName targetName = do

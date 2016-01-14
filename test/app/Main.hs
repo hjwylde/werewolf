@@ -60,6 +60,28 @@ allCommandTests = [
 
 allEngineTests :: [TestTree]
 allEngineTests = [
+    testProperty "PROP: advance turn skips seers when no seers" prop_advanceTurnSkipsSeersWhenNoSeers,
+    testProperty "PROP: advance turn does nothing when game over" prop_advanceTurnDoesNothingWhenGameOver,
+
+    testProperty "PROP: advance seers turn advances to werewolves" prop_advanceSeersTurnAdvancesToWerewolves,
+    testProperty "PROP: advance seers turn resets sees" prop_advanceSeersTurnResetsSees,
+    testProperty "PROP: advance seers turn does nothing unless all seen" prop_advanceSeersTurnDoesNothingUnlessAllSeen,
+
+    testProperty "PROP: advance villagers turn advances to seers" prop_advanceVillagersTurnAdvancesToSeers,
+    testProperty "PROP: advance villagers turn lynches one player when consensus" prop_advanceVillagersTurnLynchesOnePlayerWhenConsensus,
+    testProperty "PROP: advance villagers turn lynches no one when conflicted" prop_advanceVillagersTurnLynchesNoOneWhenConflicted,
+    testProperty "PROP: advance villagers turn resets votes" prop_advanceVillagersTurnResetsVotes,
+    testProperty "PROP: advance villagers turn does nothing unless all voted" prop_advanceVillagersTurnDoesNothingUnlessAllVoted,
+
+    testProperty "PROP: advance werewolves turn advances to villagers" prop_advanceWerewolvesTurnAdvancesToVillagers,
+    testProperty "PROP: advance werewolves turn kills one player when consensus" prop_advanceWerewolvesTurnKillsOnePlayerWhenConsensus,
+    testProperty "PROP: advance werewolves turn kills no one when conflicted" prop_advanceWerewolvesTurnKillsNoOneWhenConflicted,
+    testProperty "PROP: advance werewolves turn resets votes" prop_advanceWerewolvesTurnResetsVotes,
+    testProperty "PROP: advance werewolves turn does nothing unless all voted" prop_advanceWerewolvesTurnDoesNothingUnlessAllVoted,
+
+    testProperty "PROP: check game over advances turn" prop_checkGameOverAdvancesTurn,
+    testProperty "PROP: check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
+
     testProperty "PROP: start game starts with seers turn" prop_startGameStartsWithSeersTurn,
     testProperty "PROP: start game uses given players" prop_startGameUsesGivenPlayers,
     testProperty "PROP: start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
@@ -69,7 +91,9 @@ allEngineTests = [
     testProperty "PROP: create players uses given player names" prop_createPlayersUsesGivenPlayerNames,
     testProperty "PROP: create players creates alive players" prop_createPlayersCreatesAlivePlayers,
 
-    testProperty "PROP: randomise roles returns n roles" prop_randomiseRolesReturnsNRoles
+    testProperty "PROP: randomise roles returns n roles" prop_randomiseRolesReturnsNRoles,
+    testProperty "PROP: randomise roles proportions roles" prop_randomiseRolesProportionsRoles,
+    testProperty "PROP: randomise roles has one seer" prop_randomiseRolesHasOneSeer
     ]
 
 allGameTests :: [TestTree]
