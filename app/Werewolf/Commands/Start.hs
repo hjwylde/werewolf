@@ -25,7 +25,8 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf.Engine
+import Game.Werewolf.Game
+import Game.Werewolf.Engine hiding (isGameOver)
 import Game.Werewolf.Response
 
 -- | Options.
@@ -36,7 +37,7 @@ data Options = Options
 -- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options playerNames) = do
-    whenM doesGameExist $ exitWith failure {
+    whenM doesGameExist . whenM (fmap (not . isGameOver) readGame) $ exitWith failure {
         messages = [privateMessage [callerName] "A game is already running."]
         }
 

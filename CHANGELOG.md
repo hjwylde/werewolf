@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Allowed `start` to work when the game has ended but `end` hasn't been called. ([#15](https://github.com/hjwylde/werewolf/issues/15))
+
 #### v0.2.0.0
 
 *Major*
