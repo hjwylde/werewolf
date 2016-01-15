@@ -31,6 +31,7 @@ executable werewolf
         Werewolf.Commands.End,
         Werewolf.Commands.Help,
         Werewolf.Commands.Interpret,
+        Werewolf.Commands.See,
         Werewolf.Commands.Start,
         Werewolf.Commands.Vote,
         Werewolf.Options,
@@ -71,6 +72,7 @@ library
         FlexibleContexts,
         MultiParamTypeClasses,
         OverloadedStrings,
+        RankNTypes,
         TemplateHaskell
     build-depends:
         aeson >= 0.8,
@@ -94,6 +96,8 @@ test-suite werewolf-test
     ghc-options:    -threaded -Wall -Werror -fno-warn-name-shadowing
     other-modules:
         Game.Werewolf.Test.Arbitrary
+        Game.Werewolf.Test.Command
+        Game.Werewolf.Test.Engine
         Game.Werewolf.Test.Game
         Game.Werewolf.Test.Player
 
@@ -109,7 +113,6 @@ test-suite werewolf-test
         mtl >= 2.2,
         QuickCheck >= 2.8,
         tasty >= 0.10 && < 0.12,
-        tasty-hunit >= 0.9,
         tasty-quickcheck >= 0.8,
         text >= 1.2,
         werewolf

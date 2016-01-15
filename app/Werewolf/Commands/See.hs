@@ -1,17 +1,17 @@
 {-|
-Module      : Werewolf.Commands.Vote
-Description : Options and handler for the vote subcommand.
+Module      : Werewolf.Commands.See
+Description : Options and handler for the see subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Options and handler for the vote subcommand.
+Options and handler for the see subcommand.
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Werewolf.Commands.Vote (
+module Werewolf.Commands.See (
     -- * Options
     Options(..),
 
@@ -27,8 +27,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (isVillagersTurn)
-import Game.Werewolf.Game
+import Game.Werewolf.Engine
 import Game.Werewolf.Response
 
 -- | Options.
@@ -45,10 +44,7 @@ handle callerName (Options targetName) = do
 
     game <- readGame
 
-    let command = (if isVillagersTurn game
-            then lynchVoteCommand
-            else killVoteCommand
-            ) callerName targetName
+    let command = seeCommand callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkTurn >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

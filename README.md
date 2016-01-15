@@ -9,17 +9,18 @@ This engine is based off of [Werewolves of Millers Hollow](http://www.games-wiki
 
 ### Game description
 
-Deep in the American countryside, the little town of Millers Hollow has recently been infiltrated by werewolves.
-Each night, murders are committed by the villagers, who due to some mysterious phenomenon (possibly the greenhouse effect) have become werewolves.
+Deep in the American countryside, the little town of Millers Hollow has recently been infiltrated by Werewolves.
+Each night, murders are committed by the Villagers, who due to some mysterious phenomenon (possibly the greenhouse effect) have become Werewolves.
 It is now time to take control and eliminate this ancient evil, before the town loses its last few inhabitants.
 
 Objective of the Game:  
-For the villagers: kill all of the werewolves.  
-For the werewolves: kill all of the villagers.
+For the Villagers: kill all of the Werewolves.  
+For the Werewolves: kill all of the Villagers.
 
 #### Roles
 
 The current implemented roles are:
+* Seer.
 * Villager.
 * Werewolf.
 
@@ -51,9 +52,13 @@ All werewolf commands are designed to be run by a user from the chat client.
 E.g., to start a game:
 ```bash
 > werewolf --caller @foo start @foo @bar @baz @qux @quux @corge @grault
-{"ok":true,"messages":[{"to":null,"message":"Night falls, the town is asleep. The werewolves wake
-up, recognise one another and choose a new victim."},{"to":["@foo"],"message":"You slip away
-silently from your home."},{"to":["@bar"],"message":"ZzzZZzzz, you're sound asleep."},...]}
+{"ok":true,"messages":[
+    {"to":["@foo"],"message":"You're a Villager.\nAn ordinary townsperson humbly living in Millers Hollow.\n"},
+    ...,
+    {"to":null,"message":"Night falls, the townsfolk are asleep."},
+    {"to":null,"message":"The Seers wake up."},
+    {"to":["@grault"],"message":"Who's allegiance would you like to see?"}
+    ]}
 ```
 
 In this example, user _@foo_ ran the `start` command with the player names as arguments.
@@ -65,9 +70,20 @@ The result contains a boolean for whether the command was successful and a list 
 The `to` header on a message may either be `null` for a public message or have a list of intended
     recipients.
 
-Let's have _@foo_, a werewolf, vote to kill a villager.
+It's the Seers' turn now.
 ```bash
-> werewolf --caller @foo vote @bar
+> werewolf --caller @grault see @qux
+{"ok":true,"messages":[
+    {"to":["@grault"],"message":"@qux is a Villager."},
+    {"to":null,"message":"The Werewolves wake up, recognise one another and choose a new victim."},
+    {"to":["@bar"],"message":"Who would you like to kill?"},
+    {"to":["@corge"],"message":"Who would you like to kill?"}
+    ]}
+```
+
+Let's have _@bar_, a Werewolf, vote to kill a Villager.
+```bash
+> werewolf --caller @bar vote @foo
 {"ok":true,"messages":[]}
 ```
 
@@ -75,22 +91,23 @@ This time, even though the command was successful, there are no messages.
 In this implementation of werewolf votes are only revealed once tallied.
 
 ```bash
-> werewolf --caller @foo vote @bar
-{"ok":false,"messages":[{"to":["@foo"],"message":"You've already voted!"}]}
+> werewolf --caller @bar vote @foo
+{"ok":false,"messages":[{"to":["@bar"],"message":"You've already voted!"}]}
 ```
 
-Here the command was unsuccessful and an error message is sent to _@foo_.
+Here the command was unsuccessful and an error message is sent to _@bar_.
 Note that even though the command was unsuccessful, the chat client interface probably won't need to
     do anything special.
 Relaying the error message back to the user should suffice.
 
 ```bash
-> werewolf --caller @qux vote @bar
-{"ok":true,"messages":[{"to":["@foo","@baz"],"message":"@baz voted to kill
-@bar."},{"to":["@foo","@baz"],"message":"@foo voted to kill @bar."},{"to":null,"message":"The sun
-rises. Everybody wakes up and opens their eyes..."},{"to":null,"message":"As you open them you
-notice a door broken down and @bar's guts spilling out over the cobblestones. From the look of their
-personal effects, you deduce they were a Villager."}]}
+> werewolf --caller @corge vote @foo
+{"ok":true,"messages":[
+    {"to":["@bar","@corge"],"message":"@bar voted to kill @foo."},
+    {"to":["@bar","@corge"],"message":"@corge voted to kill @foo."},
+    {"to":null,"message":"The sun rises. Everybody wakes up and opens their eyes..."},
+    {"to":null,"message":"As you open them you notice a door broken down and @foo's guts spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Villager."}
+    ]}
 ```
 
 And so on.

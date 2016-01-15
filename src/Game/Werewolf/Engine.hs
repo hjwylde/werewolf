@@ -15,147 +15,177 @@ Engine functions.
 {-# LANGUAGE OverloadedStrings     #-}
 
 module Game.Werewolf.Engine (
-    -- * Command
-    validateCommand, applyCommand, checkGameOver,
+    -- * Loop
+    checkTurn, checkGameOver,
 
     -- * Game
 
-    -- ** Manipulating
-    startGame, isGameOver, getPlayerVote,
+    -- ** Manipulations
+    startGame, killPlayer,
+
+    -- ** Queries
+    isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
 
     -- * Player
-    createPlayers, doesPlayerExist,
+
+    -- ** Manipulations
+    createPlayers,
+
+    -- ** Queries
+    doesPlayerExist, isPlayerSeer, isPlayerVillager, isPlayerWerewolf, isPlayerAlive, isPlayerDead,
 
     -- * Role
     randomiseRoles,
 ) where
 
-import Control.Lens hiding (only)
+import Control.Lens         hiding (cons, only)
 import Control.Monad.Except
-import Control.Monad.Extra
 import Control.Monad.Random
+import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
-import Control.Monad.State hiding (state)
 
-import           Data.Aeson hiding ((.=))
-import           Data.List.Extra
-import qualified Data.Map as Map
+import           Data.Aeson           hiding ((.=))
 import qualified Data.ByteString.Lazy as BS
+import           Data.List.Extra
+import qualified Data.Map             as Map
 import           Data.Text            (Text)
+import qualified Data.Text            as T
 
-import Game.Werewolf.Game hiding (isGameOver)
-import qualified Game.Werewolf.Game as Game
-import Game.Werewolf.Command
+import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
+                                         isWerewolvesTurn, killPlayer)
+import qualified Game.Werewolf.Game     as Game
+import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
-import Game.Werewolf.Player   hiding (doesPlayerExist)
-import Game.Werewolf.Response
-import Game.Werewolf.Role     as Role
+import           Game.Werewolf.Response
+import           Game.Werewolf.Role     as Role hiding (Villagers, Werewolves)
 
 import System.Directory
 import System.Exit
 import System.FilePath
 import System.Random.Shuffle
 
-validateCommand :: MonadError [Message] m => MonadState Game m => Command -> m ()
-validateCommand (Vote voter target) = do
-    whenM isGameOver                        $ throwError [gameIsOverMessage voterName]
-    unlessM (doesPlayerExist voterName)     $ throwError [playerDoesNotExistMessage voterName voterName]
-    unlessM (doesPlayerExist targetName)    $ throwError [playerDoesNotExistMessage voterName targetName]
+checkTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkTurn = get >>= \game -> checkTurn' >> get >>= \game' -> unless (game == game') checkTurn
 
-    when (isDead voter)     $ throwError [playerIsDeadMessage voterName]
-    when (isDead target)    $ throwError [targetIsDeadMessage voterName targetName]
+checkTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkTurn' = use turn >>= \turn' -> case turn' of
+    Seers -> do
+        seersCount  <- uses players (length . filterAlive . filterSeers)
+        votes'      <- use sees
 
-    whenJustM (getPlayerVote voter) $ const (throwError [playerHasAlreadyVotedMessage voterName])
-
-    get >>= \game -> when (isWerewolvesTurn game && not (isWerewolf voter)) $ throwError [playerCannotDoThatMessage voterName]
-    where
-        voterName = voter ^. Player.name
-        targetName = target ^. Player.name
-
-applyCommand :: (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => Command -> m ()
-applyCommand (Vote voter target) = do
-    turn . votes %= Map.insert voterName targetName
-
-    use turn >>= \turn' -> case turn' of
-        Villagers {}    -> applyLynchVote
-        Werewolves {}   -> applyKillVote
-        NoOne           -> throwError [gameIsOverMessage voterName]
-    where
-        voterName   = voter ^. Player.name
-        targetName  = target ^. Player.name
-
-applyKillVote :: (MonadState Game m, MonadWriter [Message] m) => m ()
-applyKillVote = do
-    werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
-    votes           <- use $ turn . votes
-
-    when (werewolvesCount == Map.size votes) $ do
-        werewolfNames <- uses players (map Player._name . filterWerewolves)
-        tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes)
-
-        turn .= newVillagersTurn
-        tell villagersTurnMessages
-
-        let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes)) (nub $ Map.elems votes)
-        case mTargetName of
-            Nothing         -> tell [noPlayerKilledMessage]
-            Just targetName -> do
+        when (seersCount == Map.size votes') $ do
+            forM_ (Map.toList votes') $ \(seerName, targetName) -> do
                 target <- uses players (findByName_ targetName)
 
-                killPlayer target
-                tell [playerKilledMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
+                tell [playerSeenMessage seerName target]
 
-applyLynchVote :: (MonadState Game m, MonadWriter [Message] m) => m ()
-applyLynchVote = do
-    playersCount    <- uses players (length . filterAlive)
-    votes           <- use $ turn . votes
+            advanceTurn
 
-    when (playersCount == Map.size votes) $ do
-        tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes)
+    Werewolves -> do
+        werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
+        votes'          <- use votes
 
-        let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes)) (nub $ Map.elems votes)
-        case mLynchedName of
-            Nothing             -> tell [noPlayerLynchedMessage]
-            Just lynchedName    -> do
-                target <- uses players (findByName_ lynchedName)
+        when (werewolvesCount == Map.size votes') $ do
+            werewolfNames <- uses players (map Player._name . filterWerewolves)
+            tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
 
-                killPlayer target
-                tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
+            advanceTurn
 
-        turn .= newWerewolvesTurn
-        tell werewolvesTurnMessages
+            let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
+            case mTargetName of
+                Nothing         -> tell [noPlayerKilledMessage]
+                Just targetName -> do
+                    target <- uses players (findByName_ targetName)
+
+                    killPlayer target
+                    tell [playerKilledMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
+
+    Villagers -> do
+        playersCount    <- uses players (length . filterAlive)
+        votes'          <- use votes
+
+        when (playersCount == Map.size votes') $ do
+            tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes')
+
+            let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
+            case mLynchedName of
+                Nothing             -> tell [noPlayerLynchedMessage]
+                Just lynchedName    -> do
+                    target <- uses players (findByName_ lynchedName)
+
+                    killPlayer target
+                    tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
+
+            advanceTurn
+
+    NoOne -> return ()
 
 only :: [a] -> Maybe a
 only [a]    = Just a
 only _      = Nothing
 
-checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkGameOver = do
+advanceTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
+advanceTurn = do
+    turn' <- use turn
     alivePlayers <- uses players filterAlive
 
-    case length alivePlayers of
+    let nextTurn = head . drop1 $ filter (turnAvailable alivePlayers) (dropWhile (turn' /=) turnRotation)
+
+    tell $ turnMessages nextTurn alivePlayers
+
+    turn    .= nextTurn
+    sees    .= Map.empty
+    votes   .= Map.empty
+    where
+        turnAvailable alivePlayers Seers    = not . null $ filterSeers alivePlayers
+        turnAvailable _ Villagers           = True
+        turnAvailable _ Werewolves          = True
+        turnAvailable _ NoOne               = False
+
+checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkGameOver = do
+    aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
+
+    case length aliveAllegiances of
         0 -> turn .= NoOne >> tell [gameOverMessage Nothing]
-        1 -> turn .= NoOne >> tell [gameOverMessage . Just $ head alivePlayers ^. Player.role . Role.name]
+        1 -> turn .= NoOne >> tell [gameOverMessage . Just . T.pack . show $ head aliveAllegiances]
         _ -> return ()
 
-startGame :: MonadError [Message] m => Text -> [Player] -> m Game
+startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
     when (playerNames /= nub playerNames)   $ throwError [privateMessage [callerName] "Player names must be unique."]
     when (length players < 7)               $ throwError [privateMessage [callerName] "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage [callerName] "Cannot have more than 24 players."]
 
+    tell $ newGameMessages players
+
     return $ newGame players
     where
         playerNames = map Player._name players
 
+killPlayer :: MonadState Game m => Player -> m ()
+killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
+
+isSeersTurn :: MonadState Game m => m Bool
+isSeersTurn = gets Game.isSeersTurn
+
+isVillagersTurn :: MonadState Game m => m Bool
+isVillagersTurn = gets Game.isVillagersTurn
+
+isWerewolvesTurn :: MonadState Game m => m Bool
+isWerewolvesTurn = gets Game.isWerewolvesTurn
+
 isGameOver :: MonadState Game m => m Bool
 isGameOver = gets Game.isGameOver
 
-getPlayerVote :: MonadState Game m => Player -> m (Maybe Text)
-getPlayerVote player = use $ turn . votes . at (player ^. Player.name)
+getPlayerSee :: MonadState Game m => Text -> m (Maybe Text)
+getPlayerSee playerName = use $ sees . at playerName
+
+getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
+getPlayerVote playerName = use $ votes . at playerName
 
 defaultFilePath :: MonadIO m => m FilePath
 defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory
@@ -181,11 +211,24 @@ createPlayers playerNames = zipWith newPlayer playerNames <$> randomiseRoles (le
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = uses players $ Player.doesPlayerExist name
 
-killPlayer :: MonadState Game m => Player -> m ()
-killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
+isPlayerSeer :: MonadState Game m => Text -> m Bool
+isPlayerSeer name = uses players $ isSeer . findByName_ name
+
+isPlayerVillager :: MonadState Game m => Text -> m Bool
+isPlayerVillager name = uses players $ isVillager . findByName_ name
+
+isPlayerWerewolf :: MonadState Game m => Text -> m Bool
+isPlayerWerewolf name = uses players $ isWerewolf . findByName_ name
+
+isPlayerAlive :: MonadState Game m => Text -> m Bool
+isPlayerAlive name = uses players $ isAlive . findByName_ name
+
+isPlayerDead :: MonadState Game m => Text -> m Bool
+isPlayerDead name = uses players $ isDead . findByName_ name
 
 randomiseRoles :: MonadIO m => Int -> m [Role]
-randomiseRoles n = liftIO . evalRandIO . shuffleM $ werewolfRoles ++ villagerRoles
+randomiseRoles n = liftIO . evalRandIO . shuffleM $ seerRoles ++ werewolfRoles ++ villagerRoles
     where
-        werewolfRoles = replicate (n `quot` 6 + 1) werewolf
-        villagerRoles = replicate (n - length werewolfRoles) villager
+        seerRoles       = [seerRole]
+        werewolfRoles   = replicate (n `quot` 6 + 1) werewolfRole
+        villagerRoles   = replicate (n - length (seerRoles ++ werewolfRoles)) villagerRole

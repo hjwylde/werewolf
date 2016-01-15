@@ -25,19 +25,20 @@ module Game.Werewolf.Response (
 
     -- * Message
     Message(..),
-    emptyMessage, publicMessage, privateMessage,
+    publicMessage, privateMessage,
 
     -- ** Game messages
-    newGameMessages, villagersTurnMessages, werewolvesTurnMessages, playerMadeKillVoteMessage,
-    playerKilledMessage, noPlayerKilledMessage, playerMadeLynchVoteMessage, playerLynchedMessage,
-    noPlayerLynchedMessage, gameOverMessage,
+    newGameMessages, turnMessages, seersTurnMessages, villagersTurnMessage, werewolvesTurnMessages,
+    playerSeenMessage, playerMadeKillVoteMessage, playerKilledMessage, noPlayerKilledMessage,
+    playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage, gameOverMessage,
 
     -- ** Error messages
     playerDoesNotExistMessage, playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
-    gameIsOverMessage, playerIsDeadMessage, playerHasAlreadyVotedMessage, targetIsDeadMessage,
+    gameIsOverMessage, playerIsDeadMessage, playerHasAlreadySeenMessage,
+    playerHasAlreadyVotedMessage, targetIsDeadMessage,
 ) where
 
-import Control.Lens
+import Control.Lens           hiding (singular)
 import Control.Monad.IO.Class
 
 import Data.Aeson
@@ -49,9 +50,11 @@ import           Data.List
 import           Data.Text                  (Text)
 import qualified Data.Text                  as T
 
-import Game.Werewolf.Player as Player
-import Game.Werewolf.Role
-import GHC.Generics
+import           Game.Werewolf.Game
+import           Game.Werewolf.Player
+import           Game.Werewolf.Role   (allegiance, description, singular)
+import qualified Game.Werewolf.Role   as Role
+import           GHC.Generics
 
 import qualified System.Exit as Exit
 
@@ -96,9 +99,6 @@ instance ToJSON Message where
     toEncoding  = genericToEncoding defaultOptions
 #endif
 
-emptyMessage :: Message
-emptyMessage = Message Nothing ""
-
 publicMessage :: Text -> Message
 publicMessage = Message Nothing
 
@@ -106,35 +106,39 @@ privateMessage :: [Text] -> Text -> Message
 privateMessage to = Message (Just to)
 
 newGameMessages :: [Player] -> [Message]
-newGameMessages players = concat [
-    werewolvesTurnMessages,
-    map newPlayerMessage players,
-    werewolvesFirstTurnMessages (filterWerewolves players)
-    ]
+newGameMessages players = map (newPlayerMessage players) players ++ seersTurnMessages (filterSeers players)
 
-newPlayerMessage :: Player -> Message
-newPlayerMessage player = privateMessage [player ^. Player.name] (message' $ player ^. role)
-    where
-        message' role
-            | role == villager  = "ZzZZzz, you're sound asleep."
-            | role == werewolf  = "You slip away silently from your home."
-            | otherwise         = undefined
+nightFallsMessage :: Message
+nightFallsMessage = publicMessage "Night falls, the townsfolk are asleep."
 
-werewolvesFirstTurnMessages :: [Player] -> [Message]
-werewolvesFirstTurnMessages werewolves = map (\werewolf -> privateMessage [werewolf ^. Player.name] (messageFor werewolf)) werewolves
+newPlayerMessage :: [Player] -> Player -> Message
+newPlayerMessage players player
+    | isWerewolf player = privateMessage [player ^. name] $ T.unlines [T.concat ["You're a Werewolf", packMessage], player ^. role . description]
+    | otherwise         = privateMessage [player ^. name] $ T.unlines [T.concat ["You're a ", player ^. role . Role.name, "."], player ^. role . description]
     where
-        messageFor werewolf = T.concat $ "As you look around you see the rest of your " : T.intercalate ", " ("pack":names (werewolves \\ [werewolf])) : ["."]
-        names = map Player._name
+        packMessage
+            | length (filterWerewolves players) <= 1    = "."
+            | otherwise                                 = T.concat [", along with ", T.intercalate "," (map _name $ filterWerewolves players \\ [player]), "."]
 
-villagersTurnMessages :: [Message]
-villagersTurnMessages = map publicMessage messages
-    where
-        messages = ["The sun rises. Everybody wakes up and opens their eyes..."]
+turnMessages :: Turn -> [Player] -> [Message]
+turnMessages Seers players      = seersTurnMessages $ filter isSeer players
+turnMessages Villagers _        = [villagersTurnMessage]
+turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players
+turnMessages NoOne _            = undefined
 
-werewolvesTurnMessages :: [Message]
-werewolvesTurnMessages = map publicMessage messages
-    where
-        messages = ["Night falls, the town is asleep. The werewolves wake up, recognise one another and choose a new victim."]
+seersTurnMessages :: [Player] -> [Message]
+seersTurnMessages seers = nightFallsMessage:(publicMessage "The Seers wake up."):(map (\seer -> privateMessage [seer ^. name] "Who's allegiance would you like to see?") seers)
+
+villagersTurnMessage :: Message
+villagersTurnMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
+
+werewolvesTurnMessages :: [Player] -> [Message]
+werewolvesTurnMessages werewolves =
+    publicMessage "The Werewolves wake up, recognise one another and choose a new victim."
+    :map (\werewolf -> privateMessage [werewolf ^. name] "Who would you like to kill?") werewolves
+
+playerSeenMessage :: Text -> Player -> Message
+playerSeenMessage seerName target = privateMessage [seerName] $ T.concat [target ^. name, " is a ", singular $ target ^. role . allegiance, "."]
 
 playerMadeKillVoteMessage :: [Text] -> Text -> Text -> Message
 playerMadeKillVoteMessage to voterName targetName = privateMessage to $ T.concat [voterName, " voted to kill ", targetName, "."]
@@ -147,30 +151,29 @@ playerKilledMessage name roleName = publicMessage $ T.concat [
     ]
 
 noPlayerKilledMessage :: Message
-noPlayerKilledMessage = publicMessage "Surprisingly you see everyone present at the town square. Perhaps the werewolves have left Miller's Hollow?"
+noPlayerKilledMessage = publicMessage "Surprisingly you see everyone present at the town square. Perhaps the Werewolves have left Miller's Hollow?"
 
 playerMadeLynchVoteMessage :: Text -> Text -> Message
 playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat [voterName, " voted to lynch ", targetName, "."]
 
 playerLynchedMessage :: Text -> Text -> Message
 playerLynchedMessage name "Werewolf"    = publicMessage $ T.unwords [
-    name,
-    "is tied up to a pyre and set alight.",
-    "As they scream their body starts to contort and writhe, transforming into a werewolf.",
+    name, "is tied up to a pyre and set alight.",
+    "As they scream their body starts to contort and writhe, transforming into a Werewolf.",
     "Thankfully they go limp before breaking free of their restraints."
     ]
 playerLynchedMessage name roleName      = publicMessage $ T.concat [
-    name, "is tied up to a pyre and set alight.",
+    name, " is tied up to a pyre and set alight.",
     " Eventually the screams start to die and with their last breath,",
     " they reveal themselves as a ", roleName, "."
     ]
 
 noPlayerLynchedMessage :: Message
-noPlayerLynchedMessage = publicMessage "Daylight is wasted as the villagers squabble over whom to tie up. Looks like no one is being burned this day."
+noPlayerLynchedMessage = publicMessage "Daylight is wasted as the townsfolk squabble over whom to tie up. Looks like no one is being burned this day."
 
 gameOverMessage :: Maybe Text -> Message
-gameOverMessage Nothing                 = publicMessage "The game is over! Everyone died..."
-gameOverMessage (Just roleName)  = publicMessage $ T.concat ["The game is over! The ", roleName, "s have won."]
+gameOverMessage Nothing             = publicMessage "The game is over! Everyone died..."
+gameOverMessage (Just allegiance)   = publicMessage $ T.unwords ["The game is over! The", allegiance, "have won."]
 
 playerDoesNotExistMessage :: Text -> Text -> Message
 playerDoesNotExistMessage to name = privateMessage [to] $ T.unwords ["Player", name, "does not exist."]
@@ -186,6 +189,9 @@ gameIsOverMessage name = privateMessage [name] "The game is over!"
 
 playerIsDeadMessage :: Text -> Message
 playerIsDeadMessage name = privateMessage [name] "Sshh, you're meant to be dead!"
+
+playerHasAlreadySeenMessage :: Text -> Message
+playerHasAlreadySeenMessage name = privateMessage [name] "You've already seen!"
 
 playerHasAlreadyVotedMessage :: Text -> Message
 playerHasAlreadyVotedMessage name = privateMessage [name] "You've already voted!"
