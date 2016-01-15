@@ -60,27 +60,27 @@ allCommandTests = [
 
 allEngineTests :: [TestTree]
 allEngineTests = [
-    testProperty "PROP: advance turn skips seers when no seers" prop_advanceTurnSkipsSeersWhenNoSeers,
-    testProperty "PROP: advance turn does nothing when game over" prop_advanceTurnDoesNothingWhenGameOver,
+    testProperty "PROP: check turn skips seers when no seers" prop_checkTurnSkipsSeersWhenNoSeers,
+    testProperty "PROP: check turn does nothing when game over" prop_checkTurnDoesNothingWhenGameOver,
 
-    testProperty "PROP: advance seers turn advances to werewolves" prop_advanceSeersTurnAdvancesToWerewolves,
-    testProperty "PROP: advance seers turn resets sees" prop_advanceSeersTurnResetsSees,
-    testProperty "PROP: advance seers turn does nothing unless all seen" prop_advanceSeersTurnDoesNothingUnlessAllSeen,
+    testProperty "PROP: check seers turn advances to werewolves" prop_checkSeersTurnAdvancesToWerewolves,
+    testProperty "PROP: check seers turn resets sees" prop_checkSeersTurnResetsSees,
+    testProperty "PROP: check seers turn does nothing unless all seen" prop_checkSeersTurnDoesNothingUnlessAllSeen,
 
-    testProperty "PROP: advance villagers turn advances to seers" prop_advanceVillagersTurnAdvancesToSeers,
-    testProperty "PROP: advance villagers turn lynches one player when consensus" prop_advanceVillagersTurnLynchesOnePlayerWhenConsensus,
-    testProperty "PROP: advance villagers turn lynches no one when conflicted" prop_advanceVillagersTurnLynchesNoOneWhenConflicted,
-    testProperty "PROP: advance villagers turn resets votes" prop_advanceVillagersTurnResetsVotes,
-    testProperty "PROP: advance villagers turn does nothing unless all voted" prop_advanceVillagersTurnDoesNothingUnlessAllVoted,
+    testProperty "PROP: check villagers turn advances to seers" prop_checkVillagersTurnAdvancesToSeers,
+    testProperty "PROP: check villagers turn lynches one player when consensus" prop_checkVillagersTurnLynchesOnePlayerWhenConsensus,
+    testProperty "PROP: check villagers turn lynches no one when conflicted" prop_checkVillagersTurnLynchesNoOneWhenConflicted,
+    testProperty "PROP: check villagers turn resets votes" prop_checkVillagersTurnResetsVotes,
+    testProperty "PROP: check villagers turn does nothing unless all voted" prop_checkVillagersTurnDoesNothingUnlessAllVoted,
 
-    testProperty "PROP: advance werewolves turn advances to villagers" prop_advanceWerewolvesTurnAdvancesToVillagers,
-    testProperty "PROP: advance werewolves turn kills one player when consensus" prop_advanceWerewolvesTurnKillsOnePlayerWhenConsensus,
-    testProperty "PROP: advance werewolves turn kills no one when conflicted" prop_advanceWerewolvesTurnKillsNoOneWhenConflicted,
-    testProperty "PROP: advance werewolves turn resets votes" prop_advanceWerewolvesTurnResetsVotes,
-    testProperty "PROP: advance werewolves turn does nothing unless all voted" prop_advanceWerewolvesTurnDoesNothingUnlessAllVoted,
+    testProperty "PROP: check werewolves turn advances to villagers" prop_checkWerewolvesTurnAdvancesToVillagers,
+    testProperty "PROP: check werewolves turn kills one player when consensus" prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
+    testProperty "PROP: check werewolves turn kills no one when conflicted" prop_checkWerewolvesTurnKillsNoOneWhenConflicted,
+    testProperty "PROP: check werewolves turn resets votes" prop_checkWerewolvesTurnResetsVotes,
+    testProperty "PROP: check werewolves turn does nothing unless all voted" prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
 
     testProperty "PROP: check game over advances turn" prop_checkGameOverAdvancesTurn,
-    testProperty "PROP: check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
+    testProperty "PROP: check game over does nothing when at least two allegiances alivevoted" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
     testProperty "PROP: start game starts with seers turn" prop_startGameStartsWithSeersTurn,
     testProperty "PROP: start game uses given players" prop_startGameUsesGivenPlayers,

@@ -28,7 +28,9 @@ import Game.Werewolf.Response
 -- | Handle.
 handle :: MonadIO m => Text -> m ()
 handle callerName = do
-    unlessM doesGameExist $ exitWith failure { messages = [privateMessage [callerName] "No game is running."] }
+    unlessM doesGameExist $ exitWith failure {
+        messages = [privateMessage [callerName] "No game is running."]
+        }
 
     deleteGame
 

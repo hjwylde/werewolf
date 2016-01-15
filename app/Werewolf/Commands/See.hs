@@ -38,12 +38,14 @@ data Options = Options
 -- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options targetName) = do
-    unlessM doesGameExist $ exitWith failure { messages = [privateMessage [callerName] "No game is running."] }
+    unlessM doesGameExist $ exitWith failure {
+        messages = [privateMessage [callerName] "No game is running."]
+        }
 
     game <- readGame
 
     let command = seeCommand callerName targetName
 
-    case runExcept (runWriterT $ execStateT (apply command >> advanceTurn >> checkGameOver) game) of
+    case runExcept (runWriterT $ execStateT (apply command >> checkTurn >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }

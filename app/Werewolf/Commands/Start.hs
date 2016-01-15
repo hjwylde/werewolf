@@ -21,6 +21,7 @@ module Werewolf.Commands.Start (
 
 import Control.Monad.Except
 import Control.Monad.Extra
+import Control.Monad.Writer
 
 import Data.Text (Text)
 
@@ -35,10 +36,12 @@ data Options = Options
 -- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options playerNames) = do
-    whenM doesGameExist $ exitWith failure { messages = [privateMessage [callerName] "A game is already running."] }
+    whenM doesGameExist $ exitWith failure {
+        messages = [privateMessage [callerName] "A game is already running."]
+        }
 
     players <- createPlayers playerNames
 
-    case runExcept (startGame callerName players) of
-        Left errorMessages  -> exitWith failure { messages = errorMessages }
-        Right game          -> writeGame game >> exitWith success { messages = newGameMessages players }
+    case runExcept (runWriterT $ startGame callerName players) of
+        Left errorMessages      -> exitWith failure { messages = errorMessages }
+        Right (game, messages) -> writeGame game >> exitWith success { messages = messages }

@@ -16,7 +16,7 @@ Engine functions.
 
 module Game.Werewolf.Engine (
     -- * Loop
-    advanceTurn, checkGameOver,
+    checkTurn, checkGameOver,
 
     -- * Game
 
@@ -41,7 +41,7 @@ module Game.Werewolf.Engine (
     randomiseRoles,
 ) where
 
-import Control.Lens         hiding (only)
+import Control.Lens         hiding (cons, only)
 import Control.Monad.Except
 import Control.Monad.Random
 import Control.Monad.State  hiding (state)
@@ -67,11 +67,11 @@ import System.Exit
 import System.FilePath
 import System.Random.Shuffle
 
-advanceTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
-advanceTurn = get >>= \game -> advanceTurn' >> get >>= \game' -> unless (game == game') advanceTurn
+checkTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkTurn = get >>= \game -> checkTurn' >> get >>= \game' -> unless (game == game') checkTurn
 
-advanceTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
-advanceTurn' = use turn >>= \turn' -> case turn' of
+checkTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkTurn' = use turn >>= \turn' -> case turn' of
     Seers -> do
         seersCount  <- uses players (length . filterAlive . filterSeers)
         votes'      <- use sees
@@ -82,9 +82,7 @@ advanceTurn' = use turn >>= \turn' -> case turn' of
 
                 tell [playerSeenMessage seerName target]
 
-            turn .= Werewolves
-            sees .= Map.empty
-            tell werewolvesTurnMessages
+            advanceTurn
 
     Werewolves -> do
         werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
@@ -94,9 +92,7 @@ advanceTurn' = use turn >>= \turn' -> case turn' of
             werewolfNames <- uses players (map Player._name . filterWerewolves)
             tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
 
-            turn .= Villagers
-            votes .= Map.empty
-            tell villagersTurnMessages
+            advanceTurn
 
             let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
             case mTargetName of
@@ -123,15 +119,31 @@ advanceTurn' = use turn >>= \turn' -> case turn' of
                     killPlayer target
                     tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
 
-            turn .= Seers
-            votes .= Map.empty
-            use players >>= tell . seersTurnMessages . filterSeers
+            advanceTurn
 
     NoOne -> return ()
 
 only :: [a] -> Maybe a
 only [a]    = Just a
 only _      = Nothing
+
+advanceTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
+advanceTurn = do
+    turn' <- use turn
+    alivePlayers <- uses players filterAlive
+
+    let nextTurn = head . drop1 $ filter (turnAvailable alivePlayers) (dropWhile (turn' /=) turnRotation)
+
+    tell $ turnMessages nextTurn alivePlayers
+
+    turn    .= nextTurn
+    sees    .= Map.empty
+    votes   .= Map.empty
+    where
+        turnAvailable alivePlayers Seers    = not . null $ filterSeers alivePlayers
+        turnAvailable _ Villagers           = True
+        turnAvailable _ Werewolves          = True
+        turnAvailable _ NoOne               = False
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
@@ -142,11 +154,13 @@ checkGameOver = do
         1 -> turn .= NoOne >> tell [gameOverMessage . Just . T.pack . show $ head aliveAllegiances]
         _ -> return ()
 
-startGame :: MonadError [Message] m => Text -> [Player] -> m Game
+startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
     when (playerNames /= nub playerNames)   $ throwError [privateMessage [callerName] "Player names must be unique."]
     when (length players < 7)               $ throwError [privateMessage [callerName] "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage [callerName] "Cannot have more than 24 players."]
+
+    tell $ newGameMessages players
 
     return $ newGame players
     where

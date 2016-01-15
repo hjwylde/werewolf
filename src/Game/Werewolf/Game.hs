@@ -29,6 +29,7 @@ module Game.Werewolf.Game (
 
     -- * Turn
     Turn(..), sees, votes,
+    turnRotation,
 ) where
 
 import Control.Lens
@@ -75,7 +76,7 @@ makeLenses ''Game
 makeLenses ''Turn
 
 newGame :: [Player] -> Game
-newGame players = Game Seers players Map.empty Map.empty
+newGame players = Game (head turnRotation) players Map.empty Map.empty
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -91,3 +92,6 @@ isWerewolvesTurn game = game ^. turn == Werewolves
 
 isGameOver :: Game -> Bool
 isGameOver game = game ^. turn == NoOne
+
+turnRotation :: [Turn]
+turnRotation = cycle [Seers, Werewolves, Villagers, NoOne]

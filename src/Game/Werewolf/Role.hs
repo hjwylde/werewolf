@@ -23,9 +23,10 @@ module Game.Werewolf.Role (
 
     -- * Allegiance
     Allegiance(..),
+    singular,
 ) where
 
-import Control.Lens
+import Control.Lens hiding (singular)
 
 import Data.Aeson
 #if !MIN_VERSION_aeson(0,10,0)
@@ -52,19 +53,6 @@ instance ToJSON Role where
     toEncoding  = genericToEncoding defaultOptions
 #endif
 
-data Allegiance = Villagers | Werewolves
-    deriving (Eq, Generic, Show)
-
-instance FromJSON Allegiance
-
-instance ToJSON Allegiance where
-    toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
-    toEncoding  = genericToEncoding defaultOptions
-#endif
-
-makeLenses ''Role
-
 allRoles :: [Role]
 allRoles = [seerRole, villagerRole, werewolfRole]
 
@@ -87,7 +75,7 @@ villagerRole :: Role
 villagerRole = Role
     { _name         = "Villager"
     , _allegiance   = Villagers
-    , _description  = "An ordinary townsfolk humbly living in Millers Hollow."
+    , _description  = "An ordinary townsperson humbly living in Millers Hollow."
     , _advice       =
         "Bluffing can be a good technique, but you had better be convincing about what you say."
     }
@@ -96,7 +84,24 @@ werewolfRole :: Role
 werewolfRole = Role
     { _name         = "Werewolf"
     , _allegiance   = Werewolves
-    , _description  = "A shapeshifting human that, at night, hunts the residents of Millers Hollow."
+    , _description  = "A shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."
     , _advice       =
         "Voting against your partner can be a good way to deflect suspicion from yourself."
     }
+
+data Allegiance = Villagers | Werewolves
+    deriving (Eq, Generic, Show)
+
+instance FromJSON Allegiance
+
+instance ToJSON Allegiance where
+    toJSON      = genericToJSON defaultOptions
+#if MIN_VERSION_aeson(0,10,0)
+    toEncoding  = genericToEncoding defaultOptions
+#endif
+
+makeLenses ''Role
+
+singular :: Allegiance -> Text
+singular Villagers  = "Villager"
+singular Werewolves = "Werewolf"

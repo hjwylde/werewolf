@@ -10,4 +10,4 @@
 
 *Major*
 
-* Initial implementation with villagers and werewolves.
+* Initial implementation with Villagers and Werewolves.
