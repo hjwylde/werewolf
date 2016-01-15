@@ -10,8 +10,6 @@ Command data structures.
 -}
 
 {-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE RankNTypes            #-}
 
 module Game.Werewolf.Command (

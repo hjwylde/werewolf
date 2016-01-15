@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Role data structures.
 -}
 
-{-# LANGUAGE CPP               #-}
-{-# LANGUAGE DeriveGeneric     #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
@@ -28,13 +26,7 @@ module Game.Werewolf.Role (
 
 import Control.Lens hiding (singular)
 
-import Data.Aeson
-#if !MIN_VERSION_aeson(0,10,0)
-import Data.Aeson.Types
-#endif
 import Data.Text as T
-
-import GHC.Generics
 
 import Prelude hiding (all)
 
@@ -43,15 +35,7 @@ data Role = Role
     , _allegiance  :: Allegiance
     , _description :: Text
     , _advice      :: Text
-    } deriving (Eq, Generic, Show)
-
-instance FromJSON Role
-
-instance ToJSON Role where
-    toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
-    toEncoding  = genericToEncoding defaultOptions
-#endif
+    } deriving (Eq, Read, Show)
 
 allRoles :: [Role]
 allRoles = [seerRole, villagerRole, werewolfRole]
@@ -90,15 +74,7 @@ werewolfRole = Role
     }
 
 data Allegiance = Villagers | Werewolves
-    deriving (Eq, Generic, Show)
-
-instance FromJSON Allegiance
-
-instance ToJSON Allegiance where
-    toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
-    toEncoding  = genericToEncoding defaultOptions
-#endif
+    deriving (Eq, Read, Show)
 
 makeLenses ''Role
 

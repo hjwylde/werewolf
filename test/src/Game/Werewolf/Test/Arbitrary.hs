@@ -7,7 +7,6 @@ Maintainer  : public@hjwylde.com
 
 {-# OPTIONS_HADDOCK hide, prune #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
