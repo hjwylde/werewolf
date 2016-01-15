@@ -45,10 +45,11 @@ import Data.Aeson
 #if !MIN_VERSION_aeson(0,10,0)
 import Data.Aeson.Types
 #endif
-import qualified Data.ByteString.Lazy.Char8 as BS
 import           Data.List
-import           Data.Text                  (Text)
-import qualified Data.Text                  as T
+import           Data.Text               (Text)
+import qualified Data.Text               as T
+import qualified Data.Text.Lazy.Encoding as T
+import qualified Data.Text.Lazy.IO       as T
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
@@ -78,7 +79,7 @@ failure :: Response
 failure = Response False []
 
 exitWith :: MonadIO m => Response -> m ()
-exitWith response = liftIO $ BS.putStrLn (encode response) >> Exit.exitSuccess
+exitWith response = liftIO $ T.putStrLn (T.decodeUtf8 $ encode response) >> Exit.exitSuccess
 
 exitSuccess :: MonadIO m => m ()
 exitSuccess = exitWith success

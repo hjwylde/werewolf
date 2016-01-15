@@ -9,12 +9,7 @@ Maintainer  : public@hjwylde.com
 Game and turn data structures.
 -}
 
-{-# LANGUAGE CPP                   #-}
-{-# LANGUAGE DeriveGeneric         #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Game.Werewolf.Game (
     -- * Game
@@ -34,42 +29,21 @@ module Game.Werewolf.Game (
 
 import Control.Lens
 
-import Data.Aeson
-#if !MIN_VERSION_aeson(0,10,0)
-import Data.Aeson.Types
-#endif
 import           Data.Map  (Map)
 import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Player
-import GHC.Generics
 
 data Game = Game
     { _turn    :: Turn
     , _players :: [Player]
     , _sees    :: Map Text Text
     , _votes   :: Map Text Text
-    } deriving (Eq, Generic, Show)
-
-instance FromJSON Game
-
-instance ToJSON Game where
-    toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
-    toEncoding  = genericToEncoding defaultOptions
-#endif
+    } deriving (Eq, Read, Show)
 
 data Turn = Seers | Villagers | Werewolves | NoOne
-    deriving (Eq, Generic, Show)
-
-instance FromJSON Turn
-
-instance ToJSON Turn where
-    toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
-    toEncoding  = genericToEncoding defaultOptions
-#endif
+    deriving (Eq, Read, Show)
 
 makeLenses ''Game
 

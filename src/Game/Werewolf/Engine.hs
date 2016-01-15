@@ -9,9 +9,7 @@ Maintainer  : public@hjwylde.com
 Engine functions.
 -}
 
-{-# LANGUAGE CPP                   #-}
 {-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 
 module Game.Werewolf.Engine (
@@ -47,12 +45,10 @@ import Control.Monad.Random
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
-import           Data.Aeson           hiding ((.=))
-import qualified Data.ByteString.Lazy as BS
 import           Data.List.Extra
-import qualified Data.Map             as Map
-import           Data.Text            (Text)
-import qualified Data.Text            as T
+import qualified Data.Map        as Map
+import           Data.Text       (Text)
+import qualified Data.Text       as T
 
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
                                          isWerewolvesTurn, killPlayer)
@@ -63,7 +59,6 @@ import           Game.Werewolf.Response
 import           Game.Werewolf.Role     as Role hiding (Villagers, Werewolves)
 
 import System.Directory
-import System.Exit
 import System.FilePath
 import System.Random.Shuffle
 
@@ -194,10 +189,10 @@ defaultFileName :: FilePath
 defaultFileName = ".werewolf"
 
 readGame :: MonadIO m => m Game
-readGame = liftIO $ defaultFilePath >>= BS.readFile >>= either die return . eitherDecode
+readGame = liftIO . fmap read $ defaultFilePath >>= readFile
 
 writeGame :: MonadIO m => Game -> m ()
-writeGame game = defaultFilePath >>= liftIO . flip BS.writeFile (encode game)
+writeGame game = liftIO $ defaultFilePath >>= flip writeFile (show game)
 
 deleteGame :: MonadIO m => m ()
 deleteGame = liftIO $ defaultFilePath >>= removeFile

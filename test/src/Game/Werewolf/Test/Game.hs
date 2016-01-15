@@ -6,7 +6,6 @@ Maintainer  : public@hjwylde.com
 -}
 
 {-# OPTIONS_HADDOCK hide, prune #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Game.Werewolf.Test.Game (
     prop_newGameStartsWithSeersTurn, prop_newGameStartsWithSeesEmpty,

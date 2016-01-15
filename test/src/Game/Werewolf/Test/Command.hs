@@ -6,7 +6,6 @@ Maintainer  : public@hjwylde.com
 -}
 
 {-# OPTIONS_HADDOCK hide, prune #-}
-{-# LANGUAGE OverloadedStrings #-}
 
 module Game.Werewolf.Test.Command (
     -- * seeCommand

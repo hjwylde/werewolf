@@ -9,10 +9,7 @@ Maintainer  : public@hjwylde.com
 Player data structures.
 -}
 
-{-# LANGUAGE CPP               #-}
-{-# LANGUAGE DeriveGeneric     #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Game.Werewolf.Player (
     -- * Player
@@ -37,41 +34,20 @@ module Game.Werewolf.Player (
 
 import Control.Lens
 
-import Data.Aeson
-#if !MIN_VERSION_aeson(0,10,0)
-import Data.Aeson.Types
-#endif
 import Data.List
 import Data.Maybe
 import Data.Text  (Text)
 
 import Game.Werewolf.Role hiding (name, _name)
-import GHC.Generics
 
 data Player = Player
     { _name  :: Text
     , _role  :: Role
     , _state :: State
-    } deriving (Eq, Generic, Show)
-
-instance FromJSON Player
-
-instance ToJSON Player where
-    toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
-    toEncoding  = genericToEncoding defaultOptions
-#endif
+    } deriving (Eq, Read, Show)
 
 data State = Alive | Dead
-    deriving (Eq, Generic, Show)
-
-instance FromJSON State
-
-instance ToJSON State where
-    toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
-    toEncoding  = genericToEncoding defaultOptions
-#endif
+    deriving (Eq, Read, Show)
 
 makeLenses ''Player
 
