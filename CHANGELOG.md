@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.2.0.0
+
 *Major*
 
 * Added the Seer role. ([#4](https://github.com/hjwylde/werewolf/issues/4))
