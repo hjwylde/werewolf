@@ -30,7 +30,8 @@ module Game.Werewolf.Response (
     -- ** Game messages
     newGameMessages, turnMessages, seersTurnMessages, villagersTurnMessage, werewolvesTurnMessages,
     playerSeenMessage, playerMadeKillVoteMessage, playerKilledMessage, noPlayerKilledMessage,
-    playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage, gameOverMessage,
+    playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage, playerQuitMessage,
+    gameOverMessage,
 
     -- ** Error messages
     playerDoesNotExistMessage, playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
@@ -171,6 +172,9 @@ playerLynchedMessage name roleName      = publicMessage $ T.concat [
 
 noPlayerLynchedMessage :: Message
 noPlayerLynchedMessage = publicMessage "Daylight is wasted as the townsfolk squabble over whom to tie up. Looks like no one is being burned this day."
+
+playerQuitMessage :: Player -> Message
+playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
 
 gameOverMessage :: Maybe Text -> Message
 gameOverMessage Nothing             = publicMessage "The game is over! Everyone died..."

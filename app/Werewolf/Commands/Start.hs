@@ -25,8 +25,8 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
+import Game.Werewolf.Engine   hiding (isGameOver)
 import Game.Werewolf.Game
-import Game.Werewolf.Engine hiding (isGameOver)
 import Game.Werewolf.Response
 
 -- | Options.

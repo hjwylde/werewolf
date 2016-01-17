@@ -41,6 +41,7 @@ data Command
     = End
     | Help Help.Options
     | Interpret Interpret.Options
+    | Quit
     | See See.Options
     | Start Start.Options
     | Vote Vote.Options
@@ -75,6 +76,7 @@ werewolf = Options
         command "end"       $ info (helper <*> end)         (fullDesc <> progDesc "End the current game"),
         command "help"      $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents"),
         command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command"),
+        command "quit"      $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game"),
         command "see"       $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance"),
         command "start"     $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game"),
         command "vote"      $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
@@ -94,6 +96,9 @@ help_ = Help . Help.Options
 
 interpret :: Parser Command
 interpret = Interpret . Interpret.Options <$> many (T.pack <$> strArgument (metavar "COMMAND ARG..."))
+
+quit :: Parser Command
+quit = pure Quit
 
 see :: Parser Command
 see = See . See.Options . T.pack <$> strArgument (metavar "PLAYER")

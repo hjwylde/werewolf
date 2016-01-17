@@ -66,6 +66,7 @@ commandsMessages = map T.unlines [[
     "Available commands:",
     "  end - end the current game",
     "  help - help documents",
+    "  quit - quit the current game",
     "  see - see a player's allegiance",
     "  start - start a new game",
     "  vote - vote against a player"
@@ -73,6 +74,10 @@ commandsMessages = map T.unlines [[
     "End:",
     "Usage: end",
     "  Ends the current game."
+    ], [
+    "Quit:",
+    "Usage: quit",
+    "  Quit the current game."
     ], [
     "See:",
     "Usage: see PLAYER",

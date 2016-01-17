@@ -10,8 +10,9 @@ Maintainer  : public@hjwylde.com
 
 module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
-    arbitraryCommand, arbitrarySeeCommand, arbitraryKillVoteCommand, arbitraryLynchVoteCommand,
-    arbitraryNewGame, arbitraryPlayer, arbitrarySeer, arbitraryVillager, arbitraryWerewolf,
+    arbitraryCommand, arbitraryKillVoteCommand, arbitraryLynchVoteCommand, arbitraryQuitCommand,
+    arbitrarySeeCommand, arbitraryNewGame, arbitraryPlayer, arbitrarySeer, arbitraryVillager,
+    arbitraryWerewolf,
 
     -- * Utility functions
     run, run_, runArbitraryCommands,
@@ -46,15 +47,6 @@ arbitraryCommand game = case game ^. turn of
     Werewolves  -> arbitraryKillVoteCommand game
     NoOne       -> return noopCommand
 
-arbitrarySeeCommand :: Game -> Gen Command
-arbitrarySeeCommand game = do
-    let applicableCallers   = filter (flip Map.notMember (game ^. sees) . _name) (filterAlive . filterSeers $ game ^. players)
-    target                  <- arbitraryPlayer game
-
-    if null applicableCallers
-        then return noopCommand
-        else elements applicableCallers >>= \caller -> return $ seeCommand (caller ^. name) (target ^. name)
-
 arbitraryKillVoteCommand :: Game -> Gen Command
 arbitraryKillVoteCommand game = do
     let applicableCallers   = filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)
@@ -72,6 +64,23 @@ arbitraryLynchVoteCommand game = do
     if null applicableCallers
         then return noopCommand
         else elements applicableCallers >>= \caller -> return $ lynchVoteCommand (caller ^. name) (target ^. name)
+
+arbitraryQuitCommand :: Game -> Gen Command
+arbitraryQuitCommand game = do
+    let applicableCallers = filterAlive $ game ^. players
+
+    if null applicableCallers
+        then return noopCommand
+        else elements applicableCallers >>= \caller -> return $ quitCommand (caller ^. name)
+
+arbitrarySeeCommand :: Game -> Gen Command
+arbitrarySeeCommand game = do
+    let applicableCallers   = filter (flip Map.notMember (game ^. sees) . _name) (filterAlive . filterSeers $ game ^. players)
+    target                  <- arbitraryPlayer game
+
+    if null applicableCallers
+        then return noopCommand
+        else elements applicableCallers >>= \caller -> return $ seeCommand (caller ^. name) (target ^. name)
 
 instance Arbitrary Game where
     arbitrary = do
