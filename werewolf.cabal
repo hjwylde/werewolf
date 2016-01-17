@@ -31,6 +31,7 @@ executable werewolf
         Werewolf.Commands.End,
         Werewolf.Commands.Help,
         Werewolf.Commands.Interpret,
+        Werewolf.Commands.Quit,
         Werewolf.Commands.See,
         Werewolf.Commands.Start,
         Werewolf.Commands.Vote,

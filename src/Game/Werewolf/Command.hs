@@ -17,7 +17,7 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    seeCommand, killVoteCommand, lynchVoteCommand, noopCommand,
+    killVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -30,21 +30,12 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Engine
+import Game.Werewolf.Player hiding (doesPlayerExist)
 import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn, isWerewolvesTurn,
                                killPlayer)
 import Game.Werewolf.Response
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
-
-seeCommand :: Text -> Text -> Command
-seeCommand callerName targetName = Command $ do
-    validateArguments callerName targetName
-
-    unlessM isSeersTurn                         $ throwError [playerCannotDoThatMessage callerName]
-    unlessM (isPlayerSeer callerName)           $ throwError [playerCannotDoThatMessage callerName]
-    whenJustM (getPlayerSee callerName) . const $ throwError [playerHasAlreadySeenMessage callerName]
-
-    sees %= Map.insert callerName targetName
 
 killVoteCommand :: Text -> Text -> Command
 killVoteCommand callerName targetName = Command $ do
@@ -67,6 +58,31 @@ lynchVoteCommand callerName targetName = Command $ do
 
 noopCommand :: Command
 noopCommand = Command $ return ()
+
+quitCommand :: Text -> Command
+quitCommand callerName = Command $ do
+    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
+    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
+
+    whenM (isPlayerDead callerName) $ throwError [playerIsDeadMessage callerName]
+
+    caller <- uses players $ findByName_ callerName
+
+    killPlayer caller
+    tell [playerQuitMessage caller]
+
+    sees    %= Map.delete callerName
+    votes   %= Map.delete callerName
+
+seeCommand :: Text -> Text -> Command
+seeCommand callerName targetName = Command $ do
+    validateArguments callerName targetName
+
+    unlessM isSeersTurn                         $ throwError [playerCannotDoThatMessage callerName]
+    unlessM (isPlayerSeer callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    whenJustM (getPlayerSee callerName) . const $ throwError [playerHasAlreadySeenMessage callerName]
+
+    sees %= Map.insert callerName targetName
 
 validateArguments :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
 validateArguments callerName targetName = do

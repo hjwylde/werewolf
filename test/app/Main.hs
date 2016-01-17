@@ -28,16 +28,6 @@ tests = return $ testGroup "Tests" (concat [allCommandTests, allEngineTests, all
 
 allCommandTests :: [TestTree]
 allCommandTests = [
-    testProperty "PROP: see command errors when game is over" prop_seeCommandErrorsWhenGameIsOver,
-    testProperty "PROP: see command errors when caller does not exist" prop_seeCommandErrorsWhenCallerDoesNotExist,
-    testProperty "PROP: see command errors when target does not exist" prop_seeCommandErrorsWhenTargetDoesNotExist,
-    testProperty "PROP: see command errors when caller is dead" prop_seeCommandErrorsWhenCallerIsDead,
-    testProperty "PROP: see command errors when target is dead" prop_seeCommandErrorsWhenTargetIsDead,
-    testProperty "PROP: see command errors when not seers turn" prop_seeCommandErrorsWhenNotSeersTurn,
-    testProperty "PROP: see command errors when caller not seer" prop_seeCommandErrorsWhenCallerNotSeer,
-    testProperty "PROP: see command errors when caller has seen" prop_seeCommandErrorsWhenCallerHasSeen,
-    testProperty "PROP: see command errors updates sees" prop_seeCommandUpdatesSees,
-
     testProperty "PROP: kill vote command errors when game is over" prop_killVoteCommandErrorsWhenGameIsOver,
     testProperty "PROP: kill vote command errors when caller does not exist" prop_killVoteCommandErrorsWhenCallerDoesNotExist,
     testProperty "PROP: kill vote command errors when target does not exist" prop_killVoteCommandErrorsWhenTargetDoesNotExist,
@@ -55,7 +45,25 @@ allCommandTests = [
     testProperty "PROP: lynch vote command errors when target is dead" prop_lynchVoteCommandErrorsWhenTargetIsDead,
     testProperty "PROP: lynch vote command errors when not villagers turn" prop_lynchVoteCommandErrorsWhenNotVillagersTurn,
     testProperty "PROP: lynch vote command errors when caller has voted" prop_lynchVoteCommandErrorsWhenCallerHasVoted,
-    testProperty "PROP: lynch vote command updates votes" prop_lynchVoteCommandUpdatesVotes
+    testProperty "PROP: lynch vote command updates votes" prop_lynchVoteCommandUpdatesVotes,
+
+    testProperty "PROP: quit command errors when game is over" prop_quitCommandErrorsWhenGameIsOver,
+    testProperty "PROP: quit command errors when caller does not exist" prop_quitCommandErrorsWhenCallerDoesNotExist,
+    testProperty "PROP: quit command errors when caller is dead" prop_quitCommandErrorsWhenCallerIsDead,
+    testProperty "PROP: quit command kills player" prop_quitCommandKillsPlayer,
+    testProperty "PROP: quit command clears players kill vote" prop_quitCommandClearsPlayersKillVote,
+    testProperty "PROP: quit command clears players lynch vote" prop_quitCommandClearsPlayersLynchVote,
+    testProperty "PROP: quit command clears players see" prop_quitCommandClearsPlayersSee,
+
+    testProperty "PROP: see command errors when game is over" prop_seeCommandErrorsWhenGameIsOver,
+    testProperty "PROP: see command errors when caller does not exist" prop_seeCommandErrorsWhenCallerDoesNotExist,
+    testProperty "PROP: see command errors when target does not exist" prop_seeCommandErrorsWhenTargetDoesNotExist,
+    testProperty "PROP: see command errors when caller is dead" prop_seeCommandErrorsWhenCallerIsDead,
+    testProperty "PROP: see command errors when target is dead" prop_seeCommandErrorsWhenTargetIsDead,
+    testProperty "PROP: see command errors when not seers turn" prop_seeCommandErrorsWhenNotSeersTurn,
+    testProperty "PROP: see command errors when caller not seer" prop_seeCommandErrorsWhenCallerNotSeer,
+    testProperty "PROP: see command errors when caller has seen" prop_seeCommandErrorsWhenCallerHasSeen,
+    testProperty "PROP: see command errors updates sees" prop_seeCommandUpdatesSees
     ]
 
 allEngineTests :: [TestTree]
