@@ -34,6 +34,7 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Player
+import Game.Werewolf.Role hiding (Villagers, Werewolves)
 
 data Game = Game
     { _turn    :: Turn
@@ -50,7 +51,9 @@ makeLenses ''Game
 makeLenses ''Turn
 
 newGame :: [Player] -> Game
-newGame players = Game (head turnRotation) players Map.empty Map.empty
+newGame players = Game (head $ filter (turnAvailable aliveRoles) turnRotation) players Map.empty Map.empty
+    where
+        aliveRoles = map _role $ filterAlive players
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -69,3 +72,9 @@ isGameOver game = game ^. turn == NoOne
 
 turnRotation :: [Turn]
 turnRotation = cycle [Seers, Werewolves, Villagers, NoOne]
+
+turnAvailable :: [Role] -> Turn -> Bool
+turnAvailable aliveRoles Seers  = seerRole `elem` aliveRoles
+turnAvailable _ Villagers       = True
+turnAvailable _ Werewolves      = True
+turnAvailable _ NoOne           = False

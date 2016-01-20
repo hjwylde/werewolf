@@ -8,19 +8,25 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Game.Werewolf.Test.Game (
-    prop_newGameStartsWithSeersTurn, prop_newGameStartsWithSeesEmpty,
+    prop_newGameStartsWithSeersTurnWhenSeersPresent,
+    prop_newGameStartsWithWerewolvesTurnWhenSeersAbsent, prop_newGameStartsWithSeesEmpty,
     prop_newGameStartsWithVotesEmpty, prop_newGameUsesGivenPlayers,
 ) where
 
 import Control.Lens
 
-import Data.Map as Map
+import qualified Data.Map as Map
 
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 
-prop_newGameStartsWithSeersTurn :: [Player] -> Bool
-prop_newGameStartsWithSeersTurn players = isSeersTurn $ newGame players
+import Test.QuickCheck
+
+prop_newGameStartsWithSeersTurnWhenSeersPresent :: [Player] -> Property
+prop_newGameStartsWithSeersTurnWhenSeersPresent players = any isSeer players ==> isSeersTurn (newGame players)
+
+prop_newGameStartsWithWerewolvesTurnWhenSeersAbsent :: [Player] -> Bool
+prop_newGameStartsWithWerewolvesTurnWhenSeersAbsent players = isWerewolvesTurn (newGame $ filter (not . isSeer) players)
 
 prop_newGameStartsWithSeesEmpty :: [Player] -> Bool
 prop_newGameStartsWithSeesEmpty players = Map.null $ newGame players ^. sees

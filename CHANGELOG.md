@@ -2,6 +2,11 @@
 
 #### Upcoming
 
+*Major*
+
+* Added `--extra-roles` option to `start`. ([#12](https://github.com/hjwylde/werewolf/issues/12))
+* Removed Seer from being included by default. ([#12](https://github.com/hjwylde/werewolf/issues/12))
+
 *Minor*
 
 * Allowed `start` to work when the game has ended but `end` hasn't been called. ([#15](https://github.com/hjwylde/werewolf/issues/15))
