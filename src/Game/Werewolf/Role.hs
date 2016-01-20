@@ -19,6 +19,9 @@ module Game.Werewolf.Role (
     -- ** Instances
     allRoles, seerRole, villagerRole, werewolfRole,
 
+    -- ** Queries
+    findByName, findByName_,
+
     -- * Allegiance
     Allegiance(..),
     singular,
@@ -26,7 +29,10 @@ module Game.Werewolf.Role (
 
 import Control.Lens hiding (singular)
 
-import Data.Text as T
+import           Data.List
+import           Data.Maybe
+import           Data.Text  (Text)
+import qualified Data.Text  as T
 
 import Prelude hiding (all)
 
@@ -72,6 +78,12 @@ werewolfRole = Role
     , _advice       =
         "Voting against your partner can be a good way to deflect suspicion from yourself."
     }
+
+findByName :: Text -> Maybe Role
+findByName name = find ((==) name . _name) allRoles
+
+findByName_ :: Text -> Role
+findByName_ name = fromJust $ findByName name
 
 data Allegiance = Villagers | Werewolves
     deriving (Eq, Read, Show)

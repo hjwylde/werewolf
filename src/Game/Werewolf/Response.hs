@@ -34,9 +34,9 @@ module Game.Werewolf.Response (
     gameOverMessage,
 
     -- ** Error messages
-    playerDoesNotExistMessage, playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
-    gameIsOverMessage, playerIsDeadMessage, playerHasAlreadySeenMessage,
-    playerHasAlreadyVotedMessage, targetIsDeadMessage,
+    roleDoesNotExistMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
+    playerCannotDoThatRightNowMessage, gameIsOverMessage, playerIsDeadMessage,
+    playerHasAlreadySeenMessage, playerHasAlreadyVotedMessage, targetIsDeadMessage,
 ) where
 
 import Control.Lens           hiding (singular)
@@ -184,6 +184,9 @@ playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", pla
 gameOverMessage :: Maybe Text -> Message
 gameOverMessage Nothing             = publicMessage "The game is over! Everyone died..."
 gameOverMessage (Just allegiance)   = publicMessage $ T.unwords ["The game is over! The", allegiance, "have won."]
+
+roleDoesNotExistMessage :: Text -> Text -> Message
+roleDoesNotExistMessage to name = privateMessage [to] $ T.unwords ["Role", name, "does not exist."]
 
 playerDoesNotExistMessage :: Text -> Text -> Message
 playerDoesNotExistMessage to name = privateMessage [to] $ T.unwords ["Player", name, "does not exist."]

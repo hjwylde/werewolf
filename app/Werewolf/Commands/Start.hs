@@ -28,21 +28,28 @@ import Data.Text (Text)
 import Game.Werewolf.Engine   hiding (isGameOver)
 import Game.Werewolf.Game
 import Game.Werewolf.Response
+import Game.Werewolf.Role
 
 -- | Options.
 data Options = Options
-    { argPlayers :: [Text]
+    { optExtraRoleNames :: [Text]
+    , argPlayers        :: [Text]
     } deriving (Eq, Show)
 
 -- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options playerNames) = do
+handle callerName (Options extraRoleNames playerNames) = do
     whenM doesGameExist . whenM (fmap (not . isGameOver) readGame) $ exitWith failure {
         messages = [privateMessage [callerName] "A game is already running."]
         }
 
-    players <- createPlayers playerNames
+    result <- runExceptT $ do
+        extraRoles <- forM extraRoleNames $ \roleName -> maybe (throwError [roleDoesNotExistMessage callerName roleName]) return (findByName roleName)
 
-    case runExcept (runWriterT $ startGame callerName players) of
+        players <- createPlayers playerNames extraRoles
+
+        runWriterT $ startGame callerName players
+
+    case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game, messages) -> writeGame game >> exitWith success { messages = messages }
+        Right (game, messages)  -> writeGame game >> exitWith success { messages = messages }

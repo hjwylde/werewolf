@@ -97,11 +97,12 @@ allEngineTests = [
     testProperty "PROP: start game errors when more than 24 players" prop_startGameErrorsWhenMoreThan24Players,
 
     testProperty "PROP: create players uses given player names" prop_createPlayersUsesGivenPlayerNames,
+    testProperty "PROP: create players uses given roles" prop_createPlayersUsesGivenRoles,
     testProperty "PROP: create players creates alive players" prop_createPlayersCreatesAlivePlayers,
 
     testProperty "PROP: randomise roles returns n roles" prop_randomiseRolesReturnsNRoles,
-    testProperty "PROP: randomise roles proportions roles" prop_randomiseRolesProportionsRoles,
-    testProperty "PROP: randomise roles has one seer" prop_randomiseRolesHasOneSeer
+    testProperty "PROP: randomise roles uses given roles" prop_randomiseRolesUsesGivenRoles,
+    testProperty "PROP: randomise roles proportions allegiances" prop_randomiseRolesProportionsAllegiances
     ]
 
 allGameTests :: [TestTree]

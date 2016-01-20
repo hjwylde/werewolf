@@ -8,12 +8,17 @@ Maintainer  : public@hjwylde.com
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 {-# OPTIONS_HADDOCK hide, prune #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main (
-    main,
+    main, handle,
 ) where
 
+import qualified Data.Text as T
+
 import Options.Applicative
+
+import System.Environment
 
 import qualified Werewolf.Commands.End       as End
 import qualified Werewolf.Commands.Help      as Help
@@ -25,14 +30,16 @@ import qualified Werewolf.Commands.Vote      as Vote
 import           Werewolf.Options
 
 main :: IO ()
-main = customExecParser werewolfPrefs werewolfInfo >>= handle
+main = getArgs >>= handle
 
-handle :: Options -> IO ()
-handle (Options caller command) = case command of
-    End                 -> End.handle caller
-    Help options        -> Help.handle caller options
-    Interpret options   -> Interpret.handle caller options
-    Quit                -> Quit.handle caller
-    See options         -> See.handle caller options
-    Start options       -> Start.handle caller options
-    Vote options        -> Vote.handle caller options
+handle :: [String] -> IO ()
+handle args = handleParseResult (execParserPure werewolfPrefs werewolfInfo args) >>= handle'
+    where
+        handle' (Options callerName command) = case command of
+            End                                 -> End.handle callerName
+            Help options                        -> Help.handle callerName options
+            Interpret (Interpret.Options args)  -> handle . map T.unpack $ "--caller":callerName:args
+            Quit                                -> Quit.handle callerName
+            See options                         -> See.handle callerName options
+            Start options                       -> Start.handle callerName options
+            Vote options                        -> Vote.handle callerName options

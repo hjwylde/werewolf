@@ -38,7 +38,7 @@ import Data.List
 import Data.Maybe
 import Data.Text  (Text)
 
-import Game.Werewolf.Role hiding (name, _name)
+import Game.Werewolf.Role hiding (findByName, findByName_, name, _name)
 
 data Player = Player
     { _name  :: Text
