@@ -125,7 +125,7 @@ turnMessages :: Turn -> [Player] -> [Message]
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
 turnMessages Villagers _        = [villagersTurnMessage]
 turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players
-turnMessages NoOne _            = undefined
+turnMessages NoOne _            = []
 
 seersTurnMessages :: [Player] -> [Message]
 seersTurnMessages seers = nightFallsMessage:(publicMessage "The Seers wake up."):(map (\seer -> privateMessage [seer ^. name] "Who's allegiance would you like to see?") seers)
