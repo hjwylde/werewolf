@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.2.0.1
+
 *Revisions*
 
 * Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
