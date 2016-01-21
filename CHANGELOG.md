@@ -5,6 +5,7 @@
 *Minor*
 
 * Added a message to say the names of all the players at the start of a game. ([#23](https://github.com/hjwylde/werewolf/issues/23))
+* Added a message to say the roles in play at the start of a game. ([#16](https://github.com/hjwylde/werewolf/issues/16))
 
 #### v0.3.0.1
 
