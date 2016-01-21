@@ -101,12 +101,11 @@ checkTurn' = use turn >>= \turn' -> case turn' of
             advanceTurn
 
     Werewolves -> do
-        werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
+        aliveWerewolves <- uses players (filterAlive . filterWerewolves)
         votes'          <- use votes
 
-        when (werewolvesCount == Map.size votes') $ do
-            werewolfNames <- uses players (map _name . filterWerewolves)
-            tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
+        when (length aliveWerewolves == Map.size votes') $ do
+            tell $ map (uncurry . playerMadeKillVoteMessage $ map _name aliveWerewolves) (Map.toList votes')
 
             advanceTurn
 
