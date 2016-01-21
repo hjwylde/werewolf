@@ -132,8 +132,8 @@ rolesInGameMessage roles = publicMessage $ T.concat [
 
 newPlayerMessage :: [Player] -> Player -> Message
 newPlayerMessage players player
-    | isWerewolf player = privateMessage [player ^. name] $ T.unlines [T.concat ["You're a Werewolf", packMessage], player ^. role . description]
-    | otherwise         = privateMessage [player ^. name] $ T.unlines [T.concat ["You're a ", player ^. role . Role.name, "."], player ^. role . description]
+    | isWerewolf player = privateMessage [player ^. name] $ T.intercalate "\n" [T.concat ["You're a Werewolf", packMessage], player ^. role . description]
+    | otherwise         = privateMessage [player ^. name] $ T.intercalate "\n" [T.concat ["You're a ", player ^. role . Role.name, "."], player ^. role . description]
     where
         packMessage
             | length (filterWerewolves players) <= 1    = "."
@@ -144,20 +144,23 @@ nightFallsMessage = publicMessage "Night falls, the townsfolk are asleep."
 
 turnMessages :: Turn -> [Player] -> [Message]
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
-turnMessages Villagers _        = [villagersTurnMessage]
+turnMessages Villagers players  = villagersTurnMessage players
 turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players
 turnMessages NoOne _            = []
 
 seersTurnMessages :: [Player] -> [Message]
-seersTurnMessages seers = publicMessage "The Seers wake up.":privateMessage (map _name seers) "Who's allegiance would you like to see?":[]
+seersTurnMessages seers = publicMessage "The Seers wake up.":privateMessage (map _name seers) "Whose allegiance would you like to see?":[]
 
-villagersTurnMessage :: Message
-villagersTurnMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
+villagersTurnMessage :: [Player] -> [Message]
+villagersTurnMessage players = [
+    publicMessage "The sun rises. Everybody wakes up and opens their eyes...",
+    privateMessage (map _name players) "Whom would you like to lynch?"
+    ]
 
 werewolvesTurnMessages :: [Player] -> [Message]
 werewolvesTurnMessages werewolves = [
     publicMessage "The Werewolves wake up, recognise one another and choose a new victim.",
-    privateMessage (map _name werewolves) "Who would you like to kill?"
+    privateMessage (map _name werewolves) "Whom would you like to kill?"
     ]
 
 playerSeenMessage :: Text -> Player -> Message

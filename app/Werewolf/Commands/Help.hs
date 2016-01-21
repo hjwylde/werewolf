@@ -46,7 +46,7 @@ handle callerName (Options (Just Description)) = exitWith success {
     messages = map (privateMessage [callerName]) descriptionMessages
     }
 handle callerName (Options (Just Roles)) = exitWith success {
-    messages = map (\role -> privateMessage [callerName] $ T.unlines [
+    messages = map (\role -> privateMessage [callerName] $ T.intercalate "\n" [
         T.snoc (role ^. Role.name) ':',
         role ^. description,
         role ^. advice
@@ -61,24 +61,19 @@ handle callerName (Options Nothing) = exitWith success {
 
 commandsMessages :: [Text]
 commandsMessages = map (T.intercalate "\n") [[
-    "End: end the current game",
-    "Usage: end",
+    "end",
     "- Ends the current game."
     ], [
-    "Quit: quit the current game",
-    "Usage: quit",
+    "quit",
     "- Quit the current game."
     ], [
-    "See: see a player's allegiance",
-    "Usage: see PLAYER",
+    "see PLAYER",
     "- See a player's allegiance. A Seer may determine a player's allegiance once per day."
     ], [
-    "Start: start a new game",
-    "Usage: start [--extra-roles ROLE,...] PLAYER ...",
+    "start [--extra-roles ROLE,...] PLAYER ...",
     "- Starts a new game with the given players and extra roles. A game requires at least 7 players."
     ], [
-    "Vote: vote against a player",
-    "Usage: vote PLAYER",
+    "vote PLAYER",
     T.unwords [
         "- Vote against a player.",
         "A townsperson may vote at daytime to lynch someone",
@@ -138,11 +133,15 @@ rulesMessages = map (T.intercalate "\n") [[
 
 helpMessages :: [Text]
 helpMessages = map (T.intercalate "\n") [[
-    "Usage: help COMMAND"
+    "help commands",
+    "- Print the in-game commands."
     ], [
-    "Available commands:",
-    "  commands - print the in-game commands",
-    "  description - print the game description",
-    "  rules - print the game rules",
-    "  roles - print the roles and their description"
+    "help description",
+    "- Print the game description."
+    ], [
+    "help roles",
+    "- Print the roles and their description."
+    ], [
+    "help rules",
+    "- Print the game rules."
     ]]
