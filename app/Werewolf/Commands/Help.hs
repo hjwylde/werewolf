@@ -61,31 +61,22 @@ handle callerName (Options Nothing) = exitWith success {
 
 commandsMessages :: [Text]
 commandsMessages = map T.unlines [[
-    "Usage: COMMAND ARG ..."
-    ], [
-    "Available commands:",
-    "  end - end the current game",
-    "  help - help documents",
-    "  see - see a player's allegiance",
-    "  start - start a new game",
-    "  vote - vote against a player"
-    ], [
-    "End:",
+    "End: end the current game",
     "Usage: end",
-    "  Ends the current game."
+    "- Ends the current game."
     ], [
-    "See:",
+    "See: see a player's allegiance",
     "Usage: see PLAYER",
-    "  See a player's allegiance. A Seer may determine a player's allegiance once per day."
+    "- See a player's allegiance. A Seer may determine a player's allegiance once per day."
     ], [
-    "Start:",
-    "Usage: start PLAYER ...",
-    "  Starts a new game with the given players. A game requires at least 7 players."
+    "Start: start a new game",
+    "Usage: start [--extra-roles ROLE,...] PLAYER ...",
+    "- Starts a new game with the given players and extra roles. A game requires at least 7 players."
     ], [
-    "Vote:",
+    "Vote: vote against a player",
     "Usage: vote PLAYER",
     T.unwords [
-        "  Vote against a player.",
+        "- Vote against a player.",
         "A townsperson may vote at daytime to lynch someone",
         "and a Werewolf may vote at nighttime to kill a Villager."
         ]
