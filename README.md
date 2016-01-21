@@ -76,8 +76,7 @@ It's the Seers' turn now.
 {"ok":true,"messages":[
     {"to":["@grault"],"message":"@qux is a Villager."},
     {"to":null,"message":"The Werewolves wake up, recognise one another and choose a new victim."},
-    {"to":["@bar"],"message":"Who would you like to kill?"},
-    {"to":["@corge"],"message":"Who would you like to kill?"}
+    {"to":["@bar","@corge"],"message":"Who would you like to kill?"}
     ]}
 ```
 

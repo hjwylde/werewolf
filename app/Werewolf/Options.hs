@@ -9,6 +9,8 @@ Maintainer  : public@hjwylde.com
 Optparse utilities.
 -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Werewolf.Options (
     -- * Options
     Options(..), Command(..),
@@ -17,6 +19,7 @@ module Werewolf.Options (
     werewolfPrefs, werewolfInfo, werewolf,
 ) where
 
+import Data.List.Extra
 import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version (showVersion)
@@ -104,7 +107,13 @@ see :: Parser Command
 see = See . See.Options . T.pack <$> strArgument (metavar "PLAYER")
 
 start :: Parser Command
-start = Start . Start.Options <$> many (T.pack <$> strArgument (metavar "PLAYER..."))
+start = fmap Start $ Start.Options
+    <$> fmap (map T.pack . wordsBy (',' ==)) (strOption $ mconcat [
+        long "extra-roles", metavar "ROLE,...",
+        value [],
+        help "Specify the extra roles to include"
+        ])
+    <*> many (T.pack <$> strArgument (metavar "PLAYER..."))
 
 vote :: Parser Command
 vote = Vote . Vote.Options . T.pack <$> strArgument (metavar "PLAYER")

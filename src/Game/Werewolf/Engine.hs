@@ -56,7 +56,8 @@ import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     as Role hiding (Villagers, Werewolves)
+import           Game.Werewolf.Role     (Role, werewolfRole, villagerRole, _allegiance)
+import           qualified Game.Werewolf.Role     as Role
 
 import System.Directory
 import System.FilePath
@@ -79,25 +80,6 @@ checkTurn' = use turn >>= \turn' -> case turn' of
 
             advanceTurn
 
-    Werewolves -> do
-        werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
-        votes'          <- use votes
-
-        when (werewolvesCount == Map.size votes') $ do
-            werewolfNames <- uses players (map Player._name . filterWerewolves)
-            tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
-
-            advanceTurn
-
-            let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
-            case mTargetName of
-                Nothing         -> tell [noPlayerKilledMessage]
-                Just targetName -> do
-                    target <- uses players (findByName_ targetName)
-
-                    killPlayer target
-                    tell [playerKilledMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
-
     Villagers -> do
         playersCount    <- uses players (length . filterAlive)
         votes'          <- use votes
@@ -112,9 +94,30 @@ checkTurn' = use turn >>= \turn' -> case turn' of
                     target <- uses players (findByName_ lynchedName)
 
                     killPlayer target
-                    tell [playerLynchedMessage (target ^. Player.name) (target ^. Player.role . Role.name)]
+                    tell [playerLynchedMessage (target ^. name) (target ^. role . Role.name)]
+
+            tell [nightFallsMessage]
 
             advanceTurn
+
+    Werewolves -> do
+        werewolvesCount <- uses players (length . filterAlive . filterWerewolves)
+        votes'          <- use votes
+
+        when (werewolvesCount == Map.size votes') $ do
+            werewolfNames <- uses players (map _name . filterWerewolves)
+            tell $ map (uncurry $ playerMadeKillVoteMessage werewolfNames) (Map.toList votes')
+
+            advanceTurn
+
+            let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
+            case mTargetName of
+                Nothing         -> tell [noPlayerKilledMessage]
+                Just targetName -> do
+                    target <- uses players (findByName_ targetName)
+
+                    killPlayer target
+                    tell [playerKilledMessage (target ^. name) (target ^. role . Role.name)]
 
     NoOne -> return ()
 
@@ -127,18 +130,13 @@ advanceTurn = do
     turn' <- use turn
     alivePlayers <- uses players filterAlive
 
-    let nextTurn = head . drop1 $ filter (turnAvailable alivePlayers) (dropWhile (turn' /=) turnRotation)
+    let nextTurn = head . drop1 $ filter (turnAvailable $ map _role alivePlayers) (dropWhile (turn' /=) turnRotation)
 
     tell $ turnMessages nextTurn alivePlayers
 
     turn    .= nextTurn
     sees    .= Map.empty
     votes   .= Map.empty
-    where
-        turnAvailable alivePlayers Seers    = not . null $ filterSeers alivePlayers
-        turnAvailable _ Villagers           = True
-        turnAvailable _ Werewolves          = True
-        turnAvailable _ NoOne               = False
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
@@ -155,11 +153,13 @@ startGame callerName players = do
     when (length players < 7)               $ throwError [privateMessage [callerName] "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage [callerName] "Cannot have more than 24 players."]
 
-    tell $ newGameMessages players
+    let game = newGame players
 
-    return $ newGame players
+    tell $ newGameMessages game
+
+    return game
     where
-        playerNames = map Player._name players
+        playerNames = map _name players
 
 killPlayer :: MonadState Game m => Player -> m ()
 killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -200,8 +200,8 @@ deleteGame = liftIO $ defaultFilePath >>= removeFile
 doesGameExist :: MonadIO m => m Bool
 doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
 
-createPlayers :: MonadIO m => [Text] -> m [Player]
-createPlayers playerNames = zipWith newPlayer playerNames <$> randomiseRoles (length playerNames)
+createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
+createPlayers playerNames extraRoles = zipWith newPlayer playerNames <$> randomiseRoles extraRoles (length playerNames)
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = uses players $ Player.doesPlayerExist name
@@ -221,9 +221,11 @@ isPlayerAlive name = uses players $ isAlive . findByName_ name
 isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = uses players $ isDead . findByName_ name
 
-randomiseRoles :: MonadIO m => Int -> m [Role]
-randomiseRoles n = liftIO . evalRandIO . shuffleM $ seerRoles ++ werewolfRoles ++ villagerRoles
+randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
+randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ werewolfRoles ++ villagerRoles
     where
-        seerRoles       = [seerRole]
-        werewolfRoles   = replicate (n `quot` 6 + 1) werewolfRole
-        villagerRoles   = replicate (n - length (seerRoles ++ werewolfRoles)) villagerRole
+        extraWerewolfRoles = filter ((==) Role.Werewolves . _allegiance) extraRoles
+        extraVillagerRoles = filter ((==) Role.Villagers . _allegiance) extraRoles
+
+        werewolfRoles = replicate (n `quot` 6 + 1 - length extraWerewolfRoles) werewolfRole
+        villagerRoles = replicate (n - length (extraVillagerRoles ++ werewolfRoles)) villagerRole

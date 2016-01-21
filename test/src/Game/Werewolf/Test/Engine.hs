@@ -24,16 +24,18 @@ module Game.Werewolf.Test.Engine (
     prop_checkGameOverAdvancesTurn, prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
     -- * startGame
-    prop_startGameStartsWithSeersTurn, prop_startGameUsesGivenPlayers,
+    prop_startGameStartsWithSeersTurnWhenSeersPresent,
+    prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent, prop_startGameUsesGivenPlayers,
     prop_startGameErrorsUnlessUniquePlayerNames, prop_startGameErrorsWhenLessThan7Players,
     prop_startGameErrorsWhenMoreThan24Players,
 
     -- * createPlayers
-    prop_createPlayersUsesGivenPlayerNames, prop_createPlayersCreatesAlivePlayers,
+    prop_createPlayersUsesGivenPlayerNames, prop_createPlayersUsesGivenRoles,
+    prop_createPlayersCreatesAlivePlayers,
 
     -- * randomiseRoles
-    prop_randomiseRolesReturnsNRoles, prop_randomiseRolesProportionsRoles,
-    prop_randomiseRolesHasOneSeer,
+    prop_randomiseRolesReturnsNRoles, prop_randomiseRolesUsesGivenRoles,
+    prop_randomiseRolesProportionsAllegiances,
 ) where
 
 import Control.Lens         hiding (elements)
@@ -45,12 +47,13 @@ import           Data.List.Extra
 import qualified Data.Map          as Map
 import           Data.Text         (Text)
 
-import Game.Werewolf.Engine         hiding (doesPlayerExist, isGameOver, isSeersTurn,
-                                     isVillagersTurn, isWerewolvesTurn, killPlayer)
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Role           hiding (Villagers, Werewolves, _name)
-import Game.Werewolf.Test.Arbitrary
+import           Game.Werewolf.Engine         hiding (doesPlayerExist, isGameOver, isSeersTurn,
+                                               isVillagersTurn, isWerewolvesTurn, killPlayer)
+import           Game.Werewolf.Game
+import           Game.Werewolf.Player
+import           Game.Werewolf.Role           hiding (Villagers, Werewolves, _name)
+import qualified Game.Werewolf.Role           as Role
+import           Game.Werewolf.Test.Arbitrary
 
 import Test.QuickCheck
 import Test.QuickCheck.Monadic
@@ -192,10 +195,18 @@ prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
             length (nub . map (_allegiance . _role) . filterAlive $ game' ^. players) > 1
             ==> not . isGameOver $ run_ checkGameOver game'
 
-prop_startGameStartsWithSeersTurn :: [Player] -> Property
-prop_startGameStartsWithSeersTurn players = and [
+prop_startGameStartsWithSeersTurnWhenSeersPresent :: [Player] -> Property
+prop_startGameStartsWithSeersTurnWhenSeersPresent players = and [
+    any isSeer players,
     isRight . runExcept . runWriterT $ startGame "" players
     ] ==> isSeersTurn (fst . fromRight . runExcept . runWriterT $ startGame "" players)
+
+prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent :: [Player] -> Property
+prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent players = and [
+    isRight . runExcept . runWriterT $ startGame "" players'
+    ] ==> isWerewolvesTurn (fst . fromRight . runExcept . runWriterT $ startGame "" players')
+    where
+        players' = filter (not . isSeer) players
 
 prop_startGameUsesGivenPlayers :: [Player] -> Property
 prop_startGameUsesGivenPlayers players' = and [
@@ -217,22 +228,25 @@ prop_startGameErrorsWhenMoreThan24Players = forAll (resize 30 $ listOf arbitrary
     length players > 24
     ] ==> isLeft (runExcept . runWriterT $ startGame "" players)
 
-prop_createPlayersUsesGivenPlayerNames :: [Text] -> Property
-prop_createPlayersUsesGivenPlayerNames playerNames = monadicIO $ createPlayers playerNames >>= return . (playerNames ==) . map _name
+prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property
+prop_createPlayersUsesGivenPlayerNames playerNames extraRoles = monadicIO $ createPlayers playerNames extraRoles >>= return . (playerNames ==) . map _name
 
-prop_createPlayersCreatesAlivePlayers :: [Text] -> Property
-prop_createPlayersCreatesAlivePlayers playerNames = monadicIO $ createPlayers playerNames >>= return . all ((==) Alive . _state)
+prop_createPlayersUsesGivenRoles :: [Text] -> [Role] -> Property
+prop_createPlayersUsesGivenRoles playerNames extraRoles = monadicIO $ createPlayers playerNames extraRoles >>= return . isSubsequenceOf extraRoles . map _role
 
-prop_randomiseRolesReturnsNRoles :: Int -> Property
-prop_randomiseRolesReturnsNRoles n = monadicIO $ randomiseRoles n >>= return . (==) n . length
+prop_createPlayersCreatesAlivePlayers :: [Text] -> [Role] -> Property
+prop_createPlayersCreatesAlivePlayers playerNames extraRoles = monadicIO $ createPlayers playerNames extraRoles >>= return . all ((==) Alive . _state)
 
-prop_randomiseRolesProportionsRoles :: Int -> Property
-prop_randomiseRolesProportionsRoles n = monadicIO $ do
-    roles <- randomiseRoles n
+prop_randomiseRolesReturnsNRoles :: [Role] -> Int -> Property
+prop_randomiseRolesReturnsNRoles extraRoles n = monadicIO $ randomiseRoles extraRoles n >>= return . (==) n . length
 
-    let werewolvesCount = length $ elemIndices werewolfRole roles
+prop_randomiseRolesUsesGivenRoles :: [Role] -> Int -> Property
+prop_randomiseRolesUsesGivenRoles extraRoles n = monadicIO $ randomiseRoles extraRoles n >>= return . isSubsequenceOf extraRoles
+
+prop_randomiseRolesProportionsAllegiances :: [Role] -> Int -> Property
+prop_randomiseRolesProportionsAllegiances extraRoles n = monadicIO $ do
+    roles <- randomiseRoles extraRoles n
+
+    let werewolvesCount = length . elemIndices Role.Werewolves $ map _allegiance roles
 
     return $ n `quot` 6 + 1 == werewolvesCount
-
-prop_randomiseRolesHasOneSeer :: Int -> Property
-prop_randomiseRolesHasOneSeer n = monadicIO $ randomiseRoles n >>= return . (1 ==) . length . elemIndices seerRole

@@ -90,23 +90,27 @@ allEngineTests = [
     testProperty "PROP: check game over advances turn" prop_checkGameOverAdvancesTurn,
     testProperty "PROP: check game over does nothing when at least two allegiances alivevoted" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
-    testProperty "PROP: start game starts with seers turn" prop_startGameStartsWithSeersTurn,
+    testProperty "PROP: start game starts with seers turn when seers present" prop_startGameStartsWithSeersTurnWhenSeersPresent,
+    testProperty "PROP: start game starts with werewolves turn when seers absent" prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent,
     testProperty "PROP: start game uses given players" prop_startGameUsesGivenPlayers,
     testProperty "PROP: start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
     testProperty "PROP: start game errors when less than 7 players" prop_startGameErrorsWhenLessThan7Players,
     testProperty "PROP: start game errors when more than 24 players" prop_startGameErrorsWhenMoreThan24Players,
 
     testProperty "PROP: create players uses given player names" prop_createPlayersUsesGivenPlayerNames,
+    testProperty "PROP: create players uses given roles" prop_createPlayersUsesGivenRoles,
     testProperty "PROP: create players creates alive players" prop_createPlayersCreatesAlivePlayers,
 
     testProperty "PROP: randomise roles returns n roles" prop_randomiseRolesReturnsNRoles,
-    testProperty "PROP: randomise roles proportions roles" prop_randomiseRolesProportionsRoles,
-    testProperty "PROP: randomise roles has one seer" prop_randomiseRolesHasOneSeer
+    testProperty "PROP: randomise roles uses given roles" prop_randomiseRolesUsesGivenRoles,
+    testProperty "PROP: randomise roles proportions allegiances" prop_randomiseRolesProportionsAllegiances
     ]
 
 allGameTests :: [TestTree]
 allGameTests = [
-    testProperty "PROP: new game starts with seers turn" prop_newGameStartsWithSeersTurn,
+    testProperty "PROP: new game starts with seers turn when seers present" prop_newGameStartsWithSeersTurnWhenSeersPresent,
+    testProperty "PROP: new game starts with werewolves turn when seers absent" prop_newGameStartsWithWerewolvesTurnWhenSeersAbsent,
+
     testProperty "PROP: new game starts with sees empty" prop_newGameStartsWithSeesEmpty,
     testProperty "PROP: new game starts with votes empty" prop_newGameStartsWithVotesEmpty,
     testProperty "PROP: new game uses given players" prop_newGameUsesGivenPlayers
