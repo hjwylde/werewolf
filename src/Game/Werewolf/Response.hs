@@ -108,13 +108,16 @@ privateMessage :: [Text] -> Text -> Message
 privateMessage to = Message (Just to)
 
 newGameMessages :: Game -> [Message]
-newGameMessages game = map (newPlayerMessage alivePlayers) alivePlayers ++ [nightFallsMessage] ++ turnMessages turn' alivePlayers
+newGameMessages game = [playersInGameMessage alivePlayers] ++ map (newPlayerMessage alivePlayers) alivePlayers ++ [nightFallsMessage] ++ turnMessages turn' alivePlayers
     where
         turn'           = game ^. turn
         alivePlayers    = filterAlive $ game ^. players
 
-nightFallsMessage :: Message
-nightFallsMessage = publicMessage "Night falls, the townsfolk are asleep."
+playersInGameMessage :: [Player] -> Message
+playersInGameMessage players = publicMessage $ T.concat [
+    "A new game of werewolf is starting with ",
+    T.intercalate ", " (map _name players), "!"
+    ]
 
 newPlayerMessage :: [Player] -> Player -> Message
 newPlayerMessage players player
@@ -124,6 +127,9 @@ newPlayerMessage players player
         packMessage
             | length (filterWerewolves players) <= 1    = "."
             | otherwise                                 = T.concat [", along with ", T.intercalate "," (map _name $ filterWerewolves players \\ [player]), "."]
+
+nightFallsMessage :: Message
+nightFallsMessage = publicMessage "Night falls, the townsfolk are asleep."
 
 turnMessages :: Turn -> [Player] -> [Message]
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
