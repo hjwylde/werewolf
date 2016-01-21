@@ -2,12 +2,24 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
+* Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
+
 #### v0.3.1.0
 
 *Minor*
 
 * Added a message to say the names of all the players at the start of a game. ([#23](https://github.com/hjwylde/werewolf/issues/23))
 * Added a message to say the roles in play at the start of a game. ([#16](https://github.com/hjwylde/werewolf/issues/16))
+
+#### v0.3.0.2
+
+*Revisions*
+
+* Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
+* Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 
 #### v0.3.0.1
 
@@ -26,6 +38,13 @@
 
 * Allowed `start` to work when the game has ended but `end` hasn't been called. ([#15](https://github.com/hjwylde/werewolf/issues/15))
 * Added `quit` command. ([#13](https://github.com/hjwylde/werewolf/issues/13))
+
+#### v0.2.0.1
+
+*Revisions*
+
+* Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
+* Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 
 #### v0.2.0.0
 

@@ -130,7 +130,9 @@ advanceTurn = do
     turn' <- use turn
     alivePlayers <- uses players filterAlive
 
-    let nextTurn = head . drop1 $ filter (turnAvailable $ map _role alivePlayers) (dropWhile (turn' /=) turnRotation)
+    let nextTurn = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
+        then NoOne
+        else head . drop1 $ filter (turnAvailable $ map _role alivePlayers) (dropWhile (turn' /=) turnRotation)
 
     tell $ turnMessages nextTurn alivePlayers
 

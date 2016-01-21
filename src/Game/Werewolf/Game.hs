@@ -34,7 +34,7 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role hiding (Villagers, Werewolves)
+import Game.Werewolf.Role   hiding (Villagers, Werewolves)
 
 data Game = Game
     { _turn    :: Turn
@@ -74,7 +74,7 @@ turnRotation :: [Turn]
 turnRotation = cycle [Seers, Werewolves, Villagers, NoOne]
 
 turnAvailable :: [Role] -> Turn -> Bool
-turnAvailable aliveRoles Seers  = seerRole `elem` aliveRoles
-turnAvailable _ Villagers       = True
-turnAvailable _ Werewolves      = True
-turnAvailable _ NoOne           = False
+turnAvailable aliveRoles Seers          = seerRole `elem` aliveRoles
+turnAvailable alivePlayers Villagers    = not . null $ filterVillagers alivePlayers
+turnAvailable alivePlayers Werewolves   = not . null $ filterWerewolves alivePlayers
+turnAvailable _ NoOne                   = False
