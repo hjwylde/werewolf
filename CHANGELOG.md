@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.3.0.0
+
 *Major*
 
 * Added `--extra-roles` option to `start`. ([#12](https://github.com/hjwylde/werewolf/issues/12))
