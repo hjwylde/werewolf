@@ -92,7 +92,7 @@ checkTurn' = use turn >>= \turn' -> case turn' of
                 Nothing                -> do
                     aliveScapegoats <- uses players (filterAlive . filterScapegoats)
 
-                    let mScapegoat = only $ aliveScapegoats
+                    let mScapegoat = only aliveScapegoats
                     case mScapegoat of
                         Nothing        -> tell [noPlayerLynchedMessage]
                         Just scapegoat -> do
