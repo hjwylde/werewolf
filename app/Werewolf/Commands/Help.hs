@@ -77,7 +77,7 @@ commandsMessages = map (T.intercalate "\n") [[
     T.unwords [
         "- Vote against a player.",
         "A townsperson may vote at daytime to lynch someone",
-        "and a Werewolf may vote at nighttime to kill a Villager."
+        "and a Werewolf may vote at nighttime to devour a Villager."
         ]
     ]]
 
@@ -98,8 +98,8 @@ descriptionMessages = map (T.intercalate "\n") [[
         ]
     ], [
     "Objective of the Game:",
-    "For the Villagers: kill all of the Werewolves.",
-    "For the Werewolves: kill all of the Villagers."
+    "For the Villagers: lynch all of the Werewolves.",
+    "For the Werewolves: devour all of the Villagers."
     ]]
 
 rulesMessages :: [Text]

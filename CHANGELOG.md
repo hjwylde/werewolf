@@ -10,6 +10,13 @@
 
 * Shrunk some of the help text to make it more readable. ([#25](https://github.com/hjwylde/werewolf/issues/25))
 
+#### v0.3.1.3
+
+*Revisions*
+
+* Fixed a bug where Werewolves could devour other Werewolves. ([#34](https://github.com/hjwylde/werewolf/issues/34))
+* Changed Werewolf text from "kill" to "devour". ([#34](https://github.com/hjwylde/werewolf/issues/34))
+
 #### v0.3.1.2
 
 *Revisions*
@@ -29,6 +36,13 @@
 
 * Added a message to say the names of all the players at the start of a game. ([#23](https://github.com/hjwylde/werewolf/issues/23))
 * Added a message to say the roles in play at the start of a game. ([#16](https://github.com/hjwylde/werewolf/issues/16))
+
+#### v0.3.0.5
+
+*Revisions*
+
+* Fixed a bug where Werewolves could devour other Werewolves. ([#34](https://github.com/hjwylde/werewolf/issues/34))
+* Changed Werewolf text from "kill" to "devour". ([#34](https://github.com/hjwylde/werewolf/issues/34))
 
 #### v0.3.0.4
 
