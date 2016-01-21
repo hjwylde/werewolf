@@ -89,8 +89,17 @@ checkTurn' = use turn >>= \turn' -> case turn' of
 
             let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
             case mLynchedName of
-                Nothing             -> tell [noPlayerLynchedMessage]
-                Just lynchedName    -> do
+                Nothing                -> do
+                    aliveScapegoats <- uses players (filterAlive . filterScapegoats)
+
+                    let mScapegoat = only $ aliveScapegoats
+                    case mScapegoat of
+                        Nothing        -> tell [noPlayerLynchedMessage]
+                        Just scapegoat -> do
+                            killPlayer scapegoat
+                            tell [scapegoatLynchedMessage (scapegoat ^. name)]
+
+                Just lynchedName       -> do
                     target <- uses players (findByName_ lynchedName)
 
                     killPlayer target

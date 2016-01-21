@@ -35,6 +35,7 @@ module Game.Werewolf.Response (
 
     -- ** Villagers turn messages
     villagersTurnMessage, playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
+    scapegoatLynchedMessage,
 
     -- ** Werewolves turn messages
     werewolvesTurnMessages, playerMadeDevourVoteMessage, playerDevouredMessage,
@@ -207,6 +208,13 @@ werewolvesTurnMessages :: [Player] -> [Message]
 werewolvesTurnMessages werewolves = [
     publicMessage "The Werewolves wake up, recognise one another and choose a new victim.",
     privateMessage (map _name werewolves) "Whom would you like to devour?"
+    ]
+
+scapegoatLynchedMessage :: Text -> Message
+scapegoatLynchedMessage name = publicMessage $ T.unwords [
+    "The townsfolk squabble over whom to tie up. Just as they are about to call it a day",
+    "they notice that", name, "has been acting awfully suspicious.",
+    "Not wanting to take any chances,", name, "is promptly tied to a pyre and burned alive."
     ]
 
 playerMadeDevourVoteMessage :: [Text] -> Text -> Text -> Message

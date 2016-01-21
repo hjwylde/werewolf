@@ -17,7 +17,7 @@ module Game.Werewolf.Role (
     Role(..), name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles, seerRole, villagerRole, werewolfRole,
+    allRoles, seerRole, villagerRole, werewolfRole, scapegoatRole,
 
     -- ** Queries
     findByName, findByName_,
@@ -43,7 +43,7 @@ data Role = Role
     } deriving (Eq, Read, Show)
 
 allRoles :: [Role]
-allRoles = [seerRole, villagerRole, werewolfRole]
+allRoles = [seerRole, villagerRole, werewolfRole, scapegoatRole]
 
 seerRole :: Role
 seerRole = Role
@@ -76,6 +76,15 @@ werewolfRole = Role
     , _description  = "A shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."
     , _advice       =
         "Voting against your partner can be a good way to deflect suspicion from yourself."
+    }
+
+scapegoatRole :: Role
+scapegoatRole = Role
+    { _name         = "Scapegoat"
+    , _allegiance   = Villagers
+    , _description  = "That one person everyone loves to blame."
+    , _advice       =
+        "Cross your fingers that the votes don't end up tied."
     }
 
 findByName :: Text -> Maybe Role

@@ -12,7 +12,7 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
     arbitraryCommand, arbitraryDevourVoteCommand, arbitraryLynchVoteCommand, arbitraryQuitCommand,
     arbitrarySeeCommand, arbitraryNewGame, arbitraryPlayer, arbitrarySeer, arbitraryVillager,
-    arbitraryWerewolf,
+    arbitraryWerewolf, arbitraryScapegoat,
 
     -- * Utility functions
     run, run_, runArbitraryCommands,
@@ -96,9 +96,10 @@ arbitraryNewGame = do
 
     let seer        = head $ filterSeers players
     let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
-    let villagers   = take (n - 1 - (length werewolves)) $ filterVillagers players
+    let villagers   = take (n - 2 - (length werewolves)) $ filterVillagers players
+    let scapegoat   = head $ filterScapegoats players
 
-    return $ newGame (seer:werewolves ++ villagers)
+    return $ newGame (seer:scapegoat:werewolves ++ villagers)
 
 instance Arbitrary Turn where
     arbitrary = elements [Seers, Villagers, Werewolves, NoOne]
@@ -117,6 +118,9 @@ arbitraryVillager = elements . filterAlive . filterVillagers . _players
 
 arbitraryWerewolf :: Game -> Gen Player
 arbitraryWerewolf = elements . filterAlive . filterWerewolves . _players
+
+arbitraryScapegoat :: Game -> Gen Player
+arbitraryScapegoat = elements . filterAlive . filterScapegoats . _players
 
 instance Arbitrary State where
     arbitrary = elements [Alive, Dead]

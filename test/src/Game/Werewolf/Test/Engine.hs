@@ -13,8 +13,8 @@ module Game.Werewolf.Test.Engine (
     prop_checkTurnSkipsSeersWhenNoSeers, prop_checkTurnDoesNothingWhenGameOver,
     prop_checkSeersTurnAdvancesToWerewolves, prop_checkSeersTurnResetsSees,
     prop_checkSeersTurnDoesNothingUnlessAllSeen, prop_checkVillagersTurnAdvancesToSeers,
-    prop_checkVillagersTurnLynchesOnePlayerWhenConsensus,
-    prop_checkVillagersTurnLynchesNoOneWhenConflicted, prop_checkVillagersTurnResetsVotes,
+    prop_checkVillagersTurnLynchesOnePlayerWhenConsensus, prop_checkVillagersTurnLynchesNoOneWhenConflictedAndNoScapegoats,
+    prop_checkVillagersTurnLynchesScapegoatWhenConflicted, prop_checkVillagersTurnResetsVotes,
     prop_checkVillagersTurnDoesNothingUnlessAllVoted, prop_checkWerewolvesTurnAdvancesToVillagers,
     prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     prop_checkWerewolvesTurnKillsNoOneWhenConflicted, prop_checkWerewolvesTurnResetsVotes,
@@ -113,11 +113,21 @@ prop_checkVillagersTurnLynchesOnePlayerWhenConsensus game =
         game'   = game { _turn = Villagers }
         n       = length $ game' ^. players
 
-prop_checkVillagersTurnLynchesNoOneWhenConflicted :: Game -> Property
-prop_checkVillagersTurnLynchesNoOneWhenConflicted game =
+prop_checkVillagersTurnLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property
+prop_checkVillagersTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) > 1
-    ==> length (filterDead $ run_ checkTurn game'' ^. players) == 0
+    ==> length (filterDead $ run_ checkTurn game'' ^. players) == length (filterDead $ game' ^. players)
+    where
+        game'   = (foldl killPlayer game (filterScapegoats $ game ^. players)) { _turn = Villagers }
+        n       = length $ game' ^. players
+
+prop_checkVillagersTurnLynchesScapegoatWhenConflicted :: Game -> Property
+prop_checkVillagersTurnLynchesScapegoatWhenConflicted game =
+    forAll (runArbitraryCommands n game') $ \game'' -> and [
+        length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) > 1,
+        any isScapegoat $ game' ^. players
+        ] ==> isScapegoat $ head (filterDead $ run_ checkTurn game'' ^. players)
     where
         game'   = game { _turn = Villagers }
         n       = length $ game' ^. players
