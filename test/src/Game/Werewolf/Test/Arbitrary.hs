@@ -50,7 +50,7 @@ arbitraryCommand game = case game ^. turn of
 arbitraryKillVoteCommand :: Game -> Gen Command
 arbitraryKillVoteCommand game = do
     let applicableCallers   = filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)
-    target                  <- arbitraryPlayer game
+    target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
 
     if null applicableCallers
         then return noopCommand

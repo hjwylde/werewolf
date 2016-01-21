@@ -35,8 +35,9 @@ module Game.Werewolf.Response (
 
     -- ** Error messages
     roleDoesNotExistMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
-    playerCannotDoThatRightNowMessage, gameIsOverMessage, playerIsDeadMessage,
-    playerHasAlreadySeenMessage, playerHasAlreadyVotedMessage, targetIsDeadMessage,
+    playerCannotDoThatRightNowMessage, playerCannotDevourAnotherWerewolf, gameIsOverMessage,
+    playerIsDeadMessage, playerHasAlreadySeenMessage, playerHasAlreadyVotedMessage,
+    targetIsDeadMessage,
 ) where
 
 import Control.Lens
@@ -195,6 +196,9 @@ playerCannotDoThatMessage name = privateMessage [name] "You cannot do that!"
 
 playerCannotDoThatRightNowMessage :: Text -> Message
 playerCannotDoThatRightNowMessage name = privateMessage [name] "You cannot do that right now!"
+
+playerCannotDevourAnotherWerewolf :: Text -> Message
+playerCannotDevourAnotherWerewolf name = privateMessage [name] "You cannot devour another Werewolf!"
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage name = privateMessage [name] "The game is over!"

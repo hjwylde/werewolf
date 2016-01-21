@@ -36,6 +36,7 @@ allCommandTests = [
     testProperty "PROP: kill vote command errors when not werewolves turn" prop_killVoteCommandErrorsWhenNotWerewolvesTurn,
     testProperty "PROP: kill vote command errors when caller not werewolf" prop_killVoteCommandErrorsWhenCallerNotWerewolf,
     testProperty "PROP: kill vote command errors when caller has voted" prop_killVoteCommandErrorsWhenCallerHasVoted,
+    testProperty "PROP: kill vote command errors when target werewolf" prop_killVoteCommandErrorsWhenTargetWerewolf,
     testProperty "PROP: kill vote command updates votes" prop_killVoteCommandUpdatesVotes,
 
     testProperty "PROP: lynch vote command errors when game is over" prop_lynchVoteCommandErrorsWhenGameIsOver,

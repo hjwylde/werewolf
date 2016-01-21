@@ -13,7 +13,7 @@ module Game.Werewolf.Test.Command (
     prop_killVoteCommandErrorsWhenTargetDoesNotExist, prop_killVoteCommandErrorsWhenCallerIsDead,
     prop_killVoteCommandErrorsWhenTargetIsDead, prop_killVoteCommandErrorsWhenNotWerewolvesTurn,
     prop_killVoteCommandErrorsWhenCallerNotWerewolf, prop_killVoteCommandErrorsWhenCallerHasVoted,
-    prop_killVoteCommandUpdatesVotes,
+    prop_killVoteCommandErrorsWhenTargetWerewolf, prop_killVoteCommandUpdatesVotes,
 
     -- * lynchVoteCommand
     prop_lynchVoteCommandErrorsWhenGameIsOver, prop_lynchVoteCommandErrorsWhenCallerDoesNotExist,
@@ -48,16 +48,19 @@ import Game.Werewolf.Test.Arbitrary
 import Test.QuickCheck
 
 prop_killVoteCommandErrorsWhenGameIsOver :: Game -> Property
-prop_killVoteCommandErrorsWhenGameIsOver game = isGameOver game
+prop_killVoteCommandErrorsWhenGameIsOver game =
+    isGameOver game
     ==> forAll (arbitraryKillVoteCommand game) $ verbose_runCommandErrors game
 
 prop_killVoteCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
-prop_killVoteCommandErrorsWhenCallerDoesNotExist game caller = not (doesPlayerExist (caller ^. name) (game ^. players))
+prop_killVoteCommandErrorsWhenCallerDoesNotExist game caller =
+    not (doesPlayerExist (caller ^. name) (game ^. players))
     ==> forAll (arbitraryPlayer game) $ \target ->
         verbose_runCommandErrors game (killVoteCommand (caller ^. name) (target ^. name))
 
 prop_killVoteCommandErrorsWhenTargetDoesNotExist :: Game -> Player -> Property
-prop_killVoteCommandErrorsWhenTargetDoesNotExist game target = not (doesPlayerExist (target ^. name) (game ^. players))
+prop_killVoteCommandErrorsWhenTargetDoesNotExist game target =
+    not (doesPlayerExist (target ^. name) (game ^. players))
     ==> forAll (arbitraryWerewolf game) $ \caller ->
         verbose_runCommandErrors game (killVoteCommand (caller ^. name) (target ^. name))
 
@@ -89,8 +92,15 @@ prop_killVoteCommandErrorsWhenCallerHasVoted game =
     isWerewolvesTurn game ==>
     forAll (arbitraryWerewolf game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target ->
-    let command = killVoteCommand (caller ^. name) (target ^. name)
+    not (isWerewolf target)
+    ==> let command = killVoteCommand (caller ^. name) (target ^. name)
         in verbose_runCommandErrors (run_ (apply command) game) command
+
+prop_killVoteCommandErrorsWhenTargetWerewolf :: Game -> Property
+prop_killVoteCommandErrorsWhenTargetWerewolf game =
+    forAll (arbitraryPlayer game) $ \target -> isWerewolf target
+    ==> forAll (arbitraryPlayer game) $ \caller ->
+        verbose_runCommandErrors game (killVoteCommand (caller ^. name) (target ^. name))
 
 prop_killVoteCommandUpdatesVotes :: Game -> Property
 prop_killVoteCommandUpdatesVotes game =
@@ -171,7 +181,8 @@ prop_quitCommandClearsPlayersKillVote :: Game -> Property
 prop_quitCommandClearsPlayersKillVote game =
     forAll (arbitraryWerewolf game') $ \caller ->
     forAll (arbitraryPlayer game') $ \target ->
-    let game'' = run_ (apply $ killVoteCommand (caller ^. name) (target ^. name)) game'
+    not (isWerewolf target)
+    ==> let game'' = run_ (apply $ killVoteCommand (caller ^. name) (target ^. name)) game'
         in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
     where
         game' = game { _turn = Werewolves }
