@@ -127,7 +127,9 @@ advanceTurn = do
     turn' <- use turn
     alivePlayers <- uses players filterAlive
 
-    let nextTurn = head . drop1 $ filter (turnAvailable alivePlayers) (dropWhile (turn' /=) turnRotation)
+    let nextTurn = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
+        then NoOne
+        else head . drop1 $ filter (turnAvailable alivePlayers) (dropWhile (turn' /=) turnRotation)
 
     tell $ turnMessages nextTurn alivePlayers
 
@@ -135,10 +137,10 @@ advanceTurn = do
     sees    .= Map.empty
     votes   .= Map.empty
     where
-        turnAvailable alivePlayers Seers    = not . null $ filterSeers alivePlayers
-        turnAvailable _ Villagers           = True
-        turnAvailable _ Werewolves          = True
-        turnAvailable _ NoOne               = False
+        turnAvailable alivePlayers Seers        = not . null $ filterSeers alivePlayers
+        turnAvailable alivePlayers Villagers    = not . null $ filterVillagers alivePlayers
+        turnAvailable alivePlayers Werewolves   = not . null $ filterWerewolves alivePlayers
+        turnAvailable _ NoOne                   = False
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
