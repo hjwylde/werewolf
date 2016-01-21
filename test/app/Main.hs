@@ -78,7 +78,8 @@ allEngineTests = [
 
     testProperty "PROP: check villagers turn advances to seers" prop_checkVillagersTurnAdvancesToSeers,
     testProperty "PROP: check villagers turn lynches one player when consensus" prop_checkVillagersTurnLynchesOnePlayerWhenConsensus,
-    testProperty "PROP: check villagers turn lynches no one when conflicted" prop_checkVillagersTurnLynchesNoOneWhenConflicted,
+    testProperty "PROP: check villagers turn lynches no one when conflicted and no scapegoats" prop_checkVillagersTurnLynchesNoOneWhenConflictedAndNoScapegoats,
+    testProperty "PROP: check villagers turn lynches scapegoat when conflicted" prop_checkVillagersTurnLynchesScapegoatWhenConflicted,
     testProperty "PROP: check villagers turn resets votes" prop_checkVillagersTurnResetsVotes,
     testProperty "PROP: check villagers turn does nothing unless all voted" prop_checkVillagersTurnDoesNothingUnlessAllVoted,
 

@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added a Scapegoat role. ([#40](https://github.com/hjwylde/werewolf/issues/40))
+
 #### v0.3.2.0
 
 *Minor*
