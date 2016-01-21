@@ -90,7 +90,7 @@ allEngineTests = [
     testProperty "PROP: check werewolves turn does nothing unless all voted" prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
 
     testProperty "PROP: check game over advances turn" prop_checkGameOverAdvancesTurn,
-    testProperty "PROP: check game over does nothing when at least two allegiances alivevoted" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
+    testProperty "PROP: check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
     testProperty "PROP: start game starts with seers turn when seers present" prop_startGameStartsWithSeersTurnWhenSeersPresent,
     testProperty "PROP: start game starts with werewolves turn when seers absent" prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent,

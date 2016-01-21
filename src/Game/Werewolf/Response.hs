@@ -30,6 +30,9 @@ module Game.Werewolf.Response (
     -- ** Generic messages
     newGameMessages, turnMessages, nightFallsMessage, gameOverMessage, playerQuitMessage,
 
+    -- ** Status messages
+    currentTurnMessage, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
+
     -- ** Seers turn messages
     seersTurnMessages, playerSeenMessage,
 
@@ -124,27 +127,16 @@ privateMessage :: [Text] -> Text -> Message
 privateMessage to = Message (Just to)
 
 newGameMessages :: Game -> [Message]
-newGameMessages game = [playersInGameMessage players', rolesInGameMessage $ map _role players'] ++ map (newPlayerMessage players') players' ++ [nightFallsMessage] ++ turnMessages turn' players'
+newGameMessages game = [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map _role players'] ++ map (newPlayerMessage players') players' ++ [nightFallsMessage] ++ turnMessages turn' players'
     where
         turn'       = game ^. turn
         players'    = game ^. players
 
-playersInGameMessage :: [Player] -> Message
-playersInGameMessage players = publicMessage $ T.concat [
+newPlayersInGameMessage :: [Player] -> Message
+newPlayersInGameMessage players = publicMessage $ T.concat [
     "A new game of werewolf is starting with ",
     T.intercalate ", " (map _name players), "!"
     ]
-
-rolesInGameMessage :: [Role] -> Message
-rolesInGameMessage roles = publicMessage $ T.concat [
-    "The roles in play are ",
-    T.intercalate ", " $ map (\(role, count) ->
-        T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
-        roleCounts,
-    "."
-    ]
-    where
-        roleCounts = map (\list -> (head list, length list)) (groupSortOn Role._name roles)
 
 newPlayerMessage :: [Player] -> Player -> Message
 newPlayerMessage players player
@@ -153,7 +145,7 @@ newPlayerMessage players player
     where
         packMessage
             | length (filterWerewolves players) <= 1    = "."
-            | otherwise                                 = T.concat [", along with ", T.intercalate "," (map _name $ filterWerewolves players \\ [player]), "."]
+            | otherwise                                 = T.concat [", along with ", T.intercalate ", " (map _name $ filterWerewolves players \\ [player]), "."]
 
 turnMessages :: Turn -> [Player] -> [Message]
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
@@ -170,6 +162,44 @@ gameOverMessage (Just allegiance)   = publicMessage $ T.unwords ["The game is ov
 
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
+
+currentTurnMessage :: Text -> Turn -> Message
+currentTurnMessage name NoOne   = gameIsOverMessage name
+currentTurnMessage name turn    = privateMessage [name] $ T.unwords [
+    "It's currently the", T.pack $ show turn, "turn."
+    ]
+
+rolesInGameMessage :: Maybe [Text] -> [Role] -> Message
+rolesInGameMessage mTo roles = Message mTo $ T.concat [
+    "The roles in play are ",
+    T.intercalate ", " $ map (\(role, count) ->
+        T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
+        roleCounts,
+    "."
+    ]
+    where
+        roleCounts = map (\list -> (head list, length list)) (groupSortOn Role._name roles)
+
+playersInGameMessage :: Text -> [Player] -> Message
+playersInGameMessage to players = privateMessage [to] . T.intercalate "\n" $ [
+    alivePlayersText
+    ] ++ if (null $ filterDead players) then [] else [deadPlayersText]
+    where
+        alivePlayersText = T.concat [
+            "The following players are still alive: ",
+            T.intercalate ", " (map _name $ filterAlive players), "."
+            ]
+        deadPlayersText = T.concat [
+            "The following players are dead: ",
+            T.intercalate ", " (map (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"]) $ filterDead players), "."
+            ]
+
+waitingOnMessage :: Text -> [Player] -> Message
+waitingOnMessage name players = privateMessage [name] $ T.concat [
+    "Waiting on ", T.intercalate ", " playerNames, "..."
+    ]
+    where
+        playerNames = map _name players
 
 seersTurnMessages :: [Player] -> [Message]
 seersTurnMessages seers = [

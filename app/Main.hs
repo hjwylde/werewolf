@@ -27,6 +27,7 @@ import qualified Werewolf.Commands.Interpret as Interpret
 import qualified Werewolf.Commands.Quit      as Quit
 import qualified Werewolf.Commands.See       as See
 import qualified Werewolf.Commands.Start     as Start
+import qualified Werewolf.Commands.Status    as Status
 import qualified Werewolf.Commands.Vote      as Vote
 import           Werewolf.Options
 
@@ -52,4 +53,5 @@ handle (Options callerName command) = case command of
     Quit                                -> Quit.handle callerName
     See options                         -> See.handle callerName options
     Start options                       -> Start.handle callerName options
+    Status                              -> Status.handle callerName
     Vote options                        -> Vote.handle callerName options

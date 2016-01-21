@@ -152,10 +152,10 @@ checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
     aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
 
-    case length aliveAllegiances of
-        0 -> turn .= NoOne >> tell [gameOverMessage Nothing]
-        1 -> turn .= NoOne >> tell [gameOverMessage . Just . T.pack . show $ head aliveAllegiances]
-        _ -> return ()
+    case aliveAllegiances of
+        []              -> turn .= NoOne >> tell [gameOverMessage Nothing]
+        [allegiance]    -> turn .= NoOne >> tell [gameOverMessage . Just . T.pack $ show allegiance]
+        _               -> return ()
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do

@@ -17,7 +17,7 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    devourVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand,
+    devourVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand, statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -27,9 +27,12 @@ import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
 import qualified Data.Map  as Map
+import Data.List
 import           Data.Text (Text)
+import           qualified Data.Text as T
 
 import Game.Werewolf.Engine
+import Game.Werewolf.Role hiding (Werewolves, Villagers, name, _name, findByName_)
 import Game.Werewolf.Player hiding (doesPlayerExist)
 import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn, isWerewolvesTurn,
                                killPlayer)
@@ -81,6 +84,37 @@ seeCommand callerName targetName = Command $ do
     validatePlayer callerName targetName
 
     sees %= Map.insert callerName targetName
+
+statusCommand :: Text -> Command
+statusCommand callerName = Command $ use turn >>= \turn' -> case turn' of
+    Seers       -> do
+        game <- get
+
+        tell $ standardStatusMessages turn' (game ^. players)
+    Villagers   -> do
+        game <- get
+
+        tell $ standardStatusMessages turn' (game ^. players)
+        tell [waitingOnMessage callerName $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
+    Werewolves  -> do
+        unlessM (doesPlayerExist callerName) $ throwError [playerDoesNotExistMessage callerName callerName]
+
+        game <- get
+
+        tell $ standardStatusMessages turn' (game ^. players)
+        whenM (isPlayerWerewolf callerName) $ tell [waitingOnMessage callerName $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)]
+    NoOne       -> do
+        aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
+
+        case aliveAllegiances of
+            [allegiance]    -> tell [gameOverMessage . Just . T.pack $ show allegiance]
+            _               -> tell [gameOverMessage Nothing]
+    where
+        standardStatusMessages turn players = [
+            currentTurnMessage callerName turn,
+            rolesInGameMessage (Just [callerName]) $ map _role players,
+            playersInGameMessage callerName players
+            ]
 
 validatePlayer :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
 validatePlayer callerName name = do

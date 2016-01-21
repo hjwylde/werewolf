@@ -73,6 +73,9 @@ commandsMessages = map (T.intercalate "\n") [[
     "start [--extra-roles ROLE,...] PLAYER ...",
     "- Starts a new game with the given players and extra roles. A game requires at least 7 players."
     ], [
+    "status",
+    "- Gets the status of the current game."
+    ], [
     "vote PLAYER",
     T.unwords [
         "- Vote against a player.",
