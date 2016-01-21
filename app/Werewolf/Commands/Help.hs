@@ -46,7 +46,7 @@ handle callerName (Options (Just Description)) = exitWith success {
     messages = map (privateMessage [callerName]) descriptionMessages
     }
 handle callerName (Options (Just Roles)) = exitWith success {
-    messages = map (\role -> privateMessage [callerName] $ T.unlines [
+    messages = map (\role -> privateMessage [callerName] $ T.intercalate "\n" [
         T.snoc (role ^. Role.name) ':',
         role ^. description,
         role ^. advice
