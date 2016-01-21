@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed dead werewolves being informed of votes. ([#24](https://github.com/hjwylde/werewolf/issues/24))
+
 #### v0.2.0.1
 
 *Revisions*
