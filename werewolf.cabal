@@ -14,7 +14,7 @@ license:        BSD3
 license-file:   LICENSE
 
 cabal-version:  >= 1.10
-category:       Development
+category:       Game
 build-type:     Simple
 
 extra-source-files: CHANGELOG.md README.md
