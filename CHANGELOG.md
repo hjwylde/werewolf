@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.3.0.5
+
 *Revisions*
 
 * Fixed a bug where Werewolves could devour other Werewolves. ([#34](https://github.com/hjwylde/werewolf/issues/34))
