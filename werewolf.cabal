@@ -14,7 +14,7 @@ license:        BSD3
 license-file:   LICENSE
 
 cabal-version:  >= 1.10
-category:       Development
+category:       Game
 build-type:     Simple
 
 extra-source-files: CHANGELOG.md README.md
@@ -90,7 +90,7 @@ test-suite werewolf-test
     type:           exitcode-stdio-1.0
     main-is:        Main.hs
     hs-source-dirs: test/app/, test/src/
-    ghc-options:    -threaded -Wall -Werror -fno-warn-name-shadowing
+    ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
         Game.Werewolf.Test.Arbitrary
         Game.Werewolf.Test.Command
