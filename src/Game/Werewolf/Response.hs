@@ -171,7 +171,10 @@ playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
 
 seersTurnMessages :: [Player] -> [Message]
-seersTurnMessages seers = [publicMessage "The Seers wake up.":privateMessage (map _name seers) "Whose allegiance would you like to see?"]
+seersTurnMessages seers = [
+    publicMessage "The Seers wake up.",
+    privateMessage (map _name seers) "Whose allegiance would you like to see?"
+    ]
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage seerName target = privateMessage [seerName] $ T.concat [target ^. name, " is aligned with the ", T.pack . show $ target ^. role . allegiance, "."]
