@@ -19,10 +19,10 @@ module Werewolf.Options (
     werewolfPrefs, werewolfInfo, werewolf,
 ) where
 
-import Data.List.Extra
-import           Data.Text    (Text)
-import qualified Data.Text    as T
-import           Data.Version (showVersion)
+import           Data.List.Extra
+import           Data.Text       (Text)
+import qualified Data.Text       as T
+import           Data.Version    (showVersion)
 
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
