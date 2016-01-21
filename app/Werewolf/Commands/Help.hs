@@ -60,7 +60,7 @@ handle callerName (Options Nothing) = exitWith success {
     }
 
 commandsMessages :: [Text]
-commandsMessages = map T.unlines [[
+commandsMessages = map (T.intercalate "\n") [[
     "Usage: COMMAND ARG ..."
     ], [
     "Available commands:",
@@ -97,7 +97,7 @@ commandsMessages = map T.unlines [[
     ]]
 
 descriptionMessages :: [Text]
-descriptionMessages = map T.unlines [[
+descriptionMessages = map (T.intercalate "\n") [[
     T.unwords [
         "Deep in the American countryside,",
         "the little town of Millers Hollow has recently been infiltrated by Werewolves."
@@ -118,7 +118,7 @@ descriptionMessages = map T.unlines [[
     ]]
 
 rulesMessages :: [Text]
-rulesMessages = map T.unlines [[
+rulesMessages = map (T.intercalate "\n") [[
     T.unwords [
         "Each night, the Werewolves bite, kill and devour one Villager.",
         "During the day they try to conceal their identity and vile deeds from the Villagers.",
@@ -147,7 +147,7 @@ rulesMessages = map T.unlines [[
     ]]
 
 helpMessages :: [Text]
-helpMessages = map T.unlines [[
+helpMessages = map (T.intercalate "\n") [[
     "Usage: help COMMAND"
     ], [
     "Available commands:",
