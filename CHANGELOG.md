@@ -2,7 +2,7 @@
 
 #### Upcoming
 
-#### v0.3.0.2
+#### v0.3.0.3
 
 * Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 * Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
