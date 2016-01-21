@@ -19,6 +19,7 @@ module Werewolf.Options (
     werewolfPrefs, werewolfInfo, werewolf,
 ) where
 
+import           Data.Char
 import           Data.List.Extra
 import           Data.Text       (Text)
 import qualified Data.Text       as T
@@ -108,7 +109,7 @@ see = See . See.Options . T.pack <$> strArgument (metavar "PLAYER")
 
 start :: Parser Command
 start = fmap Start $ Start.Options
-    <$> fmap (map T.pack . wordsBy (',' ==)) (strOption $ mconcat [
+    <$> fmap (map (T.pack . capitalise) . wordsBy (',' ==)) (strOption $ mconcat [
         long "extra-roles", metavar "ROLE,...",
         value [],
         help "Specify the extra roles to include"
@@ -117,3 +118,7 @@ start = fmap Start $ Start.Options
 
 vote :: Parser Command
 vote = Vote . Vote.Options . T.pack <$> strArgument (metavar "PLAYER")
+
+capitalise :: String -> String
+capitalise []           = []
+capitalise (head:tail)  = toUpper head : map toLower tail
