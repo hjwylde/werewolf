@@ -47,7 +47,7 @@ handle callerName (Options targetName) = do
 
     let command = (if isVillagersTurn game
             then lynchVoteCommand
-            else killVoteCommand
+            else devourVoteCommand
             ) callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkTurn >> checkGameOver) game) of
