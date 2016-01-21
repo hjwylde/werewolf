@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added a message to say the names of all the players at the start of a game. ([#23](https://github.com/hjwylde/werewolf/issues/23))
+
 #### v0.3.0.1
 
 *Revisions*
