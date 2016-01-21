@@ -24,10 +24,9 @@ module Game.Werewolf.Role (
 
     -- * Allegiance
     Allegiance(..),
-    singular,
 ) where
 
-import Control.Lens hiding (singular)
+import Control.Lens
 
 import           Data.List
 import           Data.Maybe
@@ -89,7 +88,3 @@ data Allegiance = Villagers | Werewolves
     deriving (Eq, Read, Show)
 
 makeLenses ''Role
-
-singular :: Allegiance -> Text
-singular Villagers  = "Villager"
-singular Werewolves = "Werewolf"

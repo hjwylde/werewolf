@@ -13,7 +13,7 @@ Game and turn data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), turn, players,
+    Game(..), turn, players, sees, votes,
     newGame,
 
     -- ** Manipulations
@@ -23,8 +23,8 @@ module Game.Werewolf.Game (
     isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver,
 
     -- * Turn
-    Turn(..), sees, votes,
-    turnRotation,
+    Turn(..),
+    turnRotation, turnAvailable,
 ) where
 
 import Control.Lens

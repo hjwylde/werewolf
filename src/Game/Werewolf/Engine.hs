@@ -96,6 +96,8 @@ checkTurn' = use turn >>= \turn' -> case turn' of
                     killPlayer target
                     tell [playerLynchedMessage (target ^. name) (target ^. role . Role.name)]
 
+            tell [nightFallsMessage]
+
             advanceTurn
 
     Werewolves -> do
@@ -128,18 +130,13 @@ advanceTurn = do
     turn' <- use turn
     alivePlayers <- uses players filterAlive
 
-    let nextTurn = head . drop1 $ filter (turnAvailable alivePlayers) (dropWhile (turn' /=) turnRotation)
+    let nextTurn = head . drop1 $ filter (turnAvailable $ map _role alivePlayers) (dropWhile (turn' /=) turnRotation)
 
     tell $ turnMessages nextTurn alivePlayers
 
     turn    .= nextTurn
     sees    .= Map.empty
     votes   .= Map.empty
-    where
-        turnAvailable alivePlayers Seers    = not . null $ filterSeers alivePlayers
-        turnAvailable _ Villagers           = True
-        turnAvailable _ Werewolves          = True
-        turnAvailable _ NoOne               = False
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
@@ -156,9 +153,11 @@ startGame callerName players = do
     when (length players < 7)               $ throwError [privateMessage [callerName] "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage [callerName] "Cannot have more than 24 players."]
 
-    tell $ newGameMessages players
+    let game = newGame players
 
-    return $ newGame players
+    tell $ newGameMessages game
+
+    return game
     where
         playerNames = map _name players
 
