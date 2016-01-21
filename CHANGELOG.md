@@ -2,6 +2,12 @@
 
 #### Upcoming
 
+#### v0.3.0.1
+
+*Revisions*
+
+* Fixed `interpret` to display the commands help messages when given invalid arguments. ([#22](https://github.com/hjwylde/werewolf/issues/22))
+
 #### v0.3.0.0
 
 *Major*
