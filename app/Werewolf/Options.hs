@@ -48,6 +48,7 @@ data Command
     | Quit
     | See See.Options
     | Start Start.Options
+    | Status
     | Vote Vote.Options
     deriving (Eq, Show)
 
@@ -83,6 +84,7 @@ werewolf = Options
         command "quit"      $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game"),
         command "see"       $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance"),
         command "start"     $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game"),
+        command "status"    $ info (helper <*> status)      (fullDesc <> progDesc "Get the status of the current game"),
         command "vote"      $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
         ])
 
@@ -115,6 +117,9 @@ start = fmap Start $ Start.Options
         help "Specify the extra roles to include"
         ])
     <*> many (T.pack <$> strArgument (metavar "PLAYER..."))
+
+status :: Parser Command
+status = pure Status
 
 vote :: Parser Command
 vote = Vote . Vote.Options . T.pack <$> strArgument (metavar "PLAYER")
