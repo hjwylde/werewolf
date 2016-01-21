@@ -15,6 +15,7 @@ module Main (
 ) where
 
 import qualified Data.Text as T
+import Data.Text (Text)
 
 import Options.Applicative
 
@@ -30,16 +31,25 @@ import qualified Werewolf.Commands.Vote      as Vote
 import           Werewolf.Options
 
 main :: IO ()
-main = getArgs >>= handle
+main = getArgs >>= run
 
-handle :: [String] -> IO ()
-handle args = handleParseResult (execParserPure werewolfPrefs werewolfInfo args) >>= handle'
-    where
-        handle' (Options callerName command) = case command of
-            End                                 -> End.handle callerName
-            Help options                        -> Help.handle callerName options
-            Interpret (Interpret.Options args)  -> handle . map T.unpack $ "--caller":callerName:args
-            Quit                                -> Quit.handle callerName
-            See options                         -> See.handle callerName options
-            Start options                       -> Start.handle callerName options
-            Vote options                        -> Vote.handle callerName options
+run :: [String] -> IO ()
+run args = handleParseResult (execParserPure werewolfPrefs werewolfInfo args) >>= handle
+
+interpret :: Text -> [Text] -> IO ()
+interpret callerName args = do
+    let result = execParserPure werewolfPrefs werewolfInfo (map T.unpack $ "--caller":callerName:args)
+
+    case result of
+        Success options -> handle options
+        _               -> handle (Options callerName . Help . Help.Options $ Just Help.Commands)
+
+handle :: Options -> IO ()
+handle (Options callerName command) = case command of
+    End                                 -> End.handle callerName
+    Help options                        -> Help.handle callerName options
+    Interpret (Interpret.Options args)  -> interpret callerName args
+    Quit                                -> Quit.handle callerName
+    See options                         -> See.handle callerName options
+    Start options                       -> Start.handle callerName options
+    Vote options                        -> Vote.handle callerName options
