@@ -7,6 +7,10 @@
 * Added a Scapegoat role. ([#40](https://github.com/hjwylde/werewolf/issues/40))
 * Added a `status` command. ([#18](https://github.com/hjwylde/werewolf/issues/18))
 
+*Revisions*
+
+* Added `--` to help description of `interpret`. ([#60](https://github.com/hjwylde/werewolf/issues/60))
+
 #### v0.3.2.0
 
 *Minor*
