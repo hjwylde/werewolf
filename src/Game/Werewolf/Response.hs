@@ -46,7 +46,7 @@ import Data.Aeson
 #if !MIN_VERSION_aeson(0,10,0)
 import Data.Aeson.Types
 #endif
-import           Data.List
+import           Data.List.Extra
 import           Data.Text               (Text)
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy.Encoding as T
@@ -54,7 +54,7 @@ import qualified Data.Text.Lazy.IO       as T
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
-import           Game.Werewolf.Role   (allegiance, description)
+import           Game.Werewolf.Role   (Role, allegiance, description)
 import qualified Game.Werewolf.Role   as Role
 import           GHC.Generics
 
@@ -108,16 +108,27 @@ privateMessage :: [Text] -> Text -> Message
 privateMessage to = Message (Just to)
 
 newGameMessages :: Game -> [Message]
-newGameMessages game = [playersInGameMessage alivePlayers] ++ map (newPlayerMessage alivePlayers) alivePlayers ++ [nightFallsMessage] ++ turnMessages turn' alivePlayers
+newGameMessages game = [playersInGameMessage players', rolesInGameMessage $ map _role players'] ++ map (newPlayerMessage players') players' ++ [nightFallsMessage] ++ turnMessages turn' players'
     where
-        turn'           = game ^. turn
-        alivePlayers    = filterAlive $ game ^. players
+        turn'       = game ^. turn
+        players'    = game ^. players
 
 playersInGameMessage :: [Player] -> Message
 playersInGameMessage players = publicMessage $ T.concat [
     "A new game of werewolf is starting with ",
     T.intercalate ", " (map _name players), "!"
     ]
+
+rolesInGameMessage :: [Role] -> Message
+rolesInGameMessage roles = publicMessage $ T.concat [
+    "The roles in play are ",
+    T.intercalate ", " $ map (\(role, count) ->
+        T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
+        roleCounts,
+    "."
+    ]
+    where
+        roleCounts = map (\list -> (head list, length list)) (groupSortOn Role._name roles)
 
 newPlayerMessage :: [Player] -> Player -> Message
 newPlayerMessage players player
