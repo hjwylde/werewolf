@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.3.2.0
+
 *Minor*
 
 * Added a "Whom would you like to lynch?" message during the Villagers' turn. ([#25](https://github.com/hjwylde/werewolf/issues/25))
