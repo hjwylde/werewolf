@@ -10,7 +10,7 @@ Maintainer  : public@hjwylde.com
 
 module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
-    arbitraryCommand, arbitraryKillVoteCommand, arbitraryLynchVoteCommand, arbitraryQuitCommand,
+    arbitraryCommand, arbitraryDevourVoteCommand, arbitraryLynchVoteCommand, arbitraryQuitCommand,
     arbitrarySeeCommand, arbitraryNewGame, arbitraryPlayer, arbitrarySeer, arbitraryVillager,
     arbitraryWerewolf,
 
@@ -44,17 +44,17 @@ arbitraryCommand :: Game -> Gen Command
 arbitraryCommand game = case game ^. turn of
     Seers       -> arbitrarySeeCommand game
     Villagers   -> arbitraryLynchVoteCommand game
-    Werewolves  -> arbitraryKillVoteCommand game
+    Werewolves  -> arbitraryDevourVoteCommand game
     NoOne       -> return noopCommand
 
-arbitraryKillVoteCommand :: Game -> Gen Command
-arbitraryKillVoteCommand game = do
+arbitraryDevourVoteCommand :: Game -> Gen Command
+arbitraryDevourVoteCommand game = do
     let applicableCallers   = filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)
-    target                  <- arbitraryPlayer game
+    target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
 
     if null applicableCallers
         then return noopCommand
-        else elements applicableCallers >>= \caller -> return $ killVoteCommand (caller ^. name) (target ^. name)
+        else elements applicableCallers >>= \caller -> return $ devourVoteCommand (caller ^. name) (target ^. name)
 
 arbitraryLynchVoteCommand :: Game -> Gen Command
 arbitraryLynchVoteCommand game = do

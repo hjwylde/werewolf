@@ -17,7 +17,7 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    killVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand,
+    devourVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -37,22 +37,23 @@ import Game.Werewolf.Response
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 
-killVoteCommand :: Text -> Text -> Command
-killVoteCommand callerName targetName = Command $ do
-    validateArguments callerName targetName
-
-    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatMessage callerName]
+devourVoteCommand :: Text -> Text -> Command
+devourVoteCommand callerName targetName = Command $ do
+    validatePlayer callerName callerName
     unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
+    validatePlayer callerName targetName
+    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolf callerName]
 
     votes %= Map.insert callerName targetName
 
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
-    validateArguments callerName targetName
-
-    unlessM isVillagersTurn                         $ throwError [playerCannotDoThatMessage callerName]
+    validatePlayer callerName callerName
+    unlessM isVillagersTurn                         $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
+    validatePlayer callerName targetName
 
     votes %= Map.insert callerName targetName
 
@@ -61,10 +62,7 @@ noopCommand = Command $ return ()
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
-    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
-    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
-
-    whenM (isPlayerDead callerName) $ throwError [playerIsDeadMessage callerName]
+    validatePlayer callerName callerName
 
     caller <- uses players $ findByName_ callerName
 
@@ -76,19 +74,16 @@ quitCommand callerName = Command $ do
 
 seeCommand :: Text -> Text -> Command
 seeCommand callerName targetName = Command $ do
-    validateArguments callerName targetName
-
-    unlessM isSeersTurn                         $ throwError [playerCannotDoThatMessage callerName]
+    validatePlayer callerName callerName
     unlessM (isPlayerSeer callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isSeersTurn                         $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerSee callerName) . const $ throwError [playerHasAlreadySeenMessage callerName]
+    validatePlayer callerName targetName
 
     sees %= Map.insert callerName targetName
 
-validateArguments :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
-validateArguments callerName targetName = do
-    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
-    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
-    unlessM (doesPlayerExist targetName)    $ throwError [playerDoesNotExistMessage callerName targetName]
-
-    whenM (isPlayerDead callerName) $ throwError [playerIsDeadMessage callerName]
-    whenM (isPlayerDead targetName) $ throwError [targetIsDeadMessage callerName targetName]
+validatePlayer :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
+validatePlayer callerName name = do
+    whenM isGameOver                $ throwError [gameIsOverMessage callerName]
+    unlessM (doesPlayerExist name)  $ throwError [playerDoesNotExistMessage callerName name]
+    whenM (isPlayerDead name)       $ throwError [if callerName == name then playerIsDeadMessage callerName else targetIsDeadMessage callerName name]
