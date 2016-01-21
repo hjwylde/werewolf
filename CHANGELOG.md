@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed dead werewolves being informed of votes. ([#24](https://github.com/hjwylde/werewolf/issues/24))
+
 #### v0.3.0.3
 
 * Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
@@ -24,6 +28,12 @@
 
 * Allowed `start` to work when the game has ended but `end` hasn't been called. ([#15](https://github.com/hjwylde/werewolf/issues/15))
 * Added `quit` command. ([#13](https://github.com/hjwylde/werewolf/issues/13))
+
+#### v0.2.0.2
+
+*Revisions*
+
+* Fixed dead werewolves being informed of votes. ([#24](https://github.com/hjwylde/werewolf/issues/24))
 
 #### v0.2.0.1
 
