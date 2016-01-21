@@ -5,6 +5,7 @@
 *Minor*
 
 * Added a "Whom would you like to lynch?" message during the Villagers' turn. ([#25](https://github.com/hjwylde/werewolf/issues/25))
+* Allowed lowercase roles for `--extra-roles` in the `start` command. ([#33](https://github.com/hjwylde/werewolf/issues/33))
 
 *Revisions*
 
