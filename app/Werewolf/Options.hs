@@ -99,7 +99,7 @@ help_ = Help . Help.Options
         ])
 
 interpret :: Parser Command
-interpret = Interpret . Interpret.Options <$> many (T.pack <$> strArgument (metavar "COMMAND ARG..."))
+interpret = Interpret . Interpret.Options <$> many (T.pack <$> strArgument (metavar "-- COMMAND ARG..."))
 
 quit :: Parser Command
 quit = pure Quit

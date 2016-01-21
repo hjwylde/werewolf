@@ -6,6 +6,10 @@
 
 * Added a Scapegoat role. ([#40](https://github.com/hjwylde/werewolf/issues/40))
 
+*Revisions*
+
+* Added `--` to help description of `interpret`. ([#60](https://github.com/hjwylde/werewolf/issues/60))
+
 #### v0.3.2.0
 
 *Minor*
