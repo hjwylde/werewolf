@@ -14,8 +14,8 @@ Each night, murders are committed by the Villagers, who due to some mysterious p
 It is now time to take control and eliminate this ancient evil, before the town loses its last few inhabitants.
 
 Objective of the Game:  
-For the Villagers: kill all of the Werewolves.  
-For the Werewolves: kill all of the Villagers.
+For the Villagers: lynch all of the Werewolves.  
+For the Werewolves: devour all of the Villagers.
 
 #### Roles
 
@@ -76,11 +76,11 @@ It's the Seers' turn now.
 {"ok":true,"messages":[
     {"to":["@grault"],"message":"@qux is a Villager."},
     {"to":null,"message":"The Werewolves wake up, recognise one another and choose a new victim."},
-    {"to":["@bar","@corge"],"message":"Who would you like to kill?"}
+    {"to":["@bar","@corge"],"message":"Who would you like to devour?"}
     ]}
 ```
 
-Let's have _@bar_, a Werewolf, vote to kill a Villager.
+Let's have _@bar_, a Werewolf, vote to devour a Villager.
 ```bash
 > werewolf --caller @bar vote @foo
 {"ok":true,"messages":[]}
@@ -102,8 +102,8 @@ Relaying the error message back to the user should suffice.
 ```bash
 > werewolf --caller @corge vote @foo
 {"ok":true,"messages":[
-    {"to":["@bar","@corge"],"message":"@bar voted to kill @foo."},
-    {"to":["@bar","@corge"],"message":"@corge voted to kill @foo."},
+    {"to":["@bar","@corge"],"message":"@bar voted to devour @foo."},
+    {"to":["@bar","@corge"],"message":"@corge voted to devour @foo."},
     {"to":null,"message":"The sun rises. Everybody wakes up and opens their eyes..."},
     {"to":null,"message":"As you open them you notice a door broken down and @foo's guts spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Villager."}
     ]}

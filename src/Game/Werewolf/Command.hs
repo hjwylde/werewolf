@@ -17,7 +17,7 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    killVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand,
+    devourVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -37,8 +37,8 @@ import Game.Werewolf.Response
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 
-killVoteCommand :: Text -> Text -> Command
-killVoteCommand callerName targetName = Command $ do
+devourVoteCommand :: Text -> Text -> Command
+devourVoteCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
     unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]

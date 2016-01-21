@@ -28,16 +28,16 @@ tests = return $ testGroup "Tests" (concat [allCommandTests, allEngineTests, all
 
 allCommandTests :: [TestTree]
 allCommandTests = [
-    testProperty "PROP: kill vote command errors when game is over" prop_killVoteCommandErrorsWhenGameIsOver,
-    testProperty "PROP: kill vote command errors when caller does not exist" prop_killVoteCommandErrorsWhenCallerDoesNotExist,
-    testProperty "PROP: kill vote command errors when target does not exist" prop_killVoteCommandErrorsWhenTargetDoesNotExist,
-    testProperty "PROP: kill vote command errors when caller is dead" prop_killVoteCommandErrorsWhenCallerIsDead,
-    testProperty "PROP: kill vote command errors when target is dead" prop_killVoteCommandErrorsWhenTargetIsDead,
-    testProperty "PROP: kill vote command errors when not werewolves turn" prop_killVoteCommandErrorsWhenNotWerewolvesTurn,
-    testProperty "PROP: kill vote command errors when caller not werewolf" prop_killVoteCommandErrorsWhenCallerNotWerewolf,
-    testProperty "PROP: kill vote command errors when caller has voted" prop_killVoteCommandErrorsWhenCallerHasVoted,
-    testProperty "PROP: kill vote command errors when target werewolf" prop_killVoteCommandErrorsWhenTargetWerewolf,
-    testProperty "PROP: kill vote command updates votes" prop_killVoteCommandUpdatesVotes,
+    testProperty "PROP: devour vote command errors when game is over" prop_devourVoteCommandErrorsWhenGameIsOver,
+    testProperty "PROP: devour vote command errors when caller does not exist" prop_devourVoteCommandErrorsWhenCallerDoesNotExist,
+    testProperty "PROP: devour vote command errors when target does not exist" prop_devourVoteCommandErrorsWhenTargetDoesNotExist,
+    testProperty "PROP: devour vote command errors when caller is dead" prop_devourVoteCommandErrorsWhenCallerIsDead,
+    testProperty "PROP: devour vote command errors when target is dead" prop_devourVoteCommandErrorsWhenTargetIsDead,
+    testProperty "PROP: devour vote command errors when not werewolves turn" prop_devourVoteCommandErrorsWhenNotWerewolvesTurn,
+    testProperty "PROP: devour vote command errors when caller not werewolf" prop_devourVoteCommandErrorsWhenCallerNotWerewolf,
+    testProperty "PROP: devour vote command errors when caller has voted" prop_devourVoteCommandErrorsWhenCallerHasVoted,
+    testProperty "PROP: devour vote command errors when target werewolf" prop_devourVoteCommandErrorsWhenTargetWerewolf,
+    testProperty "PROP: devour vote command updates votes" prop_devourVoteCommandUpdatesVotes,
 
     testProperty "PROP: lynch vote command errors when game is over" prop_lynchVoteCommandErrorsWhenGameIsOver,
     testProperty "PROP: lynch vote command errors when caller does not exist" prop_lynchVoteCommandErrorsWhenCallerDoesNotExist,
@@ -52,7 +52,7 @@ allCommandTests = [
     testProperty "PROP: quit command errors when caller does not exist" prop_quitCommandErrorsWhenCallerDoesNotExist,
     testProperty "PROP: quit command errors when caller is dead" prop_quitCommandErrorsWhenCallerIsDead,
     testProperty "PROP: quit command kills player" prop_quitCommandKillsPlayer,
-    testProperty "PROP: quit command clears players kill vote" prop_quitCommandClearsPlayersKillVote,
+    testProperty "PROP: quit command clears players devour vote" prop_quitCommandClearsPlayersDevourVote,
     testProperty "PROP: quit command clears players lynch vote" prop_quitCommandClearsPlayersLynchVote,
     testProperty "PROP: quit command clears players see" prop_quitCommandClearsPlayersSee,
 

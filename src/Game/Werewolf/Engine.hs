@@ -105,18 +105,18 @@ checkTurn' = use turn >>= \turn' -> case turn' of
         votes'          <- use votes
 
         when (length aliveWerewolves == Map.size votes') $ do
-            tell $ map (uncurry . playerMadeKillVoteMessage $ map _name aliveWerewolves) (Map.toList votes')
+            tell $ map (uncurry . playerMadeDevourVoteMessage $ map _name aliveWerewolves) (Map.toList votes')
 
             advanceTurn
 
             let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
             case mTargetName of
-                Nothing         -> tell [noPlayerKilledMessage]
+                Nothing         -> tell [noPlayerDevouredMessage]
                 Just targetName -> do
                     target <- uses players (findByName_ targetName)
 
                     killPlayer target
-                    tell [playerKilledMessage (target ^. name) (target ^. role . Role.name)]
+                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name)]
 
     NoOne -> return ()
 
