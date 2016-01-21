@@ -34,7 +34,7 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role hiding (Villagers, Werewolves)
+import Game.Werewolf.Role   hiding (Villagers, Werewolves)
 
 data Game = Game
     { _turn    :: Turn
