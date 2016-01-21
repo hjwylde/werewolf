@@ -91,7 +91,7 @@ test-suite werewolf-test
     type:           exitcode-stdio-1.0
     main-is:        Main.hs
     hs-source-dirs: test/app/, test/src/
-    ghc-options:    -threaded -Wall -Werror -fno-warn-name-shadowing
+    ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
         Game.Werewolf.Test.Arbitrary
         Game.Werewolf.Test.Game
