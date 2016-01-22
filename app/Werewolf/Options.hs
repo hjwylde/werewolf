@@ -45,6 +45,7 @@ data Command
     = End
     | Help Help.Options
     | Interpret Interpret.Options
+    | Ping
     | Quit
     | See See.Options
     | Start Start.Options
@@ -80,7 +81,8 @@ werewolf = Options
     <*> subparser (mconcat [
         command "end"       $ info (helper <*> end)         (fullDesc <> progDesc "End the current game"),
         command "help"      $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents"),
-        command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command"),
+        command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command" <> noIntersperse),
+        command "ping"      $ info (helper <*> ping)        (fullDesc <> progDesc "Pings the status of the current game publicly"),
         command "quit"      $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game"),
         command "see"       $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance"),
         command "start"     $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game"),
@@ -102,6 +104,9 @@ help_ = Help . Help.Options
 
 interpret :: Parser Command
 interpret = Interpret . Interpret.Options <$> many (T.pack <$> strArgument (metavar "-- COMMAND ARG..."))
+
+ping :: Parser Command
+ping = pure Ping
 
 quit :: Parser Command
 quit = pure Quit

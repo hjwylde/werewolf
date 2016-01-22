@@ -64,6 +64,9 @@ commandsMessages = map (T.intercalate "\n") [[
     "end",
     "- Ends the current game."
     ], [
+    "ping",
+    "- Pings the status of the current game publicly."
+    ], [
     "quit",
     "- Quit the current game."
     ], [

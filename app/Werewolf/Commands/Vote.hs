@@ -27,7 +27,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (isVillagersTurn)
+import Game.Werewolf.Engine   hiding (isWerewolvesTurn)
 import Game.Werewolf.Game
 import Game.Werewolf.Response
 
@@ -45,9 +45,9 @@ handle callerName (Options targetName) = do
 
     game <- readGame
 
-    let command = (if isVillagersTurn game
-            then lynchVoteCommand
-            else devourVoteCommand
+    let command = (if isWerewolvesTurn game
+            then devourVoteCommand
+            else lynchVoteCommand
             ) callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkTurn >> checkGameOver) game) of
