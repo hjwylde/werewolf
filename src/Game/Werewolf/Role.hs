@@ -17,7 +17,7 @@ module Game.Werewolf.Role (
     Role(..), name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles, seerRole, villagerRole, werewolfRole, scapegoatRole,
+    allRoles, diurnalRoles, nocturnalRoles, seerRole, villagerRole, werewolfRole, scapegoatRole,
 
     -- ** Queries
     findByName, findByName_,
@@ -44,6 +44,12 @@ data Role = Role
 
 allRoles :: [Role]
 allRoles = [seerRole, villagerRole, werewolfRole, scapegoatRole]
+
+diurnalRoles :: [Role]
+diurnalRoles = [villagerRole, scapegoatRole]
+
+nocturnalRoles :: [Role]
+nocturnalRoles = [seerRole, werewolfRole]
 
 seerRole :: Role
 seerRole = Role

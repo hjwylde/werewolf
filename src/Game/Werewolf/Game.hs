@@ -29,6 +29,7 @@ module Game.Werewolf.Game (
 
 import Control.Lens
 
+import           Data.List (intersect)
 import           Data.Map  (Map)
 import qualified Data.Map  as Map
 import           Data.Text (Text)
@@ -43,7 +44,7 @@ data Game = Game
     , _votes   :: Map Text Text
     } deriving (Eq, Read, Show)
 
-data Turn = Seers | Villagers | Werewolves | NoOne
+data Turn = NightFalling | DayBreaking | Seers | Villagers | Werewolves | NoOne
     deriving (Eq, Read, Show)
 
 makeLenses ''Game
@@ -71,9 +72,11 @@ isGameOver :: Game -> Bool
 isGameOver game = game ^. turn == NoOne
 
 turnRotation :: [Turn]
-turnRotation = cycle [Seers, Werewolves, Villagers, NoOne]
+turnRotation = cycle [NightFalling, Seers, Werewolves, DayBreaking, Villagers, NoOne]
 
 turnAvailable :: [Role] -> Turn -> Bool
+turnAvailable aliveRoles NightFalling    = not . null $ intersect nocturnalRoles aliveRoles
+turnAvailable aliveRoles DayBreaking     = not . null $ intersect diurnalRoles aliveRoles
 turnAvailable aliveRoles Seers  = seerRole `elem` aliveRoles
 turnAvailable _ Villagers       = True
 turnAvailable _ Werewolves      = True

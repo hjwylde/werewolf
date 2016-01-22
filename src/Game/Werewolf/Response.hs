@@ -148,6 +148,8 @@ newPlayerMessage players player
             | otherwise                                 = T.concat [", along with ", T.intercalate ", " (map _name $ filterWerewolves players \\ [player]), "."]
 
 turnMessages :: Turn -> [Player] -> [Message]
+turnMessages NightFalling _     = [nightFallsMessage]
+turnMessages DayBreaking _      = []
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
 turnMessages Villagers players  = villagersTurnMessage players
 turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players
