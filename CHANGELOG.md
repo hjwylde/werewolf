@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+* Added `noIntersperse` to `interpret`. ([#60](https://github.com/hjwylde/werewolf/issues/60))
+
 #### v0.3.3.0
 
 *Minor*
