@@ -2,11 +2,19 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added a `ping` command. ([#64](https://github.com/hjwylde/werewolf/issues/64))
+
 #### v0.3.3.2
+
+*Revisions*
 
 * Fixed missing file in Cabal file. ([#18](https://github.com/hjwylde/werewolf/issues/18))
 
 #### v0.3.3.1
+
+*Revisions*
 
 * Added `noIntersperse` to `interpret`. ([#60](https://github.com/hjwylde/werewolf/issues/60))
 
