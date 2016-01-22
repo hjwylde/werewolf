@@ -174,8 +174,8 @@ pingWerewolvesMessage = publicMessage "Waiting on the Werewolves..."
 
 currentTurnMessage :: Text -> Turn -> Message
 currentTurnMessage name NoOne   = gameIsOverMessage name
-currentTurnMessage name turn    = privateMessage [name] $ T.unwords [
-    "It's currently the", T.pack $ show turn, "turn."
+currentTurnMessage name turn    = privateMessage [name] $ T.concat [
+    "It's currently the ", T.pack $ show turn, "' turn."
     ]
 
 rolesInGameMessage :: Maybe [Text] -> [Role] -> Message

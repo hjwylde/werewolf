@@ -6,6 +6,10 @@
 
 * Added a `ping` command. ([#64](https://github.com/hjwylde/werewolf/issues/64))
 
+*Revisions*
+
+* Added missing apostrophe to the new turn message. ([#63](https://github.com/hjwylde/werewolf/issues/63))
+
 #### v0.3.3.2
 
 *Revisions*
