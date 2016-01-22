@@ -20,6 +20,7 @@ module Game.Werewolf.Game (
     killPlayer,
 
     -- ** Queries
+    isNightfallTurn, isDaybreakTurn,
     isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver,
 
     -- * Turn
@@ -57,6 +58,12 @@ newGame players = Game (head $ filter (turnAvailable aliveRoles) turnRotation) p
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
+
+isNightfallTurn :: Game -> Bool
+isNightfallTurn game = game ^. turn == NightFalling
+
+isDaybreakTurn :: Game -> Bool
+isDaybreakTurn game = game ^. turn == DayBreaking
 
 isSeersTurn :: Game -> Bool
 isSeersTurn game = game ^. turn == Seers

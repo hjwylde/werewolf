@@ -205,10 +205,9 @@ prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
             ==> not . isGameOver $ run_ checkGameOver game'
 
 prop_startGameStartsWithNightfallTurn :: [Player] -> Property
-prop_startGameStartsWithNightfallTurn players = and [
-    any isSeer players,
-    isRight . runExcept . runWriterT $ startGame "" players
-    ] ==> (fst . fromRight . runExcept . runWriterT $ startGame "" players) ^. turn == NightFalling
+prop_startGameStartsWithNightfallTurn players =
+    isRight (runExcept . runWriterT $ startGame "" players)
+    ==> isNightfallTurn (fst . fromRight . runExcept . runWriterT $ startGame "" players)
 
 prop_startGameUsesGivenPlayers :: [Player] -> Property
 prop_startGameUsesGivenPlayers players' = and [

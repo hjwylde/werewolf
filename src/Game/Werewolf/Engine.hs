@@ -68,11 +68,9 @@ checkTurn = get >>= \game -> checkTurn' >> get >>= \game' -> unless (game == gam
 
 checkTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkTurn' = use turn >>= \turn' -> case turn' of
-    NightFalling -> do
-        advanceTurn
+    NightFalling -> advanceTurn
 
-    DayBreaking -> do
-        advanceTurn
+    DayBreaking -> advanceTurn
 
     Seers -> do
         seersCount  <- uses players (length . filterAlive . filterSeers)

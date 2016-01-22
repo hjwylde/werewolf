@@ -23,7 +23,7 @@ import Game.Werewolf.Player
 import Test.QuickCheck
 
 prop_newGameStartsWithNightfallTurn :: [Player] -> Property
-prop_newGameStartsWithNightfallTurn players = any isSeer players ==> (newGame players) ^. turn == NightFalling
+prop_newGameStartsWithNightfallTurn players = any isSeer players ==> isNightfallTurn (newGame players)
 
 prop_newGameStartsWithSeesEmpty :: [Player] -> Bool
 prop_newGameStartsWithSeesEmpty players = Map.null $ newGame players ^. sees
