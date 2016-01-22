@@ -80,7 +80,7 @@ werewolf = Options
     <*> subparser (mconcat [
         command "end"       $ info (helper <*> end)         (fullDesc <> progDesc "End the current game"),
         command "help"      $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents"),
-        command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command"),
+        command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command" <> noIntersperse),
         command "quit"      $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game"),
         command "see"       $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance"),
         command "start"     $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game"),
