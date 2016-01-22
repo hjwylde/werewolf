@@ -30,6 +30,9 @@ module Game.Werewolf.Response (
     -- ** Generic messages
     newGameMessages, turnMessages, nightFallsMessage, gameOverMessage, playerQuitMessage,
 
+    -- ** Ping messages
+    pingSeersMessage, pingWerewolvesMessage,
+
     -- ** Status messages
     currentTurnMessage, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
 
@@ -163,6 +166,12 @@ gameOverMessage (Just allegiance)   = publicMessage $ T.unwords ["The game is ov
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
 
+pingSeersMessage :: Message
+pingSeersMessage = publicMessage "Waiting on the Seers..."
+
+pingWerewolvesMessage :: Message
+pingWerewolvesMessage = publicMessage "Waiting on the Werewolves..."
+
 currentTurnMessage :: Text -> Turn -> Message
 currentTurnMessage name NoOne   = gameIsOverMessage name
 currentTurnMessage name turn    = privateMessage [name] $ T.unwords [
@@ -194,8 +203,8 @@ playersInGameMessage to players = privateMessage [to] . T.intercalate "\n" $ [
             T.intercalate ", " (map (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"]) $ filterDead players), "."
             ]
 
-waitingOnMessage :: Text -> [Player] -> Message
-waitingOnMessage name players = privateMessage [name] $ T.concat [
+waitingOnMessage :: Maybe [Text] -> [Player] -> Message
+waitingOnMessage to players = Message to $ T.concat [
     "Waiting on ", T.intercalate ", " playerNames, "..."
     ]
     where
