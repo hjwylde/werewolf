@@ -52,6 +52,10 @@ devourVoteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
+    aliveWerewolfNames <- uses players $ map _name . filterAlive . filterWerewolves
+
+    tell [playerMadeDevourVoteMessage aliveWerewolfNames callerName targetName]
+
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
     validatePlayer callerName callerName

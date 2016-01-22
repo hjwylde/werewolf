@@ -114,8 +114,6 @@ checkTurn' = use turn >>= \turn' -> case turn' of
         votes'          <- use votes
 
         when (length aliveWerewolves == Map.size votes') $ do
-            tell $ map (uncurry . playerMadeDevourVoteMessage $ map _name aliveWerewolves) (Map.toList votes')
-
             advanceTurn
 
             let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
