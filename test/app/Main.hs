@@ -92,8 +92,7 @@ allEngineTests = [
     testProperty "PROP: check game over advances turn" prop_checkGameOverAdvancesTurn,
     testProperty "PROP: check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
-    testProperty "PROP: start game starts with seers turn when seers present" prop_startGameStartsWithSeersTurnWhenSeersPresent,
-    testProperty "PROP: start game starts with werewolves turn when seers absent" prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent,
+    testProperty "PROP: start game starts with nightfall turn" prop_startGameStartsWithNightfallTurn,
     testProperty "PROP: start game uses given players" prop_startGameUsesGivenPlayers,
     testProperty "PROP: start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
     testProperty "PROP: start game errors when less than 7 players" prop_startGameErrorsWhenLessThan7Players,
@@ -110,8 +109,7 @@ allEngineTests = [
 
 allGameTests :: [TestTree]
 allGameTests = [
-    testProperty "PROP: new game starts with seers turn when seers present" prop_newGameStartsWithSeersTurnWhenSeersPresent,
-    testProperty "PROP: new game starts with werewolves turn when seers absent" prop_newGameStartsWithWerewolvesTurnWhenSeersAbsent,
+    testProperty "PROP: new game starts with nightfall turn" prop_newGameStartsWithNightfallTurn,
 
     testProperty "PROP: new game starts with sees empty" prop_newGameStartsWithSeesEmpty,
     testProperty "PROP: new game starts with votes empty" prop_newGameStartsWithVotesEmpty,

@@ -29,7 +29,6 @@ module Game.Werewolf.Game (
 
 import Control.Lens
 
-import           Data.List (intersect)
 import           Data.Map  (Map)
 import qualified Data.Map  as Map
 import           Data.Text (Text)
@@ -75,8 +74,8 @@ turnRotation :: [Turn]
 turnRotation = cycle [NightFalling, Seers, Werewolves, DayBreaking, Villagers, NoOne]
 
 turnAvailable :: [Role] -> Turn -> Bool
-turnAvailable aliveRoles NightFalling = True
-turnAvailable aliveRoles DayBreaking  = True
+turnAvailable _ NightFalling          = True
+turnAvailable _ DayBreaking           = True
 turnAvailable aliveRoles Seers        = seerRole `elem` aliveRoles
 turnAvailable _ Villagers             = True
 turnAvailable _ Werewolves            = True
