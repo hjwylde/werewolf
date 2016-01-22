@@ -1,5 +1,5 @@
 name:           werewolf
-version:        0.3.3.0
+version:        0.3.3.2
 
 author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
@@ -34,6 +34,7 @@ executable werewolf
         Werewolf.Commands.Quit,
         Werewolf.Commands.See,
         Werewolf.Commands.Start,
+        Werewolf.Commands.Status,
         Werewolf.Commands.Vote,
         Werewolf.Options,
         Werewolf.Version,
