@@ -75,9 +75,9 @@ turnRotation :: [Turn]
 turnRotation = cycle [NightFalling, Seers, Werewolves, DayBreaking, Villagers, NoOne]
 
 turnAvailable :: [Role] -> Turn -> Bool
-turnAvailable aliveRoles NightFalling    = not . null $ intersect nocturnalRoles aliveRoles
-turnAvailable aliveRoles DayBreaking     = not . null $ intersect diurnalRoles aliveRoles
-turnAvailable aliveRoles Seers  = seerRole `elem` aliveRoles
-turnAvailable _ Villagers       = True
-turnAvailable _ Werewolves      = True
-turnAvailable _ NoOne           = False
+turnAvailable aliveRoles NightFalling = True
+turnAvailable aliveRoles DayBreaking  = True
+turnAvailable aliveRoles Seers        = seerRole `elem` aliveRoles
+turnAvailable _ Villagers             = True
+turnAvailable _ Werewolves            = True
+turnAvailable _ NoOne                 = False

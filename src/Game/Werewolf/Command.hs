@@ -109,6 +109,8 @@ statusCommand callerName = Command $ use turn >>= \turn' -> case turn' of
         case aliveAllegiances of
             [allegiance]    -> tell [gameOverMessage . Just . T.pack $ show allegiance]
             _               -> tell [gameOverMessage Nothing]
+    NightFalling -> return ()
+    DayBreaking  -> return ()
     where
         standardStatusMessages turn players = [
             currentTurnMessage callerName turn,

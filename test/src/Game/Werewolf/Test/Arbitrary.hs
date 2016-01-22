@@ -42,6 +42,8 @@ instance Show Command where
 
 arbitraryCommand :: Game -> Gen Command
 arbitraryCommand game = case game ^. turn of
+    DayBreaking -> return noopCommand
+    NightFalling -> return noopCommand
     Seers       -> arbitrarySeeCommand game
     Villagers   -> arbitraryLynchVoteCommand game
     Werewolves  -> arbitraryDevourVoteCommand game
