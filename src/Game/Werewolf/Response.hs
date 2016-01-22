@@ -45,7 +45,7 @@ module Game.Werewolf.Response (
 
     -- ** Werewolves turn messages
     werewolvesTurnMessages, playerMadeDevourVoteMessage, playerDevouredMessage,
-    noPlayerDevouredMessage,
+    noPlayerDevouredMessage, villagersLynchVoteMessage,
 
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
@@ -152,7 +152,7 @@ newPlayerMessage players player
 
 turnMessages :: Turn -> [Player] -> [Message]
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
-turnMessages Villagers players  = villagersTurnMessage players
+turnMessages Villagers _        = [villagersTurnMessage]
 turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players
 turnMessages NoOne _            = []
 
@@ -219,11 +219,11 @@ seersTurnMessages seers = [
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage seerName target = privateMessage [seerName] $ T.concat [target ^. name, " is aligned with the ", T.pack . show $ target ^. role . allegiance, "."]
 
-villagersTurnMessage :: [Player] -> [Message]
-villagersTurnMessage players = [
-    publicMessage "The sun rises. Everybody wakes up and opens their eyes...",
-    privateMessage (map _name players) "Whom would you like to lynch?"
-    ]
+villagersTurnMessage :: Message
+villagersTurnMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
+
+villagersLynchVoteMessage :: Message
+villagersLynchVoteMessage = publicMessage "Whom would you like to lynch?"
 
 playerMadeLynchVoteMessage :: Text -> Text -> Message
 playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat [voterName, " voted to lynch ", targetName, "."]
