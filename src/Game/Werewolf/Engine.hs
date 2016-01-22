@@ -39,7 +39,7 @@ module Game.Werewolf.Engine (
     randomiseRoles,
 ) where
 
-import Control.Lens         hiding (cons, only)
+import Control.Lens         hiding (cons)
 import Control.Monad.Except
 import Control.Monad.Random
 import Control.Monad.State  hiding (state)
@@ -87,23 +87,16 @@ checkTurn' = use turn >>= \turn' -> case turn' of
         when (playersCount == Map.size votes') $ do
             tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes')
 
-            let mLynchedName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
-            case mLynchedName of
-                Nothing                -> do
-                    aliveScapegoats <- uses players (filterAlive . filterScapegoats)
-
-                    let mScapegoat = only aliveScapegoats
-                    case mScapegoat of
-                        Nothing        -> tell [noPlayerLynchedMessage]
-                        Just scapegoat -> do
-                            killPlayer scapegoat
-                            tell [scapegoatLynchedMessage (scapegoat ^. name)]
-
-                Just lynchedName       -> do
+            case last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes') of
+                [lynchedName]   -> do
                     target <- uses players (findByName_ lynchedName)
 
                     killPlayer target
                     tell [playerLynchedMessage (target ^. name) (target ^. role . Role.name)]
+                _               ->
+                    uses players (filterAlive . filterScapegoats) >>= \aliveScapegoats -> case aliveScapegoats of
+                        (scapegoat:_)   -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
+                        []              -> tell [noPlayerLynchedMessage]
 
             tell [nightFallsMessage]
 
@@ -116,20 +109,15 @@ checkTurn' = use turn >>= \turn' -> case turn' of
         when (length aliveWerewolves == Map.size votes') $ do
             advanceTurn
 
-            let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
-            case mTargetName of
-                Nothing         -> tell [noPlayerDevouredMessage, villagersLynchVoteMessage]
-                Just targetName -> do
+            case last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes') of
+                [targetName]    -> do
                     target <- uses players (findByName_ targetName)
 
                     killPlayer target
                     tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name), villagersLynchVoteMessage]
+                _               -> tell [noPlayerDevouredMessage, villagersLynchVoteMessage]
 
     NoOne -> return ()
-
-only :: [a] -> Maybe a
-only [a]    = Just a
-only _      = Nothing
 
 advanceTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceTurn = do

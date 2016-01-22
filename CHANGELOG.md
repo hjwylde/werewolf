@@ -12,6 +12,7 @@
 * Changed the "Whom would you like to lynch?" text to be a public message displayed after the devoured message. ([#56](https://github.com/hjwylde/werewolf/issues/56))
 * Better prompt to action when villagers vote.
 * Changed devour vote messages to be sent immediately. ([#57](https://github.com/hjwylde/werewolf/issues/57))
+* Removed useless `only` function. ([#55](https://github.com/hjwylde/werewolf/issues/55))
 
 #### v0.3.3.2
 
