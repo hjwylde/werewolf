@@ -73,6 +73,8 @@ pingCommand = Command $ use turn >>= \turn' -> case turn' of
         tell [waitingOnMessage Nothing $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
     Werewolves  -> tell [pingWerewolvesMessage]
     NoOne       -> return ()
+    NightFalling -> return ()
+    DayBreaking  -> return ()
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
