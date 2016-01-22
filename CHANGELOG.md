@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Added missing apostrophe to the new turn message. ([#63](https://github.com/hjwylde/werewolf/issues/63))
+
 #### v0.3.3.2
 
 * Fixed missing file in Cabal file. ([#18](https://github.com/hjwylde/werewolf/issues/18))
