@@ -2,6 +2,27 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added a `ping` command. ([#64](https://github.com/hjwylde/werewolf/issues/64))
+
+*Revisions*
+
+* Added missing apostrophe to the new turn message. ([#63](https://github.com/hjwylde/werewolf/issues/63))
+* Changed the "Whom would you like to lynch?" text to be a public message displayed after the devoured message. ([#56](https://github.com/hjwylde/werewolf/issues/56))
+
+#### v0.3.3.2
+
+*Revisions*
+
+* Fixed missing file in Cabal file. ([#18](https://github.com/hjwylde/werewolf/issues/18))
+
+#### v0.3.3.1
+
+*Revisions*
+
+* Added `noIntersperse` to `interpret`. ([#60](https://github.com/hjwylde/werewolf/issues/60))
+
 #### v0.3.3.0
 
 *Minor*

@@ -124,12 +124,12 @@ checkTurn' = use turn >>= \turn' -> case turn' of
 
             let mTargetName = only . last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes')
             case mTargetName of
-                Nothing         -> tell [noPlayerDevouredMessage]
+                Nothing         -> tell [noPlayerDevouredMessage, villagersLynchVoteMessage]
                 Just targetName -> do
                     target <- uses players (findByName_ targetName)
 
                     killPlayer target
-                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name)]
+                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name), villagersLynchVoteMessage]
 
     NoOne -> return ()
 

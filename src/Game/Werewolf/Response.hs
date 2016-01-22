@@ -30,6 +30,9 @@ module Game.Werewolf.Response (
     -- ** Generic messages
     newGameMessages, turnMessages, nightFallsMessage, gameOverMessage, playerQuitMessage,
 
+    -- ** Ping messages
+    pingSeersMessage, pingWerewolvesMessage,
+
     -- ** Status messages
     currentTurnMessage, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
 
@@ -42,7 +45,7 @@ module Game.Werewolf.Response (
 
     -- ** Werewolves turn messages
     werewolvesTurnMessages, playerMadeDevourVoteMessage, playerDevouredMessage,
-    noPlayerDevouredMessage,
+    noPlayerDevouredMessage, villagersLynchVoteMessage,
 
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
@@ -151,7 +154,7 @@ turnMessages :: Turn -> [Player] -> [Message]
 turnMessages NightFalling _     = [nightFallsMessage]
 turnMessages DayBreaking _      = []
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
-turnMessages Villagers players  = villagersTurnMessage players
+turnMessages Villagers _        = [villagersTurnMessage]
 turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players
 turnMessages NoOne _            = []
 
@@ -165,10 +168,16 @@ gameOverMessage (Just allegiance)   = publicMessage $ T.unwords ["The game is ov
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
 
+pingSeersMessage :: Message
+pingSeersMessage = publicMessage "Waiting on the Seers..."
+
+pingWerewolvesMessage :: Message
+pingWerewolvesMessage = publicMessage "Waiting on the Werewolves..."
+
 currentTurnMessage :: Text -> Turn -> Message
 currentTurnMessage name NoOne   = gameIsOverMessage name
-currentTurnMessage name turn    = privateMessage [name] $ T.unwords [
-    "It's currently the", T.pack $ show turn, "turn."
+currentTurnMessage name turn    = privateMessage [name] $ T.concat [
+    "It's currently the ", T.pack $ show turn, "' turn."
     ]
 
 rolesInGameMessage :: Maybe [Text] -> [Role] -> Message
@@ -196,8 +205,8 @@ playersInGameMessage to players = privateMessage [to] . T.intercalate "\n" $ [
             T.intercalate ", " (map (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"]) $ filterDead players), "."
             ]
 
-waitingOnMessage :: Text -> [Player] -> Message
-waitingOnMessage name players = privateMessage [name] $ T.concat [
+waitingOnMessage :: Maybe [Text] -> [Player] -> Message
+waitingOnMessage to players = Message to $ T.concat [
     "Waiting on ", T.intercalate ", " playerNames, "..."
     ]
     where
@@ -212,11 +221,11 @@ seersTurnMessages seers = [
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage seerName target = privateMessage [seerName] $ T.concat [target ^. name, " is aligned with the ", T.pack . show $ target ^. role . allegiance, "."]
 
-villagersTurnMessage :: [Player] -> [Message]
-villagersTurnMessage players = [
-    publicMessage "The sun rises. Everybody wakes up and opens their eyes...",
-    privateMessage (map _name players) "Whom would you like to lynch?"
-    ]
+villagersTurnMessage :: Message
+villagersTurnMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
+
+villagersLynchVoteMessage :: Message
+villagersLynchVoteMessage = publicMessage "Whom would you like to lynch?"
 
 playerMadeLynchVoteMessage :: Text -> Text -> Message
 playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat [voterName, " voted to lynch ", targetName, "."]

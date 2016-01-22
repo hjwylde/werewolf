@@ -17,7 +17,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    devourVoteCommand, lynchVoteCommand, noopCommand, quitCommand, seeCommand, statusCommand,
+    devourVoteCommand, lynchVoteCommand, noopCommand, pingCommand, quitCommand, seeCommand,
+    statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -63,6 +64,16 @@ lynchVoteCommand callerName targetName = Command $ do
 noopCommand :: Command
 noopCommand = Command $ return ()
 
+pingCommand :: Command
+pingCommand = Command $ use turn >>= \turn' -> case turn' of
+    Seers       -> tell [pingSeersMessage]
+    Villagers   -> do
+        game <- get
+
+        tell [waitingOnMessage Nothing $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
+    Werewolves  -> tell [pingWerewolvesMessage]
+    NoOne       -> return ()
+
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
     validatePlayer callerName callerName
@@ -95,14 +106,14 @@ statusCommand callerName = Command $ use turn >>= \turn' -> case turn' of
         game <- get
 
         tell $ standardStatusMessages turn' (game ^. players)
-        tell [waitingOnMessage callerName $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
+        tell [waitingOnMessage (Just [callerName]) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
     Werewolves  -> do
         unlessM (doesPlayerExist callerName) $ throwError [playerDoesNotExistMessage callerName callerName]
 
         game <- get
 
         tell $ standardStatusMessages turn' (game ^. players)
-        whenM (isPlayerWerewolf callerName) $ tell [waitingOnMessage callerName $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)]
+        whenM (isPlayerWerewolf callerName) $ tell [waitingOnMessage (Just [callerName]) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)]
     NoOne       -> do
         aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
 
