@@ -264,13 +264,13 @@ playerDevouredMessage name roleName = publicMessage $ T.concat [
     "As you open them you notice a door broken down and ",
     name, "'s guts half devoured and spilling out over the cobblestones.",
     " From the look of their personal effects, you deduce they were a ", roleName, ".",
-    " As the village bays for vengeance, the town Clerk calls for a vote."
+    " As the village bays for vengeance, the town clerk calls for a vote."
     ]
 
 noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords [
     "Surprisingly you see everyone present at the town square. Perhaps the Werewolves have left Miller's Hollow?",
-    "Still got to keep up the tradition though, so the town Clerk calls for a vote."
+    "Still got to keep up the tradition though, so the town clerk calls for a vote."
     ]
 
 gameIsOverMessage :: Text -> Message
