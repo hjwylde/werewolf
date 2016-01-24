@@ -20,10 +20,8 @@ import qualified Data.Map as Map
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 
-import Test.QuickCheck
-
-prop_newGameStartsWithNightfallTurn :: [Player] -> Property
-prop_newGameStartsWithNightfallTurn players = any isSeer players ==> isNightfallTurn (newGame players)
+prop_newGameStartsWithNightfallTurn :: [Player] -> Bool
+prop_newGameStartsWithNightfallTurn players = isNightfallTurn (newGame players)
 
 prop_newGameStartsWithSeesEmpty :: [Player] -> Bool
 prop_newGameStartsWithSeesEmpty players = Map.null $ newGame players ^. sees
