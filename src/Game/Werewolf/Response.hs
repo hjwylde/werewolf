@@ -28,7 +28,7 @@ module Game.Werewolf.Response (
     publicMessage, privateMessage,
 
     -- ** Generic messages
-    newGameMessages, turnMessages, nightFallsMessage, gameOverMessage, playerQuitMessage,
+    newGameMessages, turnMessages, nightFallsMessage, gameOverMessages, playerQuitMessage,
 
     -- ** Ping messages
     pingSeersMessage, pingWerewolvesMessage,
@@ -76,7 +76,7 @@ import qualified Data.Text.Lazy.IO       as T
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
-import           Game.Werewolf.Role   (Role, allegiance, description)
+import           Game.Werewolf.Role   (Role, allegiance, description, _allegiance)
 import qualified Game.Werewolf.Role   as Role
 import           GHC.Generics
 
@@ -159,9 +159,23 @@ turnMessages NoOne _            = []
 nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the townsfolk are asleep."
 
-gameOverMessage :: Maybe Text -> Message
-gameOverMessage Nothing             = publicMessage "The game is over! Everyone died..."
-gameOverMessage (Just allegiance)   = publicMessage $ T.unwords ["The game is over! The", allegiance, "have won."]
+gameOverMessages :: Game -> [Message]
+gameOverMessages game = case aliveAllegiances of
+    [allegiance]    -> concat [
+        [publicMessage $ T.unwords ["The game is over! The", T.pack $ show allegiance, "have won."]],
+        map (playerWonMessage . _name) (filter ((allegiance ==) . _allegiance . _role) players'),
+        map (playerLostMessage . _name) (filter ((allegiance /=) . _allegiance . _role) players')
+        ]
+    _               -> publicMessage "The game is over! Everyone died...":map (playerLostMessage . _name) players'
+    where
+        players'            = game ^. players
+        aliveAllegiances    = nub $ map (_allegiance . _role) (filterAlive players')
+
+playerWonMessage :: Text -> Message
+playerWonMessage name = privateMessage [name] "Victory! You won!"
+
+playerLostMessage :: Text -> Message
+playerLostMessage name = privateMessage [name] "Feck, you lost this time round..."
 
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]

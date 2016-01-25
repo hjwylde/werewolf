@@ -10,6 +10,7 @@ Command data structures.
 -}
 
 {-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes            #-}
 
 module Game.Werewolf.Command (
@@ -27,17 +28,16 @@ import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
+import           Data.List
 import qualified Data.Map  as Map
-import Data.List
 import           Data.Text (Text)
-import           qualified Data.Text as T
 
 import Game.Werewolf.Engine
-import Game.Werewolf.Role hiding (Werewolves, Villagers, name, _name, findByName_)
-import Game.Werewolf.Player hiding (doesPlayerExist)
 import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn, isWerewolvesTurn,
                                killPlayer)
+import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
+import Game.Werewolf.Role     hiding (Villagers, Werewolves, findByName_, name, _name)
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 
@@ -121,9 +121,7 @@ statusCommand callerName = Command $ use turn >>= \turn' -> case turn' of
     NoOne       -> do
         aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
 
-        case aliveAllegiances of
-            [allegiance]    -> tell [gameOverMessage . Just . T.pack $ show allegiance]
-            _               -> tell [gameOverMessage Nothing]
+        when (length aliveAllegiances <= 1) $ turn .= NoOne >> get >>= tell . gameOverMessages
     where
         standardStatusMessages turn players = [
             currentTurnMessage callerName turn,

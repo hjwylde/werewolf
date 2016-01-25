@@ -10,6 +10,7 @@ Engine functions.
 -}
 
 {-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 
 module Game.Werewolf.Engine (
@@ -48,7 +49,6 @@ import Control.Monad.Writer
 import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Text       (Text)
-import qualified Data.Text       as T
 
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
                                          isWerewolvesTurn, killPlayer)
@@ -56,8 +56,8 @@ import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     (Role, werewolfRole, villagerRole, _allegiance)
-import           qualified Game.Werewolf.Role     as Role
+import           Game.Werewolf.Role     (Role, villagerRole, werewolfRole, _allegiance)
+import qualified Game.Werewolf.Role     as Role
 
 import System.Directory
 import System.FilePath
@@ -138,10 +138,7 @@ checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
     aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
 
-    case aliveAllegiances of
-        []              -> turn .= NoOne >> tell [gameOverMessage Nothing]
-        [allegiance]    -> turn .= NoOne >> tell [gameOverMessage . Just . T.pack $ show allegiance]
-        _               -> return ()
+    when (length aliveAllegiances <= 1) $ turn .= NoOne >> get >>= tell . gameOverMessages
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
