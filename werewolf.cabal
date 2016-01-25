@@ -1,5 +1,5 @@
 name:           werewolf
-version:        0.3.3.2
+version:        0.3.4.0
 
 author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
@@ -72,6 +72,7 @@ library
         CPP,
         DeriveGeneric,
         FlexibleContexts,
+        MultiParamTypeClasses,
         OverloadedStrings,
         RankNTypes,
         TemplateHaskell
