@@ -14,6 +14,7 @@
 * Changed devour vote messages to be sent immediately. ([#57](https://github.com/hjwylde/werewolf/issues/57))
 * Removed useless `only` function. ([#55](https://github.com/hjwylde/werewolf/issues/55))
 * Turned start of day and night into distinct turns.
+* Added private message to players when the game is over. ([#65](https://github.com/hjwylde/werewolf/issues/65))
 
 #### v0.3.3.2
 
