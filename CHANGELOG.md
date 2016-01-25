@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.3.4.0
+
 *Minor*
 
 * Added a `ping` command. ([#64](https://github.com/hjwylde/werewolf/issues/64))
