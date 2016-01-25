@@ -130,7 +130,7 @@ privateMessage :: [Text] -> Text -> Message
 privateMessage to = Message (Just to)
 
 newGameMessages :: Game -> [Message]
-newGameMessages game = [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map _role players'] ++ map (newPlayerMessage players') players' ++ [nightFallsMessage] ++ turnMessages turn' players'
+newGameMessages game = [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map _role players'] ++ map (newPlayerMessage players') players' ++ turnMessages turn' players'
     where
         turn'       = game ^. turn
         players'    = game ^. players
@@ -151,6 +151,8 @@ newPlayerMessage players player
             | otherwise                                 = T.concat [", along with ", T.intercalate ", " (map _name $ filterWerewolves players \\ [player]), "."]
 
 turnMessages :: Turn -> [Player] -> [Message]
+turnMessages NightFalling _     = [nightFallsMessage]
+turnMessages DayBreaking _      = []
 turnMessages Seers players      = seersTurnMessages $ filter isSeer players
 turnMessages Villagers _        = [villagersTurnMessage]
 turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players

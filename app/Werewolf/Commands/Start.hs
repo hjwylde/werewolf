@@ -22,6 +22,7 @@ module Werewolf.Commands.Start (
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Writer
+import Control.Monad.State
 
 import Data.Text (Text)
 
@@ -48,7 +49,7 @@ handle callerName (Options extraRoleNames playerNames) = do
 
         players <- createPlayers playerNames extraRoles
 
-        runWriterT $ startGame callerName players
+        runWriterT $ startGame callerName players >>= execStateT checkTurn
 
     case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

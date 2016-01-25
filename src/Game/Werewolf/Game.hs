@@ -20,6 +20,7 @@ module Game.Werewolf.Game (
     killPlayer,
 
     -- ** Queries
+    isNightfallTurn, isDaybreakTurn,
     isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver,
 
     -- * Turn
@@ -43,7 +44,7 @@ data Game = Game
     , _votes   :: Map Text Text
     } deriving (Eq, Read, Show)
 
-data Turn = Seers | Villagers | Werewolves | NoOne
+data Turn = NightFalling | DayBreaking | Seers | Villagers | Werewolves | NoOne
     deriving (Eq, Read, Show)
 
 makeLenses ''Game
@@ -58,6 +59,12 @@ newGame players = Game (head $ filter (turnAvailable aliveRoles) turnRotation) p
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
 
+isNightfallTurn :: Game -> Bool
+isNightfallTurn game = game ^. turn == NightFalling
+
+isDaybreakTurn :: Game -> Bool
+isDaybreakTurn game = game ^. turn == DayBreaking
+
 isSeersTurn :: Game -> Bool
 isSeersTurn game = game ^. turn == Seers
 
@@ -71,10 +78,12 @@ isGameOver :: Game -> Bool
 isGameOver game = game ^. turn == NoOne
 
 turnRotation :: [Turn]
-turnRotation = cycle [Seers, Werewolves, Villagers, NoOne]
+turnRotation = cycle [NightFalling, Seers, Werewolves, DayBreaking, Villagers, NoOne]
 
 turnAvailable :: [Role] -> Turn -> Bool
-turnAvailable aliveRoles Seers  = seerRole `elem` aliveRoles
-turnAvailable _ Villagers       = True
-turnAvailable _ Werewolves      = True
-turnAvailable _ NoOne           = False
+turnAvailable _ NightFalling          = True
+turnAvailable _ DayBreaking           = True
+turnAvailable aliveRoles Seers        = seerRole `elem` aliveRoles
+turnAvailable _ Villagers             = True
+turnAvailable _ Werewolves            = True
+turnAvailable _ NoOne                 = False

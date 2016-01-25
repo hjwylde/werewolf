@@ -68,6 +68,10 @@ checkTurn = get >>= \game -> checkTurn' >> get >>= \game' -> unless (game == gam
 
 checkTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkTurn' = use turn >>= \turn' -> case turn' of
+    NightFalling -> advanceTurn
+
+    DayBreaking -> advanceTurn
+
     Seers -> do
         seersCount  <- uses players (length . filterAlive . filterSeers)
         votes'      <- use sees
@@ -98,8 +102,6 @@ checkTurn' = use turn >>= \turn' -> case turn' of
                         (scapegoat:_)   -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
                         []              -> tell [noPlayerLynchedMessage]
 
-            tell [nightFallsMessage]
-
             advanceTurn
 
     Werewolves -> do
@@ -126,7 +128,7 @@ advanceTurn = do
 
     let nextTurn = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
         then NoOne
-        else head . drop1 $ filter (turnAvailable $ map _role alivePlayers) (dropWhile (turn' /=) turnRotation)
+        else head $ filter (turnAvailable $ map _role alivePlayers) (drop1 $ dropWhile (turn' /=) turnRotation)
 
     tell $ turnMessages nextTurn alivePlayers
 

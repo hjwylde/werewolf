@@ -24,8 +24,7 @@ module Game.Werewolf.Test.Engine (
     prop_checkGameOverAdvancesTurn, prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
     -- * startGame
-    prop_startGameStartsWithSeersTurnWhenSeersPresent,
-    prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent, prop_startGameUsesGivenPlayers,
+    prop_startGameStartsWithNightfallTurn, prop_startGameUsesGivenPlayers,
     prop_startGameErrorsUnlessUniquePlayerNames, prop_startGameErrorsWhenLessThan7Players,
     prop_startGameErrorsWhenMoreThan24Players,
 
@@ -205,18 +204,10 @@ prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
             length (nub . map (_allegiance . _role) . filterAlive $ game' ^. players) > 1
             ==> not . isGameOver $ run_ checkGameOver game'
 
-prop_startGameStartsWithSeersTurnWhenSeersPresent :: [Player] -> Property
-prop_startGameStartsWithSeersTurnWhenSeersPresent players = and [
-    any isSeer players,
-    isRight . runExcept . runWriterT $ startGame "" players
-    ] ==> isSeersTurn (fst . fromRight . runExcept . runWriterT $ startGame "" players)
-
-prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent :: [Player] -> Property
-prop_startGameStartsWithWerewolvesTurnWhenSeersAbsent players = and [
-    isRight . runExcept . runWriterT $ startGame "" players'
-    ] ==> isWerewolvesTurn (fst . fromRight . runExcept . runWriterT $ startGame "" players')
-    where
-        players' = filter (not . isSeer) players
+prop_startGameStartsWithNightfallTurn :: [Player] -> Property
+prop_startGameStartsWithNightfallTurn players =
+    isRight (runExcept . runWriterT $ startGame "" players)
+    ==> isNightfallTurn (fst . fromRight . runExcept . runWriterT $ startGame "" players)
 
 prop_startGameUsesGivenPlayers :: [Player] -> Property
 prop_startGameUsesGivenPlayers players' = and [
