@@ -23,7 +23,7 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
+    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -50,7 +50,7 @@ import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Text       (Text)
 
-import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
+import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn,
                                          isWerewolvesTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
@@ -86,7 +86,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     Sunset -> advanceStage
 
-    VillagersTurn -> do
+    VillagesTurn -> do
         playersCount    <- uses players (length . filterAlive)
         votes'          <- use votes
 
@@ -118,8 +118,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
                     target <- uses players (findByName_ targetName)
 
                     killPlayer target
-                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name), villagersLynchVoteMessage]
-                _               -> tell [noPlayerDevouredMessage, villagersLynchVoteMessage]
+                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name)]
+                _               -> tell [noPlayerDevouredMessage]
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
@@ -162,8 +162,8 @@ killPlayer player = players %= map (\player' -> if player' == player then player
 isSeersTurn :: MonadState Game m => m Bool
 isSeersTurn = gets Game.isSeersTurn
 
-isVillagersTurn :: MonadState Game m => m Bool
-isVillagersTurn = gets Game.isVillagersTurn
+isVillagesTurn :: MonadState Game m => m Bool
+isVillagesTurn = gets Game.isVillagesTurn
 
 isWerewolvesTurn :: MonadState Game m => m Bool
 isWerewolvesTurn = gets Game.isWerewolvesTurn

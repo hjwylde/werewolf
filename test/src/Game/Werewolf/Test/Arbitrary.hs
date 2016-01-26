@@ -33,7 +33,7 @@ import Game.Werewolf.Command
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (Villagers, Werewolves, name, _name)
+import Game.Werewolf.Role     hiding (name, _name)
 
 import Test.QuickCheck
 
@@ -46,7 +46,7 @@ arbitraryCommand game = case game ^. stage of
     Sunrise         -> return noopCommand
     Sunset          -> return noopCommand
     SeersTurn       -> arbitrarySeeCommand game
-    VillagersTurn   -> arbitraryLynchVoteCommand game
+    VillagesTurn    -> arbitraryLynchVoteCommand game
     WerewolvesTurn  -> arbitraryDevourVoteCommand game
 
 arbitraryDevourVoteCommand :: Game -> Gen Command
@@ -104,7 +104,7 @@ arbitraryNewGame = do
     return $ newGame (seer:scapegoat:werewolves ++ villagers)
 
 instance Arbitrary Stage where
-    arbitrary = elements [GameOver, SeersTurn, VillagersTurn, WerewolvesTurn]
+    arbitrary = elements [GameOver, SeersTurn, VillagesTurn, WerewolvesTurn]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary

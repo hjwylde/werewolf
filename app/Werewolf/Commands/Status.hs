@@ -24,7 +24,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (isVillagersTurn)
+import Game.Werewolf.Engine
 import Game.Werewolf.Response
 
 -- | Handle.

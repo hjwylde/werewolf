@@ -20,7 +20,7 @@ module Game.Werewolf.Game (
     killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagersTurn, isWerewolvesTurn,
+    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
 
     -- * Stage
     Stage(..),
@@ -43,7 +43,7 @@ data Game = Game
     , _votes   :: Map Text Text
     } deriving (Eq, Read, Show)
 
-data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagersTurn | WerewolvesTurn
+data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn
     deriving (Eq, Read, Show)
 
 makeLenses ''Game
@@ -70,19 +70,19 @@ isSunrise game = game ^. stage == Sunrise
 isSunset :: Game -> Bool
 isSunset game = game ^. stage == Sunset
 
-isVillagersTurn :: Game -> Bool
-isVillagersTurn game = game ^. stage == VillagersTurn
+isVillagesTurn :: Game -> Bool
+isVillagesTurn game = game ^. stage == VillagesTurn
 
 isWerewolvesTurn :: Game -> Bool
 isWerewolvesTurn game = game ^. stage == WerewolvesTurn
 
 stageCycle :: [Stage]
-stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, Sunrise, VillagersTurn]
+stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, Sunrise, VillagesTurn]
 
 stageAvailable :: [Role] -> Stage -> Bool
 stageAvailable _ GameOver                   = False
 stageAvailable aliveRoles SeersTurn         = seerRole `elem` aliveRoles
 stageAvailable _ Sunrise                    = True
 stageAvailable _ Sunset                     = True
-stageAvailable _ VillagersTurn              = True
+stageAvailable _ VillagesTurn               = True
 stageAvailable aliveRoles WerewolvesTurn    = werewolfRole `elem` aliveRoles

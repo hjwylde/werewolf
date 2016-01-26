@@ -12,10 +12,10 @@ module Game.Werewolf.Test.Engine (
     -- * checkStage
     prop_checkStageSkipsSeersWhenNoSeers, prop_checkStageDoesNothingWhenGameOver,
     prop_checkSeersTurnAdvancesToWerewolves, prop_checkSeersTurnResetsSees,
-    prop_checkSeersTurnDoesNothingUnlessAllSeen, prop_checkVillagersTurnAdvancesToSeers,
-    prop_checkVillagersTurnLynchesOnePlayerWhenConsensus, prop_checkVillagersTurnLynchesNoOneWhenConflictedAndNoScapegoats,
-    prop_checkVillagersTurnLynchesScapegoatWhenConflicted, prop_checkVillagersTurnResetsVotes,
-    prop_checkVillagersTurnDoesNothingUnlessAllVoted, prop_checkWerewolvesTurnAdvancesToVillagers,
+    prop_checkSeersTurnDoesNothingUnlessAllSeen, prop_checkVillagesTurnAdvancesToSeers,
+    prop_checkVillagesTurnLynchesOnePlayerWhenConsensus, prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats,
+    prop_checkVillagesTurnLynchesScapegoatWhenConflicted, prop_checkVillagesTurnResetsVotes,
+    prop_checkVillagesTurnDoesNothingUnlessAllVoted, prop_checkWerewolvesTurnAdvancesToVillages,
     prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     prop_checkWerewolvesTurnKillsNoOneWhenConflicted, prop_checkWerewolvesTurnResetsVotes,
     prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
@@ -47,10 +47,10 @@ import qualified Data.Map          as Map
 import           Data.Text         (Text)
 
 import           Game.Werewolf.Engine         hiding (doesPlayerExist, isGameOver, isSeersTurn,
-                                               isVillagersTurn, isWerewolvesTurn, killPlayer)
+                                               isVillagesTurn, isWerewolvesTurn, killPlayer)
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
-import           Game.Werewolf.Role           hiding (Villagers, Werewolves, _name)
+import           Game.Werewolf.Role           hiding (_name)
 import qualified Game.Werewolf.Role           as Role
 import           Game.Werewolf.Test.Arbitrary
 
@@ -62,7 +62,7 @@ prop_checkStageSkipsSeersWhenNoSeers game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     isWerewolvesTurn $ run_ checkStage game''
     where
-        game'   = (foldl killPlayer game (filterSeers $ game ^. players)) { _stage = VillagersTurn }
+        game'   = (foldl killPlayer game (filterSeers $ game ^. players)) { _stage = VillagesTurn }
         n       = length . filterAlive $ game' ^. players
 
 prop_checkStageDoesNothingWhenGameOver :: Game -> Property
@@ -94,63 +94,63 @@ prop_checkSeersTurnDoesNothingUnlessAllSeen game =
         game'   = game { _stage = SeersTurn }
         n       = length (filterSeers $ game' ^. players) - 1
 
-prop_checkVillagersTurnAdvancesToSeers :: Game -> Property
-prop_checkVillagersTurnAdvancesToSeers game =
+prop_checkVillagesTurnAdvancesToSeers :: Game -> Property
+prop_checkVillagesTurnAdvancesToSeers game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     not (null . filterAlive . filterSeers $ run_ checkStage game'' ^. players)
     ==> isSeersTurn $ run_ checkStage game''
     where
-        game'   = game { _stage = VillagersTurn }
+        game'   = game { _stage = VillagesTurn }
         n       = length $ game' ^. players
 
-prop_checkVillagersTurnLynchesOnePlayerWhenConsensus :: Game -> Property
-prop_checkVillagersTurnLynchesOnePlayerWhenConsensus game =
+prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: Game -> Property
+prop_checkVillagesTurnLynchesOnePlayerWhenConsensus game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) == 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == 1
     where
-        game'   = game { _stage = VillagersTurn }
+        game'   = game { _stage = VillagesTurn }
         n       = length $ game' ^. players
 
-prop_checkVillagersTurnLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property
-prop_checkVillagersTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
+prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property
+prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) > 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == length (filterDead $ game' ^. players)
     where
-        game'   = (foldl killPlayer game (filterScapegoats $ game ^. players)) { _stage = VillagersTurn }
+        game'   = (foldl killPlayer game (filterScapegoats $ game ^. players)) { _stage = VillagesTurn }
         n       = length $ game' ^. players
 
-prop_checkVillagersTurnLynchesScapegoatWhenConflicted :: Game -> Property
-prop_checkVillagersTurnLynchesScapegoatWhenConflicted game =
+prop_checkVillagesTurnLynchesScapegoatWhenConflicted :: Game -> Property
+prop_checkVillagesTurnLynchesScapegoatWhenConflicted game =
     forAll (runArbitraryCommands n game') $ \game'' -> and [
         length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) > 1,
         any isScapegoat $ game' ^. players
         ] ==> isScapegoat $ head (filterDead $ run_ checkStage game'' ^. players)
     where
-        game'   = game { _stage = VillagersTurn }
+        game'   = game { _stage = VillagesTurn }
         n       = length $ game' ^. players
 
-prop_checkVillagersTurnResetsVotes :: Game -> Property
-prop_checkVillagersTurnResetsVotes game =
+prop_checkVillagesTurnResetsVotes :: Game -> Property
+prop_checkVillagesTurnResetsVotes game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     Map.null $ run_ checkStage game'' ^. votes
     where
-        game'   = game { _stage = VillagersTurn }
+        game'   = game { _stage = VillagesTurn }
         n       = length $ game' ^. players
 
-prop_checkVillagersTurnDoesNothingUnlessAllVoted :: Game -> Property
-prop_checkVillagersTurnDoesNothingUnlessAllVoted game =
+prop_checkVillagesTurnDoesNothingUnlessAllVoted :: Game -> Property
+prop_checkVillagesTurnDoesNothingUnlessAllVoted game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    isVillagersTurn $ run_ checkStage game''
+    isVillagesTurn $ run_ checkStage game''
     where
-        game'   = game { _stage = VillagersTurn }
+        game'   = game { _stage = VillagesTurn }
         n       = length (game' ^. players) - 1
 
-prop_checkWerewolvesTurnAdvancesToVillagers :: Game -> Property
-prop_checkWerewolvesTurnAdvancesToVillagers game =
+prop_checkWerewolvesTurnAdvancesToVillages :: Game -> Property
+prop_checkWerewolvesTurnAdvancesToVillages game =
     forAll (runArbitraryCommands n game') $ \game' ->
-    isVillagersTurn $ run_ checkStage game'
+    isVillagesTurn $ run_ checkStage game'
     where
         game'   = game { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players

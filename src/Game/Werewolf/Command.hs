@@ -33,7 +33,7 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Engine
-import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn, isWerewolvesTurn,
+import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
                                killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
@@ -59,7 +59,7 @@ devourVoteCommand callerName targetName = Command $ do
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM isVillagersTurn                         $ throwError [playerCannotDoThatRightNowMessage callerName]
+    unlessM isVillagesTurn                          $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
 
@@ -74,7 +74,7 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
     SeersTurn       -> tell [pingSeersMessage]
     Sunrise         -> return ()
     Sunset          -> return ()
-    VillagersTurn   -> do
+    VillagesTurn    -> do
         game <- get
 
         tell [waitingOnMessage Nothing $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
@@ -114,7 +114,7 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell $ standardStatusMessages stage' (game ^. players)
     Sunrise         -> return ()
     Sunset          -> return ()
-    VillagersTurn   -> do
+    VillagesTurn    -> do
         game <- get
 
         tell $ standardStatusMessages stage' (game ^. players)
