@@ -129,12 +129,12 @@ rulesMessages = map (T.intercalate "\n") [[
         "Each player is informed of their role (see `help roles' for a list)",
         "at the start of the game. A game begins at night and follows a standard cycle."
         ],
-    "1. The townsfolk fall asleep.",
+    "1. The village falls asleep.",
     "2. The Seers wake up and each see someone.",
     "3. The Werewolves wake up and select a victim.",
-    "4. The townsfolk wake up and find the victim.",
-    "5. The townsfolk vote to lynch a suspect.",
-    "The game is over when a single townsperson is left alive."
+    "4. The village wakes up and find the victim.",
+    "5. The village votes to lynch a suspect.",
+    "The game is over when only Villagers or Werewolves are left alive."
     ]]
 
 helpMessages :: [Text]

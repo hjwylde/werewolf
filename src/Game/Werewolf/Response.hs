@@ -167,7 +167,7 @@ sunriseMessage :: Message
 sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
 
 nightFallsMessage :: Message
-nightFallsMessage = publicMessage "Night falls, the townsfolk are asleep."
+nightFallsMessage = publicMessage "Night falls, the village is asleep."
 
 villagesTurnMessage :: Message
 villagesTurnMessage = publicMessage "Whom would you like to lynch?"
