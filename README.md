@@ -56,7 +56,7 @@ E.g., to start a game:
 {"ok":true,"messages":[
     {"to":["@foo"],"message":"You're a Villager.\nAn ordinary townsperson humbly living in Millers Hollow.\n"},
     ...,
-    {"to":null,"message":"Night falls, the townsfolk are asleep."},
+    {"to":null,"message":"Night falls, the village is asleep."},
     {"to":null,"message":"The Seers wake up."},
     {"to":["@grault"],"message":"Who's allegiance would you like to see?"}
     ]}
