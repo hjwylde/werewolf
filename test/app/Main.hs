@@ -69,8 +69,8 @@ allCommandTests = [
 
 allEngineTests :: [TestTree]
 allEngineTests = [
-    testProperty "PROP: check turn skips seers when no seers" prop_checkTurnSkipsSeersWhenNoSeers,
-    testProperty "PROP: check turn does nothing when game over" prop_checkTurnDoesNothingWhenGameOver,
+    testProperty "PROP: check stage skips seers when no seers" prop_checkStageSkipsSeersWhenNoSeers,
+    testProperty "PROP: check stage does nothing when game over" prop_checkStageDoesNothingWhenGameOver,
 
     testProperty "PROP: check seers turn advances to werewolves" prop_checkSeersTurnAdvancesToWerewolves,
     testProperty "PROP: check seers turn resets sees" prop_checkSeersTurnResetsSees,
@@ -89,10 +89,10 @@ allEngineTests = [
     testProperty "PROP: check werewolves turn resets votes" prop_checkWerewolvesTurnResetsVotes,
     testProperty "PROP: check werewolves turn does nothing unless all voted" prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
 
-    testProperty "PROP: check game over advances turn" prop_checkGameOverAdvancesTurn,
+    testProperty "PROP: check game over advances stage" prop_checkGameOverAdvancesStage,
     testProperty "PROP: check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
-    testProperty "PROP: start game starts with nightfall turn" prop_startGameStartsWithNightfallTurn,
+    testProperty "PROP: start game starts with sunset stage" prop_startGameStartsWithSunsetStage,
     testProperty "PROP: start game uses given players" prop_startGameUsesGivenPlayers,
     testProperty "PROP: start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
     testProperty "PROP: start game errors when less than 7 players" prop_startGameErrorsWhenLessThan7Players,
@@ -109,7 +109,7 @@ allEngineTests = [
 
 allGameTests :: [TestTree]
 allGameTests = [
-    testProperty "PROP: new game starts with nightfall turn" prop_newGameStartsWithNightfallTurn,
+    testProperty "PROP: new game starts with sunset stage" prop_newGameStartsWithSunsetStage,
 
     testProperty "PROP: new game starts with sees empty" prop_newGameStartsWithSeesEmpty,
     testProperty "PROP: new game starts with votes empty" prop_newGameStartsWithVotesEmpty,

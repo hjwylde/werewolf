@@ -28,19 +28,22 @@ module Game.Werewolf.Response (
     publicMessage, privateMessage,
 
     -- ** Generic messages
-    newGameMessages, turnMessages, nightFallsMessage, gameOverMessages, playerQuitMessage,
+    newGameMessages, stageMessages, nightFallsMessage, gameOverMessages, playerQuitMessage,
 
     -- ** Ping messages
     pingSeersMessage, pingWerewolvesMessage,
 
     -- ** Status messages
-    currentTurnMessage, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
+    currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
 
     -- ** Seers turn messages
     seersTurnMessages, playerSeenMessage,
 
+    -- ** Sunrise messages
+    sunriseMessage,
+
     -- ** Villagers turn messages
-    villagersTurnMessage, playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
+    playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
     scapegoatLynchedMessage,
 
     -- ** Werewolves turn messages
@@ -130,9 +133,9 @@ privateMessage :: [Text] -> Text -> Message
 privateMessage to = Message (Just to)
 
 newGameMessages :: Game -> [Message]
-newGameMessages game = [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map _role players'] ++ map (newPlayerMessage players') players' ++ turnMessages turn' players'
+newGameMessages game = [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map _role players'] ++ map (newPlayerMessage players') players' ++ stageMessages stage' players'
     where
-        turn'       = game ^. turn
+        stage'      = game ^. stage
         players'    = game ^. players
 
 newPlayersInGameMessage :: [Player] -> Message
@@ -150,13 +153,13 @@ newPlayerMessage players player
             | length (filterWerewolves players) <= 1    = "."
             | otherwise                                 = T.concat [", along with ", T.intercalate ", " (map _name $ filterWerewolves players \\ [player]), "."]
 
-turnMessages :: Turn -> [Player] -> [Message]
-turnMessages NightFalling _     = [nightFallsMessage]
-turnMessages DayBreaking _      = []
-turnMessages Seers players      = seersTurnMessages $ filter isSeer players
-turnMessages Villagers _        = [villagersTurnMessage]
-turnMessages Werewolves players = werewolvesTurnMessages $ filter isWerewolf players
-turnMessages NoOne _            = []
+stageMessages :: Stage -> [Player] -> [Message]
+stageMessages GameOver _                    = []
+stageMessages SeersTurn alivePlayers        = seersTurnMessages $ filterSeers alivePlayers
+stageMessages Sunrise _                     = [sunriseMessage]
+stageMessages Sunset _                      = [nightFallsMessage]
+stageMessages VillagersTurn _               = []
+stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages $ filterWerewolves alivePlayers
 
 nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the townsfolk are asleep."
@@ -188,11 +191,13 @@ pingSeersMessage = publicMessage "Waiting on the Seers..."
 pingWerewolvesMessage :: Message
 pingWerewolvesMessage = publicMessage "Waiting on the Werewolves..."
 
-currentTurnMessage :: Text -> Turn -> Message
-currentTurnMessage name NoOne   = gameIsOverMessage name
-currentTurnMessage name turn    = privateMessage [name] $ T.concat [
+currentStageMessages :: Text -> Stage -> [Message]
+currentStageMessages name GameOver  = [gameIsOverMessage name]
+currentStageMessages _ Sunrise      = []
+currentStageMessages _ Sunset       = []
+currentStageMessages name turn      = [privateMessage [name] $ T.concat [
     "It's currently the ", T.pack $ show turn, "' turn."
-    ]
+    ]]
 
 rolesInGameMessage :: Maybe [Text] -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat [
@@ -235,8 +240,8 @@ seersTurnMessages seers = [
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage seerName target = privateMessage [seerName] $ T.concat [target ^. name, " is aligned with the ", T.pack . show $ target ^. role . allegiance, "."]
 
-villagersTurnMessage :: Message
-villagersTurnMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
+sunriseMessage :: Message
+sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
 
 villagersLynchVoteMessage :: Message
 villagersLynchVoteMessage = publicMessage "Whom would you like to lynch?"
@@ -285,7 +290,8 @@ playerDevouredMessage name roleName = publicMessage $ T.concat [
 
 noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords [
-    "Surprisingly you see everyone present at the town square. Perhaps the Werewolves have left Miller's Hollow?",
+    "Surprisingly you see everyone present at the town square.",
+    "Perhaps the Werewolves have left Miller's Hollow?",
     "Still got to keep up the tradition though, so the town clerk calls for a vote."
     ]
 

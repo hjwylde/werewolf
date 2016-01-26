@@ -8,7 +8,7 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Game.Werewolf.Test.Game (
-    prop_newGameStartsWithNightfallTurn,
+    prop_newGameStartsWithSunsetStage,
     prop_newGameStartsWithSeesEmpty, prop_newGameStartsWithVotesEmpty,
     prop_newGameUsesGivenPlayers,
 ) where
@@ -20,8 +20,8 @@ import qualified Data.Map as Map
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 
-prop_newGameStartsWithNightfallTurn :: [Player] -> Bool
-prop_newGameStartsWithNightfallTurn players = isNightfallTurn (newGame players)
+prop_newGameStartsWithSunsetStage :: [Player] -> Bool
+prop_newGameStartsWithSunsetStage players = isSunset (newGame players)
 
 prop_newGameStartsWithSeesEmpty :: [Player] -> Bool
 prop_newGameStartsWithSeesEmpty players = Map.null $ newGame players ^. sees

@@ -49,7 +49,7 @@ handle callerName (Options extraRoleNames playerNames) = do
 
         players <- createPlayers playerNames extraRoles
 
-        runWriterT $ startGame callerName players >>= execStateT checkTurn
+        runWriterT $ startGame callerName players >>= execStateT checkStage
 
     case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

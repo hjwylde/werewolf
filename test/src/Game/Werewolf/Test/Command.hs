@@ -187,7 +187,7 @@ prop_quitCommandClearsPlayersDevourVote game =
     ==> let game'' = run_ (apply $ devourVoteCommand (caller ^. name) (target ^. name)) game'
         in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
     where
-        game' = game { _turn = Werewolves }
+        game' = game { _stage = WerewolvesTurn }
 
 prop_quitCommandClearsPlayersLynchVote :: Game -> Property
 prop_quitCommandClearsPlayersLynchVote game =
@@ -196,7 +196,7 @@ prop_quitCommandClearsPlayersLynchVote game =
     let game'' = run_ (apply $ lynchVoteCommand (caller ^. name) (target ^. name)) game'
         in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
     where
-        game' = game { _turn = Villagers }
+        game' = game { _stage = VillagersTurn }
 
 prop_quitCommandClearsPlayersSee :: Game -> Property
 prop_quitCommandClearsPlayersSee game =
@@ -205,7 +205,7 @@ prop_quitCommandClearsPlayersSee game =
     let game'' = run_ (apply $ seeCommand (caller ^. name) (target ^. name)) game'
         in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
     where
-        game' = game { _turn = Seers }
+        game' = game { _stage = SeersTurn }
 
 prop_seeCommandErrorsWhenGameIsOver :: Game -> Property
 prop_seeCommandErrorsWhenGameIsOver game =

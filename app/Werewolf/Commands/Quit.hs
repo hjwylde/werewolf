@@ -38,6 +38,6 @@ handle callerName = do
 
     let command = quitCommand callerName
 
-    case runExcept (runWriterT $ execStateT (apply command >> checkTurn >> checkGameOver) game) of
+    case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }
