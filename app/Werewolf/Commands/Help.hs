@@ -121,7 +121,7 @@ rulesMessages = map (T.intercalate "\n") [[
         "the survivors gather in the town square and try to discover who the Werewolves are.",
         "This is done by studying the other player's social behaviours",
         "for hidden signs of lycanthropy.",
-        "After discussing and debating, the Villagers vote to lynch a suspect,",
+        "After discussing and debating, the village votes to lynch a suspect,",
         "who is then hanged, burned and eliminated from the game."
         ]
     ], [

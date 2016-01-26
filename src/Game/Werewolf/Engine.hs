@@ -15,7 +15,7 @@ Engine functions.
 
 module Game.Werewolf.Engine (
     -- * Loop
-    checkTurn, checkGameOver,
+    checkStage, checkGameOver,
 
     -- * Game
 
@@ -23,7 +23,7 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
+    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -50,7 +50,7 @@ import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Text       (Text)
 
-import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn,
+import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn,
                                          isWerewolvesTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
@@ -63,16 +63,14 @@ import System.Directory
 import System.FilePath
 import System.Random.Shuffle
 
-checkTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkTurn = get >>= \game -> checkTurn' >> get >>= \game' -> unless (game == game') checkTurn
+checkStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkStage = get >>= \game -> checkStage' >> get >>= \game' -> unless (game == game') checkStage
 
-checkTurn' :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkTurn' = use turn >>= \turn' -> case turn' of
-    NightFalling -> advanceTurn
+checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkStage' = use stage >>= \stage' -> case stage' of
+    GameOver -> return ()
 
-    DayBreaking -> advanceTurn
-
-    Seers -> do
+    SeersTurn -> do
         seersCount  <- uses players (length . filterAlive . filterSeers)
         votes'      <- use sees
 
@@ -82,9 +80,13 @@ checkTurn' = use turn >>= \turn' -> case turn' of
 
                 tell [playerSeenMessage seerName target]
 
-            advanceTurn
+            advanceStage
 
-    Villagers -> do
+    Sunrise -> advanceStage
+
+    Sunset -> advanceStage
+
+    VillagesTurn -> do
         playersCount    <- uses players (length . filterAlive)
         votes'          <- use votes
 
@@ -102,37 +104,35 @@ checkTurn' = use turn >>= \turn' -> case turn' of
                         (scapegoat:_)   -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
                         []              -> tell [noPlayerLynchedMessage]
 
-            advanceTurn
+            advanceStage
 
-    Werewolves -> do
+    WerewolvesTurn -> do
         aliveWerewolves <- uses players (filterAlive . filterWerewolves)
         votes'          <- use votes
 
         when (length aliveWerewolves == Map.size votes') $ do
-            advanceTurn
+            advanceStage
 
             case last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes') of
                 [targetName]    -> do
                     target <- uses players (findByName_ targetName)
 
                     killPlayer target
-                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name), villagersLynchVoteMessage]
-                _               -> tell [noPlayerDevouredMessage, villagersLynchVoteMessage]
+                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name)]
+                _               -> tell [noPlayerDevouredMessage]
 
-    NoOne -> return ()
-
-advanceTurn :: (MonadState Game m, MonadWriter [Message] m) => m ()
-advanceTurn = do
-    turn' <- use turn
+advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
+advanceStage = do
+    stage' <- use stage
     alivePlayers <- uses players filterAlive
 
-    let nextTurn = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
-        then NoOne
-        else head $ filter (turnAvailable $ map _role alivePlayers) (drop1 $ dropWhile (turn' /=) turnRotation)
+    let nextStage = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
+        then GameOver
+        else head $ filter (stageAvailable $ map _role alivePlayers) (drop1 $ dropWhile (stage' /=) stageCycle)
 
-    tell $ turnMessages nextTurn alivePlayers
+    tell $ stageMessages nextStage alivePlayers
 
-    turn    .= nextTurn
+    stage   .= nextStage
     sees    .= Map.empty
     votes   .= Map.empty
 
@@ -140,7 +140,7 @@ checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
     aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
 
-    when (length aliveAllegiances <= 1) $ turn .= NoOne >> get >>= tell . gameOverMessages
+    when (length aliveAllegiances <= 1) $ stage .= GameOver >> get >>= tell . gameOverMessages
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
@@ -162,8 +162,8 @@ killPlayer player = players %= map (\player' -> if player' == player then player
 isSeersTurn :: MonadState Game m => m Bool
 isSeersTurn = gets Game.isSeersTurn
 
-isVillagersTurn :: MonadState Game m => m Bool
-isVillagersTurn = gets Game.isVillagersTurn
+isVillagesTurn :: MonadState Game m => m Bool
+isVillagesTurn = gets Game.isVillagesTurn
 
 isWerewolvesTurn :: MonadState Game m => m Bool
 isWerewolvesTurn = gets Game.isWerewolvesTurn

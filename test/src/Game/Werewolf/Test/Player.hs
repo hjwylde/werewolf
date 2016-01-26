@@ -17,7 +17,6 @@ import Data.Text
 
 import Game.Werewolf.Player
 import Game.Werewolf.Role
-import Game.Werewolf.Test.Arbitrary ()
 
 prop_newPlayerIsAlive :: Text -> Role -> Bool
 prop_newPlayerIsAlive name role = newPlayer name role ^. state == Alive

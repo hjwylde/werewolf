@@ -89,8 +89,7 @@ scapegoatRole = Role
     { _name         = "Scapegoat"
     , _allegiance   = Villagers
     , _description  = "That one person everyone loves to blame."
-    , _advice       =
-        "Cross your fingers that the votes don't end up tied."
+    , _advice       = "Cross your fingers that the votes don't end up tied."
     }
 
 findByName :: Text -> Maybe Role

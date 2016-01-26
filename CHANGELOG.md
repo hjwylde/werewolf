@@ -2,6 +2,11 @@
 
 #### Upcoming
 
+*Major*
+
+* Renamed `turn` to `stage`. ([#70](https://github.com/hjwylde/werewolf/issues/70))
+* Renamed `VillagersTurn` to `VillagesTurn`. ([#70](https://github.com/hjwylde/werewolf/issues/70))
+
 #### v0.3.4.0
 
 *Minor*

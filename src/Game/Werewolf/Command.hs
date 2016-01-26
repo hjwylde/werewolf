@@ -33,7 +33,7 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Engine
-import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagersTurn, isWerewolvesTurn,
+import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
                                killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
@@ -59,7 +59,7 @@ devourVoteCommand callerName targetName = Command $ do
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM isVillagersTurn                         $ throwError [playerCannotDoThatRightNowMessage callerName]
+    unlessM isVillagesTurn                          $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
 
@@ -69,16 +69,16 @@ noopCommand :: Command
 noopCommand = Command $ return ()
 
 pingCommand :: Command
-pingCommand = Command $ use turn >>= \turn' -> case turn' of
-    Seers       -> tell [pingSeersMessage]
-    Villagers   -> do
+pingCommand = Command $ use stage >>= \stage' -> case stage' of
+    GameOver        -> return ()
+    SeersTurn       -> tell [pingSeersMessage]
+    Sunrise         -> return ()
+    Sunset          -> return ()
+    VillagesTurn    -> do
         game <- get
 
         tell [waitingOnMessage Nothing $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
-    Werewolves  -> tell [pingWerewolvesMessage]
-    NoOne       -> return ()
-    NightFalling -> return ()
-    DayBreaking  -> return ()
+    WerewolvesTurn  -> tell [pingWerewolvesMessage]
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
@@ -103,32 +103,32 @@ seeCommand callerName targetName = Command $ do
     sees %= Map.insert callerName targetName
 
 statusCommand :: Text -> Command
-statusCommand callerName = Command $ use turn >>= \turn' -> case turn' of
-    Seers       -> do
+statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
+    GameOver       -> do
+        aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
+
+        when (length aliveAllegiances <= 1) $ stage .= GameOver >> get >>= tell . gameOverMessages
+    SeersTurn       -> do
         game <- get
 
-        tell $ standardStatusMessages turn' (game ^. players)
-    Villagers   -> do
+        tell $ standardStatusMessages stage' (game ^. players)
+    Sunrise         -> return ()
+    Sunset          -> return ()
+    VillagesTurn    -> do
         game <- get
 
-        tell $ standardStatusMessages turn' (game ^. players)
+        tell $ standardStatusMessages stage' (game ^. players)
         tell [waitingOnMessage (Just [callerName]) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
-    Werewolves  -> do
+    WerewolvesTurn  -> do
         unlessM (doesPlayerExist callerName) $ throwError [playerDoesNotExistMessage callerName callerName]
 
         game <- get
 
-        tell $ standardStatusMessages turn' (game ^. players)
+        tell $ standardStatusMessages stage' (game ^. players)
         whenM (isPlayerWerewolf callerName) $ tell [waitingOnMessage (Just [callerName]) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)]
-    NoOne       -> do
-        aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
-
-        when (length aliveAllegiances <= 1) $ turn .= NoOne >> get >>= tell . gameOverMessages
-    NightFalling -> return ()
-    DayBreaking  -> return ()
     where
-        standardStatusMessages turn players = [
-            currentTurnMessage callerName turn,
+        standardStatusMessages stage players =
+            currentStageMessages callerName stage ++ [
             rolesInGameMessage (Just [callerName]) $ map _role players,
             playersInGameMessage callerName players
             ]

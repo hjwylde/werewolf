@@ -20,7 +20,7 @@ module Game.Werewolf.Test.Command (
     -- * lynchVoteCommand
     prop_lynchVoteCommandErrorsWhenGameIsOver, prop_lynchVoteCommandErrorsWhenCallerDoesNotExist,
     prop_lynchVoteCommandErrorsWhenTargetDoesNotExist, prop_lynchVoteCommandErrorsWhenCallerIsDead,
-    prop_lynchVoteCommandErrorsWhenTargetIsDead, prop_lynchVoteCommandErrorsWhenNotVillagersTurn,
+    prop_lynchVoteCommandErrorsWhenTargetIsDead, prop_lynchVoteCommandErrorsWhenNotVillagesTurn,
     prop_lynchVoteCommandErrorsWhenCallerHasVoted, prop_lynchVoteCommandUpdatesVotes,
 
     -- * quitCommand
@@ -139,14 +139,14 @@ prop_lynchVoteCommandErrorsWhenTargetIsDead game =
     forAll (arbitraryPlayer game) $ \target ->
     verbose_runCommandErrors (killPlayer game target) (lynchVoteCommand (caller ^. name) (target ^. name))
 
-prop_lynchVoteCommandErrorsWhenNotVillagersTurn :: Game -> Property
-prop_lynchVoteCommandErrorsWhenNotVillagersTurn game =
-    not (isVillagersTurn game)
+prop_lynchVoteCommandErrorsWhenNotVillagesTurn :: Game -> Property
+prop_lynchVoteCommandErrorsWhenNotVillagesTurn game =
+    not (isVillagesTurn game)
     ==> forAll (arbitraryLynchVoteCommand game) $ verbose_runCommandErrors game
 
 prop_lynchVoteCommandErrorsWhenCallerHasVoted :: Game -> Property
 prop_lynchVoteCommandErrorsWhenCallerHasVoted game =
-    isVillagersTurn game ==>
+    isVillagesTurn game ==>
     forAll (arbitraryPlayer game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target ->
     let command = lynchVoteCommand (caller ^. name) (target ^. name)
@@ -154,7 +154,7 @@ prop_lynchVoteCommandErrorsWhenCallerHasVoted game =
 
 prop_lynchVoteCommandUpdatesVotes :: Game -> Property
 prop_lynchVoteCommandUpdatesVotes game =
-    isVillagersTurn game ==>
+    isVillagesTurn game ==>
     forAll (arbitraryLynchVoteCommand game) $ \command ->
     Map.size (run_ (apply command) game ^. votes) == 1
 
@@ -187,7 +187,7 @@ prop_quitCommandClearsPlayersDevourVote game =
     ==> let game'' = run_ (apply $ devourVoteCommand (caller ^. name) (target ^. name)) game'
         in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
     where
-        game' = game { _turn = Werewolves }
+        game' = game { _stage = WerewolvesTurn }
 
 prop_quitCommandClearsPlayersLynchVote :: Game -> Property
 prop_quitCommandClearsPlayersLynchVote game =
@@ -196,7 +196,7 @@ prop_quitCommandClearsPlayersLynchVote game =
     let game'' = run_ (apply $ lynchVoteCommand (caller ^. name) (target ^. name)) game'
         in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
     where
-        game' = game { _turn = Villagers }
+        game' = game { _stage = VillagesTurn }
 
 prop_quitCommandClearsPlayersSee :: Game -> Property
 prop_quitCommandClearsPlayersSee game =
@@ -205,7 +205,7 @@ prop_quitCommandClearsPlayersSee game =
     let game'' = run_ (apply $ seeCommand (caller ^. name) (target ^. name)) game'
         in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
     where
-        game' = game { _turn = Seers }
+        game' = game { _stage = SeersTurn }
 
 prop_seeCommandErrorsWhenGameIsOver :: Game -> Property
 prop_seeCommandErrorsWhenGameIsOver game =

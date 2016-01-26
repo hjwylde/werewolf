@@ -33,7 +33,7 @@ import Game.Werewolf.Command
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (Villagers, Werewolves, name, _name)
+import Game.Werewolf.Role     hiding (name, _name)
 
 import Test.QuickCheck
 
@@ -41,13 +41,13 @@ instance Show Command where
     show _ = "command"
 
 arbitraryCommand :: Game -> Gen Command
-arbitraryCommand game = case game ^. turn of
-    DayBreaking -> return noopCommand
-    NightFalling -> return noopCommand
-    Seers       -> arbitrarySeeCommand game
-    Villagers   -> arbitraryLynchVoteCommand game
-    Werewolves  -> arbitraryDevourVoteCommand game
-    NoOne       -> return noopCommand
+arbitraryCommand game = case game ^. stage of
+    GameOver        -> return noopCommand
+    Sunrise         -> return noopCommand
+    Sunset          -> return noopCommand
+    SeersTurn       -> arbitrarySeeCommand game
+    VillagesTurn    -> arbitraryLynchVoteCommand game
+    WerewolvesTurn  -> arbitraryDevourVoteCommand game
 
 arbitraryDevourVoteCommand :: Game -> Gen Command
 arbitraryDevourVoteCommand game = do
@@ -87,9 +87,9 @@ arbitrarySeeCommand game = do
 instance Arbitrary Game where
     arbitrary = do
         game <- arbitraryNewGame
-        turn <- arbitrary
+        stage <- arbitrary
 
-        return $ game { _turn = turn }
+        return $ game { _stage = stage }
 
 arbitraryNewGame :: Gen Game
 arbitraryNewGame = do
@@ -103,8 +103,8 @@ arbitraryNewGame = do
 
     return $ newGame (seer:scapegoat:werewolves ++ villagers)
 
-instance Arbitrary Turn where
-    arbitrary = elements [Seers, Villagers, Werewolves, NoOne]
+instance Arbitrary Stage where
+    arbitrary = elements [GameOver, SeersTurn, VillagesTurn, WerewolvesTurn]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary

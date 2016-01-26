@@ -1,31 +1,30 @@
 {-|
 Module      : Game.Werewolf.Game
-Description : Game and turn data structures.
+Description : Game and stage data structures.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Game and turn data structures.
+Game and stage data structures.
 -}
 
 {-# LANGUAGE TemplateHaskell #-}
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), turn, players, sees, votes,
+    Game(..), stage, players, sees, votes,
     newGame,
 
     -- ** Manipulations
     killPlayer,
 
     -- ** Queries
-    isNightfallTurn, isDaybreakTurn,
-    isSeersTurn, isVillagersTurn, isWerewolvesTurn, isGameOver,
+    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
 
-    -- * Turn
-    Turn(..),
-    turnRotation, turnAvailable,
+    -- * Stage
+    Stage(..),
+    stageCycle, stageAvailable,
 ) where
 
 import Control.Lens
@@ -38,52 +37,52 @@ import Game.Werewolf.Player
 import Game.Werewolf.Role   hiding (Villagers, Werewolves)
 
 data Game = Game
-    { _turn    :: Turn
+    { _stage   :: Stage
     , _players :: [Player]
     , _sees    :: Map Text Text
     , _votes   :: Map Text Text
     } deriving (Eq, Read, Show)
 
-data Turn = NightFalling | DayBreaking | Seers | Villagers | Werewolves | NoOne
+data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn
     deriving (Eq, Read, Show)
 
 makeLenses ''Game
 
-makeLenses ''Turn
+makeLenses ''Stage
 
 newGame :: [Player] -> Game
-newGame players = Game (head $ filter (turnAvailable aliveRoles) turnRotation) players Map.empty Map.empty
+newGame players = Game (head $ filter (stageAvailable aliveRoles) stageCycle) players Map.empty Map.empty
     where
         aliveRoles = map _role $ filterAlive players
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
 
-isNightfallTurn :: Game -> Bool
-isNightfallTurn game = game ^. turn == NightFalling
-
-isDaybreakTurn :: Game -> Bool
-isDaybreakTurn game = game ^. turn == DayBreaking
+isGameOver :: Game -> Bool
+isGameOver game = game ^. stage == GameOver
 
 isSeersTurn :: Game -> Bool
-isSeersTurn game = game ^. turn == Seers
+isSeersTurn game = game ^. stage == SeersTurn
 
-isVillagersTurn :: Game -> Bool
-isVillagersTurn game = game ^. turn == Villagers
+isSunrise :: Game -> Bool
+isSunrise game = game ^. stage == Sunrise
+
+isSunset :: Game -> Bool
+isSunset game = game ^. stage == Sunset
+
+isVillagesTurn :: Game -> Bool
+isVillagesTurn game = game ^. stage == VillagesTurn
 
 isWerewolvesTurn :: Game -> Bool
-isWerewolvesTurn game = game ^. turn == Werewolves
+isWerewolvesTurn game = game ^. stage == WerewolvesTurn
 
-isGameOver :: Game -> Bool
-isGameOver game = game ^. turn == NoOne
+stageCycle :: [Stage]
+stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, Sunrise, VillagesTurn]
 
-turnRotation :: [Turn]
-turnRotation = cycle [NightFalling, Seers, Werewolves, DayBreaking, Villagers, NoOne]
-
-turnAvailable :: [Role] -> Turn -> Bool
-turnAvailable _ NightFalling          = True
-turnAvailable _ DayBreaking           = True
-turnAvailable aliveRoles Seers        = seerRole `elem` aliveRoles
-turnAvailable _ Villagers             = True
-turnAvailable _ Werewolves            = True
-turnAvailable _ NoOne                 = False
+stageAvailable :: [Role] -> Stage -> Bool
+stageAvailable _ GameOver                   = False
+stageAvailable aliveRoles SeersTurn         = seerRole `elem` aliveRoles
+stageAvailable _ Sunrise                    = True
+stageAvailable _ Sunset                     = True
+stageAvailable _ VillagesTurn               = True
+stageAvailable aliveRoles WerewolvesTurn    = werewolfRole `elem` aliveRoles
