@@ -52,9 +52,9 @@ devourVoteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- uses players $ map _name . filterAlive . filterWerewolves
+    aliveWerewolves <- uses players $ filterAlive . filterWerewolves
 
-    tell [playerMadeDevourVoteMessage aliveWerewolfNames callerName targetName]
+    tell $ map (\werewolf -> playerMadeDevourVoteMessage (werewolf ^. name) callerName targetName) aliveWerewolves
 
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
@@ -118,18 +118,18 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         game <- get
 
         tell $ standardStatusMessages stage' (game ^. players)
-        tell [waitingOnMessage (Just [callerName]) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
+        tell [waitingOnMessage (Just callerName) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
     WerewolvesTurn  -> do
         unlessM (doesPlayerExist callerName) $ throwError [playerDoesNotExistMessage callerName callerName]
 
         game <- get
 
         tell $ standardStatusMessages stage' (game ^. players)
-        whenM (isPlayerWerewolf callerName) $ tell [waitingOnMessage (Just [callerName]) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)]
+        whenM (isPlayerWerewolf callerName) $ tell [waitingOnMessage (Just callerName) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)]
     where
         standardStatusMessages stage players =
             currentStageMessages callerName stage ++ [
-            rolesInGameMessage (Just [callerName]) $ map _role players,
+            rolesInGameMessage (Just callerName) $ map _role players,
             playersInGameMessage callerName players
             ]
 

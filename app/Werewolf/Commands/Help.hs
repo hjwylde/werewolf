@@ -40,23 +40,23 @@ data Command = Commands | Description | Rules | Roles
 -- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options (Just Commands)) = exitWith success {
-    messages = map (privateMessage [callerName]) commandsMessages
+    messages = map (privateMessage callerName) commandsMessages
     }
 handle callerName (Options (Just Description)) = exitWith success {
-    messages = map (privateMessage [callerName]) descriptionMessages
+    messages = map (privateMessage callerName) descriptionMessages
     }
 handle callerName (Options (Just Roles)) = exitWith success {
-    messages = map (\role -> privateMessage [callerName] $ T.intercalate "\n" [
+    messages = map (\role -> privateMessage callerName $ T.intercalate "\n" [
         T.snoc (role ^. Role.name) ':',
         role ^. description,
         role ^. advice
         ]) allRoles
     }
 handle callerName (Options (Just Rules)) = exitWith success {
-    messages = map (privateMessage [callerName]) rulesMessages
+    messages = map (privateMessage callerName) rulesMessages
     }
 handle callerName (Options Nothing) = exitWith success {
-    messages = map (privateMessage [callerName]) helpMessages
+    messages = map (privateMessage callerName) helpMessages
     }
 
 commandsMessages :: [Text]
