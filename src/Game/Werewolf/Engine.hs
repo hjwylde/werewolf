@@ -50,7 +50,7 @@ import Control.Monad.Writer
 import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Text       (Text)
-import           qualified Data.Text       as T
+import qualified Data.Text       as T
 
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn,
                                          isWerewolvesTurn, killPlayer)
@@ -58,7 +58,8 @@ import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     (Role, scapegoatRole, seerRole, villagerRole, werewolfRole, _allegiance)
+import           Game.Werewolf.Role     (Role, scapegoatRole, seerRole, villagerRole, werewolfRole,
+                                         _allegiance)
 import qualified Game.Werewolf.Role     as Role
 
 import System.Directory
