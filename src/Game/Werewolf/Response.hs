@@ -25,7 +25,7 @@ module Game.Werewolf.Response (
 
     -- * Message
     Message(..),
-    publicMessage, privateMessage,
+    publicMessage, privateMessage, groupMessages,
 
     -- ** Generic messages
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
@@ -107,7 +107,7 @@ exitFailure :: MonadIO m => m ()
 exitFailure = exitWith failure
 
 data Message = Message
-    { to      :: Maybe [Text]
+    { to      :: Maybe Text
     , message :: Text
     } deriving (Eq, Generic, Show)
 
@@ -122,11 +122,18 @@ instance ToJSON Message where
 publicMessage :: Text -> Message
 publicMessage = Message Nothing
 
-privateMessage :: [Text] -> Text -> Message
+privateMessage :: Text -> Text -> Message
 privateMessage to = Message (Just to)
 
+groupMessages :: [Text] -> Text -> [Message]
+groupMessages tos message = map (\to -> privateMessage to message) tos
+
 newGameMessages :: Game -> [Message]
-newGameMessages game = [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map _role players'] ++ map (newPlayerMessage players') players' ++ stageMessages stage' players'
+newGameMessages game = [
+    newPlayersInGameMessage players',
+    rolesInGameMessage Nothing $ map _role players'
+    ] ++ map (newPlayerMessage players') players'
+    ++ stageMessages stage' players'
     where
         stage'      = game ^. stage
         players'    = game ^. players
@@ -139,8 +146,8 @@ newPlayersInGameMessage players = publicMessage $ T.concat [
 
 newPlayerMessage :: [Player] -> Player -> Message
 newPlayerMessage players player
-    | isWerewolf player = privateMessage [player ^. name] $ T.intercalate "\n" [T.concat ["You're a Werewolf", packMessage], player ^. role . description]
-    | otherwise         = privateMessage [player ^. name] $ T.intercalate "\n" [T.concat ["You're a ", player ^. role . Role.name, "."], player ^. role . description]
+    | isWerewolf player = privateMessage (player ^. name) $ T.intercalate "\n" [T.concat ["You're a Werewolf", packMessage], player ^. role . description]
+    | otherwise         = privateMessage (player ^. name) $ T.intercalate "\n" [T.concat ["You're a ", player ^. role . Role.name, "."], player ^. role . description]
     where
         packMessage
             | length (filterWerewolves players) <= 1    = "."
@@ -157,7 +164,7 @@ stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages $ filterWer
 seersTurnMessages :: Player -> [Message]
 seersTurnMessages seer = [
     publicMessage "The Seer wakes up.",
-    privateMessage [seer ^. name] "Whose allegiance would you like to see?"
+    privateMessage (seer ^. name) "Whose allegiance would you like to see?"
     ]
 
 sunriseMessage :: Message
@@ -171,9 +178,8 @@ villagesTurnMessage = publicMessage "Whom would you like to lynch?"
 
 werewolvesTurnMessages :: [Player] -> [Message]
 werewolvesTurnMessages werewolves = [
-    publicMessage "The Werewolves wake up, recognise one another and choose a new victim.",
-    privateMessage (map _name werewolves) "Whom would you like to devour?"
-    ]
+    publicMessage "The Werewolves wake up, recognise one another and choose a new victim."
+    ] ++ groupMessages (map _name werewolves) "Whom would you like to devour?"
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game = case aliveAllegiances of
@@ -188,10 +194,10 @@ gameOverMessages game = case aliveAllegiances of
         aliveAllegiances    = nub $ map (_allegiance . _role) (filterAlive players')
 
 playerWonMessage :: Text -> Message
-playerWonMessage name = privateMessage [name] "Victory! You won!"
+playerWonMessage to = privateMessage to "Victory! You won!"
 
 playerLostMessage :: Text -> Message
-playerLostMessage name = privateMessage [name] "Feck, you lost this time round..."
+playerLostMessage to = privateMessage to "Feck, you lost this time round..."
 
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
@@ -203,15 +209,15 @@ pingWerewolvesMessage :: Message
 pingWerewolvesMessage = publicMessage "Waiting on the Werewolves..."
 
 currentStageMessages :: Text -> Stage -> [Message]
-currentStageMessages name GameOver  = [gameIsOverMessage name]
+currentStageMessages to GameOver    = [gameIsOverMessage to]
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
-currentStageMessages name turn      = [privateMessage [name] $ T.concat [
     -- TODO (hjw): pluralise this correctly for the Seer
+currentStageMessages to turn        = [privateMessage to $ T.concat [
     "It's currently the ", T.pack $ show turn, "' turn."
     ]]
 
-rolesInGameMessage :: Maybe [Text] -> [Role] -> Message
+rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat [
     "The roles in play are ",
     T.intercalate ", " $ map (\(role, count) ->
@@ -223,7 +229,7 @@ rolesInGameMessage mTo roles = Message mTo $ T.concat [
         roleCounts = map (\list -> (head list, length list)) (groupSortOn Role._name roles)
 
 playersInGameMessage :: Text -> [Player] -> Message
-playersInGameMessage to players = privateMessage [to] . T.intercalate "\n" $ [
+playersInGameMessage to players = privateMessage to . T.intercalate "\n" $ [
     alivePlayersText
     ] ++ if (null $ filterDead players) then [] else [deadPlayersText]
     where
@@ -236,18 +242,22 @@ playersInGameMessage to players = privateMessage [to] . T.intercalate "\n" $ [
             T.intercalate ", " (map (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"]) $ filterDead players), "."
             ]
 
-waitingOnMessage :: Maybe [Text] -> [Player] -> Message
-waitingOnMessage to players = Message to $ T.concat [
+waitingOnMessage :: Maybe Text -> [Player] -> Message
+waitingOnMessage mTo players = Message mTo $ T.concat [
     "Waiting on ", T.intercalate ", " playerNames, "..."
     ]
     where
         playerNames = map _name players
 
 playerSeenMessage :: Text -> Player -> Message
-playerSeenMessage seerName target = privateMessage [seerName] $ T.concat [target ^. name, " is aligned with the ", T.pack . show $ target ^. role . allegiance, "."]
+playerSeenMessage to target = privateMessage to $ T.concat [
+    target ^. name, " is aligned with the ", T.pack . show $ target ^. role . allegiance, "."
+    ]
 
 playerMadeLynchVoteMessage :: Text -> Text -> Message
-playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat [voterName, " voted to lynch ", targetName, "."]
+playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat [
+    voterName, " voted to lynch ", targetName, "."
+    ]
 
 playerLynchedMessage :: Text -> Text -> Message
 playerLynchedMessage name "Werewolf"    = publicMessage $ T.unwords [
@@ -262,7 +272,10 @@ playerLynchedMessage name roleName      = publicMessage $ T.concat [
     ]
 
 noPlayerLynchedMessage :: Message
-noPlayerLynchedMessage = publicMessage "Daylight is wasted as the townsfolk squabble over whom to tie up. Looks like no one is being burned this day."
+noPlayerLynchedMessage = publicMessage $ T.unwords [
+    "Daylight is wasted as the townsfolk squabble over whom to tie up.",
+    "Looks like no one is being burned this day."
+    ]
 
 scapegoatLynchedMessage :: Text -> Message
 scapegoatLynchedMessage name = publicMessage $ T.unwords [
@@ -271,8 +284,10 @@ scapegoatLynchedMessage name = publicMessage $ T.unwords [
     "Not wanting to take any chances,", name, "is promptly tied to a pyre and burned alive."
     ]
 
-playerMadeDevourVoteMessage :: [Text] -> Text -> Text -> Message
-playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat [voterName, " voted to devour ", targetName, "."]
+playerMadeDevourVoteMessage :: Text -> Text -> Text -> Message
+playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat [
+    voterName, " voted to devour ", targetName, "."
+    ]
 
 playerDevouredMessage :: Text -> Text -> Message
 playerDevouredMessage name roleName = publicMessage $ T.concat [
@@ -290,28 +305,32 @@ noPlayerDevouredMessage = publicMessage $ T.unwords [
     ]
 
 gameIsOverMessage :: Text -> Message
-gameIsOverMessage name = privateMessage [name] "The game is over!"
+gameIsOverMessage to = privateMessage to "The game is over!"
 
 playerDoesNotExistMessage :: Text -> Text -> Message
-playerDoesNotExistMessage to name = privateMessage [to] $ T.unwords ["Player", name, "does not exist."]
+playerDoesNotExistMessage to name = privateMessage to $ T.unwords [
+    "Player", name, "does not exist."
+    ]
 
 playerCannotDoThatMessage :: Text -> Message
-playerCannotDoThatMessage name = privateMessage [name] "You cannot do that!"
+playerCannotDoThatMessage to = privateMessage to "You cannot do that!"
 
 playerCannotDoThatRightNowMessage :: Text -> Message
-playerCannotDoThatRightNowMessage name = privateMessage [name] "You cannot do that right now!"
+playerCannotDoThatRightNowMessage to = privateMessage to "You cannot do that right now!"
 
 playerIsDeadMessage :: Text -> Message
-playerIsDeadMessage name = privateMessage [name] "Sshh, you're meant to be dead!"
+playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
 
 roleDoesNotExistMessage :: Text -> Text -> Message
-roleDoesNotExistMessage to name = privateMessage [to] $ T.unwords ["Role", name, "does not exist."]
+roleDoesNotExistMessage to name = privateMessage to $ T.unwords ["Role", name, "does not exist."]
 
 playerHasAlreadyVotedMessage :: Text -> Message
-playerHasAlreadyVotedMessage name = privateMessage [name] "You've already voted!"
+playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
 
 targetIsDeadMessage :: Text -> Text -> Message
-targetIsDeadMessage name targetName = privateMessage [name] $ T.unwords [targetName, "is already dead!"]
+targetIsDeadMessage to targetName = privateMessage to $ T.unwords [
+    targetName, "is already dead!"
+    ]
 
 playerCannotDevourAnotherWerewolf :: Text -> Message
-playerCannotDevourAnotherWerewolf name = privateMessage [name] "You cannot devour another Werewolf!"
+playerCannotDevourAnotherWerewolf to = privateMessage to "You cannot devour another Werewolf!"

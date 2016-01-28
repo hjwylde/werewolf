@@ -7,6 +7,7 @@
 * Renamed `turn` to `stage`. ([#70](https://github.com/hjwylde/werewolf/issues/70))
 * Renamed `VillagersTurn` to `VillagesTurn`. ([#70](https://github.com/hjwylde/werewolf/issues/70))
 * Restricted count of special roles to 1. ([#32](https://github.com/hjwylde/werewolf/issues/32))
+* Changed private message structure to only ever be for a single player. ([#21](https://github.com/hjwylde/werewolf/issues/21))
 
 #### v0.3.4.0
 
