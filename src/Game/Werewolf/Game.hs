@@ -13,7 +13,7 @@ Game and stage data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), stage, players, sees, votes,
+    Game(..), stage, players, see, votes,
     newGame,
 
     -- ** Manipulations
@@ -39,7 +39,7 @@ import Game.Werewolf.Role   hiding (Villagers, Werewolves)
 data Game = Game
     { _stage   :: Stage
     , _players :: [Player]
-    , _sees    :: Map Text Text
+    , _see     :: Maybe Text
     , _votes   :: Map Text Text
     } deriving (Eq, Read, Show)
 
@@ -51,7 +51,7 @@ makeLenses ''Game
 makeLenses ''Stage
 
 newGame :: [Player] -> Game
-newGame players = Game (head $ filter (stageAvailable aliveRoles) stageCycle) players Map.empty Map.empty
+newGame players = Game (head $ filter (stageAvailable aliveRoles) stageCycle) players Nothing Map.empty
     where
         aliveRoles = map _role $ filterAlive players
 
