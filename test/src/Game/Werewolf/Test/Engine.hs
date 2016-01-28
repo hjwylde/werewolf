@@ -11,7 +11,7 @@ Maintainer  : public@hjwylde.com
 module Game.Werewolf.Test.Engine (
     -- * checkStage
     prop_checkStageSkipsSeersWhenNoSeers, prop_checkStageDoesNothingWhenGameOver,
-    prop_checkSeersTurnAdvancesToWerewolves, prop_checkSeersTurnResetsSees,
+    prop_checkSeersTurnAdvancesToWerewolves, prop_checkSeersTurnResetsSee,
     prop_checkSeersTurnDoesNothingUnlessAllSeen, prop_checkVillagesTurnAdvancesToSeers,
     prop_checkVillagesTurnLynchesOnePlayerWhenConsensus, prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats,
     prop_checkVillagesTurnLynchesScapegoatWhenConflicted, prop_checkVillagesTurnResetsVotes,
@@ -26,7 +26,8 @@ module Game.Werewolf.Test.Engine (
     -- * startGame
     prop_startGameStartsWithSunsetStage, prop_startGameUsesGivenPlayers,
     prop_startGameErrorsUnlessUniquePlayerNames, prop_startGameErrorsWhenLessThan7Players,
-    prop_startGameErrorsWhenMoreThan24Players,
+    prop_startGameErrorsWhenMoreThan24Players, prop_startGameErrorsWhenMoreThan1Seer,
+    prop_startGameErrorsWhenMoreThan1Scapegoat,
 
     -- * createPlayers
     prop_createPlayersUsesGivenPlayerNames, prop_createPlayersUsesGivenRoles,
@@ -44,6 +45,7 @@ import Control.Monad.Writer
 import           Data.Either.Extra
 import           Data.List.Extra
 import qualified Data.Map          as Map
+import           Data.Maybe
 import           Data.Text         (Text)
 
 import           Game.Werewolf.Engine         hiding (doesPlayerExist, isGameOver, isSeersTurn,
@@ -78,10 +80,10 @@ prop_checkSeersTurnAdvancesToWerewolves game =
         game'   = game { _stage = SeersTurn }
         n       = length . filterSeers $ game' ^. players
 
-prop_checkSeersTurnResetsSees :: Game -> Property
-prop_checkSeersTurnResetsSees game =
+prop_checkSeersTurnResetsSee :: Game -> Property
+prop_checkSeersTurnResetsSee game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    Map.null $ run_ checkStage game'' ^. sees
+    isNothing $ run_ checkStage game'' ^. see
     where
         game'   = game { _stage = SeersTurn }
         n       = length . filterSeers $ game' ^. players
@@ -204,30 +206,42 @@ prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
             length (nub . map (_allegiance . _role) . filterAlive $ game' ^. players) > 1
             ==> not . isGameOver $ run_ checkGameOver game'
 
-prop_startGameStartsWithSunsetStage :: [Player] -> Property
-prop_startGameStartsWithSunsetStage players =
-    isRight (runExcept . runWriterT $ startGame "" players)
-    ==> isSunset (fst . fromRight . runExcept . runWriterT $ startGame "" players)
+prop_startGameStartsWithSunsetStage :: Property
+prop_startGameStartsWithSunsetStage =
+    forAll arbitraryPlayerSet $ \players ->
+    isSunset (fst . fromRight . runExcept . runWriterT $ startGame "" players)
 
-prop_startGameUsesGivenPlayers :: [Player] -> Property
-prop_startGameUsesGivenPlayers players' = and [
-    isRight . runExcept . runWriterT $ startGame "" players'
-    ] ==> (fst . fromRight . runExcept . runWriterT $ startGame "" players') ^. players == players'
+prop_startGameUsesGivenPlayers :: Property
+prop_startGameUsesGivenPlayers =
+    forAll arbitraryPlayerSet $ \players' ->
+    (fst . fromRight . runExcept . runWriterT $ startGame "" players') ^. players == players'
 
-prop_startGameErrorsUnlessUniquePlayerNames :: [Player] -> Property
-prop_startGameErrorsUnlessUniquePlayerNames players = and [
-    isRight . runExcept . runWriterT $ startGame "" players
-    ] ==> forAll (elements players) $ \player -> isLeft (runExcept . runWriterT $ startGame "" (player:players))
+prop_startGameErrorsUnlessUniquePlayerNames :: Game -> Property
+prop_startGameErrorsUnlessUniquePlayerNames game =
+    forAll (elements players') $ \player -> isLeft (runExcept . runWriterT $ startGame "" (player:players'))
+    where
+        players' = game ^. players
 
 prop_startGameErrorsWhenLessThan7Players :: [Player] -> Property
-prop_startGameErrorsWhenLessThan7Players players = and [
+prop_startGameErrorsWhenLessThan7Players players =
     length players < 7
-    ] ==> isLeft (runExcept . runWriterT $ startGame "" players)
+    ==> isLeft (runExcept . runWriterT $ startGame "" players)
 
 prop_startGameErrorsWhenMoreThan24Players :: Property
-prop_startGameErrorsWhenMoreThan24Players = forAll (resize 30 $ listOf arbitrary) $ \players -> and [
-    length players > 24
-    ] ==> isLeft (runExcept . runWriterT $ startGame "" players)
+prop_startGameErrorsWhenMoreThan24Players =
+    forAll (resize 30 $ listOf arbitrary) $ \players ->
+        length players > 24
+        ==> isLeft (runExcept . runWriterT $ startGame "" players)
+
+prop_startGameErrorsWhenMoreThan1Seer :: [Player] -> Property
+prop_startGameErrorsWhenMoreThan1Seer players =
+    length (filterSeers players) > 1
+    ==> isLeft (runExcept . runWriterT $ startGame "" players)
+
+prop_startGameErrorsWhenMoreThan1Scapegoat :: [Player] -> Property
+prop_startGameErrorsWhenMoreThan1Scapegoat players =
+    length (filterScapegoats players) > 1
+    ==> isLeft (runExcept . runWriterT $ startGame "" players)
 
 prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property
 prop_createPlayersUsesGivenPlayerNames playerNames extraRoles = monadicIO $ createPlayers playerNames extraRoles >>= return . (playerNames ==) . map _name

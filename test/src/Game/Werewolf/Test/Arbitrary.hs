@@ -11,8 +11,8 @@ Maintainer  : public@hjwylde.com
 module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
     arbitraryCommand, arbitraryDevourVoteCommand, arbitraryLynchVoteCommand, arbitraryQuitCommand,
-    arbitrarySeeCommand, arbitraryNewGame, arbitraryPlayer, arbitrarySeer, arbitraryVillager,
-    arbitraryWerewolf, arbitraryScapegoat,
+    arbitrarySeeCommand, arbitraryNewGame, arbitraryPlayer, arbitraryPlayerSet, arbitraryScapegoat,
+    arbitrarySeer, arbitraryVillager, arbitraryWerewolf,
 
     -- * Utility functions
     run, run_, runArbitraryCommands,
@@ -26,6 +26,7 @@ import Control.Monad.Writer
 import           Data.Either.Extra
 import           Data.List.Extra
 import qualified Data.Map          as Map
+import           Data.Maybe
 import           Data.Text         (Text)
 import qualified Data.Text         as T
 
@@ -77,12 +78,12 @@ arbitraryQuitCommand game = do
 
 arbitrarySeeCommand :: Game -> Gen Command
 arbitrarySeeCommand game = do
-    let applicableCallers   = filter (flip Map.notMember (game ^. sees) . _name) (filterAlive . filterSeers $ game ^. players)
-    target                  <- arbitraryPlayer game
+    let seer    = head . filterSeers $ game ^. players
+    target      <- arbitraryPlayer game
 
-    if null applicableCallers
+    if isJust (game ^. see)
         then return noopCommand
-        else elements applicableCallers >>= \caller -> return $ seeCommand (caller ^. name) (target ^. name)
+        else return $ seeCommand (seer ^. name) (target ^. name)
 
 instance Arbitrary Game where
     arbitrary = do
@@ -92,16 +93,7 @@ instance Arbitrary Game where
         return $ game { _stage = stage }
 
 arbitraryNewGame :: Gen Game
-arbitraryNewGame = do
-    n <- choose (7, 24)
-    players <- nubOn _name <$> infiniteList
-
-    let seer        = head $ filterSeers players
-    let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
-    let villagers   = take (n - 2 - (length werewolves)) $ filterVillagers players
-    let scapegoat   = head $ filterScapegoats players
-
-    return $ newGame (seer:scapegoat:werewolves ++ villagers)
+arbitraryNewGame = newGame <$> arbitraryPlayerSet
 
 instance Arbitrary Stage where
     arbitrary = elements [GameOver, SeersTurn, VillagesTurn, WerewolvesTurn]
@@ -111,6 +103,18 @@ instance Arbitrary Player where
 
 arbitraryPlayer :: Game -> Gen Player
 arbitraryPlayer = elements . filterAlive . _players
+
+arbitraryPlayerSet :: Gen [Player]
+arbitraryPlayerSet = do
+    n <- choose (7, 24)
+    players <- nubOn _name <$> infiniteList
+
+    let seer        = head $ filterSeers players
+    let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
+    let villagers   = take (n - 2 - (length werewolves)) $ filterVillagers players
+    let scapegoat   = head $ filterScapegoats players
+
+    return $ seer:scapegoat:werewolves ++ villagers
 
 arbitrarySeer :: Game -> Gen Player
 arbitrarySeer = elements . filterAlive . filterSeers . _players

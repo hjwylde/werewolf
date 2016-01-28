@@ -71,7 +71,7 @@ noopCommand = Command $ return ()
 pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> return ()
-    SeersTurn       -> tell [pingSeersMessage]
+    SeersTurn       -> tell [pingSeerMessage]
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
@@ -89,18 +89,17 @@ quitCommand callerName = Command $ do
     killPlayer caller
     tell [playerQuitMessage caller]
 
-    sees    %= Map.delete callerName
-    votes   %= Map.delete callerName
+    when (isSeer caller) $ see .= Nothing
+    votes %= Map.delete callerName
 
 seeCommand :: Text -> Text -> Command
 seeCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM (isPlayerSeer callerName)           $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isSeersTurn                         $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerSee callerName) . const $ throwError [playerHasAlreadySeenMessage callerName]
+    unlessM (isPlayerSeer callerName)       $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isSeersTurn                     $ throwError [playerCannotDoThatRightNowMessage callerName]
     validatePlayer callerName targetName
 
-    sees %= Map.insert callerName targetName
+    see .= Just targetName
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of

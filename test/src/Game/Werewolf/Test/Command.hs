@@ -33,14 +33,14 @@ module Game.Werewolf.Test.Command (
     prop_seeCommandErrorsWhenGameIsOver, prop_seeCommandErrorsWhenCallerDoesNotExist,
     prop_seeCommandErrorsWhenTargetDoesNotExist, prop_seeCommandErrorsWhenCallerIsDead,
     prop_seeCommandErrorsWhenTargetIsDead, prop_seeCommandErrorsWhenNotSeersTurn,
-    prop_seeCommandErrorsWhenCallerNotSeer, prop_seeCommandErrorsWhenCallerHasSeen,
-    prop_seeCommandUpdatesSees,
+    prop_seeCommandErrorsWhenCallerNotSeer, prop_seeCommandSetsSee,
 ) where
 
 import Control.Lens hiding (elements)
 
 import Data.Either.Extra
 import Data.Map          as Map
+import Data.Maybe
 
 import Game.Werewolf.Command
 import Game.Werewolf.Game
@@ -248,19 +248,11 @@ prop_seeCommandErrorsWhenCallerNotSeer game =
     ==> forAll (arbitraryPlayer game) $ \target ->
         verbose_runCommandErrors game (seeCommand (caller ^. name) (target ^. name))
 
-prop_seeCommandErrorsWhenCallerHasSeen :: Game -> Property
-prop_seeCommandErrorsWhenCallerHasSeen game =
-    isSeersTurn game
-    ==> forAll (arbitrarySeer game) $ \caller ->
-        forAll (arbitraryPlayer game) $ \target ->
-        let command = seeCommand (caller ^. name) (target ^. name)
-            in verbose_runCommandErrors (run_ (apply command) game) command
-
-prop_seeCommandUpdatesSees :: Game -> Property
-prop_seeCommandUpdatesSees game =
+prop_seeCommandSetsSee :: Game -> Property
+prop_seeCommandSetsSee game =
     isSeersTurn game
     ==> forAll (arbitrarySeeCommand game) $ \command ->
-        Map.size (run_ (apply command) game ^. sees) == 1
+        isJust $ run_ (apply command) game ^. see
 
 verbose_runCommandErrors :: Game -> Command -> Property
 verbose_runCommandErrors game command = whenFail (mapM_ putStrLn [show game, show command, show . fromRight $ run (apply command) game]) (isLeft $ run (apply command) game)

@@ -63,8 +63,7 @@ allCommandTests = [
     testProperty "PROP: see command errors when target is dead" prop_seeCommandErrorsWhenTargetIsDead,
     testProperty "PROP: see command errors when not seers turn" prop_seeCommandErrorsWhenNotSeersTurn,
     testProperty "PROP: see command errors when caller not seer" prop_seeCommandErrorsWhenCallerNotSeer,
-    testProperty "PROP: see command errors when caller has seen" prop_seeCommandErrorsWhenCallerHasSeen,
-    testProperty "PROP: see command errors updates sees" prop_seeCommandUpdatesSees
+    testProperty "PROP: see command sets see" prop_seeCommandSetsSee
     ]
 
 allEngineTests :: [TestTree]
@@ -73,7 +72,7 @@ allEngineTests = [
     testProperty "PROP: check stage does nothing when game over" prop_checkStageDoesNothingWhenGameOver,
 
     testProperty "PROP: check seers turn advances to werewolves" prop_checkSeersTurnAdvancesToWerewolves,
-    testProperty "PROP: check seers turn resets sees" prop_checkSeersTurnResetsSees,
+    testProperty "PROP: check seers turn resets sees" prop_checkSeersTurnResetsSee,
     testProperty "PROP: check seers turn does nothing unless all seen" prop_checkSeersTurnDoesNothingUnlessAllSeen,
 
     testProperty "PROP: check villages turn advances to seers" prop_checkVillagesTurnAdvancesToSeers,
@@ -97,6 +96,8 @@ allEngineTests = [
     testProperty "PROP: start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
     testProperty "PROP: start game errors when less than 7 players" prop_startGameErrorsWhenLessThan7Players,
     testProperty "PROP: start game errors when more than 24 players" prop_startGameErrorsWhenMoreThan24Players,
+    testProperty "PROP: start game errors when more than 1 seer" prop_startGameErrorsWhenMoreThan1Seer,
+    testProperty "PROP: start game errors when more than 1 scapegoat" prop_startGameErrorsWhenMoreThan1Scapegoat,
 
     testProperty "PROP: create players uses given player names" prop_createPlayersUsesGivenPlayerNames,
     testProperty "PROP: create players uses given roles" prop_createPlayersUsesGivenRoles,
@@ -111,7 +112,7 @@ allGameTests :: [TestTree]
 allGameTests = [
     testProperty "PROP: new game starts with sunset stage" prop_newGameStartsWithSunsetStage,
 
-    testProperty "PROP: new game starts with sees empty" prop_newGameStartsWithSeesEmpty,
+    testProperty "PROP: new game starts with no see" prop_newGameStartsWithNoSee,
     testProperty "PROP: new game starts with votes empty" prop_newGameStartsWithVotesEmpty,
     testProperty "PROP: new game uses given players" prop_newGameUsesGivenPlayers
     ]

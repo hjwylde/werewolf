@@ -23,7 +23,7 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerSee, getPlayerVote,
+    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerVote,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -42,6 +42,7 @@ module Game.Werewolf.Engine (
 
 import Control.Lens         hiding (cons)
 import Control.Monad.Except
+import Control.Monad.Extra
 import Control.Monad.Random
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
@@ -49,6 +50,7 @@ import Control.Monad.Writer
 import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Text       (Text)
+import           qualified Data.Text       as T
 
 import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn,
                                          isWerewolvesTurn, killPlayer)
@@ -56,7 +58,7 @@ import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     (Role, villagerRole, werewolfRole, _allegiance)
+import           Game.Werewolf.Role     (Role, scapegoatRole, seerRole, villagerRole, werewolfRole, _allegiance)
 import qualified Game.Werewolf.Role     as Role
 
 import System.Directory
@@ -70,17 +72,13 @@ checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
     GameOver -> return ()
 
-    SeersTurn -> do
-        seersCount  <- uses players (length . filterAlive . filterSeers)
-        votes'      <- use sees
+    SeersTurn -> whenJustM (use see) $ \targetName -> do
+        seer <- uses players (head . filterSeers)
+        target <- uses players (findByName_ targetName)
 
-        when (seersCount == Map.size votes') $ do
-            forM_ (Map.toList votes') $ \(seerName, targetName) -> do
-                target <- uses players (findByName_ targetName)
+        tell [playerSeenMessage (seer ^. name) target]
 
-                tell [playerSeenMessage seerName target]
-
-            advanceStage
+        advanceStage
 
     Sunrise -> advanceStage
 
@@ -101,8 +99,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
                     tell [playerLynchedMessage (target ^. name) (target ^. role . Role.name)]
                 _               ->
                     uses players (filterAlive . filterScapegoats) >>= \aliveScapegoats -> case aliveScapegoats of
-                        (scapegoat:_)   -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
-                        []              -> tell [noPlayerLynchedMessage]
+                        [scapegoat] -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
+                        _           -> tell [noPlayerLynchedMessage]
 
             advanceStage
 
@@ -133,7 +131,7 @@ advanceStage = do
     tell $ stageMessages nextStage alivePlayers
 
     stage   .= nextStage
-    sees    .= Map.empty
+    see     .= Nothing
     votes   .= Map.empty
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
@@ -147,6 +145,8 @@ startGame callerName players = do
     when (playerNames /= nub playerNames)   $ throwError [privateMessage [callerName] "Player names must be unique."]
     when (length players < 7)               $ throwError [privateMessage [callerName] "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage [callerName] "Cannot have more than 24 players."]
+    forM_ restrictedRoles $ \role ->
+        when (length (filter ((role ==) . _role) players) > 1) $ throwError [privateMessage [callerName] $ T.concat ["Cannot have more than 1 ", role ^. Role.name, "."]]
 
     let game = newGame players
 
@@ -155,6 +155,7 @@ startGame callerName players = do
     return game
     where
         playerNames = map _name players
+        restrictedRoles = [scapegoatRole, seerRole]
 
 killPlayer :: MonadState Game m => Player -> m ()
 killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -170,9 +171,6 @@ isWerewolvesTurn = gets Game.isWerewolvesTurn
 
 isGameOver :: MonadState Game m => m Bool
 isGameOver = gets Game.isGameOver
-
-getPlayerSee :: MonadState Game m => Text -> m (Maybe Text)
-getPlayerSee playerName = use $ sees . at playerName
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = use $ votes . at playerName

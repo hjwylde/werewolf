@@ -6,6 +6,7 @@
 
 * Renamed `turn` to `stage`. ([#70](https://github.com/hjwylde/werewolf/issues/70))
 * Renamed `VillagersTurn` to `VillagesTurn`. ([#70](https://github.com/hjwylde/werewolf/issues/70))
+* Restricted count of special roles to 1. ([#32](https://github.com/hjwylde/werewolf/issues/32))
 
 #### v0.3.4.0
 

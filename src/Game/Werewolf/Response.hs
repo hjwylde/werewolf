@@ -31,12 +31,12 @@ module Game.Werewolf.Response (
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
 
     -- ** Ping messages
-    pingSeersMessage, pingWerewolvesMessage,
+    pingSeerMessage, pingWerewolvesMessage,
 
     -- ** Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
 
-    -- ** Seers turn messages
+    -- ** Seer's turn messages
     playerSeenMessage,
 
     -- ** Villages' turn messages
@@ -49,9 +49,6 @@ module Game.Werewolf.Response (
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
     playerCannotDoThatRightNowMessage, playerIsDeadMessage, roleDoesNotExistMessage,
-
-    -- ** Seers' turn error messages
-    playerHasAlreadySeenMessage,
 
     -- ** Voting turn error messages
     playerHasAlreadyVotedMessage, targetIsDeadMessage,
@@ -151,16 +148,16 @@ newPlayerMessage players player
 
 stageMessages :: Stage -> [Player] -> [Message]
 stageMessages GameOver _                    = []
-stageMessages SeersTurn alivePlayers        = seersTurnMessages $ filterSeers alivePlayers
+stageMessages SeersTurn alivePlayers        = seersTurnMessages . head $ filterSeers alivePlayers
 stageMessages Sunrise _                     = [sunriseMessage]
 stageMessages Sunset _                      = [nightFallsMessage]
 stageMessages VillagesTurn _                = [villagesTurnMessage]
 stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages $ filterWerewolves alivePlayers
 
-seersTurnMessages :: [Player] -> [Message]
-seersTurnMessages seers = [
-    publicMessage "The Seers wake up.",
-    privateMessage (map _name seers) "Whose allegiance would you like to see?"
+seersTurnMessages :: Player -> [Message]
+seersTurnMessages seer = [
+    publicMessage "The Seer wakes up.",
+    privateMessage [seer ^. name] "Whose allegiance would you like to see?"
     ]
 
 sunriseMessage :: Message
@@ -199,8 +196,8 @@ playerLostMessage name = privateMessage [name] "Feck, you lost this time round..
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
 
-pingSeersMessage :: Message
-pingSeersMessage = publicMessage "Waiting on the Seers..."
+pingSeerMessage :: Message
+pingSeerMessage = publicMessage "Waiting on the Seer..."
 
 pingWerewolvesMessage :: Message
 pingWerewolvesMessage = publicMessage "Waiting on the Werewolves..."
@@ -210,6 +207,7 @@ currentStageMessages name GameOver  = [gameIsOverMessage name]
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
 currentStageMessages name turn      = [privateMessage [name] $ T.concat [
+    -- TODO (hjw): pluralise this correctly for the Seer
     "It's currently the ", T.pack $ show turn, "' turn."
     ]]
 
@@ -308,9 +306,6 @@ playerIsDeadMessage name = privateMessage [name] "Sshh, you're meant to be dead!
 
 roleDoesNotExistMessage :: Text -> Text -> Message
 roleDoesNotExistMessage to name = privateMessage [to] $ T.unwords ["Role", name, "does not exist."]
-
-playerHasAlreadySeenMessage :: Text -> Message
-playerHasAlreadySeenMessage name = privateMessage [name] "You've already seen!"
 
 playerHasAlreadyVotedMessage :: Text -> Message
 playerHasAlreadyVotedMessage name = privateMessage [name] "You've already voted!"
