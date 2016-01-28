@@ -16,7 +16,6 @@ matrix:
     - env: ARGS=""
     - env: ARGS="--resolver lts-3"
     - env: ARGS="--resolver lts-4"
-    - env: ARGS="--resolver lts-5"
     - env: ARGS="--resolver lts"
     - env: ARGS="--resolver nightly"
 
