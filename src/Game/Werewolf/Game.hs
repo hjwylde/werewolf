@@ -20,7 +20,7 @@ module Game.Werewolf.Game (
     killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
+    isGameOver, isSeersTurn, isSunset, isVillagesTurn, isWerewolvesTurn,
 
     -- * Stage
     Stage(..),
@@ -64,9 +64,6 @@ isGameOver game = game ^. stage == GameOver
 
 isSeersTurn :: Game -> Bool
 isSeersTurn game = game ^. stage == SeersTurn
-
-isSunrise :: Game -> Bool
-isSunrise game = game ^. stage == Sunrise
 
 isSunset :: Game -> Bool
 isSunset game = game ^. stage == Sunset

@@ -45,7 +45,10 @@ handle callerName (Options extraRoleNames playerNames) = do
         }
 
     result <- runExceptT $ do
-        extraRoles <- forM extraRoleNames $ \roleName -> maybe (throwError [roleDoesNotExistMessage callerName roleName]) return (findByName roleName)
+        extraRoles <- forM extraRoleNames $ \roleName -> maybe
+            (throwError [roleDoesNotExistMessage callerName roleName])
+            return
+            (findByName roleName)
 
         players <- createPlayers playerNames extraRoles
 

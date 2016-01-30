@@ -23,7 +23,7 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerVote, getPendingVoters,
+    isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn, getPlayerVote, getPendingVoters,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -34,7 +34,7 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerSeer, isPlayerVillager, isPlayerWerewolf, isPlayerAlive, isPlayerDead,
+    doesPlayerExist, isPlayerSeer, isPlayerWerewolf, isPlayerDead,
 
     -- * Role
     randomiseRoles,
@@ -210,14 +210,8 @@ doesPlayerExist name = uses players $ Player.doesPlayerExist name
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name = uses players $ isSeer . findByName_ name
 
-isPlayerVillager :: MonadState Game m => Text -> m Bool
-isPlayerVillager name = uses players $ isVillager . findByName_ name
-
 isPlayerWerewolf :: MonadState Game m => Text -> m Bool
 isPlayerWerewolf name = uses players $ isWerewolf . findByName_ name
-
-isPlayerAlive :: MonadState Game m => Text -> m Bool
-isPlayerAlive name = uses players $ isAlive . findByName_ name
 
 isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = uses players $ isDead . findByName_ name

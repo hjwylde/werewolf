@@ -111,11 +111,12 @@ allEngineTests = [
 allGameTests :: [TestTree]
 allGameTests = [
     testProperty "PROP: new game starts with sunset stage" prop_newGameStartsWithSunsetStage,
-
     testProperty "PROP: new game starts with no see" prop_newGameStartsWithNoSee,
     testProperty "PROP: new game starts with votes empty" prop_newGameStartsWithVotesEmpty,
     testProperty "PROP: new game uses given players" prop_newGameUsesGivenPlayers
     ]
 
 allPlayerTests :: [TestTree]
-allPlayerTests = [testProperty "PROP: new player is alive" prop_newPlayerIsAlive]
+allPlayerTests = [
+    testProperty "PROP: new player is alive" prop_newPlayerIsAlive
+    ]

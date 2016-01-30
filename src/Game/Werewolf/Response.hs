@@ -21,7 +21,7 @@ module Game.Werewolf.Response (
     success, failure,
 
     -- ** Exit functions
-    exitWith, exitSuccess, exitFailure,
+    exitWith,
 
     -- * Message
     Message(..),
@@ -102,12 +102,6 @@ failure = Response False []
 
 exitWith :: MonadIO m => Response -> m ()
 exitWith response = liftIO $ T.putStrLn (T.decodeUtf8 $ encode response) >> Exit.exitSuccess
-
-exitSuccess :: MonadIO m => m ()
-exitSuccess = exitWith success
-
-exitFailure :: MonadIO m => m ()
-exitFailure = exitWith failure
 
 data Message = Message
     { to      :: Maybe Text
