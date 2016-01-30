@@ -10,6 +10,7 @@
 * Changed private message structure to only ever be for a single player. ([#21](https://github.com/hjwylde/werewolf/issues/21))
 
 *Minor*
+
 * Added private pinging to the `ping` command. ([#69](https://github.com/hjwylde/werewolf/issues/69))
 
 #### v0.3.4.0
