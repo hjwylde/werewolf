@@ -11,6 +11,7 @@ Maintainer  : public@hjwylde.com
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (
+    -- * Main
     main, handle,
 ) where
 

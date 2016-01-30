@@ -17,7 +17,7 @@ module Game.Werewolf.Role (
     Role(..), name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles, diurnalRoles, nocturnalRoles, seerRole, villagerRole, werewolfRole, scapegoatRole,
+    allRoles, diurnalRoles, nocturnalRoles, scapegoatRole, seerRole, villagerRole, werewolfRole,
 
     -- ** Queries
     findByName, findByName_,
@@ -49,7 +49,15 @@ diurnalRoles :: [Role]
 diurnalRoles = [villagerRole, scapegoatRole]
 
 nocturnalRoles :: [Role]
-nocturnalRoles = [seerRole, werewolfRole]
+nocturnalRoles = allRoles \\ diurnalRoles
+
+scapegoatRole :: Role
+scapegoatRole = Role
+    { _name         = "Scapegoat"
+    , _allegiance   = Villagers
+    , _description  = "That one person everyone loves to blame."
+    , _advice       = "Cross your fingers that the votes don't end up tied."
+    }
 
 seerRole :: Role
 seerRole = Role
@@ -84,16 +92,8 @@ werewolfRole = Role
         "Voting against your partner can be a good way to deflect suspicion from yourself."
     }
 
-scapegoatRole :: Role
-scapegoatRole = Role
-    { _name         = "Scapegoat"
-    , _allegiance   = Villagers
-    , _description  = "That one person everyone loves to blame."
-    , _advice       = "Cross your fingers that the votes don't end up tied."
-    }
-
 findByName :: Text -> Maybe Role
-findByName name = find ((==) name . _name) allRoles
+findByName name = find ((name ==) . _name) allRoles
 
 findByName_ :: Text -> Role
 findByName_ name = fromJust $ findByName name

@@ -51,9 +51,10 @@ makeLenses ''Game
 makeLenses ''Stage
 
 newGame :: [Player] -> Game
-newGame players = Game (head $ filter (stageAvailable aliveRoles) stageCycle) players Nothing Map.empty
+newGame players = Game stage players Nothing Map.empty
     where
-        aliveRoles = map _role $ filterAlive players
+        stage       = head $ filter (stageAvailable aliveRoles) stageCycle
+        aliveRoles  = map _role $ filterAlive players
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')

@@ -55,7 +55,7 @@ newPlayer :: Text -> Role -> Player
 newPlayer name role = Player name role Alive
 
 findByName :: Text -> [Player] -> Maybe Player
-findByName name = find ((==) name . _name)
+findByName name = find ((name ==) . _name)
 
 findByName_ :: Text -> [Player] -> Player
 findByName_ name = fromJust . findByName name

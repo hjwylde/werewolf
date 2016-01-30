@@ -27,6 +27,9 @@ module Game.Werewolf.Response (
     Message(..),
     publicMessage, privateMessage, groupMessages,
 
+    -- ** Binary messages
+    noGameRunningMessage, gameAlreadyRunningMessage,
+
     -- ** Generic messages
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
 
@@ -127,6 +130,12 @@ privateMessage to = Message (Just to)
 
 groupMessages :: [Text] -> Text -> [Message]
 groupMessages tos message = map (\to -> privateMessage to message) tos
+
+noGameRunningMessage :: Text -> Message
+noGameRunningMessage to = privateMessage to "No game is running."
+
+gameAlreadyRunningMessage :: Text -> Message
+gameAlreadyRunningMessage to = privateMessage to "A game is already running."
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = [
