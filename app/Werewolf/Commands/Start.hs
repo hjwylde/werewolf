@@ -41,7 +41,7 @@ data Options = Options
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options extraRoleNames playerNames) = do
     whenM doesGameExist . whenM (fmap (not . isGameOver) readGame) $ exitWith failure {
-        messages = [privateMessage callerName "A game is already running."]
+        messages = [gameAlreadyRunningMessage callerName]
         }
 
     result <- runExceptT $ do

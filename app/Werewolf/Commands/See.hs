@@ -39,7 +39,7 @@ data Options = Options
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options targetName) = do
     unlessM doesGameExist $ exitWith failure {
-        messages = [privateMessage callerName "No game is running."]
+        messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
