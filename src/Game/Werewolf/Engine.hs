@@ -23,7 +23,7 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerVote,
+    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerVote, getPendingVoters,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -175,6 +175,13 @@ isGameOver = gets Game.isGameOver
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = use $ votes . at playerName
+
+getPendingVoters :: MonadState Game m => m [Player]
+getPendingVoters = do
+    votes'          <- use votes
+    alivePlayers    <- uses players filterAlive
+
+    return $ filter (flip Map.notMember votes' . _name) alivePlayers
 
 defaultFilePath :: MonadIO m => m FilePath
 defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory

@@ -28,7 +28,6 @@ import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
-import           Data.List
 import qualified Data.Map  as Map
 import           Data.Text (Text)
 
@@ -37,7 +36,6 @@ import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn, i
                                killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (Villagers, Werewolves, findByName_, name, _name)
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 
@@ -71,14 +69,23 @@ noopCommand = Command $ return ()
 pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> return ()
-    SeersTurn       -> tell [pingSeerMessage]
+    SeersTurn       -> do
+        seer <- uses players $ head . filterAlive . filterSeers
+
+        tell [pingSeerMessage]
+        tell [pingPlayerMessage seer]
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
-        game <- get
+        pendingVoters <- getPendingVoters
 
-        tell [waitingOnMessage Nothing $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
-    WerewolvesTurn  -> tell [pingWerewolvesMessage]
+        tell [waitingOnMessage Nothing pendingVoters]
+        tell $ map pingPlayerMessage pendingVoters
+    WerewolvesTurn  -> do
+        pendingVoters <- getPendingVoters
+
+        tell [pingWerewolvesMessage]
+        tell $ map pingPlayerMessage (filterWerewolves pendingVoters)
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
@@ -103,10 +110,7 @@ seeCommand callerName targetName = Command $ do
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    GameOver       -> do
-        aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
-
-        when (length aliveAllegiances <= 1) $ stage .= GameOver >> get >>= tell . gameOverMessages
+    GameOver        -> get >>= tell . gameOverMessages
     SeersTurn       -> do
         game <- get
 
@@ -114,17 +118,18 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
-        game <- get
+        game            <- get
+        pendingVoters   <- getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
-        tell [waitingOnMessage (Just callerName) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)]
+        tell [waitingOnMessage (Just callerName) pendingVoters]
     WerewolvesTurn  -> do
-        unlessM (doesPlayerExist callerName) $ throwError [playerDoesNotExistMessage callerName callerName]
-
-        game <- get
+        game            <- get
+        pendingVoters   <- filterWerewolves <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
-        whenM (isPlayerWerewolf callerName) $ tell [waitingOnMessage (Just callerName) $ filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)]
+        whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
+            tell [waitingOnMessage (Just callerName) pendingVoters]
     where
         standardStatusMessages stage players =
             currentStageMessages callerName stage ++ [

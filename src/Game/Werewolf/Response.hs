@@ -31,7 +31,7 @@ module Game.Werewolf.Response (
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
 
     -- ** Ping messages
-    pingSeerMessage, pingWerewolvesMessage,
+    pingPlayerMessage, pingSeerMessage, pingWerewolvesMessage,
 
     -- ** Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
@@ -201,6 +201,9 @@ playerLostMessage to = privateMessage to "Feck, you lost this time round..."
 
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
+
+pingPlayerMessage :: Player -> Message
+pingPlayerMessage player = privateMessage (player ^. name) "Waiting on you..."
 
 pingSeerMessage :: Message
 pingSeerMessage = publicMessage "Waiting on the Seer..."
