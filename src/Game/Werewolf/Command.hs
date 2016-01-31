@@ -32,8 +32,8 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Engine
-import Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                               killPlayer)
+import Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, isGameOver, isSeersTurn,
+                               isVillagesTurn, isWerewolvesTurn, killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
 

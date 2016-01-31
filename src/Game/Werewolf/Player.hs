@@ -20,10 +20,10 @@ module Game.Werewolf.Player (
     findByName, findByName_,
 
     -- ** Filters
-    filterSeers, filterVillagers, filterWerewolves, filterScapegoats,
+    filterScapegoats, filterSeers, filterVillagers, filterWerewolves,
 
     -- ** Queries
-    doesPlayerExist, isSeer, isVillager, isWerewolf, isScapegoat, isAlive, isDead,
+    doesPlayerExist, isScapegoat, isSeer, isVillager, isWerewolf, isAlive, isDead,
 
     -- * State
     State(..),
@@ -38,7 +38,7 @@ import Data.List
 import Data.Maybe
 import Data.Text  (Text)
 
-import Game.Werewolf.Role hiding (findByName, findByName_, name, _name)
+import Game.Werewolf.Role hiding (findByName, name, _name)
 
 data Player = Player
     { _name  :: Text
@@ -60,6 +60,9 @@ findByName name = find ((name ==) . _name)
 findByName_ :: Text -> [Player] -> Player
 findByName_ name = fromJust . findByName name
 
+filterScapegoats :: [Player] -> [Player]
+filterScapegoats = filter isScapegoat
+
 filterSeers :: [Player] -> [Player]
 filterSeers = filter isSeer
 
@@ -69,11 +72,11 @@ filterVillagers = filter isVillager
 filterWerewolves :: [Player] -> [Player]
 filterWerewolves = filter isWerewolf
 
-filterScapegoats :: [Player] -> [Player]
-filterScapegoats = filter isScapegoat
-
 doesPlayerExist :: Text -> [Player] -> Bool
 doesPlayerExist name = isJust . findByName name
+
+isScapegoat :: Player -> Bool
+isScapegoat player = player ^. role == scapegoatRole
 
 isSeer :: Player -> Bool
 isSeer player = player ^. role == seerRole
@@ -83,9 +86,6 @@ isVillager player = player ^. role == villagerRole
 
 isWerewolf :: Player -> Bool
 isWerewolf player = player ^. role == werewolfRole
-
-isScapegoat :: Player -> Bool
-isScapegoat player = player ^. role == scapegoatRole
 
 isAlive :: Player -> Bool
 isAlive player = player ^. state == Alive

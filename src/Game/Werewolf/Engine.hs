@@ -23,7 +23,7 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isSeersTurn, isVillagesTurn, isWerewolvesTurn, isGameOver, getPlayerVote, getPendingVoters,
+    isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn, getPlayerVote, getPendingVoters,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -34,7 +34,7 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerSeer, isPlayerVillager, isPlayerWerewolf, isPlayerAlive, isPlayerDead,
+    doesPlayerExist, isPlayerSeer, isPlayerWerewolf, isPlayerDead,
 
     -- * Role
     randomiseRoles,
@@ -52,8 +52,8 @@ import qualified Data.Map        as Map
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (isGameOver, isSeersTurn, isVillagesTurn,
-                                         isWerewolvesTurn, killPlayer)
+import           Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, isGameOver,
+                                         isSeersTurn, isVillagesTurn, isWerewolvesTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -174,14 +174,10 @@ isGameOver :: MonadState Game m => m Bool
 isGameOver = gets Game.isGameOver
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
-getPlayerVote playerName = use $ votes . at playerName
+getPlayerVote playerName = gets $ Game.getPlayerVote playerName
 
 getPendingVoters :: MonadState Game m => m [Player]
-getPendingVoters = do
-    votes'          <- use votes
-    alivePlayers    <- uses players filterAlive
-
-    return $ filter (flip Map.notMember votes' . _name) alivePlayers
+getPendingVoters = gets Game.getPendingVoters
 
 defaultFilePath :: MonadIO m => m FilePath
 defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory
@@ -210,14 +206,8 @@ doesPlayerExist name = uses players $ Player.doesPlayerExist name
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name = uses players $ isSeer . findByName_ name
 
-isPlayerVillager :: MonadState Game m => Text -> m Bool
-isPlayerVillager name = uses players $ isVillager . findByName_ name
-
 isPlayerWerewolf :: MonadState Game m => Text -> m Bool
 isPlayerWerewolf name = uses players $ isWerewolf . findByName_ name
-
-isPlayerAlive :: MonadState Game m => Text -> m Bool
-isPlayerAlive name = uses players $ isAlive . findByName_ name
 
 isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = uses players $ isDead . findByName_ name

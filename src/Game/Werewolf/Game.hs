@@ -20,7 +20,8 @@ module Game.Werewolf.Game (
     killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
+    isGameOver, isSeersTurn, isSunset, isVillagesTurn, isWerewolvesTurn, getPlayerVote,
+    getPendingVoters,
 
     -- * Stage
     Stage(..),
@@ -34,7 +35,7 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role   hiding (Villagers, Werewolves)
+import Game.Werewolf.Role   hiding (Villagers, Werewolves, _name)
 
 data Game = Game
     { _stage   :: Stage
@@ -65,9 +66,6 @@ isGameOver game = game ^. stage == GameOver
 isSeersTurn :: Game -> Bool
 isSeersTurn game = game ^. stage == SeersTurn
 
-isSunrise :: Game -> Bool
-isSunrise game = game ^. stage == Sunrise
-
 isSunset :: Game -> Bool
 isSunset game = game ^. stage == Sunset
 
@@ -76,6 +74,15 @@ isVillagesTurn game = game ^. stage == VillagesTurn
 
 isWerewolvesTurn :: Game -> Bool
 isWerewolvesTurn game = game ^. stage == WerewolvesTurn
+
+getPlayerVote :: Text -> Game -> Maybe Text
+getPlayerVote playerName game = game ^. votes . at playerName
+
+getPendingVoters :: Game -> [Player]
+getPendingVoters game = filter (flip Map.notMember votes' . _name) alivePlayers
+    where
+        votes'          = game ^. votes
+        alivePlayers    = filterAlive $ game ^. players
 
 stageCycle :: [Stage]
 stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, Sunrise, VillagesTurn]

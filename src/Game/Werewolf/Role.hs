@@ -20,7 +20,7 @@ module Game.Werewolf.Role (
     allRoles, diurnalRoles, nocturnalRoles, scapegoatRole, seerRole, villagerRole, werewolfRole,
 
     -- ** Queries
-    findByName, findByName_,
+    findByName,
 
     -- * Allegiance
     Allegiance(..),
@@ -94,9 +94,6 @@ werewolfRole = Role
 
 findByName :: Text -> Maybe Role
 findByName name = find ((name ==) . _name) allRoles
-
-findByName_ :: Text -> Role
-findByName_ name = fromJust $ findByName name
 
 data Allegiance = Villagers | Werewolves
     deriving (Eq, Read, Show)

@@ -25,7 +25,6 @@ import Control.Monad.Writer
 
 import           Data.Either.Extra
 import           Data.List.Extra
-import qualified Data.Map          as Map
 import           Data.Maybe
 import           Data.Text         (Text)
 import qualified Data.Text         as T
@@ -52,7 +51,7 @@ arbitraryCommand game = case game ^. stage of
 
 arbitraryDevourVoteCommand :: Game -> Gen Command
 arbitraryDevourVoteCommand game = do
-    let applicableCallers   = filter (flip Map.notMember (game ^. votes) . _name) (filterAlive . filterWerewolves $ game ^. players)
+    let applicableCallers   = filterWerewolves $ getPendingVoters game
     target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
 
     if null applicableCallers
@@ -61,7 +60,7 @@ arbitraryDevourVoteCommand game = do
 
 arbitraryLynchVoteCommand :: Game -> Gen Command
 arbitraryLynchVoteCommand game = do
-    let applicableCallers   = filter (flip Map.notMember (game ^. votes) . _name) (filterAlive $ game ^. players)
+    let applicableCallers   = getPendingVoters game
     target                  <- arbitraryPlayer game
 
     if null applicableCallers
