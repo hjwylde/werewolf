@@ -21,7 +21,7 @@ module Game.Werewolf.Game (
 
     -- ** Queries
     isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn, getPlayerVote,
-    getPendingVoters,
+    getPendingVoters, getVoteResult,
 
     -- * Stage
     Stage(..),
@@ -33,9 +33,10 @@ module Game.Werewolf.Game (
 
 import Control.Lens
 
-import           Data.Map  (Map)
-import qualified Data.Map  as Map
-import           Data.Text (Text)
+import           Data.List.Extra
+import           Data.Map        (Map)
+import qualified Data.Map        as Map
+import           Data.Text       (Text)
 
 import Game.Werewolf.Player
 import Game.Werewolf.Role   hiding (Villagers, Werewolves, _name)
@@ -93,6 +94,13 @@ getPendingVoters game = filter (flip Map.notMember votes' . _name) alivePlayers
     where
         votes'          = game ^. votes
         alivePlayers    = filterAlive $ game ^. players
+
+getVoteResult :: Game -> [Player]
+getVoteResult game = map (`findByName_` players') result
+    where
+        players'    = game ^. players
+        votees      = Map.elems $ game ^. votes
+        result      = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
 
 stageCycle :: [Stage]
 stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, Sunrise, VillagesTurn]

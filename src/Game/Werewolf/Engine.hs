@@ -24,6 +24,7 @@ module Game.Werewolf.Engine (
 
     -- ** Queries
     isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn, getPlayerVote, getPendingVoters,
+    getVoteResult,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -52,8 +53,9 @@ import qualified Data.Map        as Map
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, isGameOver,
-                                         isSeersTurn, isVillagesTurn, isWerewolvesTurn, killPlayer)
+import           Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, getVoteResult,
+                                         isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
+                                         killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -97,12 +99,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
         when (playersCount == Map.size votes') $ do
             tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes')
 
-            case last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes') of
-                [lynchedName]   -> do
-                    target <- uses players (findByName_ lynchedName)
-
-                    killPlayer target
-                    tell [playerLynchedMessage target]
+            getVoteResult >>= \votees -> case votees of
+                [votee]   -> do
+                    killPlayer votee
+                    tell [playerLynchedMessage votee]
                 _               ->
                     uses players (filterAlive . filterScapegoats) >>= \aliveScapegoats -> case aliveScapegoats of
                         [scapegoat] -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
@@ -112,12 +112,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     WerewolvesTurn -> do
         aliveWerewolves <- uses players (filterAlive . filterWerewolves)
-        votes'          <- use votes
 
-        when (length aliveWerewolves == Map.size votes') $ do
-            case last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes') of
-                [targetName]    -> events %= cons (Devour targetName)
-                _               -> tell [noPlayerDevouredMessage]
+        whenM (uses votes $ (length aliveWerewolves ==) . Map.size) $ do
+            getVoteResult >>= \votees -> case votees of
+                [target]    -> events %= cons (Devour $ target ^. name)
+                _           -> tell [noPlayerDevouredMessage]
 
             advanceStage
 
@@ -198,6 +197,9 @@ getPlayerVote playerName = gets $ Game.getPlayerVote playerName
 
 getPendingVoters :: MonadState Game m => m [Player]
 getPendingVoters = gets Game.getPendingVoters
+
+getVoteResult :: MonadState Game m => m [Player]
+getVoteResult = gets Game.getVoteResult
 
 defaultFilePath :: MonadIO m => m FilePath
 defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory
