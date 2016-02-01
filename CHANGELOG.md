@@ -8,6 +8,7 @@
 * Renamed `VillagersTurn` to `VillagesTurn`. ([#70](https://github.com/hjwylde/werewolf/issues/70))
 * Restricted count of special roles to 1. ([#32](https://github.com/hjwylde/werewolf/issues/32))
 * Changed private message structure to only ever be for a single player. ([#21](https://github.com/hjwylde/werewolf/issues/21))
+* Added `events` to the game state. ([#71](https://github.com/hjwylde/werewolf/issues/71))
 
 *Minor*
 

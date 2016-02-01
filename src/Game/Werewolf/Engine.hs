@@ -67,7 +67,12 @@ import System.FilePath
 import System.Random.Shuffle
 
 checkStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkStage = get >>= \game -> checkStage' >> get >>= \game' -> unless (game == game') checkStage
+checkStage = do
+    game <- get
+    checkStage' >> checkEvents
+    game' <- get
+
+    when (game /= game') checkStage
 
 checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
@@ -110,15 +115,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
         votes'          <- use votes
 
         when (length aliveWerewolves == Map.size votes') $ do
-            advanceStage
-
             case last $ groupSortOn (length . flip elemIndices (Map.elems votes')) (nub $ Map.elems votes') of
-                [targetName]    -> do
-                    target <- uses players (findByName_ targetName)
-
-                    killPlayer target
-                    tell [playerDevouredMessage target]
+                [targetName]    -> events %= cons (Devour targetName)
                 _               -> tell [noPlayerDevouredMessage]
+
+            advanceStage
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
@@ -134,6 +135,25 @@ advanceStage = do
     stage   .= nextStage
     see     .= Nothing
     votes   .= Map.empty
+
+checkEvents :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkEvents = do
+    (available, pending) <- use events >>= partitionM eventAvailable
+
+    events .= pending
+
+    mapM_ applyEvent available
+
+eventAvailable :: MonadState Game m => Event -> m Bool
+eventAvailable (Devour _) = gets isSunrise
+
+applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
+applyEvent (Devour name) = do
+    player <- uses players $ findByName_ name
+
+    killPlayer player
+
+    tell [playerDevouredMessage player]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do

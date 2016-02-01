@@ -13,19 +13,22 @@ Game and stage data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), stage, players, see, votes,
+    Game(..), stage, players, events, see, votes,
     newGame,
 
     -- ** Manipulations
     killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isSunset, isVillagesTurn, isWerewolvesTurn, getPlayerVote,
+    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn, getPlayerVote,
     getPendingVoters,
 
     -- * Stage
     Stage(..),
     stageCycle, stageAvailable,
+
+    -- * Event
+    Event(..),
 ) where
 
 import Control.Lens
@@ -40,6 +43,7 @@ import Game.Werewolf.Role   hiding (Villagers, Werewolves, _name)
 data Game = Game
     { _stage   :: Stage
     , _players :: [Player]
+    , _events  :: [Event]
     , _see     :: Maybe Text
     , _votes   :: Map Text Text
     } deriving (Eq, Read, Show)
@@ -47,12 +51,15 @@ data Game = Game
 data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn
     deriving (Eq, Read, Show)
 
+data Event = Devour Text
+    deriving (Eq, Read, Show)
+
 makeLenses ''Game
 
 makeLenses ''Stage
 
 newGame :: [Player] -> Game
-newGame players = Game stage players Nothing Map.empty
+newGame players = Game stage players [] Nothing Map.empty
     where
         stage       = head $ filter (stageAvailable aliveRoles) stageCycle
         aliveRoles  = map _role $ filterAlive players
@@ -65,6 +72,9 @@ isGameOver game = game ^. stage == GameOver
 
 isSeersTurn :: Game -> Bool
 isSeersTurn game = game ^. stage == SeersTurn
+
+isSunrise :: Game -> Bool
+isSunrise game = game ^. stage == Sunrise
 
 isSunset :: Game -> Bool
 isSunset game = game ^. stage == Sunset
