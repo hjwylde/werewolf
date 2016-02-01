@@ -97,7 +97,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
                     target <- uses players (findByName_ lynchedName)
 
                     killPlayer target
-                    tell [playerLynchedMessage (target ^. name) (target ^. role . Role.name)]
+                    tell [playerLynchedMessage target]
                 _               ->
                     uses players (filterAlive . filterScapegoats) >>= \aliveScapegoats -> case aliveScapegoats of
                         [scapegoat] -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
@@ -117,7 +117,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
                     target <- uses players (findByName_ targetName)
 
                     killPlayer target
-                    tell [playerDevouredMessage (target ^. name) (target ^. role . Role.name)]
+                    tell [playerDevouredMessage target]
                 _               -> tell [noPlayerDevouredMessage]
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
