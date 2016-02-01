@@ -161,7 +161,7 @@ stageMessages GameOver _                    = []
 stageMessages SeersTurn alivePlayers        = seersTurnMessages . head $ filterSeers alivePlayers
 stageMessages Sunrise _                     = [sunriseMessage]
 stageMessages Sunset _                      = [nightFallsMessage]
-stageMessages VillagesTurn _                = [villagesTurnMessage]
+stageMessages VillagesTurn _                = villagesTurnMessages
 stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages $ filterWerewolves alivePlayers
 
 seersTurnMessages :: Player -> [Message]
@@ -176,8 +176,11 @@ sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens thei
 nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the village is asleep."
 
-villagesTurnMessage :: Message
-villagesTurnMessage = publicMessage "Whom would you like to lynch?"
+villagesTurnMessages :: [Message]
+villagesTurnMessages = [
+    publicMessage "As the village gathers in the town square the town clerk calls for a vote.",
+    publicMessage "Whom would you like to lynch?"
+    ]
 
 werewolvesTurnMessages :: [Player] -> [Message]
 werewolvesTurnMessages werewolves = [
@@ -301,15 +304,13 @@ playerDevouredMessage player = publicMessage $ T.concat [
     "As you open them you notice a door broken down and ",
     player ^. name, "'s guts half devoured and spilling out over the cobblestones.",
     " From the look of their personal effects, you deduce they were a ",
-    player ^. role . Role.name, ".",
-    " As the village bays for vengeance, the town clerk calls for a vote."
+    player ^. role . Role.name, "."
     ]
 
 noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords [
     "Surprisingly you see everyone present at the town square.",
-    "Perhaps the Werewolves have left Miller's Hollow?",
-    "Still got to keep up the tradition though, so the town clerk calls for a vote."
+    "Perhaps the Werewolves have left Miller's Hollow?"
     ]
 
 gameIsOverMessage :: Text -> Message
