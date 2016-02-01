@@ -48,8 +48,9 @@ import qualified Data.Map          as Map
 import           Data.Maybe
 import           Data.Text         (Text)
 
-import           Game.Werewolf.Engine         hiding (doesPlayerExist, isGameOver, isSeersTurn,
-                                               isVillagesTurn, isWerewolvesTurn, killPlayer)
+import           Game.Werewolf.Engine         hiding (doesPlayerExist, getVoteResult, isGameOver,
+                                               isSeersTurn, isVillagesTurn, isWerewolvesTurn,
+                                               killPlayer)
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
 import           Game.Werewolf.Role           hiding (_name)
@@ -108,7 +109,7 @@ prop_checkVillagesTurnAdvancesToSeers game =
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: Game -> Property
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) == 1
+    length (getVoteResult game'') == 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == 1
     where
         game'   = game { _stage = VillagesTurn }
@@ -117,7 +118,7 @@ prop_checkVillagesTurnLynchesOnePlayerWhenConsensus game =
 prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property
 prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) > 1
+    length (getVoteResult game'') > 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == length (filterDead $ game' ^. players)
     where
         game'   = (foldl killPlayer game (filterScapegoats $ game ^. players)) { _stage = VillagesTurn }
@@ -126,7 +127,7 @@ prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
 prop_checkVillagesTurnLynchesScapegoatWhenConflicted :: Game -> Property
 prop_checkVillagesTurnLynchesScapegoatWhenConflicted game =
     forAll (runArbitraryCommands n game') $ \game'' -> and [
-        length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) > 1,
+        length (getVoteResult game'') > 1,
         any isScapegoat $ game' ^. players
         ] ==> isScapegoat $ head (filterDead $ run_ checkStage game'' ^. players)
     where
@@ -160,7 +161,7 @@ prop_checkWerewolvesTurnAdvancesToVillages game =
 prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus :: Game -> Property
 prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) == 1
+    length (getVoteResult game'') == 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == 1
     where
         game'   = game { _stage = WerewolvesTurn }
@@ -169,7 +170,7 @@ prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus game =
 prop_checkWerewolvesTurnKillsNoOneWhenConflicted :: Game -> Property
 prop_checkWerewolvesTurnKillsNoOneWhenConflicted game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    length (last $ groupSortOn (length . flip elemIndices (Map.elems $ game'' ^. votes)) (nub . Map.elems $ game'' ^. votes)) > 1
+    length (getVoteResult game'') > 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == 0
     where
         game'   = game { _stage = WerewolvesTurn }

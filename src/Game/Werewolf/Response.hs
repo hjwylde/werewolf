@@ -161,7 +161,7 @@ stageMessages GameOver _                    = []
 stageMessages SeersTurn alivePlayers        = seersTurnMessages . head $ filterSeers alivePlayers
 stageMessages Sunrise _                     = [sunriseMessage]
 stageMessages Sunset _                      = [nightFallsMessage]
-stageMessages VillagesTurn _                = [villagesTurnMessage]
+stageMessages VillagesTurn _                = villagesTurnMessages
 stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages $ filterWerewolves alivePlayers
 
 seersTurnMessages :: Player -> [Message]
@@ -176,8 +176,11 @@ sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens thei
 nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the village is asleep."
 
-villagesTurnMessage :: Message
-villagesTurnMessage = publicMessage "Whom would you like to lynch?"
+villagesTurnMessages :: [Message]
+villagesTurnMessages = [
+    publicMessage "As the village gathers in the town square the town clerk calls for a vote.",
+    publicMessage "Whom would you like to lynch?"
+    ]
 
 werewolvesTurnMessages :: [Player] -> [Message]
 werewolvesTurnMessages werewolves = [
@@ -205,8 +208,8 @@ playerLostMessage to = privateMessage to "Feck, you lost this time round..."
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
 
-pingPlayerMessage :: Player -> Message
-pingPlayerMessage player = privateMessage (player ^. name) "Waiting on you..."
+pingPlayerMessage :: Text -> Message
+pingPlayerMessage to = privateMessage to "Waiting on you..."
 
 pingSeerMessage :: Message
 pingSeerMessage = publicMessage "Waiting on the Seer..."
@@ -265,17 +268,18 @@ playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat [
     voterName, " voted to lynch ", targetName, "."
     ]
 
-playerLynchedMessage :: Text -> Text -> Message
-playerLynchedMessage name "Werewolf"    = publicMessage $ T.unwords [
-    name, "is tied up to a pyre and set alight.",
-    "As they scream their body starts to contort and writhe, transforming into a Werewolf.",
-    "Thankfully they go limp before breaking free of their restraints."
-    ]
-playerLynchedMessage name roleName      = publicMessage $ T.concat [
-    name, " is tied up to a pyre and set alight.",
-    " Eventually the screams start to die and with their last breath,",
-    " they reveal themselves as a ", roleName, "."
-    ]
+playerLynchedMessage :: Player -> Message
+playerLynchedMessage player
+    | isWerewolf player = publicMessage $ T.unwords [
+        player ^. name, "is tied up to a pyre and set alight.",
+        "As they scream their body starts to contort and writhe, transforming into a Werewolf.",
+        "Thankfully they go limp before breaking free of their restraints."
+        ]
+    | otherwise         = publicMessage $ T.concat [
+        player ^. name, " is tied up to a pyre and set alight.",
+        " Eventually the screams start to die and with their last breath,",
+        " they reveal themselves as a ", player ^. role . Role.name, "."
+        ]
 
 noPlayerLynchedMessage :: Message
 noPlayerLynchedMessage = publicMessage $ T.unwords [
@@ -295,19 +299,18 @@ playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.conc
     voterName, " voted to devour ", targetName, "."
     ]
 
-playerDevouredMessage :: Text -> Text -> Message
-playerDevouredMessage name roleName = publicMessage $ T.concat [
+playerDevouredMessage :: Player -> Message
+playerDevouredMessage player = publicMessage $ T.concat [
     "As you open them you notice a door broken down and ",
-    name, "'s guts half devoured and spilling out over the cobblestones.",
-    " From the look of their personal effects, you deduce they were a ", roleName, ".",
-    " As the village bays for vengeance, the town clerk calls for a vote."
+    player ^. name, "'s guts half devoured and spilling out over the cobblestones.",
+    " From the look of their personal effects, you deduce they were a ",
+    player ^. role . Role.name, "."
     ]
 
 noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords [
     "Surprisingly you see everyone present at the town square.",
-    "Perhaps the Werewolves have left Miller's Hollow?",
-    "Still got to keep up the tradition though, so the town clerk calls for a vote."
+    "Perhaps the Werewolves have left Miller's Hollow?"
     ]
 
 gameIsOverMessage :: Text -> Message

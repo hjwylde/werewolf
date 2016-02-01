@@ -73,19 +73,19 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         seer <- uses players $ head . filterAlive . filterSeers
 
         tell [pingSeerMessage]
-        tell [pingPlayerMessage seer]
+        tell [pingPlayerMessage $ seer ^. name]
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
         pendingVoters <- getPendingVoters
 
         tell [waitingOnMessage Nothing pendingVoters]
-        tell $ map pingPlayerMessage pendingVoters
+        tell $ map (pingPlayerMessage . _name) pendingVoters
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
         tell [pingWerewolvesMessage]
-        tell $ map pingPlayerMessage (filterWerewolves pendingVoters)
+        tell $ map (pingPlayerMessage . _name) (filterWerewolves pendingVoters)
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
