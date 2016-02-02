@@ -70,8 +70,10 @@ noopCommand = Command $ return ()
 passCommand :: Text -> Command
 passCommand callerName = Command $ do
     validatePlayer callerName callerName
+    unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
 
-    passes %= cons callerName
+    passes %= nub . cons callerName
 
 pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
@@ -117,6 +119,7 @@ quitCommand callerName = Command $ do
     killPlayer caller
     tell [playerQuitMessage caller]
 
+    passes %= delete callerName
     when (isWitch caller)   $ poison .= Nothing
     when (isSeer caller)    $ see .= Nothing
     votes %= Map.delete callerName

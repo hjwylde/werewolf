@@ -28,95 +28,120 @@ tests = return $ testGroup "Tests" (concat [allCommandTests, allEngineTests, all
 
 allCommandTests :: [TestTree]
 allCommandTests = [
-    testProperty "PROP: devour vote command errors when game is over" prop_devourVoteCommandErrorsWhenGameIsOver,
-    testProperty "PROP: devour vote command errors when caller does not exist" prop_devourVoteCommandErrorsWhenCallerDoesNotExist,
-    testProperty "PROP: devour vote command errors when target does not exist" prop_devourVoteCommandErrorsWhenTargetDoesNotExist,
-    testProperty "PROP: devour vote command errors when caller is dead" prop_devourVoteCommandErrorsWhenCallerIsDead,
-    testProperty "PROP: devour vote command errors when target is dead" prop_devourVoteCommandErrorsWhenTargetIsDead,
-    testProperty "PROP: devour vote command errors when not werewolves turn" prop_devourVoteCommandErrorsWhenNotWerewolvesTurn,
-    testProperty "PROP: devour vote command errors when caller not werewolf" prop_devourVoteCommandErrorsWhenCallerNotWerewolf,
-    testProperty "PROP: devour vote command errors when caller has voted" prop_devourVoteCommandErrorsWhenCallerHasVoted,
-    testProperty "PROP: devour vote command errors when target werewolf" prop_devourVoteCommandErrorsWhenTargetWerewolf,
-    testProperty "PROP: devour vote command updates votes" prop_devourVoteCommandUpdatesVotes,
+    testProperty "devour vote command errors when game is over" prop_devourVoteCommandErrorsWhenGameIsOver,
+    testProperty "devour vote command errors when caller does not exist" prop_devourVoteCommandErrorsWhenCallerDoesNotExist,
+    testProperty "devour vote command errors when target does not exist" prop_devourVoteCommandErrorsWhenTargetDoesNotExist,
+    testProperty "devour vote command errors when caller is dead" prop_devourVoteCommandErrorsWhenCallerIsDead,
+    testProperty "devour vote command errors when target is dead" prop_devourVoteCommandErrorsWhenTargetIsDead,
+    testProperty "devour vote command errors when not werewolves turn" prop_devourVoteCommandErrorsWhenNotWerewolvesTurn,
+    testProperty "devour vote command errors when caller not werewolf" prop_devourVoteCommandErrorsWhenCallerNotWerewolf,
+    testProperty "devour vote command errors when caller has voted" prop_devourVoteCommandErrorsWhenCallerHasVoted,
+    testProperty "devour vote command errors when target werewolf" prop_devourVoteCommandErrorsWhenTargetWerewolf,
+    testProperty "devour vote command updates votes" prop_devourVoteCommandUpdatesVotes,
 
-    testProperty "PROP: lynch vote command errors when game is over" prop_lynchVoteCommandErrorsWhenGameIsOver,
-    testProperty "PROP: lynch vote command errors when caller does not exist" prop_lynchVoteCommandErrorsWhenCallerDoesNotExist,
-    testProperty "PROP: lynch vote command errors when target does not exist" prop_lynchVoteCommandErrorsWhenTargetDoesNotExist,
-    testProperty "PROP: lynch vote command errors when caller is dead" prop_lynchVoteCommandErrorsWhenCallerIsDead,
-    testProperty "PROP: lynch vote command errors when target is dead" prop_lynchVoteCommandErrorsWhenTargetIsDead,
-    testProperty "PROP: lynch vote command errors when not villages turn" prop_lynchVoteCommandErrorsWhenNotVillagesTurn,
-    testProperty "PROP: lynch vote command errors when caller has voted" prop_lynchVoteCommandErrorsWhenCallerHasVoted,
-    testProperty "PROP: lynch vote command updates votes" prop_lynchVoteCommandUpdatesVotes,
+    testProperty "lynch vote command errors when game is over" prop_lynchVoteCommandErrorsWhenGameIsOver,
+    testProperty "lynch vote command errors when caller does not exist" prop_lynchVoteCommandErrorsWhenCallerDoesNotExist,
+    testProperty "lynch vote command errors when target does not exist" prop_lynchVoteCommandErrorsWhenTargetDoesNotExist,
+    testProperty "lynch vote command errors when caller is dead" prop_lynchVoteCommandErrorsWhenCallerIsDead,
+    testProperty "lynch vote command errors when target is dead" prop_lynchVoteCommandErrorsWhenTargetIsDead,
+    testProperty "lynch vote command errors when not villages turn" prop_lynchVoteCommandErrorsWhenNotVillagesTurn,
+    testProperty "lynch vote command errors when caller has voted" prop_lynchVoteCommandErrorsWhenCallerHasVoted,
+    testProperty "lynch vote command updates votes" prop_lynchVoteCommandUpdatesVotes,
 
-    testProperty "PROP: quit command errors when game is over" prop_quitCommandErrorsWhenGameIsOver,
-    testProperty "PROP: quit command errors when caller does not exist" prop_quitCommandErrorsWhenCallerDoesNotExist,
-    testProperty "PROP: quit command errors when caller is dead" prop_quitCommandErrorsWhenCallerIsDead,
-    testProperty "PROP: quit command kills player" prop_quitCommandKillsPlayer,
-    testProperty "PROP: quit command clears players devour vote" prop_quitCommandClearsPlayersDevourVote,
-    testProperty "PROP: quit command clears players lynch vote" prop_quitCommandClearsPlayersLynchVote,
-    testProperty "PROP: quit command clears players see" prop_quitCommandClearsPlayersSee,
+    testProperty "pass command errors when game is over" prop_passCommandErrorsWhenGameIsOver,
+    testProperty "pass command errors when caller does not exist" prop_passCommandErrorsWhenCallerDoesNotExist,
+    testProperty "pass command errors when caller is dead" prop_passCommandErrorsWhenCallerIsDead,
+    testProperty "pass command errors when not witch's turn" prop_passCommandErrorsWhenNotWitchsTurn,
+    testProperty "pass command updates passes" prop_passCommandUpdatesPasses,
 
-    testProperty "PROP: see command errors when game is over" prop_seeCommandErrorsWhenGameIsOver,
-    testProperty "PROP: see command errors when caller does not exist" prop_seeCommandErrorsWhenCallerDoesNotExist,
-    testProperty "PROP: see command errors when target does not exist" prop_seeCommandErrorsWhenTargetDoesNotExist,
-    testProperty "PROP: see command errors when caller is dead" prop_seeCommandErrorsWhenCallerIsDead,
-    testProperty "PROP: see command errors when target is dead" prop_seeCommandErrorsWhenTargetIsDead,
-    testProperty "PROP: see command errors when not seers turn" prop_seeCommandErrorsWhenNotSeersTurn,
-    testProperty "PROP: see command errors when caller not seer" prop_seeCommandErrorsWhenCallerNotSeer,
-    testProperty "PROP: see command sets see" prop_seeCommandSetsSee
+    testProperty "poison command errors when game is over" prop_poisonCommandErrorsWhenGameIsOver,
+    testProperty "poison command errors when caller does not exist" prop_poisonCommandErrorsWhenCallerDoesNotExist,
+    testProperty "poison command errors when target does not exist" prop_poisonCommandErrorsWhenTargetDoesNotExist,
+    testProperty "poison command errors when caller is dead" prop_poisonCommandErrorsWhenCallerIsDead,
+    testProperty "poison command errors when target is dead" prop_poisonCommandErrorsWhenTargetIsDead,
+    testProperty "poison command errors when target is devoured" prop_poisonCommandErrorsWhenTargetIsDevoured,
+    testProperty "poison command errors when not witch's turn" prop_poisonCommandErrorsWhenNotWitchsTurn,
+    testProperty "poison command errors when caller not witch" prop_poisonCommandErrorsWhenCallerNotWitch,
+    testProperty "poison command sets poison" prop_poisonCommandSetsPoison,
+
+    testProperty "quit command errors when game is over" prop_quitCommandErrorsWhenGameIsOver,
+    testProperty "quit command errors when caller does not exist" prop_quitCommandErrorsWhenCallerDoesNotExist,
+    testProperty "quit command errors when caller is dead" prop_quitCommandErrorsWhenCallerIsDead,
+    testProperty "quit command kills player" prop_quitCommandKillsPlayer,
+    testProperty "quit command clears players devour vote" prop_quitCommandClearsPlayersDevourVote,
+    testProperty "quit command clears players lynch vote" prop_quitCommandClearsPlayersLynchVote,
+
+    testProperty "see command errors when game is over" prop_seeCommandErrorsWhenGameIsOver,
+    testProperty "see command errors when caller does not exist" prop_seeCommandErrorsWhenCallerDoesNotExist,
+    testProperty "see command errors when target does not exist" prop_seeCommandErrorsWhenTargetDoesNotExist,
+    testProperty "see command errors when caller is dead" prop_seeCommandErrorsWhenCallerIsDead,
+    testProperty "see command errors when target is dead" prop_seeCommandErrorsWhenTargetIsDead,
+    testProperty "see command errors when not seer's turn" prop_seeCommandErrorsWhenNotSeersTurn,
+    testProperty "see command errors when caller not seer" prop_seeCommandErrorsWhenCallerNotSeer,
+    testProperty "see command sets see" prop_seeCommandSetsSee
     ]
 
 allEngineTests :: [TestTree]
 allEngineTests = [
-    testProperty "PROP: check stage skips seers when no seers" prop_checkStageSkipsSeersWhenNoSeers,
-    testProperty "PROP: check stage does nothing when game over" prop_checkStageDoesNothingWhenGameOver,
+    testProperty "check stage skips seer's turn when no seer" prop_checkStageSkipsSeersTurnWhenNoSeer,
+    testProperty "check stage skips witch's turn when no witch" prop_checkStageSkipsWitchsTurnWhenNoWitch,
+    testProperty "check stage does nothing when game over" prop_checkStageDoesNothingWhenGameOver,
 
-    testProperty "PROP: check seers turn advances to werewolves" prop_checkSeersTurnAdvancesToWerewolves,
-    testProperty "PROP: check seers turn resets sees" prop_checkSeersTurnResetsSee,
-    testProperty "PROP: check seers turn does nothing unless all seen" prop_checkSeersTurnDoesNothingUnlessAllSeen,
+    testProperty "check seer's turn advances to werewolves' turn" prop_checkSeersTurnAdvancesToWerewolvesTurn,
+    testProperty "check seer's turn resets sees" prop_checkSeersTurnResetsSee,
+    testProperty "check seer's turn does nothing unless seen" prop_checkSeersTurnDoesNothingUnlessSeen,
 
-    testProperty "PROP: check villages turn advances to seers" prop_checkVillagesTurnAdvancesToSeers,
-    testProperty "PROP: check villages turn lynches one player when consensus" prop_checkVillagesTurnLynchesOnePlayerWhenConsensus,
-    testProperty "PROP: check villages turn lynches no one when conflicted and no scapegoats" prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats,
-    testProperty "PROP: check villages turn lynches scapegoat when conflicted" prop_checkVillagesTurnLynchesScapegoatWhenConflicted,
-    testProperty "PROP: check villages turn resets votes" prop_checkVillagesTurnResetsVotes,
-    testProperty "PROP: check villages turn does nothing unless all voted" prop_checkVillagesTurnDoesNothingUnlessAllVoted,
+    testProperty "check villages' turn advances to seer's turn" prop_checkVillagesTurnAdvancesToSeersTurn,
+    testProperty "check villages' turn lynches one player when consensus" prop_checkVillagesTurnLynchesOnePlayerWhenConsensus,
+    testProperty "check villages' turn lynches no one when conflicted and no scapegoats" prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats,
+    testProperty "check villages' turn lynches scapegoat when conflicted" prop_checkVillagesTurnLynchesScapegoatWhenConflicted,
+    testProperty "check villages' turn resets votes" prop_checkVillagesTurnResetsVotes,
+    testProperty "check villages' turn does nothing unless all voted" prop_checkVillagesTurnDoesNothingUnlessAllVoted,
 
-    testProperty "PROP: check werewolves turn advances to villages" prop_checkWerewolvesTurnAdvancesToVillages,
-    testProperty "PROP: check werewolves turn kills one player when consensus" prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
-    testProperty "PROP: check werewolves turn kills no one when conflicted" prop_checkWerewolvesTurnKillsNoOneWhenConflicted,
-    testProperty "PROP: check werewolves turn resets votes" prop_checkWerewolvesTurnResetsVotes,
-    testProperty "PROP: check werewolves turn does nothing unless all voted" prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
+    testProperty "check werewolves' turn advances to witch's turn" prop_checkWerewolvesTurnAdvancesToWitchsTurn,
+    testProperty "check werewolves' turn kills one player when consensus" prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
+    testProperty "check werewolves' turn kills no one when conflicted" prop_checkWerewolvesTurnKillsNoOneWhenConflicted,
+    testProperty "check werewolves' turn resets votes" prop_checkWerewolvesTurnResetsVotes,
+    testProperty "check werewolves' turn does nothing unless all voted" prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
 
-    testProperty "PROP: check game over advances stage" prop_checkGameOverAdvancesStage,
-    testProperty "PROP: check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
+    testProperty "check witch's turn advances to villages' turn" prop_checkWitchsTurnAdvancesToVillagesTurn,
+    testProperty "check witch's turn kills one player when poisoned" prop_checkWitchsTurnKillsOnePlayerWhenPoisoned,
+    testProperty "check witch's turn does nothing when passed" prop_checkWitchsTurnDoesNothingWhenPassed,
+    testProperty "check witch's turn resets poison" prop_checkWitchsTurnResetsPoison,
 
-    testProperty "PROP: start game starts with sunset stage" prop_startGameStartsWithSunsetStage,
-    testProperty "PROP: start game uses given players" prop_startGameUsesGivenPlayers,
-    testProperty "PROP: start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
-    testProperty "PROP: start game errors when less than 7 players" prop_startGameErrorsWhenLessThan7Players,
-    testProperty "PROP: start game errors when more than 24 players" prop_startGameErrorsWhenMoreThan24Players,
-    testProperty "PROP: start game errors when more than 1 seer" prop_startGameErrorsWhenMoreThan1Seer,
-    testProperty "PROP: start game errors when more than 1 scapegoat" prop_startGameErrorsWhenMoreThan1Scapegoat,
+    testProperty "check game over advances stage" prop_checkGameOverAdvancesStage,
+    testProperty "check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
-    testProperty "PROP: create players uses given player names" prop_createPlayersUsesGivenPlayerNames,
-    testProperty "PROP: create players uses given roles" prop_createPlayersUsesGivenRoles,
-    testProperty "PROP: create players creates alive players" prop_createPlayersCreatesAlivePlayers,
+    testProperty "start game starts with sunset stage" prop_startGameStartsWithSunsetStage,
+    testProperty "start game uses given players" prop_startGameUsesGivenPlayers,
+    testProperty "start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
+    testProperty "start game errors when less than 7 players" prop_startGameErrorsWhenLessThan7Players,
+    testProperty "start game errors when more than 24 players" prop_startGameErrorsWhenMoreThan24Players,
+    testProperty "start game errors when more than 1 scapegoat" prop_startGameErrorsWhenMoreThan1Scapegoat,
+    testProperty "start game errors when more than 1 seer" prop_startGameErrorsWhenMoreThan1Seer,
+    testProperty "start game errors when more than 1 witch" prop_startGameErrorsWhenMoreThan1Witch,
 
-    testProperty "PROP: randomise roles returns n roles" prop_randomiseRolesReturnsNRoles,
-    testProperty "PROP: randomise roles uses given roles" prop_randomiseRolesUsesGivenRoles,
-    testProperty "PROP: randomise roles proportions allegiances" prop_randomiseRolesProportionsAllegiances
+    testProperty "create players uses given player names" prop_createPlayersUsesGivenPlayerNames,
+    testProperty "create players uses given roles" prop_createPlayersUsesGivenRoles,
+    testProperty "create players creates alive players" prop_createPlayersCreatesAlivePlayers,
+
+    testProperty "randomise roles returns n roles" prop_randomiseRolesReturnsNRoles,
+    testProperty "randomise roles uses given roles" prop_randomiseRolesUsesGivenRoles,
+    testProperty "randomise roles proportions allegiances" prop_randomiseRolesProportionsAllegiances
     ]
 
 allGameTests :: [TestTree]
 allGameTests = [
-    testProperty "PROP: new game starts with sunset stage" prop_newGameStartsWithSunsetStage,
-    testProperty "PROP: new game starts with no see" prop_newGameStartsWithNoSee,
-    testProperty "PROP: new game starts with votes empty" prop_newGameStartsWithVotesEmpty,
-    testProperty "PROP: new game uses given players" prop_newGameUsesGivenPlayers
+    testProperty "new game starts with sunset stage" prop_newGameStartsWithSunsetStage,
+    testProperty "new game starts with events empty" prop_newGameStartsWithEventsEmpty,
+    testProperty "new game starts with passes empty" prop_newGameStartsWithPassesEmpty,
+    testProperty "new game starts with no poison" prop_newGameStartsWithNoPoison,
+    testProperty "new game starts with no see" prop_newGameStartsWithNoSee,
+    testProperty "new game starts with votes empty" prop_newGameStartsWithVotesEmpty,
+    testProperty "new game uses given players" prop_newGameUsesGivenPlayers
     ]
 
 allPlayerTests :: [TestTree]
 allPlayerTests = [
-    testProperty "PROP: new player is alive" prop_newPlayerIsAlive
+    testProperty "new player is alive" prop_newPlayerIsAlive
     ]

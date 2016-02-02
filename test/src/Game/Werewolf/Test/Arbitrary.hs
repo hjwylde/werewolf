@@ -71,9 +71,9 @@ arbitraryLynchVoteCommand game = do
 
 arbitraryPassCommand :: Game -> Gen Command
 arbitraryPassCommand game = do
-    player <- arbitraryPlayer game
+    witch <- arbitraryWitch game
 
-    return $ passCommand (player ^. name)
+    return $ passCommand (witch ^. name)
 
 arbitraryPoisonCommand :: Game -> Gen Command
 arbitraryPoisonCommand game = do
