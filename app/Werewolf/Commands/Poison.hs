@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Options and handler for the poison subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.Poison (
     -- * Options
     Options(..),

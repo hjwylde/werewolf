@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Handler for the pass subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.Pass (
     -- * Handle
     handle,

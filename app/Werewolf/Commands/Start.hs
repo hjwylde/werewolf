@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Options and handler for the start subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.Start (
     -- * Options
     Options(..),

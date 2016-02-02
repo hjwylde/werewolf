@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Handler for the ping subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.Ping (
     -- * Handle
     handle,

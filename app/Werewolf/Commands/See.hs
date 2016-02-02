@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Options and handler for the see subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.See (
     -- * Options
     Options(..),
