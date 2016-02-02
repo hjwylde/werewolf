@@ -60,7 +60,10 @@ module Game.Werewolf.Response (
     playerHasAlreadyVotedMessage, targetIsDeadMessage,
 
     -- ** Werewolves' turn error messages
-    playerCannotDevourAnotherWerewolf,
+    playerCannotDevourAnotherWerewolfMessage,
+
+    -- ** Witch's turn error messages
+    playerHasAlreadyPoisonedMessage,
 ) where
 
 import Control.Lens
@@ -363,5 +366,8 @@ targetIsDeadMessage to targetName = privateMessage to $ T.unwords [
     targetName, "is already dead!"
     ]
 
-playerCannotDevourAnotherWerewolf :: Text -> Message
-playerCannotDevourAnotherWerewolf to = privateMessage to "You cannot devour another Werewolf!"
+playerCannotDevourAnotherWerewolfMessage :: Text -> Message
+playerCannotDevourAnotherWerewolfMessage to = privateMessage to "You cannot devour another Werewolf!"
+
+playerHasAlreadyPoisonedMessage :: Text -> Message
+playerHasAlreadyPoisonedMessage to = privateMessage to "You've already poisoned someone!"

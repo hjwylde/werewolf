@@ -35,7 +35,7 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerSeer, isPlayerWerewolf, isPlayerWitch, isPlayerDead,
+    doesPlayerExist, isPlayerSeer, isPlayerWerewolf, isPlayerWitch, isPlayerAlive, isPlayerDead,
 
     -- * Role
     randomiseRoles,
@@ -122,7 +122,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     WitchsTurn -> do
         whenJustM (use poison) $ \targetName -> do
-            events %= (++ [Poison targetName])
+            whenM (isPlayerAlive targetName) $ events %= (++ [Poison targetName])
 
             advanceStage
 
@@ -143,7 +143,6 @@ advanceStage = do
 
     stage   .= nextStage
     passes  .= []
-    poison  .= Nothing
     see     .= Nothing
     votes   .= Map.empty
 
@@ -258,6 +257,9 @@ isPlayerWerewolf name = uses players $ isWerewolf . findByName_ name
 
 isPlayerWitch :: MonadState Game m => Text -> m Bool
 isPlayerWitch name = uses players $ isWitch . findByName_ name
+
+isPlayerAlive :: MonadState Game m => Text -> m Bool
+isPlayerAlive name = uses players $ isAlive . findByName_ name
 
 isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = uses players $ isDead . findByName_ name

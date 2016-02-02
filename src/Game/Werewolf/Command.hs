@@ -47,7 +47,7 @@ devourVoteCommand callerName targetName = Command $ do
     unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
-    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolf callerName]
+    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
 
     votes %= Map.insert callerName targetName
 
@@ -106,7 +106,9 @@ poisonCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
     unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenJustM (use poison) . const          $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
+    -- TODO (hjw): error when the target has been devoured
 
     poison .= Just targetName
 

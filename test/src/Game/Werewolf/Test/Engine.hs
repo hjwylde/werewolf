@@ -11,17 +11,23 @@ Maintainer  : public@hjwylde.com
 module Game.Werewolf.Test.Engine (
     -- * checkStage
     prop_checkStageSkipsSeersTurnWhenNoSeer, prop_checkStageSkipsWitchsTurnWhenNoWitch,
-    prop_checkStageDoesNothingWhenGameOver, prop_checkSeersTurnAdvancesToWerewolvesTurn,
-    prop_checkSeersTurnResetsSee, prop_checkSeersTurnDoesNothingUnlessSeen,
+    prop_checkStageDoesNothingWhenGameOver,
+
+    prop_checkSeersTurnAdvancesToWerewolvesTurn, prop_checkSeersTurnResetsSee,
+    prop_checkSeersTurnDoesNothingUnlessSeen,
+
     prop_checkVillagesTurnAdvancesToSeersTurn, prop_checkVillagesTurnLynchesOnePlayerWhenConsensus,
     prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats,
     prop_checkVillagesTurnLynchesScapegoatWhenConflicted, prop_checkVillagesTurnResetsVotes,
-    prop_checkVillagesTurnDoesNothingUnlessAllVoted, prop_checkWerewolvesTurnAdvancesToWitchsTurn,
+    prop_checkVillagesTurnDoesNothingUnlessAllVoted,
+
+    prop_checkWerewolvesTurnAdvancesToWitchsTurn,
     prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     prop_checkWerewolvesTurnKillsNoOneWhenConflicted, prop_checkWerewolvesTurnResetsVotes,
-    prop_checkWerewolvesTurnDoesNothingUnlessAllVoted, prop_checkWitchsTurnAdvancesToVillagesTurn,
-    prop_checkWitchsTurnKillsOnePlayerWhenPoisoned, prop_checkWitchsTurnDoesNothingWhenPassed,
-    prop_checkWitchsTurnResetsPoison,
+    prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
+
+    prop_checkWitchsTurnAdvancesToVillagesTurn, prop_checkWitchsTurnKillsOnePlayerWhenPoisoned,
+    prop_checkWitchsTurnDoesNothingWhenPassed, prop_checkWitchsTurnDoesntResetPoison,
 
     -- * checkGameOver
     prop_checkGameOverAdvancesStage, prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
@@ -51,12 +57,12 @@ import qualified Data.Map          as Map
 import           Data.Maybe
 import           Data.Text         (Text)
 
+import           Game.Werewolf.Command
 import           Game.Werewolf.Engine         hiding (doesPlayerExist, getVoteResult, isGameOver,
                                                isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                               killPlayer, isWitchsTurn)
+                                               isWitchsTurn, killPlayer)
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
-import           Game.Werewolf.Command
 import           Game.Werewolf.Role           hiding (_name)
 import qualified Game.Werewolf.Role           as Role
 import           Game.Werewolf.Test.Arbitrary
@@ -220,10 +226,10 @@ prop_checkWitchsTurnDoesNothingWhenPassed game =
     where
         game' = game { _stage = WitchsTurn }
 
-prop_checkWitchsTurnResetsPoison :: Game -> Property
-prop_checkWitchsTurnResetsPoison game =
-    forAll (arbitraryCommand game') $ \command ->
-    isNothing $ run_ checkStage (run_ (apply command) game') ^. poison
+prop_checkWitchsTurnDoesntResetPoison :: Game -> Property
+prop_checkWitchsTurnDoesntResetPoison game =
+    forAll (arbitraryPoisonCommand game') $ \command ->
+    isJust $ run_ checkStage (run_ (apply command) game') ^. poison
     where
         game' = game { _stage = WitchsTurn }
 

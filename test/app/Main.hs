@@ -61,6 +61,7 @@ allCommandTests = [
     testProperty "poison command errors when target is dead" prop_poisonCommandErrorsWhenTargetIsDead,
     testProperty "poison command errors when target is devoured" prop_poisonCommandErrorsWhenTargetIsDevoured,
     testProperty "poison command errors when not witch's turn" prop_poisonCommandErrorsWhenNotWitchsTurn,
+    testProperty "poison command errors when caller has poisoned" prop_poisonCommandErrorsWhenCallerHasPoisoned,
     testProperty "poison command errors when caller not witch" prop_poisonCommandErrorsWhenCallerNotWitch,
     testProperty "poison command sets poison" prop_poisonCommandSetsPoison,
 
@@ -68,8 +69,9 @@ allCommandTests = [
     testProperty "quit command errors when caller does not exist" prop_quitCommandErrorsWhenCallerDoesNotExist,
     testProperty "quit command errors when caller is dead" prop_quitCommandErrorsWhenCallerIsDead,
     testProperty "quit command kills player" prop_quitCommandKillsPlayer,
-    testProperty "quit command clears players devour vote" prop_quitCommandClearsPlayersDevourVote,
-    testProperty "quit command clears players lynch vote" prop_quitCommandClearsPlayersLynchVote,
+    testProperty "quit command clears player's devour vote" prop_quitCommandClearsPlayersDevourVote,
+    testProperty "quit command clears player's lynch vote" prop_quitCommandClearsPlayersLynchVote,
+    testProperty "quit command clears player's poison" prop_quitCommandClearsPlayersPoison,
 
     testProperty "see command errors when game is over" prop_seeCommandErrorsWhenGameIsOver,
     testProperty "see command errors when caller does not exist" prop_seeCommandErrorsWhenCallerDoesNotExist,
@@ -107,7 +109,7 @@ allEngineTests = [
     testProperty "check witch's turn advances to villages' turn" prop_checkWitchsTurnAdvancesToVillagesTurn,
     testProperty "check witch's turn kills one player when poisoned" prop_checkWitchsTurnKillsOnePlayerWhenPoisoned,
     testProperty "check witch's turn does nothing when passed" prop_checkWitchsTurnDoesNothingWhenPassed,
-    testProperty "check witch's turn resets poison" prop_checkWitchsTurnResetsPoison,
+    testProperty "check witch's turn doesn't reset poison" prop_checkWitchsTurnDoesntResetPoison,
 
     testProperty "check game over advances stage" prop_checkGameOverAdvancesStage,
     testProperty "check game over does nothing when at least two allegiances alive" prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
