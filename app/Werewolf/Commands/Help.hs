@@ -64,8 +64,14 @@ commandsMessages = map (T.intercalate "\n") [[
     "end",
     "- Ends the current game."
     ], [
+    "pass",
+    "- Pass. A Witch may pass on poisoning a player."
+    ], [
     "ping",
     "- Pings the status of the current game publicly."
+    ], [
+    "poison PLAYER",
+    "- Poison a player. A Witch may poison a player at nighttime."
     ], [
     "quit",
     "- Quit the current game."
@@ -113,8 +119,8 @@ rulesMessages = map (T.intercalate "\n") [[
     T.unwords [
         "Each night, the Werewolves bite, kill and devour one Villager.",
         "During the day they try to conceal their identity and vile deeds from the Villagers.",
-        "Depending upon the number of players and variants used in the game,",
-        "there are 1, 2, 3 or 4 Werewolves in play."
+        "The number of Werewolves in play depends upon",
+        " the number of players and variants used in the game,"
         ],
     T.unwords [
         "Each day,",
@@ -130,10 +136,11 @@ rulesMessages = map (T.intercalate "\n") [[
         "at the start of the game. A game begins at night and follows a standard cycle."
         ],
     "1. The village falls asleep.",
-    "2. The Seers wake up and each see someone.",
+    "2. The Seer wakes up and sees someone's allegiance.",
     "3. The Werewolves wake up and select a victim.",
-    "4. The village wakes up and find the victim.",
-    "5. The village votes to lynch a suspect.",
+    "4. The Witch wakes up and may poison someone.",
+    "5. The village wakes up and find the victim.",
+    "6. The village votes to lynch a suspect.",
     "The game is over when only Villagers or Werewolves are left alive."
     ]]
 

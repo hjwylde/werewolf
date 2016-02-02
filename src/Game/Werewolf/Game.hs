@@ -13,15 +13,15 @@ Game and stage data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), stage, players, events, see, votes,
+    Game(..), stage, players, events, passes, poison, see, votes,
     newGame,
 
     -- ** Manipulations
     killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn, getPlayerVote,
-    getPendingVoters, getVoteResult,
+    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+    getPassers, getPlayerVote, getPendingVoters, getVoteResult,
 
     -- * Stage
     Stage(..),
@@ -45,14 +45,16 @@ data Game = Game
     { _stage   :: Stage
     , _players :: [Player]
     , _events  :: [Event]
+    , _passes  :: [Text]
+    , _poison  :: Maybe Text
     , _see     :: Maybe Text
     , _votes   :: Map Text Text
     } deriving (Eq, Read, Show)
 
-data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn
+data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
-data Event = Devour Text
+data Event = Devour Text | Poison Text
     deriving (Eq, Read, Show)
 
 makeLenses ''Game
@@ -60,7 +62,7 @@ makeLenses ''Game
 makeLenses ''Stage
 
 newGame :: [Player] -> Game
-newGame players = Game stage players [] Nothing Map.empty
+newGame players = Game stage players [] [] Nothing Nothing Map.empty
     where
         stage       = head $ filter (stageAvailable aliveRoles) stageCycle
         aliveRoles  = map _role $ filterAlive players
@@ -86,6 +88,15 @@ isVillagesTurn game = game ^. stage == VillagesTurn
 isWerewolvesTurn :: Game -> Bool
 isWerewolvesTurn game = game ^. stage == WerewolvesTurn
 
+isWitchsTurn :: Game -> Bool
+isWitchsTurn game = game ^. stage == WitchsTurn
+
+getPassers :: Game -> [Player]
+getPassers game = map (`findByName_` players') passes'
+    where
+        players'    = game ^. players
+        passes'     = game ^. passes
+
 getPlayerVote :: Text -> Game -> Maybe Text
 getPlayerVote playerName game = game ^. votes . at playerName
 
@@ -103,7 +114,7 @@ getVoteResult game = map (`findByName_` players') result
         result      = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
 
 stageCycle :: [Stage]
-stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, Sunrise, VillagesTurn]
+stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, WitchsTurn, Sunrise, VillagesTurn]
 
 stageAvailable :: [Role] -> Stage -> Bool
 stageAvailable _ GameOver                   = False
@@ -112,3 +123,4 @@ stageAvailable _ Sunrise                    = True
 stageAvailable _ Sunset                     = True
 stageAvailable _ VillagesTurn               = True
 stageAvailable aliveRoles WerewolvesTurn    = werewolfRole `elem` aliveRoles
+stageAvailable aliveRoles WitchsTurn        = witchRole `elem` aliveRoles

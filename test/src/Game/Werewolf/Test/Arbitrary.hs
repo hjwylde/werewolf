@@ -10,9 +10,10 @@ Maintainer  : public@hjwylde.com
 
 module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
-    arbitraryCommand, arbitraryDevourVoteCommand, arbitraryLynchVoteCommand, arbitraryQuitCommand,
-    arbitrarySeeCommand, arbitraryNewGame, arbitraryPlayer, arbitraryPlayerSet, arbitraryScapegoat,
-    arbitrarySeer, arbitraryVillager, arbitraryWerewolf,
+    arbitraryCommand, arbitraryDevourVoteCommand, arbitraryLynchVoteCommand, arbitraryPassCommand,
+    arbitraryPoisonCommand, arbitraryQuitCommand, arbitrarySeeCommand, arbitraryNewGame,
+    arbitraryPlayer, arbitraryPlayerSet, arbitraryScapegoat, arbitrarySeer, arbitraryVillager,
+    arbitraryWerewolf, arbitraryWitch,
 
     -- * Utility functions
     run, run_, runArbitraryCommands,
@@ -48,6 +49,7 @@ arbitraryCommand game = case game ^. stage of
     SeersTurn       -> arbitrarySeeCommand game
     VillagesTurn    -> arbitraryLynchVoteCommand game
     WerewolvesTurn  -> arbitraryDevourVoteCommand game
+    WitchsTurn      -> oneof [arbitraryPassCommand game, arbitraryPoisonCommand game]
 
 arbitraryDevourVoteCommand :: Game -> Gen Command
 arbitraryDevourVoteCommand game = do
@@ -67,6 +69,21 @@ arbitraryLynchVoteCommand game = do
         then return noopCommand
         else elements applicableCallers >>= \caller -> return $ lynchVoteCommand (caller ^. name) (target ^. name)
 
+arbitraryPassCommand :: Game -> Gen Command
+arbitraryPassCommand game = do
+    player <- arbitraryPlayer game
+
+    return $ passCommand (player ^. name)
+
+arbitraryPoisonCommand :: Game -> Gen Command
+arbitraryPoisonCommand game = do
+    let witch   = head . filterWitches $ game ^. players
+    target      <- arbitraryPlayer game
+
+    return $ if isJust (game ^. poison)
+        then noopCommand
+        else poisonCommand (witch ^. name) (target ^. name)
+
 arbitraryQuitCommand :: Game -> Gen Command
 arbitraryQuitCommand game = do
     let applicableCallers = filterAlive $ game ^. players
@@ -80,9 +97,9 @@ arbitrarySeeCommand game = do
     let seer    = head . filterSeers $ game ^. players
     target      <- arbitraryPlayer game
 
-    if isJust (game ^. see)
-        then return noopCommand
-        else return $ seeCommand (seer ^. name) (target ^. name)
+    return $ if isJust (game ^. see)
+        then noopCommand
+        else seeCommand (seer ^. name) (target ^. name)
 
 instance Arbitrary Game where
     arbitrary = do
@@ -95,7 +112,7 @@ arbitraryNewGame :: Gen Game
 arbitraryNewGame = newGame <$> arbitraryPlayerSet
 
 instance Arbitrary Stage where
-    arbitrary = elements [GameOver, SeersTurn, VillagesTurn, WerewolvesTurn]
+    arbitrary = elements [GameOver, SeersTurn, VillagesTurn, WerewolvesTurn, WitchsTurn]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary
@@ -108,12 +125,17 @@ arbitraryPlayerSet = do
     n <- choose (7, 24)
     players <- nubOn _name <$> infiniteList
 
-    let seer        = head $ filterSeers players
-    let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
-    let villagers   = take (n - 2 - (length werewolves)) $ filterVillagers players
     let scapegoat   = head $ filterScapegoats players
+    let seer        = head $ filterSeers players
+    let witch       = head $ filterWitches players
 
-    return $ seer:scapegoat:werewolves ++ villagers
+    let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
+    let villagers   = take (n - 3 - (length werewolves)) $ filterVillagers players
+
+    return $ scapegoat:seer:witch:werewolves ++ villagers
+
+arbitraryScapegoat :: Game -> Gen Player
+arbitraryScapegoat = elements . filterAlive . filterScapegoats . _players
 
 arbitrarySeer :: Game -> Gen Player
 arbitrarySeer = elements . filterAlive . filterSeers . _players
@@ -124,8 +146,8 @@ arbitraryVillager = elements . filterAlive . filterVillagers . _players
 arbitraryWerewolf :: Game -> Gen Player
 arbitraryWerewolf = elements . filterAlive . filterWerewolves . _players
 
-arbitraryScapegoat :: Game -> Gen Player
-arbitraryScapegoat = elements . filterAlive . filterScapegoats . _players
+arbitraryWitch :: Game -> Gen Player
+arbitraryWitch = elements . filterAlive . filterWitches . _players
 
 instance Arbitrary State where
     arbitrary = elements [Alive, Dead]

@@ -27,6 +27,7 @@ import           Data.Version    (showVersion)
 
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
+import qualified Werewolf.Commands.Poison    as Poison
 import qualified Werewolf.Commands.See       as See
 import qualified Werewolf.Commands.Start     as Start
 import qualified Werewolf.Commands.Vote      as Vote
@@ -45,7 +46,9 @@ data Command
     = End
     | Help Help.Options
     | Interpret Interpret.Options
+    | Pass
     | Ping
+    | Poison Poison.Options
     | Quit
     | See See.Options
     | Start Start.Options
@@ -86,7 +89,9 @@ werewolf = Options
         command "end"       $ info (helper <*> end)         (fullDesc <> progDesc "End the current game"),
         command "help"      $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents"),
         command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command" <> noIntersperse),
+        command "pass"      $ info (helper <*> pass)        (fullDesc <> progDesc "Pass"),
         command "ping"      $ info (helper <*> ping)        (fullDesc <> progDesc "Pings the status of the current game publicly"),
+        command "poison"    $ info (helper <*> poison)      (fullDesc <> progDesc "Poison a player"),
         command "quit"      $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game"),
         command "see"       $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance"),
         command "start"     $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game"),
@@ -109,8 +114,14 @@ help_ = Help . Help.Options
 interpret :: Parser Command
 interpret = Interpret . Interpret.Options <$> many (T.pack <$> strArgument (metavar "-- COMMAND ARG..."))
 
+pass :: Parser Command
+pass = pure Pass
+
 ping :: Parser Command
 ping = pure Ping
+
+poison :: Parser Command
+poison = Poison . Poison.Options . T.pack <$> strArgument (metavar "PLAYER")
 
 quit :: Parser Command
 quit = pure Quit

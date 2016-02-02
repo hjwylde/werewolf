@@ -34,7 +34,7 @@ module Game.Werewolf.Response (
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
 
     -- ** Ping messages
-    pingPlayerMessage, pingSeerMessage, pingWerewolvesMessage,
+    pingPlayerMessage, pingSeerMessage, pingWerewolvesMessage, pingWitchMessage,
 
     -- ** Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
@@ -48,6 +48,9 @@ module Game.Werewolf.Response (
 
     -- ** Werewolves' turn messages
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
+
+    -- ** Witch's turn messages
+    playerPoisonedMessage,
 
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
@@ -75,7 +78,7 @@ import qualified Data.Text.Lazy.IO       as T
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
-import           Game.Werewolf.Role   (Role, allegiance, description, _allegiance)
+import           Game.Werewolf.Role   (Allegiance (..), Role, allegiance, description, _allegiance)
 import qualified Game.Werewolf.Role   as Role
 import           GHC.Generics
 
@@ -158,16 +161,17 @@ newPlayerMessage players player
 
 stageMessages :: Stage -> [Player] -> [Message]
 stageMessages GameOver _                    = []
-stageMessages SeersTurn alivePlayers        = seersTurnMessages . head $ filterSeers alivePlayers
+stageMessages SeersTurn alivePlayers        = seersTurnMessages . _name . head $ filterSeers alivePlayers
 stageMessages Sunrise _                     = [sunriseMessage]
 stageMessages Sunset _                      = [nightFallsMessage]
 stageMessages VillagesTurn _                = villagesTurnMessages
-stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages $ filterWerewolves alivePlayers
+stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages . map _name $ filterWerewolves alivePlayers
+stageMessages WitchsTurn alivePlayers       = witchsTurnMessages . _name . head $ filterWitches alivePlayers
 
-seersTurnMessages :: Player -> [Message]
-seersTurnMessages seer = [
+seersTurnMessages :: Text -> [Message]
+seersTurnMessages seerName = [
     publicMessage "The Seer wakes up.",
-    privateMessage (seer ^. name) "Whose allegiance would you like to see?"
+    privateMessage seerName "Whose allegiance would you like to see?"
     ]
 
 sunriseMessage :: Message
@@ -178,14 +182,20 @@ nightFallsMessage = publicMessage "Night falls, the village is asleep."
 
 villagesTurnMessages :: [Message]
 villagesTurnMessages = [
-    publicMessage "As the village gathers in the town square the town clerk calls for a vote.",
+    publicMessage "As the village gathers in the square the town clerk calls for a vote.",
     publicMessage "Whom would you like to lynch?"
     ]
 
-werewolvesTurnMessages :: [Player] -> [Message]
-werewolvesTurnMessages werewolves = [
+werewolvesTurnMessages :: [Text] -> [Message]
+werewolvesTurnMessages werewolfNames = [
     publicMessage "The Werewolves wake up, recognise one another and choose a new victim."
-    ] ++ groupMessages (map _name werewolves) "Whom would you like to devour?"
+    ] ++ groupMessages werewolfNames "Whom would you like to devour?"
+
+witchsTurnMessages :: Text -> [Message]
+witchsTurnMessages witchName = [
+    publicMessage "The Witch wakes up.",
+    privateMessage witchName "Who would you like to poison? (Type `pass` for no one.)"
+    ]
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game = case aliveAllegiances of
@@ -216,6 +226,9 @@ pingSeerMessage = publicMessage "Waiting on the Seer..."
 
 pingWerewolvesMessage :: Message
 pingWerewolvesMessage = publicMessage "Waiting on the Werewolves..."
+
+pingWitchMessage :: Message
+pingWitchMessage = publicMessage "Waiting on the Witch..."
 
 currentStageMessages :: Text -> Stage -> [Message]
 currentStageMessages to GameOver    = [gameIsOverMessage to]
@@ -312,6 +325,15 @@ noPlayerDevouredMessage = publicMessage $ T.unwords [
     "Surprisingly you see everyone present at the town square.",
     "Perhaps the Werewolves have left Miller's Hollow?"
     ]
+
+playerPoisonedMessage :: Player -> Message
+playerPoisonedMessage player = publicMessage $ T.concat [
+    "Upon further discovery, it looks like the Witch has struck for the side of ", side, ".",
+    " ", player ^. name, " the ", player ^. role . Role.name, " is lying in their bed, poisoned,",
+    " drooling over the side."
+    ]
+    where
+        side = if player ^. role . allegiance == Villagers then "evil" else "good"
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to "The game is over!"

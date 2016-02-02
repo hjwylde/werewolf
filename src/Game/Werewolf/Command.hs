@@ -18,8 +18,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    devourVoteCommand, lynchVoteCommand, noopCommand, pingCommand, quitCommand, seeCommand,
-    statusCommand,
+    devourVoteCommand, lynchVoteCommand, noopCommand, passCommand, pingCommand, poisonCommand,
+    quitCommand, seeCommand, statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -28,12 +28,13 @@ import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
+import           Data.List
 import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Engine
 import Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, isGameOver, isSeersTurn,
-                               isVillagesTurn, isWerewolvesTurn, killPlayer)
+                               isVillagesTurn, isWerewolvesTurn, isWitchsTurn, killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
 
@@ -50,9 +51,9 @@ devourVoteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolves <- uses players $ filterAlive . filterWerewolves
+    aliveWerewolfNames <- uses players $ map _name . filterAlive . filterWerewolves
 
-    tell $ map (\werewolf -> playerMadeDevourVoteMessage (werewolf ^. name) callerName targetName) aliveWerewolves
+    tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
 
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
@@ -65,6 +66,12 @@ lynchVoteCommand callerName targetName = Command $ do
 
 noopCommand :: Command
 noopCommand = Command $ return ()
+
+passCommand :: Text -> Command
+passCommand callerName = Command $ do
+    validatePlayer callerName callerName
+
+    passes %= cons callerName
 
 pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
@@ -86,6 +93,20 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingWerewolvesMessage]
         tell $ map (pingPlayerMessage . _name) (filterWerewolves pendingVoters)
+    WitchsTurn      -> do
+        witch <- uses players $ head . filterAlive . filterWitches
+
+        tell [pingWitchMessage]
+        tell [pingPlayerMessage $ witch ^. name]
+
+poisonCommand :: Text -> Text -> Command
+poisonCommand callerName targetName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    validatePlayer callerName targetName
+
+    poison .= Just targetName
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
@@ -96,7 +117,8 @@ quitCommand callerName = Command $ do
     killPlayer caller
     tell [playerQuitMessage caller]
 
-    when (isSeer caller) $ see .= Nothing
+    when (isWitch caller)   $ poison .= Nothing
+    when (isSeer caller)    $ see .= Nothing
     votes %= Map.delete callerName
 
 seeCommand :: Text -> Text -> Command
@@ -130,6 +152,10 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell $ standardStatusMessages stage' (game ^. players)
         whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
             tell [waitingOnMessage (Just callerName) pendingVoters]
+    WitchsTurn      -> do
+        game <- get
+
+        tell $ standardStatusMessages stage' (game ^. players)
     where
         standardStatusMessages stage players =
             currentStageMessages callerName stage ++ [
