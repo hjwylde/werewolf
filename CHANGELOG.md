@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.2.0
+
 *Minor*
 
 * Added the Villager role. ([#37](https://github.com/hjwylde/werewolf/issues/37))
