@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.1.0
+
 *Minor*
 
 * Added a Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
