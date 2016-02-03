@@ -50,7 +50,7 @@ handle callerName (Options extraRoleNames playerNames) = do
             return
             (findByName roleName)
 
-        players <- createPlayers playerNames extraRoles
+        players <- createPlayers (callerName:playerNames) extraRoles
 
         runWriterT $ startGame callerName players >>= execStateT checkStage
 
