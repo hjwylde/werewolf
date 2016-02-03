@@ -20,7 +20,8 @@ module Game.Werewolf.Player (
     findByName, findByName_,
 
     -- ** Filters
-    filterScapegoats, filterSeers, filterVillagers, filterWerewolves, filterWitches,
+    filterScapegoats, filterSeers, filterVillagers, filterVillagerVillagers, filterWerewolves,
+    filterWitches,
 
     -- ** Queries
     doesPlayerExist, isScapegoat, isSeer, isVillager, isWerewolf, isWitch, isAlive, isDead,
@@ -38,7 +39,7 @@ import Data.List
 import Data.Maybe
 import Data.Text  (Text)
 
-import Game.Werewolf.Role hiding (findByName, name, _name)
+import Game.Werewolf.Role hiding (name, _name)
 
 data Player = Player
     { _name  :: Text
@@ -69,6 +70,9 @@ filterSeers = filter isSeer
 filterVillagers :: [Player] -> [Player]
 filterVillagers = filter isVillager
 
+filterVillagerVillagers :: [Player] -> [Player]
+filterVillagerVillagers = filter isVillagerVillager
+
 filterWerewolves :: [Player] -> [Player]
 filterWerewolves = filter isWerewolf
 
@@ -86,6 +90,9 @@ isSeer player = player ^. role == seerRole
 
 isVillager :: Player -> Bool
 isVillager player = player ^. role == villagerRole
+
+isVillagerVillager :: Player -> Bool
+isVillagerVillager player = player ^. role == villagerVillagerRole
 
 isWerewolf :: Player -> Bool
 isWerewolf player = player ^. role == werewolfRole

@@ -17,11 +17,7 @@ module Game.Werewolf.Role (
     Role(..), name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles, diurnalRoles, nocturnalRoles, scapegoatRole, seerRole, villagerRole, werewolfRole,
-    witchRole,
-
-    -- ** Queries
-    findByName,
+    allRoles, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole, witchRole,
 
     -- * Allegiance
     Allegiance(..),
@@ -29,10 +25,8 @@ module Game.Werewolf.Role (
 
 import Control.Lens
 
-import           Data.List
-import           Data.Maybe
-import           Data.Text  (Text)
-import qualified Data.Text  as T
+import           Data.Text (Text)
+import qualified Data.Text as T
 
 import Prelude hiding (all)
 
@@ -44,13 +38,7 @@ data Role = Role
     } deriving (Eq, Read, Show)
 
 allRoles :: [Role]
-allRoles = [scapegoatRole, seerRole, villagerRole, werewolfRole, witchRole]
-
-diurnalRoles :: [Role]
-diurnalRoles = [scapegoatRole, villagerRole, witchRole]
-
-nocturnalRoles :: [Role]
-nocturnalRoles = allRoles \\ diurnalRoles
+allRoles = [scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole, witchRole]
 
 scapegoatRole :: Role
 scapegoatRole = Role
@@ -84,11 +72,20 @@ villagerRole = Role
         "Bluffing can be a good technique, but you had better be convincing about what you say."
     }
 
+villagerVillagerRole :: Role
+villagerVillagerRole = Role
+    { _name         = "Villager-Villager"
+    , _allegiance   = Villagers
+    , _description  = "An honest townsperson humbly living in Millers Hollow."
+    , _advice       = "You'll make friends quickly, but be wary about whom you trust."
+    }
+
 werewolfRole :: Role
 werewolfRole = Role
     { _name         = "Werewolf"
     , _allegiance   = Werewolves
-    , _description  = "A shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."
+    , _description  =
+        "A shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."
     , _advice       =
         "Voting against your partner can be a good way to deflect suspicion from yourself."
     }
@@ -108,9 +105,6 @@ witchRole = Role
         , "but there are no restrictions on how many you may use at night."
         ]
     }
-
-findByName :: Text -> Maybe Role
-findByName name = find ((name ==) . _name) allRoles
 
 data Allegiance = Villagers | Werewolves
     deriving (Eq, Read, Show)

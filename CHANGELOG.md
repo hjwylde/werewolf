@@ -2,11 +2,15 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added the Villager role. ([#37](https://github.com/hjwylde/werewolf/issues/37))
+
 #### v0.4.1.0
 
 *Minor*
 
-* Added a Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
+* Added the Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
 
 #### v0.4.0.0
 

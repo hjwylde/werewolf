@@ -143,9 +143,14 @@ newGameMessages game = [
     newPlayersInGameMessage players',
     rolesInGameMessage Nothing $ map _role players'
     ] ++ map (newPlayerMessage players') players'
+    ++ villagerVillagerMessages
     ++ stageMessages game
     where
-        players' = game ^. players
+        players'                    = game ^. players
+        villagerVillagerMessages    =
+            case filterVillagerVillagers (game ^. players) of
+                [villagerVillager]  -> [villagerVillagerMessage $ villagerVillager ^. name]
+                _                   -> []
 
 newPlayersInGameMessage :: [Player] -> Message
 newPlayersInGameMessage players = publicMessage $ T.concat [
@@ -156,11 +161,20 @@ newPlayersInGameMessage players = publicMessage $ T.concat [
 newPlayerMessage :: [Player] -> Player -> Message
 newPlayerMessage players player
     | isWerewolf player = privateMessage (player ^. name) $ T.intercalate "\n" [T.concat ["You're a Werewolf", packMessage], player ^. role . description]
-    | otherwise         = privateMessage (player ^. name) $ T.intercalate "\n" [T.concat ["You're a ", player ^. role . Role.name, "."], player ^. role . description]
+    | isVillager player = privateMessage (player ^. name) $ T.intercalate "\n" ["You're a Villager.", player ^. role . description]
+    | otherwise         = privateMessage (player ^. name) $ T.intercalate "\n" [T.concat ["You're the ", player ^. role . Role.name, "."], player ^. role . description]
     where
         packMessage
             | length (filterWerewolves players) <= 1    = "."
             | otherwise                                 = T.concat [", along with ", T.intercalate ", " (map _name $ filterWerewolves players \\ [player]), "."]
+
+villagerVillagerMessage :: Text -> Message
+villagerVillagerMessage name = publicMessage $ T.unwords [
+    "Unguarded advice is seldom given, for advice is a dangerous gift,",
+    "even from the wise to the wise, and all courses may run ill.",
+    "Yet as you feel like you need help, I will begrudgingly leave you with this:",
+    name, "is the Villager-Villager."
+    ]
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of

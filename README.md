@@ -23,6 +23,7 @@ The current implemented roles are:
 * Scapegoat.
 * Seer.
 * Villager.
+* Villager-Villager.
 * Werewolf.
 * Witch.
 

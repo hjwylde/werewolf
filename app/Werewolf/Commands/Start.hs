@@ -22,7 +22,9 @@ import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
-import Data.Text (Text)
+import           Data.List
+import           Data.Text (Text)
+import qualified Data.Text as T
 
 import Game.Werewolf.Engine   hiding (isGameOver)
 import Game.Werewolf.Game
@@ -55,3 +57,7 @@ handle callerName (Options extraRoleNames playerNames) = do
     case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game, messages)  -> writeGame game >> exitWith success { messages = messages }
+
+
+findByName :: Text -> Maybe Role
+findByName name = find ((name ==) . T.toLower . _name) allRoles
