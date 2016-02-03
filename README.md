@@ -73,7 +73,7 @@ The result contains a boolean for whether the command was successful and a list 
 The `to` header on a message may either be `null`---for a public message---or have an intended
     recipient.
 
-It's the Seers' turn now.
+It's the Seer's turn now.
 ```bash
 > werewolf --caller @qux see @grault
 {"ok":true,"messages":[
