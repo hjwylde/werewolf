@@ -64,6 +64,9 @@ commandsMessages = map (T.intercalate "\n") [[
     "end",
     "- Ends the current game."
     ], [
+    "heal PLAYER",
+    "- Heal a devoured player. The Witch may heal a devoured player at nighttime."
+    ], [
     "pass",
     "- Pass. A Witch may pass on poisoning a player."
     ], [
@@ -71,13 +74,13 @@ commandsMessages = map (T.intercalate "\n") [[
     "- Pings the status of the current game publicly."
     ], [
     "poison PLAYER",
-    "- Poison a player. A Witch may poison a player at nighttime."
+    "- Poison a player. The Witch may poison a player at nighttime."
     ], [
     "quit",
     "- Quit the current game."
     ], [
     "see PLAYER",
-    "- See a player's allegiance. A Seer may determine a player's allegiance once per day."
+    "- See a player's allegiance. The Seer may determine a player's allegiance once per day."
     ], [
     "start [--extra-roles ROLE,...] PLAYER ...",
     "- Starts a new game with the given players and extra roles. A game requires at least 7 players."
@@ -138,7 +141,7 @@ rulesMessages = map (T.intercalate "\n") [[
     "1. The village falls asleep.",
     "2. The Seer wakes up and sees someone's allegiance.",
     "3. The Werewolves wake up and select a victim.",
-    "4. The Witch wakes up and may poison someone.",
+    "4. The Witch wakes up and may heal the victim and/or poison someone.",
     "5. The village wakes up and find the victim.",
     "6. The village votes to lynch a suspect.",
     "The game is over when only Villagers or Werewolves are left alive."

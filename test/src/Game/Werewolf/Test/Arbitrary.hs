@@ -10,10 +10,10 @@ Maintainer  : public@hjwylde.com
 
 module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
-    arbitraryCommand, arbitraryDevourVoteCommand, arbitraryLynchVoteCommand, arbitraryPassCommand,
-    arbitraryPoisonCommand, arbitraryQuitCommand, arbitrarySeeCommand, arbitraryNewGame,
-    arbitraryPlayer, arbitraryPlayerSet, arbitraryScapegoat, arbitrarySeer, arbitraryVillager,
-    arbitraryWerewolf, arbitraryWitch,
+    arbitraryCommand, arbitraryDevourVoteCommand, arbitraryHealCommand, arbitraryLynchVoteCommand,
+    arbitraryPassCommand, arbitraryPoisonCommand, arbitraryQuitCommand, arbitrarySeeCommand,
+    arbitraryNewGame, arbitraryPlayer, arbitraryPlayerSet, arbitraryScapegoat, arbitrarySeer,
+    arbitraryVillager, arbitraryWerewolf, arbitraryWitch,
 
     -- * Utility functions
     run, run_, runArbitraryCommands,
@@ -49,7 +49,11 @@ arbitraryCommand game = case game ^. stage of
     SeersTurn       -> arbitrarySeeCommand game
     VillagesTurn    -> arbitraryLynchVoteCommand game
     WerewolvesTurn  -> arbitraryDevourVoteCommand game
-    WitchsTurn      -> oneof [arbitraryPassCommand game, arbitraryPoisonCommand game]
+    WitchsTurn      -> oneof [
+        arbitraryHealCommand game,
+        arbitraryPassCommand game,
+        arbitraryPoisonCommand game
+        ]
 
 arbitraryDevourVoteCommand :: Game -> Gen Command
 arbitraryDevourVoteCommand game = do
@@ -68,6 +72,14 @@ arbitraryLynchVoteCommand game = do
     if null applicableCallers
         then return noopCommand
         else elements applicableCallers >>= \caller -> return $ lynchVoteCommand (caller ^. name) (target ^. name)
+
+arbitraryHealCommand :: Game -> Gen Command
+arbitraryHealCommand game = do
+    let witchName = (head . filterWitches $ game ^. players) ^. name
+
+    return $ if game ^. healUsed
+        then noopCommand
+        else seq (fromJust (getDevourEvent game)) $ healCommand witchName
 
 arbitraryPassCommand :: Game -> Gen Command
 arbitraryPassCommand game = do

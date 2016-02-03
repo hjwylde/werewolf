@@ -127,30 +127,30 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     WitchsTurn -> do
         whenJustM (use poison) $ \targetName -> do
-            whenM (isPlayerAlive targetName) $ events %= (++ [PoisonEvent targetName])
-
-            advanceStage
+            events %= (++ [PoisonEvent targetName])
+            poison .= Nothing
 
         witch <- uses players (head . filterWitches)
 
-        whenM (fmap (witch `elem`) getPassers) advanceStage
+        whenM (use healUsed &&^ use poisonUsed) advanceStage
+        whenM (fmap (witch `elem`) getPassers)  advanceStage
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
+    game            <- get
     stage'          <- use stage
     alivePlayers    <- uses players filterAlive
-    events'         <- use events
 
     let nextStage = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
         then GameOver
-        else head $ filter (stageAvailable alivePlayers events') (drop1 $ dropWhile (stage' /=) stageCycle)
-
-    tell $ stageMessages nextStage alivePlayers
+        else head $ filter (stageAvailable game) (drop1 $ dropWhile (stage' /=) stageCycle)
 
     stage   .= nextStage
     passes  .= []
     see     .= Nothing
     votes   .= Map.empty
+
+    tell . stageMessages =<< get
 
 checkEvents :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkEvents = do
@@ -165,12 +165,17 @@ eventAvailable (DevourEvent _) = gets isSunrise
 eventAvailable (PoisonEvent _) = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
-applyEvent (DevourEvent name) = do
-    player <- uses players $ findByName_ name
+applyEvent (DevourEvent targetName) = do
+    player  <- uses players $ findByName_ targetName
+    heal'   <- use heal
 
-    killPlayer player
+    if heal'
+        then tell [playerHealedMessage $ player ^. name]
+        else do
+            killPlayer player
+            tell [playerDevouredMessage player]
 
-    tell [playerDevouredMessage player]
+    heal .= False
 applyEvent (PoisonEvent name) = do
     player <- uses players $ findByName_ name
 

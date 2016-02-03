@@ -23,6 +23,7 @@ import Options.Applicative
 import System.Environment
 
 import qualified Werewolf.Commands.End       as End
+import qualified Werewolf.Commands.Heal      as Heal
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
 import qualified Werewolf.Commands.Pass      as Pass
@@ -52,6 +53,7 @@ interpret callerName args = do
 handle :: Options -> IO ()
 handle (Options callerName command) = case command of
     End                                 -> End.handle callerName
+    Heal                                -> Heal.handle callerName
     Help options                        -> Help.handle callerName options
     Interpret (Interpret.Options args)  -> interpret callerName args
     Pass                                -> Pass.handle callerName

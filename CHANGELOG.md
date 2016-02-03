@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added a Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
+
 #### v0.4.0.0
 
 *Major*
@@ -16,7 +20,6 @@
 * Added `events` to the game state. ([#71](https://github.com/hjwylde/werewolf/issues/71))
 * Added private pinging to the `ping` command. ([#69](https://github.com/hjwylde/werewolf/issues/69))
 * Restricted `end` to players in the current game. ([#74](https://github.com/hjwylde/werewolf/issues/74))
-* Added a Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
 
 #### v0.3.4.0
 

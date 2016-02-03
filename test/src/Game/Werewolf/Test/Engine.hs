@@ -23,12 +23,14 @@ module Game.Werewolf.Test.Engine (
 
     prop_checkWerewolvesTurnAdvancesToWitchsTurn,
     prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured,
+    prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned,
     prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     prop_checkWerewolvesTurnKillsNoOneWhenConflicted, prop_checkWerewolvesTurnResetsVotes,
     prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
 
-    prop_checkWitchsTurnAdvancesToVillagesTurn, prop_checkWitchsTurnKillsOnePlayerWhenPoisoned,
-    prop_checkWitchsTurnDoesNothingWhenPassed, prop_checkWitchsTurnDoesntResetPoison,
+    prop_checkWitchsTurnAdvancesToVillagesTurn, prop_checkWitchsTurnHealsDevoureeWhenHealed,
+    prop_checkWitchsTurnKillsOnePlayerWhenPoisoned, prop_checkWitchsTurnDoesNothingWhenPassed,
+    prop_checkWitchsTurnResetsHeal, prop_checkWitchsTurnResetsPoison,
 
     -- * checkGameOver
     prop_checkGameOverAdvancesStage, prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
@@ -59,9 +61,10 @@ import           Data.Maybe
 import           Data.Text         (Text)
 
 import           Game.Werewolf.Command
-import           Game.Werewolf.Engine         hiding (doesPlayerExist, getVoteResult, isGameOver,
-                                               isSeersTurn, isVillagesTurn, isWerewolvesTurn, getDevourEvent,
-                                               isWitchsTurn, killPlayer)
+import           Game.Werewolf.Engine         hiding (doesPlayerExist, getDevourEvent,
+                                               getVoteResult, isGameOver, isSeersTurn,
+                                               isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+                                               killPlayer)
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
 import           Game.Werewolf.Role           hiding (name, _name)
@@ -166,11 +169,11 @@ prop_checkVillagesTurnDoesNothingUnlessAllVoted game =
 
 prop_checkWerewolvesTurnAdvancesToWitchsTurn :: Game -> Property
 prop_checkWerewolvesTurnAdvancesToWitchsTurn game =
-    forAll (runArbitraryCommands n game') $ \game' ->
-    length (getVoteResult game') == 1
-    ==> let target = head $ getVoteResult game'
+    forAll (runArbitraryCommands n game') $ \game'' ->
+    length (getVoteResult game'') == 1
+    ==> let target = head $ getVoteResult game''
         in not (isWitch target)
-        ==> isWitchsTurn $ run_ checkStage game'
+        ==> isWitchsTurn $ run_ checkStage game''
     where
         game'   = game { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players
@@ -183,6 +186,12 @@ prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured game =
     in not . isWitchsTurn $ run_ checkStage game''
     where
         game' = game { _stage = WerewolvesTurn }
+
+prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned :: Game -> Bool
+prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned game =
+    not . isWitchsTurn $ run_ checkStage game'
+    where
+        game' = game { _stage = WerewolvesTurn, _healUsed = True, _poisonUsed = True }
 
 prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus :: Game -> Property
 prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus game =
@@ -204,8 +213,8 @@ prop_checkWerewolvesTurnKillsNoOneWhenConflicted game =
 
 prop_checkWerewolvesTurnResetsVotes :: Game -> Property
 prop_checkWerewolvesTurnResetsVotes game =
-    forAll (runArbitraryCommands n game') $ \game' ->
-    Map.null $ run_ checkStage game' ^. votes
+    forAll (runArbitraryCommands n game') $ \game'' ->
+    Map.null $ run_ checkStage game'' ^. votes
     where
         game'   = game { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players
@@ -220,15 +229,33 @@ prop_checkWerewolvesTurnDoesNothingUnlessAllVoted game =
 
 prop_checkWitchsTurnAdvancesToVillagesTurn :: Game -> Property
 prop_checkWitchsTurnAdvancesToVillagesTurn game =
-    forAll (arbitraryCommand game') $ \command ->
+    forAll (arbitraryPassCommand game') $ \command ->
     isVillagesTurn $ run_ checkStage (run_ (apply command) game')
     where
         game' = game { _stage = WitchsTurn }
 
+prop_checkWitchsTurnHealsDevoureeWhenHealed :: Game -> Property
+prop_checkWitchsTurnHealsDevoureeWhenHealed game =
+    forAll (runArbitraryCommands n game') $ \game'' ->
+    length (getVoteResult game'') == 1
+    ==> let target = head $ getVoteResult game''
+        in not (isWitch target)
+        ==> let game''' = run_ checkStage game''
+            in forAll (arbitraryHealCommand game''') $ \command ->
+            forAll (arbitraryPassCommand game''') $ \passCommand ->
+            null . filterDead $ run_ checkStage
+                (run_ (apply passCommand) $
+                    run_ (apply command) game'''
+                    ) ^. players
+    where
+        game'   = game { _stage = WerewolvesTurn }
+        n       = length . filterWerewolves $ game' ^. players
+
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned :: Game -> Property
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned game =
     forAll (arbitraryPoisonCommand game') $ \command ->
-    length (filterDead $ run_ checkStage (run_ (apply command) game') ^. players) == 1
+    forAll (arbitraryPassCommand game') $ \passCommand ->
+    length (filterDead $ run_ checkStage (run_ (apply passCommand) $ run_ (apply command) game') ^. players) == 1
     where
         game' = game { _stage = WitchsTurn }
 
@@ -239,10 +266,28 @@ prop_checkWitchsTurnDoesNothingWhenPassed game =
     where
         game' = game { _stage = WitchsTurn }
 
-prop_checkWitchsTurnDoesntResetPoison :: Game -> Property
-prop_checkWitchsTurnDoesntResetPoison game =
+prop_checkWitchsTurnResetsHeal :: Game -> Property
+prop_checkWitchsTurnResetsHeal game =
+    forAll (runArbitraryCommands n game') $ \game'' ->
+    length (getVoteResult game'') == 1
+    ==> let target = head $ getVoteResult game''
+        in not (isWitch target)
+        ==> let game''' = run_ checkStage game''
+            in forAll (arbitraryHealCommand game''') $ \command ->
+            forAll (arbitraryPassCommand game''') $ \passCommand ->
+            not $ run_ checkStage
+                (run_ (apply passCommand) $
+                    run_ (apply command) game'''
+                    ) ^. heal
+    where
+        game'   = game { _stage = WerewolvesTurn }
+        n       = length . filterWerewolves $ game' ^. players
+
+
+prop_checkWitchsTurnResetsPoison :: Game -> Property
+prop_checkWitchsTurnResetsPoison game =
     forAll (arbitraryPoisonCommand game') $ \command ->
-    isJust $ run_ checkStage (run_ (apply command) game') ^. poison
+    isNothing $ run_ checkStage (run_ (apply command) game') ^. poison
     where
         game' = game { _stage = WitchsTurn }
 

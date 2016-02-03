@@ -44,6 +44,7 @@ data Options = Options
 -- | Command.
 data Command
     = End
+    | Heal
     | Help Help.Options
     | Interpret Interpret.Options
     | Pass
@@ -87,6 +88,7 @@ werewolf = Options
         ])
     <*> subparser (mconcat [
         command "end"       $ info (helper <*> end)         (fullDesc <> progDesc "End the current game"),
+        command "heal"      $ info (helper <*> heal)        (fullDesc <> progDesc "Heal the devoured player"),
         command "help"      $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents"),
         command "interpret" $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command" <> noIntersperse),
         command "pass"      $ info (helper <*> pass)        (fullDesc <> progDesc "Pass"),
@@ -101,6 +103,9 @@ werewolf = Options
 
 end :: Parser Command
 end = pure End
+
+heal :: Parser Command
+heal = pure Heal
 
 help_ :: Parser Command
 help_ = Help . Help.Options

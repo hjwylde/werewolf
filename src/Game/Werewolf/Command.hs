@@ -18,8 +18,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    devourVoteCommand, lynchVoteCommand, noopCommand, passCommand, pingCommand, poisonCommand,
-    quitCommand, seeCommand, statusCommand,
+    devourVoteCommand, healCommand, lynchVoteCommand, noopCommand, passCommand, pingCommand,
+    poisonCommand, quitCommand, seeCommand, statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -29,8 +29,9 @@ import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
 import           Data.List
-import qualified Data.Map  as Map
-import           Data.Text (Text)
+import qualified Data.Map   as Map
+import           Data.Maybe
+import           Data.Text  (Text)
 
 import Game.Werewolf.Engine
 import Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote, isGameOver,
@@ -55,6 +56,17 @@ devourVoteCommand callerName targetName = Command $ do
     aliveWerewolfNames <- uses players $ map _name . filterAlive . filterWerewolves
 
     tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
+
+healCommand :: Text -> Command
+healCommand callerName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (use healUsed)                    $ throwError [playerHasAlreadyHealedMessage callerName]
+    whenM (isNothing <$> getDevourEvent)    $ throwError [playerCannotDoThatRightNowMessage callerName]
+
+    heal        .= True
+    healUsed    .= True
 
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
@@ -107,12 +119,13 @@ poisonCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
     unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (use poison) . const          $ throwError [playerHasAlreadyPoisonedMessage callerName]
+    whenM (use poisonUsed)                  $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
     whenJustM getDevourEvent                $ \(DevourEvent targetName') ->
         when (targetName == targetName') $ throwError [playerCannotDoThatMessage callerName]
 
-    poison .= Just targetName
+    poison      .= Just targetName
+    poisonUsed  .= True
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
@@ -124,7 +137,11 @@ quitCommand callerName = Command $ do
     tell [playerQuitMessage caller]
 
     passes %= delete callerName
-    when (isWitch caller)   $ poison .= Nothing
+    when (isWitch caller)   $ do
+        heal        .= False
+        healUsed    .= False
+        poison      .= Nothing
+        poisonUsed  .= False
     when (isSeer caller)    $ see .= Nothing
     votes %= Map.delete callerName
 

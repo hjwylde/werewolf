@@ -50,7 +50,7 @@ module Game.Werewolf.Response (
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
 
     -- ** Witch's turn messages
-    playerPoisonedMessage,
+    playerHealedMessage, playerPoisonedMessage,
 
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
@@ -63,7 +63,7 @@ module Game.Werewolf.Response (
     playerCannotDevourAnotherWerewolfMessage,
 
     -- ** Witch's turn error messages
-    playerHasAlreadyPoisonedMessage,
+    playerHasAlreadyHealedMessage, playerHasAlreadyPoisonedMessage,
 ) where
 
 import Control.Lens
@@ -74,6 +74,7 @@ import Data.Aeson
 import Data.Aeson.Types
 #endif
 import           Data.List.Extra
+import           Data.Maybe
 import           Data.Text               (Text)
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy.Encoding as T
@@ -142,10 +143,9 @@ newGameMessages game = [
     newPlayersInGameMessage players',
     rolesInGameMessage Nothing $ map _role players'
     ] ++ map (newPlayerMessage players') players'
-    ++ stageMessages stage' players'
+    ++ stageMessages game
     where
-        stage'      = game ^. stage
-        players'    = game ^. players
+        players' = game ^. players
 
 newPlayersInGameMessage :: [Player] -> Message
 newPlayersInGameMessage players = publicMessage $ T.concat [
@@ -162,14 +162,15 @@ newPlayerMessage players player
             | length (filterWerewolves players) <= 1    = "."
             | otherwise                                 = T.concat [", along with ", T.intercalate ", " (map _name $ filterWerewolves players \\ [player]), "."]
 
-stageMessages :: Stage -> [Player] -> [Message]
-stageMessages GameOver _                    = []
-stageMessages SeersTurn alivePlayers        = seersTurnMessages . _name . head $ filterSeers alivePlayers
-stageMessages Sunrise _                     = [sunriseMessage]
-stageMessages Sunset _                      = [nightFallsMessage]
-stageMessages VillagesTurn _                = villagesTurnMessages
-stageMessages WerewolvesTurn alivePlayers   = werewolvesTurnMessages . map _name $ filterWerewolves alivePlayers
-stageMessages WitchsTurn alivePlayers       = witchsTurnMessages . _name . head $ filterWitches alivePlayers
+stageMessages :: Game -> [Message]
+stageMessages game = case game ^. stage of
+    GameOver        -> []
+    SeersTurn       -> seersTurnMessages (_name . head . filterSeers $ game ^. players)
+    Sunrise         -> [sunriseMessage]
+    Sunset          -> [nightFallsMessage]
+    VillagesTurn    -> villagesTurnMessages
+    WerewolvesTurn  -> werewolvesTurnMessages (map _name . filterAlive . filterWerewolves $ game ^. players)
+    WitchsTurn      -> witchsTurnMessages game
 
 seersTurnMessages :: Text -> [Message]
 seersTurnMessages seerName = [
@@ -194,11 +195,25 @@ werewolvesTurnMessages werewolfNames = [
     publicMessage "The Werewolves wake up, recognise one another and choose a new victim."
     ] ++ groupMessages werewolfNames "Whom would you like to devour?"
 
-witchsTurnMessages :: Text -> [Message]
-witchsTurnMessages witchName = [
-    publicMessage "The Witch wakes up.",
-    privateMessage witchName "Who would you like to poison? (Type `pass` for no one.)"
-    ]
+witchsTurnMessages :: Game -> [Message]
+witchsTurnMessages game = wakeUpMessage:devourMessages ++ healMessages ++ poisonMessages ++ [passMessage]
+    where
+        witchName       = (head . filterWitches $ game ^. players) ^. name
+        wakeUpMessage   = publicMessage "The Witch wakes up."
+        passMessage     = privateMessage witchName "Type `pass` to end your turn."
+        devourMessages  = maybe
+            []
+            (\(DevourEvent targetName) ->
+                [privateMessage witchName $ T.unwords ["You see", targetName, "sprawled outside bleeding uncontrollably."]]
+                )
+            (getDevourEvent game)
+        healMessages
+            | not (game ^. healUsed)
+                && isJust (getDevourEvent game) = [privateMessage witchName "Would you like to heal them?"]
+            | otherwise                         = []
+        poisonMessages
+            | not (game ^. poisonUsed)          = [privateMessage witchName "Whom would you like to poison?"]
+            | otherwise                         = []
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game = case aliveAllegiances of
@@ -329,6 +344,13 @@ noPlayerDevouredMessage = publicMessage $ T.unwords [
     "Perhaps the Werewolves have left Miller's Hollow?"
     ]
 
+playerHealedMessage :: Text -> Message
+playerHealedMessage name = publicMessage $ T.unwords [
+    "As you open them you notice a door broken down and blood over the cobblestones.",
+    name, "hobbles over, clutching the bandages round their stomach.",
+    "The Witch must have seen their body and healed them..."
+    ]
+
 playerPoisonedMessage :: Player -> Message
 playerPoisonedMessage player = publicMessage $ T.concat [
     "Upon further discovery, it looks like the Witch has struck for the side of ", side, ".",
@@ -368,6 +390,9 @@ targetIsDeadMessage to targetName = privateMessage to $ T.unwords [
 
 playerCannotDevourAnotherWerewolfMessage :: Text -> Message
 playerCannotDevourAnotherWerewolfMessage to = privateMessage to "You cannot devour another Werewolf!"
+
+playerHasAlreadyHealedMessage :: Text -> Message
+playerHasAlreadyHealedMessage to = privateMessage to "You've already healed someone!"
 
 playerHasAlreadyPoisonedMessage :: Text -> Message
 playerHasAlreadyPoisonedMessage to = privateMessage to "You've already poisoned someone!"

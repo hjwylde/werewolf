@@ -13,7 +13,7 @@ Game and stage data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), stage, players, events, passes, poison, see, votes,
+    Game(..), stage, players, events, passes, heal, healUsed, poison, poisonUsed, see, votes,
     newGame,
 
     -- ** Manipulations
@@ -45,13 +45,16 @@ import           Data.Text       (Text)
 import Game.Werewolf.Player
 
 data Game = Game
-    { _stage   :: Stage
-    , _players :: [Player]
-    , _events  :: [Event]
-    , _passes  :: [Text]
-    , _poison  :: Maybe Text
-    , _see     :: Maybe Text
-    , _votes   :: Map Text Text
+    { _stage      :: Stage
+    , _players    :: [Player]
+    , _events     :: [Event]
+    , _passes     :: [Text]
+    , _heal       :: Bool
+    , _healUsed   :: Bool
+    , _poison     :: Maybe Text
+    , _poisonUsed :: Bool
+    , _see        :: Maybe Text
+    , _votes      :: Map Text Text
     } deriving (Eq, Read, Show)
 
 data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn | WitchsTurn
@@ -65,9 +68,20 @@ makeLenses ''Game
 makeLenses ''Stage
 
 newGame :: [Player] -> Game
-newGame players = Game stage players [] [] Nothing Nothing Map.empty
+newGame players = game { _stage = head $ filter (stageAvailable game) stageCycle }
     where
-        stage = head $ filter (stageAvailable players []) stageCycle
+        game = Game
+            { _stage        = Sunset
+            , _players      = players
+            , _events       = []
+            , _passes       = []
+            , _heal         = False
+            , _healUsed     = False
+            , _poison       = Nothing
+            , _poisonUsed   = False
+            , _see          = Nothing
+            , _votes        = Map.empty
+            }
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -118,18 +132,20 @@ getVoteResult game = map (`findByName_` players') result
 stageCycle :: [Stage]
 stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, WitchsTurn, Sunrise, VillagesTurn]
 
-stageAvailable :: [Player] -> [Event] -> Stage -> Bool
-stageAvailable _ _ GameOver                 = False
-stageAvailable players _ SeersTurn          = any isSeer (filterAlive players)
-stageAvailable _ _ Sunrise                  = True
-stageAvailable _ _ Sunset                   = True
-stageAvailable _ _ VillagesTurn             = True
-stageAvailable players _ WerewolvesTurn     = any isWerewolf (filterAlive players)
-stageAvailable players events WitchsTurn    =
-    any isWitch (filterAlive players) &&
-    (witch ^. name `notElem` [name | (DevourEvent name) <- events])
+stageAvailable :: Game -> Stage -> Bool
+stageAvailable _ GameOver           = False
+stageAvailable game SeersTurn       = any isSeer (filterAlive $ game ^. players)
+stageAvailable _ Sunrise            = True
+stageAvailable _ Sunset             = True
+stageAvailable _ VillagesTurn       = True
+stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
+stageAvailable game WitchsTurn      = and [
+    any isWitch (filterAlive $ game ^. players),
+    not (game ^. healUsed) || not (game ^. poisonUsed),
+    (witch ^. name `notElem` [name | (DevourEvent name) <- game ^. events])
+    ]
     where
-        witch = head $ filterWitches players
+        witch = head . filterWitches $ game ^. players
 
 getDevourEvent :: Game -> Maybe Event
 getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]
