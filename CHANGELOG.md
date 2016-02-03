@@ -13,6 +13,7 @@
 *Minor*
 
 * Added private pinging to the `ping` command. ([#69](https://github.com/hjwylde/werewolf/issues/69))
+* Restricted `end` to players in the current game. ([#74](https://github.com/hjwylde/werewolf/issues/74))
 
 #### v0.3.4.0
 
