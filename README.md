@@ -52,13 +52,15 @@ This section covers how a chat client interacts with the werewolf game engine.
 All werewolf commands are designed to be run by a user from the chat client.
 E.g., to start a game:
 ```bash
-> werewolf --caller @foo start @foo @bar @baz @qux @quux @corge @grault
+> werewolf --caller @foo start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
-    {"to":["@foo"],"message":"You're a Villager.\nAn ordinary townsperson humbly living in Millers Hollow.\n"},
+    {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
+    {"to":null,"message":"The roles in play are Seer (1), Villager (4), Werewolf (2)."},
+    {"to":"@foo","message":"You're a Werewolf, along with @baz.\nA shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."},
     ...,
     {"to":null,"message":"Night falls, the village is asleep."},
-    {"to":null,"message":"The Seers wake up."},
-    {"to":["@grault"],"message":"Who's allegiance would you like to see?"}
+    {"to":null,"message":"The Seer wakes up."},
+    {"to":"@qux","message":"Whose allegiance would you like to see?"}
     ]}
 ```
 
@@ -68,56 +70,60 @@ All commands require this option.
 
 Any command ran returns a JSON result.
 The result contains a boolean for whether the command was successful and a list of messages.
-The `to` header on a message may either be `null` for a public message or have a list of intended
-    recipients.
+The `to` header on a message may either be `null`---for a public message---or have an intended
+    recipient.
 
 It's the Seers' turn now.
 ```bash
-> werewolf --caller @grault see @qux
+> werewolf --caller @qux see @grault
 {"ok":true,"messages":[
-    {"to":["@grault"],"message":"@qux is a Villager."},
+    {"to":"@qux","message":"@grault is aligned with the Villagers."},
     {"to":null,"message":"The Werewolves wake up, recognise one another and choose a new victim."},
-    {"to":["@bar","@corge"],"message":"Who would you like to devour?"}
+    {"to":"@foo","message":"Whom would you like to devour?"},
+    {"to":"@baz","message":"Whom would you like to devour?"}
     ]}
 ```
 
-Let's have _@bar_, a Werewolf, vote to devour a Villager.
+Let's have the Werewolves, _@foo_ and _@baz_, vote to devour a Villager.
 ```bash
-> werewolf --caller @bar vote @foo
+> werewolf --caller @foo vote @bar
+{"ok":true,"messages":[
+    {"to":"@baz","message":"@foo voted to devour @bar."}
+    ]}
+> werewolf --caller @baz vote @bar
+{"ok":true,"messages":[
+    {"to":"@foo","message":"@baz voted to devour @bar."},
+    {"to":null,"message":"The sun rises. Everybody wakes up and opens their eyes..."},
+    {"to":null,"message":"As you open them you notice a door broken down and @bar's guts half devoured and spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Villager."},
+    {"to":null,"message":"As the village gathers in the town square the town clerk calls for a vote."},
+    {"to":null,"message":"Whom would you like to lynch?"}
+    ]}
+```
+
+Too bad for _@bar_. Maybe the village can get some vengeance...
+```bash
+> werewolf --caller @qux vote @foo
 {"ok":true,"messages":[]}
 ```
 
 This time, even though the command was successful, there are no messages.
-In this implementation of werewolf votes are only revealed once tallied.
 
 ```bash
-> werewolf --caller @bar vote @foo
-{"ok":false,"messages":[{"to":["@bar"],"message":"You've already voted!"}]}
+> werewolf --caller @qux vote @foo
+{"ok":false,"messages":[{"to":["@qux"],"message":"You've already voted!"}]}
 ```
 
-Here the command was unsuccessful and an error message is sent to _@bar_.
-Note that even though the command was unsuccessful, the chat client interface probably won't need to
-    do anything special.
+Here the command was unsuccessful and an error message is sent to _@qux_.
+Even though the command was unsuccessful, the chat client interface probably won't need to do
+    anything special.
 Relaying the error message back to the user should suffice.
-
-```bash
-> werewolf --caller @corge vote @foo
-{"ok":true,"messages":[
-    {"to":["@bar","@corge"],"message":"@bar voted to devour @foo."},
-    {"to":["@bar","@corge"],"message":"@corge voted to devour @foo."},
-    {"to":null,"message":"The sun rises. Everybody wakes up and opens their eyes..."},
-    {"to":null,"message":"As you open them you notice a door broken down and @foo's guts spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Villager."}
-    ]}
-```
-
-And so on.
 
 Thus a chat client interface must implement the following:
 * The ability to call werewolf commands. This includes passing the `--caller` option and arguments
-  correctly. Note that it is possible to just implement the `interpret` command, which interprets
-  the caller's input.
-* The ability to send resultant messages. Resultant messages may be to everyone or to specific
-  users.
+  correctly. It is possible to only implement the `interpret` command, which interprets the
+  caller's input.
+* The ability to send resultant messages. Resultant messages may be to everyone or to a specific
+  user.
 
 #### Commands
 
