@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.0.0
+
 *Major*
 
 * Restricted count of special roles to 1. ([#32](https://github.com/hjwylde/werewolf/issues/32))
