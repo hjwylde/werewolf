@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Handler for the quit subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.Quit (
     -- * Handle
     handle,

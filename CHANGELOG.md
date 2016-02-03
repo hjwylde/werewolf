@@ -2,13 +2,16 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added a Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
+
 #### v0.4.0.0
 
 *Major*
 
 * Restricted count of special roles to 1. ([#32](https://github.com/hjwylde/werewolf/issues/32))
 * Changed private message structure to only ever be for a single player. ([#21](https://github.com/hjwylde/werewolf/issues/21))
-* Changed `start` to assume the caller wishes to play. ([#75](https://github.com/hjwylde/werewolf/issues/75))
 
 *Minor*
 

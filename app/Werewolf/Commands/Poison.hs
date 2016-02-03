@@ -1,15 +1,15 @@
 {-|
-Module      : Werewolf.Commands.See
-Description : Options and handler for the see subcommand.
+Module      : Werewolf.Commands.Poison
+Description : Options and handler for the poison subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Options and handler for the see subcommand.
+Options and handler for the poison subcommand.
 -}
 
-module Werewolf.Commands.See (
+module Werewolf.Commands.Poison (
     -- * Options
     Options(..),
 
@@ -42,7 +42,7 @@ handle callerName (Options targetName) = do
 
     game <- readGame
 
-    let command = seeCommand callerName targetName
+    let command = poisonCommand callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

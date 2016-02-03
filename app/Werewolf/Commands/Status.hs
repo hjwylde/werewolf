@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Handler for the status subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.Status (
     -- * Handle
     handle,

@@ -1,15 +1,17 @@
 {-|
-Module      : Werewolf.Commands.Ping
-Description : Handler for the ping subcommand.
+Module      : Werewolf.Commands.Heal
+Description : Handler for the heal subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the ping subcommand.
+Handler for the heal subcommand.
 -}
 
-module Werewolf.Commands.Ping (
+{-# LANGUAGE OverloadedStrings #-}
+
+module Werewolf.Commands.Heal (
     -- * Handle
     handle,
 ) where
@@ -34,8 +36,8 @@ handle callerName = do
 
     game <- readGame
 
-    let command = pingCommand
+    let command = healCommand callerName
 
-    case runExcept (execWriterT $ execStateT (apply command) game) of
-        Left errorMessages  -> exitWith failure { messages = errorMessages }
-        Right messages      -> exitWith success { messages = messages }
+    case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
+        Left errorMessages      -> exitWith failure { messages = errorMessages }
+        Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }

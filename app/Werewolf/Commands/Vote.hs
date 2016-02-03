@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Options and handler for the vote subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Commands.Vote (
     -- * Options
     Options(..),

@@ -23,11 +23,16 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn, getPlayerVote, getPendingVoters,
-    getVoteResult,
+    isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, getPlayerVote,
+    getPendingVoters, getVoteResult,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
+
+    -- * Event
+
+    -- ** Queries
+    getDevourEvent,
 
     -- * Player
 
@@ -35,13 +40,13 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerSeer, isPlayerWerewolf, isPlayerDead,
+    doesPlayerExist, isPlayerSeer, isPlayerWerewolf, isPlayerWitch, isPlayerAlive, isPlayerDead,
 
     -- * Role
     randomiseRoles,
 ) where
 
-import Control.Lens         hiding (cons)
+import Control.Lens         hiding (cons, snoc)
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Random
@@ -53,15 +58,15 @@ import qualified Data.Map        as Map
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, getVoteResult,
-                                         isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                         killPlayer)
+import           Game.Werewolf.Game     hiding (getDevourEvent, getPassers, getPendingVoters,
+                                         getPlayerVote, getVoteResult, isGameOver, isSeersTurn,
+                                         isVillagesTurn, isWerewolvesTurn, isWitchsTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
 import           Game.Werewolf.Role     (Role, scapegoatRole, seerRole, villagerRole, werewolfRole,
-                                         _allegiance)
+                                         witchRole, _allegiance)
 import qualified Game.Werewolf.Role     as Role
 
 import System.Directory
@@ -81,8 +86,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
     GameOver -> return ()
 
     SeersTurn -> whenJustM (use see) $ \targetName -> do
-        seer <- uses players (head . filterSeers)
-        target <- uses players (findByName_ targetName)
+        seer    <- uses players (head . filterSeers)
+        target  <- uses players (findByName_ targetName)
 
         tell [playerSeenMessage (seer ^. name) target]
 
@@ -115,25 +120,37 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         whenM (uses votes $ (length aliveWerewolves ==) . Map.size) $ do
             getVoteResult >>= \votees -> case votees of
-                [target]    -> events %= cons (Devour $ target ^. name)
+                [target]    -> events %= cons (DevourEvent $ target ^. name)
                 _           -> tell [noPlayerDevouredMessage]
 
             advanceStage
 
+    WitchsTurn -> do
+        whenJustM (use poison) $ \targetName -> do
+            events %= (++ [PoisonEvent targetName])
+            poison .= Nothing
+
+        witch <- uses players (head . filterWitches)
+
+        whenM (use healUsed &&^ use poisonUsed) advanceStage
+        whenM (fmap (witch `elem`) getPassers)  advanceStage
+
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
-    stage' <- use stage
-    alivePlayers <- uses players filterAlive
+    game            <- get
+    stage'          <- use stage
+    alivePlayers    <- uses players filterAlive
 
     let nextStage = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
         then GameOver
-        else head $ filter (stageAvailable $ map _role alivePlayers) (drop1 $ dropWhile (stage' /=) stageCycle)
-
-    tell $ stageMessages nextStage alivePlayers
+        else head $ filter (stageAvailable game) (drop1 $ dropWhile (stage' /=) stageCycle)
 
     stage   .= nextStage
+    passes  .= []
     see     .= Nothing
     votes   .= Map.empty
+
+    tell . stageMessages =<< get
 
 checkEvents :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkEvents = do
@@ -144,15 +161,27 @@ checkEvents = do
     mapM_ applyEvent available
 
 eventAvailable :: MonadState Game m => Event -> m Bool
-eventAvailable (Devour _) = gets isSunrise
+eventAvailable (DevourEvent _) = gets isSunrise
+eventAvailable (PoisonEvent _) = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
-applyEvent (Devour name) = do
+applyEvent (DevourEvent targetName) = do
+    player  <- uses players $ findByName_ targetName
+    heal'   <- use heal
+
+    if heal'
+        then tell [playerHealedMessage $ player ^. name]
+        else do
+            killPlayer player
+            tell [playerDevouredMessage player]
+
+    heal .= False
+applyEvent (PoisonEvent name) = do
     player <- uses players $ findByName_ name
 
     killPlayer player
 
-    tell [playerDevouredMessage player]
+    tell [playerPoisonedMessage player]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
@@ -175,7 +204,7 @@ startGame callerName players = do
     return game
     where
         playerNames = map _name players
-        restrictedRoles = [scapegoatRole, seerRole]
+        restrictedRoles = [scapegoatRole, seerRole, witchRole]
 
 killPlayer :: MonadState Game m => Player -> m ()
 killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -189,8 +218,14 @@ isVillagesTurn = gets Game.isVillagesTurn
 isWerewolvesTurn :: MonadState Game m => m Bool
 isWerewolvesTurn = gets Game.isWerewolvesTurn
 
+isWitchsTurn :: MonadState Game m => m Bool
+isWitchsTurn = gets Game.isWitchsTurn
+
 isGameOver :: MonadState Game m => m Bool
 isGameOver = gets Game.isGameOver
+
+getPassers :: MonadState Game m => m [Player]
+getPassers = gets Game.getPassers
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = gets $ Game.getPlayerVote playerName
@@ -219,6 +254,9 @@ deleteGame = liftIO $ defaultFilePath >>= removeFile
 doesGameExist :: MonadIO m => m Bool
 doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
 
+getDevourEvent :: MonadState Game m => m (Maybe Event)
+getDevourEvent = gets Game.getDevourEvent
+
 createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
 createPlayers playerNames extraRoles = zipWith newPlayer playerNames <$> randomiseRoles extraRoles (length playerNames)
 
@@ -230,6 +268,12 @@ isPlayerSeer name = uses players $ isSeer . findByName_ name
 
 isPlayerWerewolf :: MonadState Game m => Text -> m Bool
 isPlayerWerewolf name = uses players $ isWerewolf . findByName_ name
+
+isPlayerWitch :: MonadState Game m => Text -> m Bool
+isPlayerWitch name = uses players $ isWitch . findByName_ name
+
+isPlayerAlive :: MonadState Game m => Text -> m Bool
+isPlayerAlive name = uses players $ isAlive . findByName_ name
 
 isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = uses players $ isDead . findByName_ name

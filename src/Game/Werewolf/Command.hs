@@ -18,8 +18,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    devourVoteCommand, lynchVoteCommand, noopCommand, pingCommand, quitCommand, seeCommand,
-    statusCommand,
+    devourVoteCommand, healCommand, lynchVoteCommand, noopCommand, passCommand, pingCommand,
+    poisonCommand, quitCommand, seeCommand, statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -28,12 +28,15 @@ import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
-import qualified Data.Map  as Map
-import           Data.Text (Text)
+import           Data.List
+import qualified Data.Map   as Map
+import           Data.Maybe
+import           Data.Text  (Text)
 
 import Game.Werewolf.Engine
-import Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, isGameOver, isSeersTurn,
-                               isVillagesTurn, isWerewolvesTurn, killPlayer)
+import Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote, isGameOver,
+                               isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+                               killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
 
@@ -46,13 +49,24 @@ devourVoteCommand callerName targetName = Command $ do
     unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
-    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolf callerName]
+    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolves <- uses players $ filterAlive . filterWerewolves
+    aliveWerewolfNames <- uses players $ map _name . filterAlive . filterWerewolves
 
-    tell $ map (\werewolf -> playerMadeDevourVoteMessage (werewolf ^. name) callerName targetName) aliveWerewolves
+    tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
+
+healCommand :: Text -> Command
+healCommand callerName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (use healUsed)                    $ throwError [playerHasAlreadyHealedMessage callerName]
+    whenM (isNothing <$> getDevourEvent)    $ throwError [playerCannotDoThatRightNowMessage callerName]
+
+    heal        .= True
+    healUsed    .= True
 
 lynchVoteCommand :: Text -> Text -> Command
 lynchVoteCommand callerName targetName = Command $ do
@@ -65,6 +79,14 @@ lynchVoteCommand callerName targetName = Command $ do
 
 noopCommand :: Command
 noopCommand = Command $ return ()
+
+passCommand :: Text -> Command
+passCommand callerName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+
+    passes %= nub . cons callerName
 
 pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
@@ -86,6 +108,24 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingWerewolvesMessage]
         tell $ map (pingPlayerMessage . _name) (filterWerewolves pendingVoters)
+    WitchsTurn      -> do
+        witch <- uses players $ head . filterAlive . filterWitches
+
+        tell [pingWitchMessage]
+        tell [pingPlayerMessage $ witch ^. name]
+
+poisonCommand :: Text -> Text -> Command
+poisonCommand callerName targetName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWitch callerName)      $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (use poisonUsed)                  $ throwError [playerHasAlreadyPoisonedMessage callerName]
+    validatePlayer callerName targetName
+    whenJustM getDevourEvent                $ \(DevourEvent targetName') ->
+        when (targetName == targetName') $ throwError [playerCannotDoThatMessage callerName]
+
+    poison      .= Just targetName
+    poisonUsed  .= True
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
@@ -96,7 +136,13 @@ quitCommand callerName = Command $ do
     killPlayer caller
     tell [playerQuitMessage caller]
 
-    when (isSeer caller) $ see .= Nothing
+    passes %= delete callerName
+    when (isWitch caller)   $ do
+        heal        .= False
+        healUsed    .= False
+        poison      .= Nothing
+        poisonUsed  .= False
+    when (isSeer caller)    $ see .= Nothing
     votes %= Map.delete callerName
 
 seeCommand :: Text -> Text -> Command
@@ -130,6 +176,10 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell $ standardStatusMessages stage' (game ^. players)
         whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
             tell [waitingOnMessage (Just callerName) pendingVoters]
+    WitchsTurn      -> do
+        game <- get
+
+        tell $ standardStatusMessages stage' (game ^. players)
     where
         standardStatusMessages stage players =
             currentStageMessages callerName stage ++ [

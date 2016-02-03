@@ -18,6 +18,7 @@ module Game.Werewolf.Role (
 
     -- ** Instances
     allRoles, diurnalRoles, nocturnalRoles, scapegoatRole, seerRole, villagerRole, werewolfRole,
+    witchRole,
 
     -- ** Queries
     findByName,
@@ -43,10 +44,10 @@ data Role = Role
     } deriving (Eq, Read, Show)
 
 allRoles :: [Role]
-allRoles = [seerRole, villagerRole, werewolfRole, scapegoatRole]
+allRoles = [scapegoatRole, seerRole, villagerRole, werewolfRole, witchRole]
 
 diurnalRoles :: [Role]
-diurnalRoles = [villagerRole, scapegoatRole]
+diurnalRoles = [scapegoatRole, villagerRole, witchRole]
 
 nocturnalRoles :: [Role]
 nocturnalRoles = allRoles \\ diurnalRoles
@@ -90,6 +91,22 @@ werewolfRole = Role
     , _description  = "A shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."
     , _advice       =
         "Voting against your partner can be a good way to deflect suspicion from yourself."
+    }
+
+witchRole :: Role
+witchRole = Role
+    { _name         = "Witch"
+    , _allegiance   = Villagers
+    , _description  = T.unwords
+        [ "A conniving townsperson."
+        , "She knows how to make up 2 extremely powerful potions;"
+        , "one healing potion which can revive the Werewolves' victim,"
+        , "one poison potion which when used at night can kill a player."
+        ]
+    , _advice       = T.unwords
+        [ "Each potion may be used once per game,"
+        , "but there are no restrictions on how many you may use at night."
+        ]
     }
 
 findByName :: Text -> Maybe Role

@@ -24,6 +24,7 @@ The current implemented roles are:
 * Seer.
 * Villager.
 * Werewolf.
+* Witch.
 
 ### Installing
 
