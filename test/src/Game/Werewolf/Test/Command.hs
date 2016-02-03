@@ -235,7 +235,9 @@ prop_poisonCommandErrorsWhenTargetIsDevoured game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     length (getVoteResult game'') == 1
     ==> forAll (arbitraryWitch game'') $ \caller ->
-        verbose_runCommandErrors (run_ checkStage game'') (poisonCommand (caller ^. name) (head (getVoteResult game'') ^. name))
+        let game''' = run_ checkStage game''
+            votee   = head (getVoteResult game'')
+        in verbose_runCommandErrors game''' (poisonCommand (caller ^. name) (votee ^. name))
     where
         game'   = game { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players
@@ -363,4 +365,4 @@ prop_seeCommandSetsSee game =
         game' = game { _stage = SeersTurn }
 
 verbose_runCommandErrors :: Game -> Command -> Property
-verbose_runCommandErrors game command = whenFail (mapM_ putStrLn [show game, show command, show . fromRight $ run (apply command) game]) (isLeft $ run (apply command) game)
+verbose_runCommandErrors game command = whenFail (mapM_ putStrLn [show game, show . fromRight $ run (apply command) game]) (isLeft $ run (apply command) game)

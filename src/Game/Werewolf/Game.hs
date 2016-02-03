@@ -29,6 +29,9 @@ module Game.Werewolf.Game (
 
     -- * Event
     Event(..),
+
+    -- ** Queries
+    getDevourEvent
 ) where
 
 import Control.Lens
@@ -36,10 +39,10 @@ import Control.Lens
 import           Data.List.Extra
 import           Data.Map        (Map)
 import qualified Data.Map        as Map
+import           Data.Maybe
 import           Data.Text       (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role   hiding (Villagers, Werewolves, _name)
 
 data Game = Game
     { _stage   :: Stage
@@ -54,7 +57,7 @@ data Game = Game
 data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
-data Event = Devour Text | Poison Text
+data Event = DevourEvent Text | PoisonEvent Text
     deriving (Eq, Read, Show)
 
 makeLenses ''Game
@@ -64,8 +67,7 @@ makeLenses ''Stage
 newGame :: [Player] -> Game
 newGame players = Game stage players [] [] Nothing Nothing Map.empty
     where
-        stage       = head $ filter (stageAvailable aliveRoles) stageCycle
-        aliveRoles  = map _role $ filterAlive players
+        stage = head $ filter (stageAvailable players []) stageCycle
 
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -116,11 +118,18 @@ getVoteResult game = map (`findByName_` players') result
 stageCycle :: [Stage]
 stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, WitchsTurn, Sunrise, VillagesTurn]
 
-stageAvailable :: [Role] -> Stage -> Bool
-stageAvailable _ GameOver                   = False
-stageAvailable aliveRoles SeersTurn         = seerRole `elem` aliveRoles
-stageAvailable _ Sunrise                    = True
-stageAvailable _ Sunset                     = True
-stageAvailable _ VillagesTurn               = True
-stageAvailable aliveRoles WerewolvesTurn    = werewolfRole `elem` aliveRoles
-stageAvailable aliveRoles WitchsTurn        = witchRole `elem` aliveRoles
+stageAvailable :: [Player] -> [Event] -> Stage -> Bool
+stageAvailable _ _ GameOver                 = False
+stageAvailable players _ SeersTurn          = any isSeer (filterAlive players)
+stageAvailable _ _ Sunrise                  = True
+stageAvailable _ _ Sunset                   = True
+stageAvailable _ _ VillagesTurn             = True
+stageAvailable players _ WerewolvesTurn     = any isWerewolf (filterAlive players)
+stageAvailable players events WitchsTurn    =
+    any isWitch (filterAlive players) &&
+    (witch ^. name `notElem` [name | (DevourEvent name) <- events])
+    where
+        witch = head $ filterWitches players
+
+getDevourEvent :: Game -> Maybe Event
+getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]

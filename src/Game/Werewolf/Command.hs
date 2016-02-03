@@ -33,8 +33,9 @@ import qualified Data.Map  as Map
 import           Data.Text (Text)
 
 import Game.Werewolf.Engine
-import Game.Werewolf.Game     hiding (getPendingVoters, getPlayerVote, isGameOver, isSeersTurn,
-                               isVillagesTurn, isWerewolvesTurn, isWitchsTurn, killPlayer)
+import Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote, isGameOver,
+                               isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+                               killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
 
@@ -108,7 +109,8 @@ poisonCommand callerName targetName = Command $ do
     unlessM isWitchsTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (use poison) . const          $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
-    -- TODO (hjw): error when the target has been devoured
+    whenJustM getDevourEvent                $ \(DevourEvent targetName') ->
+        when (targetName == targetName') $ throwError [playerCannotDoThatMessage callerName]
 
     poison .= Just targetName
 

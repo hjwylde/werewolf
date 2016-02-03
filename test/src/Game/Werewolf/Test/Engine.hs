@@ -22,6 +22,7 @@ module Game.Werewolf.Test.Engine (
     prop_checkVillagesTurnDoesNothingUnlessAllVoted,
 
     prop_checkWerewolvesTurnAdvancesToWitchsTurn,
+    prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured,
     prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     prop_checkWerewolvesTurnKillsNoOneWhenConflicted, prop_checkWerewolvesTurnResetsVotes,
     prop_checkWerewolvesTurnDoesNothingUnlessAllVoted,
@@ -59,11 +60,11 @@ import           Data.Text         (Text)
 
 import           Game.Werewolf.Command
 import           Game.Werewolf.Engine         hiding (doesPlayerExist, getVoteResult, isGameOver,
-                                               isSeersTurn, isVillagesTurn, isWerewolvesTurn,
+                                               isSeersTurn, isVillagesTurn, isWerewolvesTurn, getDevourEvent,
                                                isWitchsTurn, killPlayer)
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
-import           Game.Werewolf.Role           hiding (_name)
+import           Game.Werewolf.Role           hiding (name, _name)
 import qualified Game.Werewolf.Role           as Role
 import           Game.Werewolf.Test.Arbitrary
 
@@ -166,10 +167,22 @@ prop_checkVillagesTurnDoesNothingUnlessAllVoted game =
 prop_checkWerewolvesTurnAdvancesToWitchsTurn :: Game -> Property
 prop_checkWerewolvesTurnAdvancesToWitchsTurn game =
     forAll (runArbitraryCommands n game') $ \game' ->
-    isWitchsTurn $ run_ checkStage game'
+    length (getVoteResult game') == 1
+    ==> let target = head $ getVoteResult game'
+        in not (isWitch target)
+        ==> isWitchsTurn $ run_ checkStage game'
     where
         game'   = game { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players
+
+prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured :: Game -> Property
+prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured game =
+    forAll (arbitraryWitch game) $ \witch ->
+    let devourVoteCommands = map (\werewolf -> devourVoteCommand (werewolf ^. name) (witch ^. name)) (filterWerewolves $ game ^. players)
+        game'' = foldl (flip $ run_ . apply) game' devourVoteCommands
+    in not . isWitchsTurn $ run_ checkStage game''
+    where
+        game' = game { _stage = WerewolvesTurn }
 
 prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus :: Game -> Property
 prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus game =

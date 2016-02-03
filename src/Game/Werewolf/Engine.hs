@@ -29,6 +29,11 @@ module Game.Werewolf.Engine (
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
 
+    -- * Event
+
+    -- ** Queries
+    getDevourEvent,
+
     -- * Player
 
     -- ** Manipulations
@@ -53,9 +58,9 @@ import qualified Data.Map        as Map
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (getPassers, getPendingVoters, getPlayerVote,
-                                         getVoteResult, isGameOver, isSeersTurn, isVillagesTurn,
-                                         isWerewolvesTurn, isWitchsTurn, killPlayer)
+import           Game.Werewolf.Game     hiding (getDevourEvent, getPassers, getPendingVoters,
+                                         getPlayerVote, getVoteResult, isGameOver, isSeersTurn,
+                                         isVillagesTurn, isWerewolvesTurn, isWitchsTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -115,14 +120,14 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         whenM (uses votes $ (length aliveWerewolves ==) . Map.size) $ do
             getVoteResult >>= \votees -> case votees of
-                [target]    -> events %= cons (Devour $ target ^. name)
+                [target]    -> events %= cons (DevourEvent $ target ^. name)
                 _           -> tell [noPlayerDevouredMessage]
 
             advanceStage
 
     WitchsTurn -> do
         whenJustM (use poison) $ \targetName -> do
-            whenM (isPlayerAlive targetName) $ events %= (++ [Poison targetName])
+            whenM (isPlayerAlive targetName) $ events %= (++ [PoisonEvent targetName])
 
             advanceStage
 
@@ -132,12 +137,13 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
-    stage' <- use stage
-    alivePlayers <- uses players filterAlive
+    stage'          <- use stage
+    alivePlayers    <- uses players filterAlive
+    events'         <- use events
 
     let nextStage = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
         then GameOver
-        else head $ filter (stageAvailable $ map _role alivePlayers) (drop1 $ dropWhile (stage' /=) stageCycle)
+        else head $ filter (stageAvailable alivePlayers events') (drop1 $ dropWhile (stage' /=) stageCycle)
 
     tell $ stageMessages nextStage alivePlayers
 
@@ -155,17 +161,17 @@ checkEvents = do
     mapM_ applyEvent available
 
 eventAvailable :: MonadState Game m => Event -> m Bool
-eventAvailable (Devour _) = gets isSunrise
-eventAvailable (Poison _) = gets isSunrise
+eventAvailable (DevourEvent _) = gets isSunrise
+eventAvailable (PoisonEvent _) = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
-applyEvent (Devour name) = do
+applyEvent (DevourEvent name) = do
     player <- uses players $ findByName_ name
 
     killPlayer player
 
     tell [playerDevouredMessage player]
-applyEvent (Poison name) = do
+applyEvent (PoisonEvent name) = do
     player <- uses players $ findByName_ name
 
     killPlayer player
@@ -242,6 +248,9 @@ deleteGame = liftIO $ defaultFilePath >>= removeFile
 
 doesGameExist :: MonadIO m => m Bool
 doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
+
+getDevourEvent :: MonadState Game m => m (Maybe Event)
+getDevourEvent = gets Game.getDevourEvent
 
 createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
 createPlayers playerNames extraRoles = zipWith newPlayer playerNames <$> randomiseRoles extraRoles (length playerNames)

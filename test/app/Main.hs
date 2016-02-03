@@ -101,6 +101,7 @@ allEngineTests = [
     testProperty "check villages' turn does nothing unless all voted" prop_checkVillagesTurnDoesNothingUnlessAllVoted,
 
     testProperty "check werewolves' turn advances to witch's turn" prop_checkWerewolvesTurnAdvancesToWitchsTurn,
+    testProperty "check werewolves' turn skips witch's turn when witch devoured" prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured,
     testProperty "check werewolves' turn kills one player when consensus" prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     testProperty "check werewolves' turn kills no one when conflicted" prop_checkWerewolvesTurnKillsNoOneWhenConflicted,
     testProperty "check werewolves' turn resets votes" prop_checkWerewolvesTurnResetsVotes,
