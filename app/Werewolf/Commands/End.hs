@@ -32,14 +32,14 @@ import Game.Werewolf.Response
 -- | Handle.
 handle :: MonadIO m => Text -> m ()
 handle callerName = do
-    unlessM doesGameExist $ exitWith failure {
-        messages = [noGameRunningMessage callerName]
+    unlessM doesGameExist $ exitWith failure
+        { messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
 
-    when (isNothing $ findByName callerName (game ^. players)) $ exitWith failure {
-        messages = [playerCannotDoThatMessage callerName]
+    when (isNothing $ findByName callerName (game ^. players)) $ exitWith failure
+        { messages = [playerCannotDoThatMessage callerName]
         }
 
     deleteGame
