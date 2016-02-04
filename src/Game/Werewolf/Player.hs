@@ -20,11 +20,12 @@ module Game.Werewolf.Player (
     findByName, findByName_,
 
     -- ** Filters
-    filterScapegoats, filterSeers, filterVillagers, filterVillagerVillagers, filterWerewolves,
-    filterWitches,
+    filterDefenders, filterScapegoats, filterSeers, filterVillagers, filterVillagerVillagers,
+    filterWerewolves, filterWitches,
 
     -- ** Queries
-    doesPlayerExist, isScapegoat, isSeer, isVillager, isWerewolf, isWitch, isAlive, isDead,
+    doesPlayerExist, isDefender, isScapegoat, isSeer, isVillager, isWerewolf, isWitch, isAlive,
+    isDead,
 
     -- * State
     State(..),
@@ -61,6 +62,9 @@ findByName name = find ((name ==) . _name)
 findByName_ :: Text -> [Player] -> Player
 findByName_ name = fromJust . findByName name
 
+filterDefenders :: [Player] -> [Player]
+filterDefenders = filter isDefender
+
 filterScapegoats :: [Player] -> [Player]
 filterScapegoats = filter isScapegoat
 
@@ -81,6 +85,9 @@ filterWitches = filter isWitch
 
 doesPlayerExist :: Text -> [Player] -> Bool
 doesPlayerExist name = isJust . findByName name
+
+isDefender :: Player -> Bool
+isDefender player = player ^. role == defenderRole
 
 isScapegoat :: Player -> Bool
 isScapegoat player = player ^. role == scapegoatRole

@@ -29,6 +29,7 @@ import qualified Werewolf.Commands.Interpret as Interpret
 import qualified Werewolf.Commands.Pass      as Pass
 import qualified Werewolf.Commands.Ping      as Ping
 import qualified Werewolf.Commands.Poison    as Poison
+import qualified Werewolf.Commands.Protect   as Protect
 import qualified Werewolf.Commands.Quit      as Quit
 import qualified Werewolf.Commands.See       as See
 import qualified Werewolf.Commands.Start     as Start
@@ -59,6 +60,7 @@ handle (Options callerName command) = case command of
     Pass                                -> Pass.handle callerName
     Ping                                -> Ping.handle callerName
     Poison options                      -> Poison.handle callerName options
+    Protect options                     -> Protect.handle callerName options
     Quit                                -> Quit.handle callerName
     See options                         -> See.handle callerName options
     Start options                       -> Start.handle callerName options

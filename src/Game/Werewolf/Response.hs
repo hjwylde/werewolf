@@ -34,10 +34,14 @@ module Game.Werewolf.Response (
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
 
     -- ** Ping messages
-    pingPlayerMessage, pingSeerMessage, pingWerewolvesMessage, pingWitchMessage,
+    pingPlayerMessage, pingDefenderMessage, pingSeerMessage, pingWerewolvesMessage,
+    pingWitchMessage,
 
     -- ** Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
+
+    -- ** Defender's turn messages
+    playerProtectedMessage,
 
     -- ** Seer's turn messages
     playerSeenMessage,
@@ -55,6 +59,9 @@ module Game.Werewolf.Response (
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
     playerCannotDoThatRightNowMessage, playerIsDeadMessage, roleDoesNotExistMessage,
+
+    -- ** Seer's turn error messages
+    playerCannotProtectSelfMessage, playerCannotProtectSamePlayerTwiceInARowMessage,
 
     -- ** Voting turn error messages
     playerHasAlreadyVotedMessage, targetIsDeadMessage,
@@ -179,12 +186,19 @@ villagerVillagerMessage name = publicMessage $ T.unwords [
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
     GameOver        -> []
+    DefendersTurn   -> defendersTurnMessages (_name . head . filterDefenders $ game ^. players)
     SeersTurn       -> seersTurnMessages (_name . head . filterSeers $ game ^. players)
     Sunrise         -> [sunriseMessage]
     Sunset          -> [nightFallsMessage]
     VillagesTurn    -> villagesTurnMessages
     WerewolvesTurn  -> werewolvesTurnMessages (map _name . filterAlive . filterWerewolves $ game ^. players)
     WitchsTurn      -> witchsTurnMessages game
+
+defendersTurnMessages :: Text -> [Message]
+defendersTurnMessages defenderName = [
+    publicMessage "The Defender wakes up.",
+    privateMessage defenderName "Whom would you like to protect?"
+    ]
 
 seersTurnMessages :: Text -> [Message]
 seersTurnMessages seerName = [
@@ -253,6 +267,9 @@ playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", pla
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to "Waiting on you..."
 
+pingDefenderMessage :: Message
+pingDefenderMessage = publicMessage "Waiting on the Defender..."
+
 pingSeerMessage :: Message
 pingSeerMessage = publicMessage "Waiting on the Seer..."
 
@@ -302,6 +319,12 @@ waitingOnMessage mTo players = Message mTo $ T.concat [
     ]
     where
         playerNames = map _name players
+
+playerProtectedMessage :: Text -> Message
+playerProtectedMessage name = publicMessage $ T.unwords
+    [ "As you emerge from your home you see", name, "outside waving a wolf paw around."
+    , "Some poor Werewolf must have tried to attack them while the Defender was on watch."
+    ]
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat [
@@ -393,6 +416,13 @@ playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
 
 roleDoesNotExistMessage :: Text -> Text -> Message
 roleDoesNotExistMessage to name = privateMessage to $ T.unwords ["Role", name, "does not exist."]
+
+playerCannotProtectSelfMessage :: Text -> Message
+playerCannotProtectSelfMessage to = privateMessage to "You cannot protect yourself!"
+
+playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
+playerCannotProtectSamePlayerTwiceInARowMessage to =
+    privateMessage to "You cannot protect the same player twice in a row!"
 
 playerHasAlreadyVotedMessage :: Text -> Message
 playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"

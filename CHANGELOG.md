@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added the Defender role. ([#38](https://github.com/hjwylde/werewolf/issues/38))
+
 #### v0.4.2.0
 
 *Minor*

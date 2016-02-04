@@ -19,7 +19,7 @@ module Game.Werewolf.Command (
 
     -- ** Instances
     devourVoteCommand, healCommand, lynchVoteCommand, noopCommand, passCommand, pingCommand,
-    poisonCommand, quitCommand, seeCommand, statusCommand,
+    poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -34,9 +34,9 @@ import           Data.Maybe
 import           Data.Text  (Text)
 
 import Game.Werewolf.Engine
-import Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote, isGameOver,
-                               isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-                               killPlayer)
+import Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote,
+                               isDefendersTurn, isGameOver, isSeersTurn, isVillagesTurn,
+                               isWerewolvesTurn, isWitchsTurn, killPlayer)
 import Game.Werewolf.Player   hiding (doesPlayerExist)
 import Game.Werewolf.Response
 
@@ -91,8 +91,13 @@ passCommand callerName = Command $ do
 pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> return ()
+    DefendersTurn   -> do
+        defender <- uses players $ head . filterDefenders
+
+        tell [pingDefenderMessage]
+        tell [pingPlayerMessage $ defender ^. name]
     SeersTurn       -> do
-        seer <- uses players $ head . filterAlive . filterSeers
+        seer <- uses players $ head . filterSeers
 
         tell [pingSeerMessage]
         tell [pingPlayerMessage $ seer ^. name]
@@ -109,7 +114,7 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         tell [pingWerewolvesMessage]
         tell $ map (pingPlayerMessage . _name) (filterWerewolves pendingVoters)
     WitchsTurn      -> do
-        witch <- uses players $ head . filterAlive . filterWitches
+        witch <- uses players $ head . filterWitches
 
         tell [pingWitchMessage]
         tell [pingPlayerMessage $ witch ^. name]
@@ -127,6 +132,19 @@ poisonCommand callerName targetName = Command $ do
     poison      .= Just targetName
     poisonUsed  .= True
 
+protectCommand :: Text -> Text -> Command
+protectCommand callerName targetName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerDefender callerName)   $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isDefendersTurn                 $ throwError [playerCannotDoThatRightNowMessage callerName]
+    when (callerName == targetName)         $ throwError [playerCannotProtectSelfMessage callerName]
+    validatePlayer callerName targetName
+    whenJustM (use priorProtect) $ \priorName ->
+        when (targetName == priorName) $ throwError [playerCannotProtectSamePlayerTwiceInARowMessage callerName]
+
+    priorProtect    .= Just targetName
+    protect         .= Just targetName
+
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
     validatePlayer callerName callerName
@@ -137,12 +155,15 @@ quitCommand callerName = Command $ do
     tell [playerQuitMessage caller]
 
     passes %= delete callerName
-    when (isWitch caller)   $ do
+    when (isDefender caller)    $ do
+        protect         .= Nothing
+        priorProtect    .= Nothing
+    when (isSeer caller)        $ see .= Nothing
+    when (isWitch caller)       $ do
         heal        .= False
         healUsed    .= False
         poison      .= Nothing
         poisonUsed  .= False
-    when (isSeer caller)    $ see .= Nothing
     votes %= Map.delete callerName
 
 seeCommand :: Text -> Text -> Command
@@ -157,6 +178,10 @@ seeCommand callerName targetName = Command $ do
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> get >>= tell . gameOverMessages
+    DefendersTurn   -> do
+        game <- get
+
+        tell $ standardStatusMessages stage' (game ^. players)
     SeersTurn       -> do
         game <- get
 

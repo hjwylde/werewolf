@@ -1,15 +1,18 @@
 {-|
-Module      : Werewolf.Commands.Quit
-Description : Handler for the quit subcommand.
+Module      : Werewolf.Commands.Protect
+Description : Options and handler for the protect subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the quit subcommand.
+Options and handler for the protect subcommand.
 -}
 
-module Werewolf.Commands.Quit (
+module Werewolf.Commands.Protect (
+    -- * Options
+    Options(..),
+
     -- * Handle
     handle,
 ) where
@@ -25,16 +28,21 @@ import Game.Werewolf.Command
 import Game.Werewolf.Engine
 import Game.Werewolf.Response
 
+-- | Options.
+data Options = Options
+    { argTarget :: Text
+    } deriving (Eq, Show)
+
 -- | Handle.
-handle :: MonadIO m => Text -> m ()
-handle callerName = do
+handle :: MonadIO m => Text -> Options -> m ()
+handle callerName (Options targetName) = do
     unlessM doesGameExist $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
 
-    let command = quitCommand callerName
+    let command = protectCommand callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
