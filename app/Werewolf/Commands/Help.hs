@@ -39,125 +39,97 @@ data Command = Commands | Description | Rules | Roles
 
 -- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options (Just Commands)) = exitWith success {
-    messages = map (privateMessage callerName) commandsMessages
+handle callerName (Options (Just Commands)) = exitWith success
+    { messages = map (privateMessage callerName) commandsMessages
     }
-handle callerName (Options (Just Description)) = exitWith success {
-    messages = map (privateMessage callerName) descriptionMessages
+handle callerName (Options (Just Description)) = exitWith success
+    { messages = map (privateMessage callerName) descriptionMessages
     }
-handle callerName (Options (Just Roles)) = exitWith success {
-    messages = map (\role -> privateMessage callerName $ T.intercalate "\n" [
-        T.snoc (role ^. Role.name) ':',
-        role ^. description,
-        role ^. advice
+handle callerName (Options (Just Roles)) = exitWith success
+    { messages = map (\role -> privateMessage callerName $ T.intercalate "\n"
+        [ T.snoc (role ^. Role.name) ':'
+        , role ^. description
+        , role ^. advice
         ]) allRoles
     }
-handle callerName (Options (Just Rules)) = exitWith success {
-    messages = map (privateMessage callerName) rulesMessages
+handle callerName (Options (Just Rules)) = exitWith success
+    { messages = map (privateMessage callerName) rulesMessages
     }
-handle callerName (Options Nothing) = exitWith success {
-    messages = map (privateMessage callerName) helpMessages
+handle callerName (Options Nothing) = exitWith success
+    { messages = map (privateMessage callerName) helpMessages
     }
 
 commandsMessages :: [Text]
-commandsMessages = map (T.intercalate "\n") [[
-    "end",
-    "- Ends the current game."
-    ], [
-    "heal PLAYER",
-    "- Heal a devoured player. The Witch may heal a devoured player at nighttime."
-    ], [
-    "pass",
-    "- Pass. A Witch may pass on poisoning a player."
-    ], [
-    "ping",
-    "- Pings the status of the current game publicly."
-    ], [
-    "poison PLAYER",
-    "- Poison a player. The Witch may poison a player at nighttime."
-    ], [
-    "quit",
-    "- Quit the current game."
-    ], [
-    "see PLAYER",
-    "- See a player's allegiance. The Seer may determine a player's allegiance once per day."
-    ], [
-    "start [--extra-roles ROLE,...] PLAYER ...",
-    "- Starts a new game with the given players and extra roles. A game requires at least 7 players."
-    ], [
-    "status",
-    "- Gets the status of the current game."
-    ], [
-    "vote PLAYER",
-    T.unwords [
-        "- Vote against a player.",
-        "A townsperson may vote at daytime to lynch someone",
-        "and a Werewolf may vote at nighttime to devour a Villager."
-        ]
-    ]]
+commandsMessages =
+    [ "end - ends the current game."
+    , "heal PLAYER - heal a devoured player."
+    , "pass - pass on healing or poisoning a player."
+    , "ping - pings the status of the current game publicly."
+    , "poison PLAYER - poison a player."
+    , "quit - quit the current game."
+    , "see PLAYER - see a player's allegiance."
+    , "start [--extra-roles ROLE,...] PLAYER ... - starts a new game with the given players and extra roles. A game requires at least 7 players."
+    , "status - gets the status of the current game."
+    , "vote PLAYER - vote against a player."
+    ]
 
 descriptionMessages :: [Text]
-descriptionMessages = map (T.intercalate "\n") [[
-    T.unwords [
-        "Deep in the American countryside,",
-        "the little town of Millers Hollow has recently been infiltrated by Werewolves."
-        ],
-    T.unwords [
-        "Each night, murders are committed by the Villagers,",
-        "who due to some mysterious phenomenon (possibly the greenhouse effect)",
-        "have become Werewolves."
-        ],
-    T.unwords [
-        "It is now time to take control and eliminate this ancient evil,",
-        "before the town loses its last few inhabitants."
+descriptionMessages = map (T.intercalate "\n")
+    [ [ T.unwords
+        [ "Deep in the American countryside,"
+        , "the little town of Millers Hollow has recently been infiltrated by Werewolves."
         ]
-    ], [
-    "Objective of the Game:",
-    "For the Villagers: lynch all of the Werewolves.",
-    "For the Werewolves: devour all of the Villagers."
-    ]]
+      , T.unwords
+        [ "Each night, murders are committed by the Villagers,"
+        , "who due to some mysterious phenomenon (possibly the greenhouse effect)"
+        , "have become Werewolves."
+        ]
+      , T.unwords
+        [ "It is now time to take control and eliminate this ancient evil,"
+        , "before the town loses its last few inhabitants."
+        ]
+      ]
+    , [ "Objective of the Game:"
+      , "For the Villagers: lynch all of the Werewolves."
+      , "For the Werewolves: devour all of the Villagers."
+      ]
+    ]
 
 rulesMessages :: [Text]
-rulesMessages = map (T.intercalate "\n") [[
-    T.unwords [
-        "Each night, the Werewolves bite, kill and devour one Villager.",
-        "During the day they try to conceal their identity and vile deeds from the Villagers.",
-        "The number of Werewolves in play depends upon",
-        " the number of players and variants used in the game,"
-        ],
-    T.unwords [
-        "Each day,",
-        "the survivors gather in the town square and try to discover who the Werewolves are.",
-        "This is done by studying the other player's social behaviours",
-        "for hidden signs of lycanthropy.",
-        "After discussing and debating, the village votes to lynch a suspect,",
-        "who is then hanged, burned and eliminated from the game."
+rulesMessages = map (T.intercalate "\n")
+    [ [ T.unwords
+        [ "Each night, the Werewolves bite, kill and devour one Villager."
+        , "During the day they try to conceal their identity and vile deeds from the Villagers."
+        , "The number of Werewolves in play depends upon"
+        , " the number of players and variants used in the game."
         ]
-    ], [
-    T.unwords [
-        "Each player is informed of their role (see `help roles' for a list)",
-        "at the start of the game. A game begins at night and follows a standard cycle."
-        ],
-    "1. The village falls asleep.",
-    "2. The Seer wakes up and sees someone's allegiance.",
-    "3. The Werewolves wake up and select a victim.",
-    "4. The Witch wakes up and may heal the victim and/or poison someone.",
-    "5. The village wakes up and find the victim.",
-    "6. The village votes to lynch a suspect.",
-    "The game is over when only Villagers or Werewolves are left alive."
-    ]]
+      , T.unwords
+        [ "Each day,"
+        , "the survivors gather in the town square and try to discover who the Werewolves are."
+        , "This is done by studying the other player's social behaviours"
+        , "for hidden signs of lycanthropy."
+        , "After discussing and debating, the village votes to lynch a suspect,"
+        , "who is then hanged, burned and eliminated from the game."
+        ]
+      ]
+    , [ T.unwords
+        [ "Each player is informed of their role (see `help roles' for a list)"
+        , "at the start of the game. A game begins at night and follows a standard cycle."
+        ]
+      , "1. The village falls asleep."
+      , "2. The Seer wakes up and sees someone's allegiance."
+      , "3. The Werewolves wake up and select a victim."
+      , "4. The Witch wakes up and may heal the victim and/or poison someone."
+      , "5. The village wakes up and find the victim."
+      , "6. The village votes to lynch a suspect."
+      , "The game is over when only Villagers or Werewolves are left alive."
+      ]
+    ]
 
 helpMessages :: [Text]
-helpMessages = map (T.intercalate "\n") [[
-    "help commands",
-    "- Print the in-game commands."
-    ], [
-    "help description",
-    "- Print the game description."
-    ], [
-    "help roles",
-    "- Print the roles and their description."
-    ], [
-    "help rules",
-    "- Print the game rules."
-    ]]
+helpMessages =
+    [ "help commands - print the in-game commands."
+    , "help description - print the game description."
+    , "help roles - print the roles and their description."
+    , "help rules - print the game rules."
+    ]
