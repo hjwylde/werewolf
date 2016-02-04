@@ -6,11 +6,23 @@
 
 * Added the Defender role. ([#38](https://github.com/hjwylde/werewolf/issues/38))
 
+#### v0.4.2.1
+
+*Revisions*
+
+* Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
+
 #### v0.4.2.0
 
 *Minor*
 
 * Added the Villager-Villager role. ([#37](https://github.com/hjwylde/werewolf/issues/37))
+
+#### v0.4.1.1
+
+*Revisions*
+
+* Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
 
 #### v0.4.1.0
 
