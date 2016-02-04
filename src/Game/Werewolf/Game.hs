@@ -13,15 +13,16 @@ Game and stage data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), stage, players, events, passes, heal, healUsed, poison, poisonUsed, see, votes,
+    Game(..), stage, players, events, passes, heal, healUsed, poison, poisonUsed, priorProtect,
+    protect, see, votes,
     newGame,
 
     -- ** Manipulations
     killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-    getPassers, getPlayerVote, getPendingVoters, getVoteResult,
+    isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
+    isWitchsTurn, getPassers, getPlayerVote, getPendingVoters, getVoteResult,
 
     -- * Stage
     Stage(..),
@@ -45,22 +46,25 @@ import           Data.Text       (Text)
 import Game.Werewolf.Player
 
 data Game = Game
-    { _stage      :: Stage
-    , _players    :: [Player]
-    , _events     :: [Event]
-    , _passes     :: [Text]
-    , _heal       :: Bool
-    , _healUsed   :: Bool
-    , _poison     :: Maybe Text
-    , _poisonUsed :: Bool
-    , _see        :: Maybe Text
-    , _votes      :: Map Text Text
+    { _stage        :: Stage
+    , _players      :: [Player]
+    , _events       :: [Event]
+    , _passes       :: [Text]
+    , _heal         :: Bool
+    , _healUsed     :: Bool
+    , _poison       :: Maybe Text
+    , _poisonUsed   :: Bool
+    , _priorProtect :: Maybe Text
+    , _protect      :: Maybe Text
+    , _see          :: Maybe Text
+    , _votes        :: Map Text Text
     } deriving (Eq, Read, Show)
 
-data Stage = GameOver | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn | WitchsTurn
+data Stage  = GameOver | DefendersTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
+            | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
-data Event = DevourEvent Text | PoisonEvent Text
+data Event = DevourEvent Text | PoisonEvent Text | ProtectEvent Text
     deriving (Eq, Read, Show)
 
 makeLenses ''Game
@@ -79,6 +83,8 @@ newGame players = game { _stage = head $ filter (stageAvailable game) stageCycle
             , _healUsed     = False
             , _poison       = Nothing
             , _poisonUsed   = False
+            , _priorProtect = Nothing
+            , _protect      = Nothing
             , _see          = Nothing
             , _votes        = Map.empty
             }
@@ -88,6 +94,9 @@ killPlayer game player = game & players %~ map (\player' -> if player' == player
 
 isGameOver :: Game -> Bool
 isGameOver game = game ^. stage == GameOver
+
+isDefendersTurn :: Game -> Bool
+isDefendersTurn game = game ^. stage == DefendersTurn
 
 isSeersTurn :: Game -> Bool
 isSeersTurn game = game ^. stage == SeersTurn
@@ -130,10 +139,12 @@ getVoteResult game = map (`findByName_` players') result
         result      = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
 
 stageCycle :: [Stage]
-stageCycle = cycle [Sunset, SeersTurn, WerewolvesTurn, WitchsTurn, Sunrise, VillagesTurn]
+stageCycle = cycle
+    [Sunset, SeersTurn, DefendersTurn, WerewolvesTurn, WitchsTurn, Sunrise, VillagesTurn]
 
 stageAvailable :: Game -> Stage -> Bool
 stageAvailable _ GameOver           = False
+stageAvailable game DefendersTurn   = any isDefender (filterAlive $ game ^. players)
 stageAvailable game SeersTurn       = any isSeer (filterAlive $ game ^. players)
 stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True

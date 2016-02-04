@@ -12,8 +12,8 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
     arbitraryCommand, arbitraryDevourVoteCommand, arbitraryHealCommand, arbitraryLynchVoteCommand,
     arbitraryPassCommand, arbitraryPoisonCommand, arbitraryQuitCommand, arbitrarySeeCommand,
-    arbitraryNewGame, arbitraryPlayer, arbitraryPlayerSet, arbitraryScapegoat, arbitrarySeer,
-    arbitraryVillager, arbitraryWerewolf, arbitraryWitch,
+    arbitraryNewGame, arbitraryPlayer, arbitraryPlayerSet, arbitrarySeer, arbitraryWerewolf,
+    arbitraryWitch,
 
     -- * Utility functions
     run, run_, runArbitraryCommands,
@@ -44,6 +44,7 @@ instance Show Command where
 arbitraryCommand :: Game -> Gen Command
 arbitraryCommand game = case game ^. stage of
     GameOver        -> return noopCommand
+    DefendersTurn   -> arbitraryProtectCommand game
     Sunrise         -> return noopCommand
     Sunset          -> return noopCommand
     SeersTurn       -> arbitrarySeeCommand game
@@ -75,11 +76,11 @@ arbitraryLynchVoteCommand game = do
 
 arbitraryHealCommand :: Game -> Gen Command
 arbitraryHealCommand game = do
-    let witchName = (head . filterWitches $ game ^. players) ^. name
+    let witch = head . filterWitches $ game ^. players
 
     return $ if game ^. healUsed
         then noopCommand
-        else seq (fromJust (getDevourEvent game)) $ healCommand witchName
+        else seq (fromJust (getDevourEvent game)) $ healCommand (witch ^. name)
 
 arbitraryPassCommand :: Game -> Gen Command
 arbitraryPassCommand game = do
@@ -95,6 +96,15 @@ arbitraryPoisonCommand game = do
     return $ if isJust (game ^. poison)
         then noopCommand
         else poisonCommand (witch ^. name) (target ^. name)
+
+arbitraryProtectCommand :: Game -> Gen Command
+arbitraryProtectCommand game = do
+    let defender    = head . filterDefenders $ game ^. players
+    target          <- suchThat (arbitraryPlayer game) (defender /=)
+
+    return $ if isJust (game ^. protect)
+        then noopCommand
+        else protectCommand (defender ^. name) (target ^. name)
 
 arbitraryQuitCommand :: Game -> Gen Command
 arbitraryQuitCommand game = do
@@ -148,14 +158,8 @@ arbitraryPlayerSet = do
 
     return $ defender:scapegoat:seer:villagerVillager:witch:werewolves ++ villagers
 
-arbitraryScapegoat :: Game -> Gen Player
-arbitraryScapegoat = elements . filterAlive . filterScapegoats . _players
-
 arbitrarySeer :: Game -> Gen Player
 arbitrarySeer = elements . filterAlive . filterSeers . _players
-
-arbitraryVillager :: Game -> Gen Player
-arbitraryVillager = elements . filterAlive . filterVillagers . _players
 
 arbitraryWerewolf :: Game -> Gen Player
 arbitraryWerewolf = elements . filterAlive . filterWerewolves . _players

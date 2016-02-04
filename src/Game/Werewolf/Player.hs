@@ -24,7 +24,8 @@ module Game.Werewolf.Player (
     filterWerewolves, filterWitches,
 
     -- ** Queries
-    doesPlayerExist, isScapegoat, isSeer, isVillager, isWerewolf, isWitch, isAlive, isDead,
+    doesPlayerExist, isDefender, isScapegoat, isSeer, isVillager, isWerewolf, isWitch, isAlive,
+    isDead,
 
     -- * State
     State(..),

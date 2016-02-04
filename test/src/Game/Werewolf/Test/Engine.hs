@@ -13,7 +13,7 @@ module Game.Werewolf.Test.Engine (
     prop_checkStageSkipsSeersTurnWhenNoSeer, prop_checkStageSkipsWitchsTurnWhenNoWitch,
     prop_checkStageDoesNothingWhenGameOver,
 
-    prop_checkSeersTurnAdvancesToWerewolvesTurn, prop_checkSeersTurnResetsSee,
+    prop_checkSeersTurnAdvancesToDefendersTurn, prop_checkSeersTurnResetsSee,
     prop_checkSeersTurnDoesNothingUnlessSeen,
 
     prop_checkVillagesTurnAdvancesToSeersTurn, prop_checkVillagesTurnLynchesOnePlayerWhenConsensus,
@@ -63,7 +63,7 @@ import           Data.Text         (Text)
 
 import           Game.Werewolf.Command
 import           Game.Werewolf.Engine         hiding (doesPlayerExist, getDevourEvent,
-                                               getVoteResult, isGameOver, isSeersTurn,
+                                               getVoteResult, isGameOver, isSeersTurn, isDefendersTurn,
                                                isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
                                                killPlayer)
 import           Game.Werewolf.Game
@@ -78,7 +78,7 @@ import Test.QuickCheck.Monadic
 prop_checkStageSkipsSeersTurnWhenNoSeer :: Game -> Property
 prop_checkStageSkipsSeersTurnWhenNoSeer game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    isWerewolvesTurn $ run_ checkStage game''
+    not . isSeersTurn $ run_ checkStage game''
     where
         game'   = (foldl killPlayer game (filterSeers $ game ^. players)) { _stage = VillagesTurn }
         n       = length $ game' ^. players
@@ -86,7 +86,7 @@ prop_checkStageSkipsSeersTurnWhenNoSeer game =
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: Game -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch game =
     forAll (runArbitraryCommands n game') $ \game'' ->
-    isVillagesTurn $ run_ checkStage game''
+    not . isWitchsTurn $ run_ checkStage game''
     where
         game'   = (foldl killPlayer game (filterWitches $ game ^. players)) { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players
@@ -96,10 +96,10 @@ prop_checkStageDoesNothingWhenGameOver game = run_ checkStage game' === game'
     where
         game' = game { _stage = GameOver }
 
-prop_checkSeersTurnAdvancesToWerewolvesTurn :: Game -> Property
-prop_checkSeersTurnAdvancesToWerewolvesTurn game =
+prop_checkSeersTurnAdvancesToDefendersTurn :: Game -> Property
+prop_checkSeersTurnAdvancesToDefendersTurn game =
     forAll (arbitraryCommand game') $ \command ->
-    isWerewolvesTurn $ run_ checkStage (run_ (apply command) game')
+    isDefendersTurn $ run_ checkStage (run_ (apply command) game')
     where
         game' = game { _stage = SeersTurn }
 

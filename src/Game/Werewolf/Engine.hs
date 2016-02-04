@@ -23,8 +23,8 @@ module Game.Werewolf.Engine (
     startGame, killPlayer,
 
     -- ** Queries
-    isGameOver, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, getPlayerVote,
-    getPendingVoters, getVoteResult,
+    isGameOver, isDefendersTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+    getPlayerVote, getPendingVoters, getVoteResult,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -40,7 +40,8 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerSeer, isPlayerWerewolf, isPlayerWitch, isPlayerAlive, isPlayerDead,
+    doesPlayerExist, isPlayerDefender, isPlayerSeer, isPlayerWerewolf, isPlayerWitch, isPlayerAlive,
+    isPlayerDead,
 
     -- * Role
     randomiseRoles,
@@ -59,8 +60,9 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import           Game.Werewolf.Game     hiding (getDevourEvent, getPassers, getPendingVoters,
-                                         getPlayerVote, getVoteResult, isGameOver, isSeersTurn,
-                                         isVillagesTurn, isWerewolvesTurn, isWitchsTurn, killPlayer)
+                                         getPlayerVote, getVoteResult, isDefendersTurn, isGameOver,
+                                         isSeersTurn, isVillagesTurn, isWerewolvesTurn,
+                                         isWitchsTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -83,6 +85,8 @@ checkStage = do
 checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
     GameOver -> return ()
+
+    DefendersTurn -> whenJustM (use protect) $ const advanceStage
 
     SeersTurn -> whenJustM (use see) $ \targetName -> do
         seer    <- uses players (head . filterSeers)
@@ -119,8 +123,13 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         whenM (uses votes $ (length aliveWerewolves ==) . Map.size) $ do
             getVoteResult >>= \votees -> case votees of
-                [target]    -> events %= cons (DevourEvent $ target ^. name)
+                [target]    ->
+                    ifM (uses protect $ maybe False (== target ^. name))
+                        (events %= cons (ProtectEvent $ target ^. name))
+                        (events %= cons (DevourEvent $ target ^. name))
                 _           -> tell [noPlayerDevouredMessage]
+
+            protect .= Nothing
 
             advanceStage
 
@@ -162,6 +171,7 @@ checkEvents = do
 eventAvailable :: MonadState Game m => Event -> m Bool
 eventAvailable (DevourEvent _) = gets isSunrise
 eventAvailable (PoisonEvent _) = gets isSunrise
+eventAvailable (ProtectEvent _) = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
@@ -181,6 +191,7 @@ applyEvent (PoisonEvent name) = do
     killPlayer player
 
     tell [playerPoisonedMessage player]
+applyEvent (ProtectEvent name) = tell [playerProtectedMessage name]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
@@ -207,6 +218,9 @@ startGame callerName players = do
 
 killPlayer :: MonadState Game m => Player -> m ()
 killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
+
+isDefendersTurn :: MonadState Game m => m Bool
+isDefendersTurn = gets Game.isDefendersTurn
 
 isSeersTurn :: MonadState Game m => m Bool
 isSeersTurn = gets Game.isSeersTurn
@@ -261,6 +275,9 @@ createPlayers playerNames extraRoles = zipWith newPlayer playerNames <$> randomi
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = uses players $ Player.doesPlayerExist name
+
+isPlayerDefender :: MonadState Game m => Text -> m Bool
+isPlayerDefender name = uses players $ isDefender . findByName_ name
 
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name = uses players $ isSeer . findByName_ name

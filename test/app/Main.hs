@@ -103,7 +103,7 @@ allEngineTests = [
     testProperty "check stage skips witch's turn when no witch" prop_checkStageSkipsWitchsTurnWhenNoWitch,
     testProperty "check stage does nothing when game over" prop_checkStageDoesNothingWhenGameOver,
 
-    testProperty "check seer's turn advances to werewolves' turn" prop_checkSeersTurnAdvancesToWerewolvesTurn,
+    testProperty "check seer's turn advances to defender's turn" prop_checkSeersTurnAdvancesToDefendersTurn,
     testProperty "check seer's turn resets sees" prop_checkSeersTurnResetsSee,
     testProperty "check seer's turn does nothing unless seen" prop_checkSeersTurnDoesNothingUnlessSeen,
 
