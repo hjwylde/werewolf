@@ -45,8 +45,12 @@ defenderRole :: Role
 defenderRole = Role
     { _name         = "Defender"
     , _allegiance   = Villagers
-    , _description  = "TODO (hjw)"
-    , _advice       = "TODO (hjw)"
+    , _description  = T.unwords
+        [ "A knight living in Miller's Hollow."
+        , "The Defender has the ability to protect one player each night."
+        ]
+    , _advice       =
+        "Be careful when you choose to protect someone, you cannot protect them 2 nights in a row."
     }
 
 scapegoatRole :: Role
@@ -107,11 +111,11 @@ witchRole = Role
         [ "A conniving townsperson."
         , "She knows how to make up 2 extremely powerful potions;"
         , "one healing potion which can revive the Werewolves' victim,"
-        , "one poison potion which when used at night can kill a player."
+        , "one poison potion which when used can kill a player."
         ]
     , _advice       = T.unwords
-        [ "Each potion may be used once per game,"
-        , "but there are no restrictions on how many you may use at night."
+        [ "Each potion may only be used once per game,"
+        , "but there are no restrictions on using both on one night."
         ]
     }
 
