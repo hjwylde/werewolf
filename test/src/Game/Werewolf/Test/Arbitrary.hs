@@ -12,7 +12,8 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Initial arbitraries
 
     -- ** Game
-    arbitraryNewGame, arbitraryGameWithDevourEventForVillager,
+    arbitraryNewGame, arbitraryGameWithDevourVotes, arbitraryGameWithDevourEventForVillager,
+    arbitraryGameWithProtect, arbitraryGameWithProtectAndDevourVotes,
 
     -- ** Player
     arbitraryPlayerSet,
@@ -21,11 +22,11 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Command
     arbitraryCommand, arbitraryDevourVoteCommand, arbitraryHealCommand, arbitraryLynchVoteCommand,
-    arbitraryPassCommand, arbitraryPoisonCommand, arbitraryQuitCommand, arbitrarySeeCommand,
-    runArbitraryCommands,
+    arbitraryPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand, arbitraryQuitCommand,
+    arbitrarySeeCommand, runArbitraryCommands,
 
     -- ** Player
-    arbitraryPlayer, arbitrarySeer, arbitraryWerewolf, arbitraryWitch,
+    arbitraryPlayer, arbitraryDefender, arbitrarySeer, arbitraryWerewolf, arbitraryWitch,
 ) where
 
 import Control.Lens hiding (elements)
@@ -74,12 +75,7 @@ arbitraryNewGame :: Gen Game
 arbitraryNewGame = newGame <$> arbitraryPlayerSet
 
 arbitraryGameWithDevourVotes :: Gen Game
-arbitraryGameWithDevourVotes = do
-    game        <- arbitrary
-    let game'   = game { _stage = WerewolvesTurn }
-    let n       = length . filterWerewolves $ game' ^. players
-
-    runArbitraryCommands n game'
+arbitraryGameWithDevourVotes = arbitrary >>= runArbitraryDevourVoteCommands
 
 arbitraryGameWithDevourEvent :: Gen Game
 arbitraryGameWithDevourEvent = do
@@ -90,6 +86,17 @@ arbitraryGameWithDevourEvent = do
 arbitraryGameWithDevourEventForVillager :: Gen Game
 arbitraryGameWithDevourEventForVillager =
     suchThat arbitraryGameWithDevourEvent $ \game -> all isVillager (filterDead $ game ^. players)
+
+arbitraryGameWithProtect :: Gen Game
+arbitraryGameWithProtect = do
+    game        <- arbitrary
+    let game'   = game { _stage = DefendersTurn }
+    command     <- arbitraryProtectCommand game'
+
+    return $ run_ (apply command) game'
+
+arbitraryGameWithProtectAndDevourVotes :: Gen Game
+arbitraryGameWithProtectAndDevourVotes = arbitraryGameWithProtect >>= runArbitraryDevourVoteCommands
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
@@ -197,12 +204,22 @@ runArbitraryCommands n = iterateM n $ \game -> do
 
     return $ run_ (apply command) game
 
+runArbitraryDevourVoteCommands :: Game -> Gen Game
+runArbitraryDevourVoteCommands game = do
+    let game'   = game { _stage = WerewolvesTurn }
+    let n       = length . filterWerewolves $ game' ^. players
+
+    runArbitraryCommands n game'
+
 iterateM :: Monad m => Int -> (a -> m a) -> a -> m a
 iterateM 0 _ a = return a
 iterateM n f a = f a >>= iterateM (n - 1) f
 
 arbitraryPlayer :: Game -> Gen Player
 arbitraryPlayer = elements . filterAlive . _players
+
+arbitraryDefender :: Game -> Gen Player
+arbitraryDefender = elements . filterAlive . filterDefenders . _players
 
 arbitrarySeer :: Game -> Gen Player
 arbitrarySeer = elements . filterAlive . filterSeers . _players
