@@ -65,8 +65,7 @@ import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     (Role, scapegoatRole, seerRole, villagerRole,
-                                         villagerVillagerRole, werewolfRole, witchRole, _allegiance)
+import           Game.Werewolf.Role     hiding (name, _name)
 import qualified Game.Werewolf.Role     as Role
 
 import System.Directory
@@ -204,7 +203,7 @@ startGame callerName players = do
     return game
     where
         playerNames = map _name players
-        restrictedRoles = [scapegoatRole, seerRole, villagerVillagerRole, witchRole]
+        restrictedRoles = [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole]
 
 killPlayer :: MonadState Game m => Player -> m ()
 killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')

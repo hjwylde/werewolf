@@ -137,6 +137,7 @@ allEngineTests = [
     testProperty "start game errors unless unique player names" prop_startGameErrorsUnlessUniquePlayerNames,
     testProperty "start game errors when less than 7 players" prop_startGameErrorsWhenLessThan7Players,
     testProperty "start game errors when more than 24 players" prop_startGameErrorsWhenMoreThan24Players,
+    testProperty "start game errors when more than 1 defender" prop_startGameErrorsWhenMoreThan1Defender,
     testProperty "start game errors when more than 1 scapegoat" prop_startGameErrorsWhenMoreThan1Scapegoat,
     testProperty "start game errors when more than 1 seer" prop_startGameErrorsWhenMoreThan1Seer,
     testProperty "start game errors when more than 1 villager-villager" prop_startGameErrorsWhenMoreThan1VillagerVillager,

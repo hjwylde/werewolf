@@ -17,7 +17,8 @@ module Game.Werewolf.Role (
     Role(..), name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole, witchRole,
+    allRoles, defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole,
+    werewolfRole, witchRole,
 
     -- * Allegiance
     Allegiance(..),
@@ -38,7 +39,15 @@ data Role = Role
     } deriving (Eq, Read, Show)
 
 allRoles :: [Role]
-allRoles = [scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole, witchRole]
+allRoles = [defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole, witchRole]
+
+defenderRole :: Role
+defenderRole = Role
+    { _name         = "Defender"
+    , _allegiance   = Villagers
+    , _description  = "TODO (hjw)"
+    , _advice       = "TODO (hjw)"
+    }
 
 scapegoatRole :: Role
 scapegoatRole = Role

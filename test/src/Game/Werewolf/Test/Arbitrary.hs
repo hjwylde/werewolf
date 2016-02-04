@@ -134,18 +134,19 @@ arbitraryPlayer = elements . filterAlive . _players
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
-    n <- choose (7, 24)
+    n <- choose (10, 24)
     players <- nubOn _name <$> infiniteList
 
+    let defender            = head $ filterDefenders players
     let scapegoat           = head $ filterScapegoats players
     let seer                = head $ filterSeers players
     let villagerVillager    = head $ filterVillagerVillagers players
     let witch               = head $ filterWitches players
 
     let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
-    let villagers   = take (n - 4 - (length werewolves)) $ filterVillagers players
+    let villagers   = take (n - 5 - (length werewolves)) $ filterVillagers players
 
-    return $ scapegoat:seer:villagerVillager:witch:werewolves ++ villagers
+    return $ defender:scapegoat:seer:villagerVillager:witch:werewolves ++ villagers
 
 arbitraryScapegoat :: Game -> Gen Player
 arbitraryScapegoat = elements . filterAlive . filterScapegoats . _players

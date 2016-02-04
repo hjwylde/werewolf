@@ -20,6 +20,7 @@ For the Werewolves: devour all of the Villagers.
 #### Roles
 
 The current implemented roles are:
+* Defender.
 * Scapegoat.
 * Seer.
 * Villager.
