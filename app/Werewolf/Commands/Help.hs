@@ -66,9 +66,10 @@ commandsMessages =
     , "pass - pass on healing or poisoning a player."
     , "ping - pings the status of the current game publicly."
     , "poison PLAYER - poison a player."
+    , "protect PLAYER - protect a player."
     , "quit - quit the current game."
     , "see PLAYER - see a player's allegiance."
-    , "start [--extra-roles ROLE,...] PLAYER ... - starts a new game with the given players and extra roles. A game requires at least 7 players."
+    , "start [--extra-roles ROLE,...] PLAYER... - starts a new game with the given players and extra roles. A game requires at least 7 players."
     , "status - gets the status of the current game."
     , "vote PLAYER - vote against a player."
     ]

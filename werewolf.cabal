@@ -34,6 +34,7 @@ executable werewolf
         Werewolf.Commands.Pass,
         Werewolf.Commands.Ping,
         Werewolf.Commands.Poison,
+        Werewolf.Commands.Protect,
         Werewolf.Commands.Quit,
         Werewolf.Commands.See,
         Werewolf.Commands.Start,

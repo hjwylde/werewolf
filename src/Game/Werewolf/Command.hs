@@ -19,7 +19,7 @@ module Game.Werewolf.Command (
 
     -- ** Instances
     devourVoteCommand, healCommand, lynchVoteCommand, noopCommand, passCommand, pingCommand,
-    poisonCommand, quitCommand, seeCommand, statusCommand,
+    poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -126,6 +126,9 @@ poisonCommand callerName targetName = Command $ do
 
     poison      .= Just targetName
     poisonUsed  .= True
+
+protectCommand :: Text -> Text -> Command
+protectCommand _ _ = noopCommand
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do

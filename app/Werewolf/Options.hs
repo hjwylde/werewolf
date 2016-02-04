@@ -27,6 +27,7 @@ import           Data.Version    (showVersion)
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
 import qualified Werewolf.Commands.Poison    as Poison
+import qualified Werewolf.Commands.Protect   as Protect
 import qualified Werewolf.Commands.See       as See
 import qualified Werewolf.Commands.Start     as Start
 import qualified Werewolf.Commands.Vote      as Vote
@@ -49,6 +50,7 @@ data Command
     | Pass
     | Ping
     | Poison Poison.Options
+    | Protect Protect.Options
     | Quit
     | See See.Options
     | Start Start.Options
@@ -93,6 +95,7 @@ werewolf = Options
         , command "pass"        $ info (helper <*> pass)        (fullDesc <> progDesc "Pass")
         , command "ping"        $ info (helper <*> ping)        (fullDesc <> progDesc "Pings the status of the current game publicly")
         , command "poison"      $ info (helper <*> poison)      (fullDesc <> progDesc "Poison a player")
+        , command "protect"     $ info (helper <*> protect)     (fullDesc <> progDesc "Protect a player")
         , command "quit"        $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game")
         , command "see"         $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance")
         , command "start"       $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game")
@@ -127,13 +130,16 @@ ping :: Parser Command
 ping = pure Ping
 
 poison :: Parser Command
-poison = Poison . Poison.Options . T.pack <$> strArgument (metavar "PLAYER")
+poison = Poison . Poison.Options <$> playerArgument
+
+protect :: Parser Command
+protect = Protect . Protect.Options <$> playerArgument
 
 quit :: Parser Command
 quit = pure Quit
 
 see :: Parser Command
-see = See . See.Options . T.pack <$> strArgument (metavar "PLAYER")
+see = See . See.Options <$> playerArgument
 
 start :: Parser Command
 start = fmap Start $ Start.Options
@@ -148,4 +154,7 @@ status :: Parser Command
 status = pure Status
 
 vote :: Parser Command
-vote = Vote . Vote.Options . T.pack <$> strArgument (metavar "PLAYER")
+vote = Vote . Vote.Options <$> playerArgument
+
+playerArgument :: Parser Text
+playerArgument = T.pack <$> strArgument (metavar "PLAYER")
