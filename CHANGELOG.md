@@ -2,11 +2,21 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
+
 #### v0.4.2.0
 
 *Minor*
 
 * Added the Villager role. ([#37](https://github.com/hjwylde/werewolf/issues/37))
+
+#### v0.4.1.1
+
+*Revisions*
+
+* Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
 
 #### v0.4.1.0
 

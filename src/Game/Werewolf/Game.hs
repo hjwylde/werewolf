@@ -139,13 +139,9 @@ stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
 stageAvailable _ VillagesTurn       = True
 stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
-stageAvailable game WitchsTurn      = and [
-    any isWitch (filterAlive $ game ^. players),
-    not (game ^. healUsed) || not (game ^. poisonUsed),
-    witch ^. name `notElem` [name | (DevourEvent name) <- game ^. events]
-    ]
-    where
-        witch = head . filterWitches $ game ^. players
+stageAvailable game WitchsTurn      =
+    (any isWitch (filterAlive $ game ^. players))
+    && (not (game ^. healUsed) || not (game ^. poisonUsed))
 
 getDevourEvent :: Game -> Maybe Event
 getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]
