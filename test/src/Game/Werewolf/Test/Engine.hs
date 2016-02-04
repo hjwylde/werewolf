@@ -22,7 +22,7 @@ module Game.Werewolf.Test.Engine (
     prop_checkVillagesTurnDoesNothingUnlessAllVoted,
 
     prop_checkWerewolvesTurnAdvancesToWitchsTurn,
-    prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured,
+    prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured,
     prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned,
     prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     prop_checkWerewolvesTurnKillsNoOneWhenConflicted, prop_checkWerewolvesTurnResetsVotes,
@@ -178,12 +178,12 @@ prop_checkWerewolvesTurnAdvancesToWitchsTurn game =
         game'   = game { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players
 
-prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured :: Game -> Property
-prop_checkWerewolvesTurnSkipsWitchsTurnWhenWitchDevoured game =
+prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured :: Game -> Property
+prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured game =
     forAll (arbitraryWitch game) $ \witch ->
     let devourVoteCommands = map (\werewolf -> devourVoteCommand (werewolf ^. name) (witch ^. name)) (filterWerewolves $ game ^. players)
         game'' = foldl (flip $ run_ . apply) game' devourVoteCommands
-    in not . isWitchsTurn $ run_ checkStage game''
+    in isWitchsTurn $ run_ checkStage game''
     where
         game' = game { _stage = WerewolvesTurn }
 
