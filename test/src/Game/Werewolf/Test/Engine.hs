@@ -63,14 +63,15 @@ import           Data.Text         (Text)
 
 import           Game.Werewolf.Command
 import           Game.Werewolf.Engine         hiding (doesPlayerExist, getDevourEvent,
-                                               getVoteResult, isGameOver, isSeersTurn, isDefendersTurn,
-                                               isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-                                               killPlayer)
+                                               getVoteResult, isDefendersTurn, isGameOver,
+                                               isSeersTurn, isVillagesTurn, isWerewolvesTurn,
+                                               isWitchsTurn, killPlayer)
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
 import           Game.Werewolf.Role           hiding (name, _name)
 import qualified Game.Werewolf.Role           as Role
 import           Game.Werewolf.Test.Arbitrary
+import           Game.Werewolf.Test.Util
 
 import Test.QuickCheck
 import Test.QuickCheck.Monadic

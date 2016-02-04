@@ -11,7 +11,8 @@ module Game.Werewolf.Test.Game (
     prop_newGameStartsWithSunsetStage, prop_newGameStartsWithEventsEmpty,
     prop_newGameStartsWithPassesEmpty, prop_newGameStartsWithNoHeal,
     prop_newGameStartsWithNoHealUsed, prop_newGameStartsWithNoPoison,
-    prop_newGameStartsWithNoPoisonUsed, prop_newGameStartsWithNoSee,
+    prop_newGameStartsWithNoPoisonUsed, prop_newGameStartsWithNoPriorProtect,
+    prop_newGameStartsWithNoProtect, prop_newGameStartsWithNoSee,
     prop_newGameStartsWithVotesEmpty, prop_newGameUsesGivenPlayers,
 ) where
 
@@ -43,6 +44,12 @@ prop_newGameStartsWithNoPoison players = isNothing $ newGame players ^. poison
 
 prop_newGameStartsWithNoPoisonUsed :: [Player] -> Bool
 prop_newGameStartsWithNoPoisonUsed players = not $ newGame players ^. poisonUsed
+
+prop_newGameStartsWithNoPriorProtect :: [Player] -> Bool
+prop_newGameStartsWithNoPriorProtect players = isNothing $ newGame players ^. priorProtect
+
+prop_newGameStartsWithNoProtect :: [Player] -> Bool
+prop_newGameStartsWithNoProtect players = isNothing $ newGame players ^. protect
 
 prop_newGameStartsWithNoSee :: [Player] -> Bool
 prop_newGameStartsWithNoSee players = isNothing $ newGame players ^. see

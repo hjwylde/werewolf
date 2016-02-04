@@ -161,6 +161,8 @@ allGameTests = [
     testProperty "new game starts with no heal used" prop_newGameStartsWithNoHealUsed,
     testProperty "new game starts with no poison" prop_newGameStartsWithNoPoison,
     testProperty "new game starts with no poison used" prop_newGameStartsWithNoPoisonUsed,
+    testProperty "new game starts with no prior protect" prop_newGameStartsWithNoPriorProtect,
+    testProperty "new game starts with no protect" prop_newGameStartsWithNoProtect,
     testProperty "new game starts with no see" prop_newGameStartsWithNoSee,
     testProperty "new game starts with votes empty" prop_newGameStartsWithVotesEmpty,
     testProperty "new game uses given players" prop_newGameUsesGivenPlayers
