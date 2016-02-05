@@ -103,7 +103,8 @@ prop_checkStageSkipsWitchsTurnWhenNoWitch game =
         n       = length . filterWerewolves $ game' ^. players
 
 prop_checkStageDoesNothingWhenGameOver :: Game -> Property
-prop_checkStageDoesNothingWhenGameOver game = run_ checkStage game' === game'
+prop_checkStageDoesNothingWhenGameOver game =
+    run_ checkStage game' === game'
     where
         game' = game { _stage = GameOver }
 

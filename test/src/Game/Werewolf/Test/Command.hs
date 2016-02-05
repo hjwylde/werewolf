@@ -75,7 +75,6 @@ import qualified Data.Map          as Map
 import           Data.Maybe
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine         (checkStage)
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Test.Arbitrary
@@ -92,14 +91,18 @@ prop_devourVoteCommandErrorsWhenGameIsOver game =
 prop_devourVoteCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_devourVoteCommandErrorsWhenCallerDoesNotExist game caller =
     not (doesPlayerExist (caller ^. name) (game ^. players))
-    ==> forAll (arbitraryPlayer game) $ \target ->
-        verbose_runCommandErrors game (devourVoteCommand (caller ^. name) (target ^. name))
+    ==> forAll (arbitraryPlayer game) $ \target -> do
+        let command = devourVoteCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_devourVoteCommandErrorsWhenTargetDoesNotExist :: Game -> Player -> Property
 prop_devourVoteCommandErrorsWhenTargetDoesNotExist game target =
     not (doesPlayerExist (target ^. name) (game ^. players))
-    ==> forAll (arbitraryWerewolf game) $ \caller ->
-        verbose_runCommandErrors game (devourVoteCommand (caller ^. name) (target ^. name))
+    ==> forAll (arbitraryWerewolf game) $ \caller -> do
+        let command = devourVoteCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_devourVoteCommandErrorsWhenCallerIsDead :: Game -> Property
 prop_devourVoteCommandErrorsWhenCallerIsDead game =
@@ -127,8 +130,10 @@ prop_devourVoteCommandErrorsWhenNotWerewolvesTurn game =
 prop_devourVoteCommandErrorsWhenCallerNotWerewolf :: Game -> Property
 prop_devourVoteCommandErrorsWhenCallerNotWerewolf game =
     forAll (suchThat (arbitraryPlayer game) (not . isWerewolf)) $ \caller ->
-    forAll (arbitraryPlayer game) $ \target ->
-    verbose_runCommandErrors game (devourVoteCommand (caller ^. name) (target ^. name))
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = devourVoteCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_devourVoteCommandErrorsWhenCallerHasVoted :: Game -> Property
 prop_devourVoteCommandErrorsWhenCallerHasVoted game =
@@ -157,9 +162,11 @@ prop_devourVoteCommandUpdatesVotes game =
         game' = game { _stage = WerewolvesTurn }
 
 prop_healCommandErrorsWhenGameIsOver :: Game -> Property
-prop_healCommandErrorsWhenGameIsOver game =
-    forAll (arbitraryWitch game') $ \witch ->
-    verbose_runCommandErrors game' (healCommand $ witch ^. name)
+prop_healCommandErrorsWhenGameIsOver game = do
+    let witch   = head . filterWitches $ game ^. players
+    let command = healCommand $ witch ^. name
+
+    verbose_runCommandErrors game' command
     where
         game' = game { _stage = GameOver }
 
@@ -177,19 +184,22 @@ prop_healCommandErrorsWhenCallerIsDead game =
         verbose_runCommandErrors game' command
 
 prop_healCommandErrorsWhenNoTargetIsDevoured :: Game -> Property
-prop_healCommandErrorsWhenNoTargetIsDevoured game =
-    forAll (arbitraryWitch game) $ \witch ->
-    verbose_runCommandErrors game (healCommand $ witch ^. name)
+prop_healCommandErrorsWhenNoTargetIsDevoured game = do
+    let witch   = head . filterWitches $ game ^. players
+    let command = healCommand $ witch ^. name
+
+    verbose_runCommandErrors game command
 
 prop_healCommandErrorsWhenNotWitchsTurn :: Game -> Property
-prop_healCommandErrorsWhenNotWitchsTurn game =
-    not (isWitchsTurn game)
-    ==> forAll (arbitraryWitch game) $ \witch ->
-        verbose_runCommandErrors game (healCommand $ witch ^. name)
+prop_healCommandErrorsWhenNotWitchsTurn game = do
+    let witch   = head . filterWitches $ game ^. players
+    let command = healCommand $ witch ^. name
+
+    not (isWitchsTurn game) ==> verbose_runCommandErrors game command
 
 prop_healCommandErrorsWhenCallerHasHealed :: Gen Property
 prop_healCommandErrorsWhenCallerHasHealed = do
-    game <- arbitraryGameWithDevourEventForVillager
+    game <- arbitraryGameWithDevourEvent
 
     return $ forAll (arbitraryHealCommand game) $ \command -> do
         let game' = run_ (apply command) game
@@ -198,19 +208,21 @@ prop_healCommandErrorsWhenCallerHasHealed = do
 
 prop_healCommandErrorsWhenCallerNotWitch :: Game -> Property
 prop_healCommandErrorsWhenCallerNotWitch game =
-    forAll (suchThat (arbitraryPlayer game) (not . isWitch)) $ \caller ->
-    verbose_runCommandErrors game (healCommand (caller ^. name))
+    forAll (suchThat (arbitraryPlayer game) (not . isWitch)) $ \caller -> do
+        let command = healCommand (caller ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_healCommandSetsHeal :: Gen Property
 prop_healCommandSetsHeal = do
-    game <- arbitraryGameWithDevourEventForVillager
+    game <- arbitraryGameWithDevourEvent
 
     return $ forAll (arbitraryHealCommand game) $ \command ->
         (run_ (apply command) game) ^. heal
 
 prop_healCommandSetsHealUsed :: Gen Property
 prop_healCommandSetsHealUsed = do
-    game <- arbitraryGameWithDevourEventForVillager
+    game <- arbitraryGameWithDevourEvent
 
     return $ forAll (arbitraryHealCommand game) $ \command ->
         (run_ (apply command) game) ^. healUsed
@@ -224,14 +236,18 @@ prop_lynchVoteCommandErrorsWhenGameIsOver game =
 prop_lynchVoteCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_lynchVoteCommandErrorsWhenCallerDoesNotExist game caller =
     not (doesPlayerExist (caller ^. name) (game ^. players))
-    ==> forAll (arbitraryPlayer game) $ \target ->
-        verbose_runCommandErrors game (lynchVoteCommand (caller ^. name) (target ^. name))
+    ==> forAll (arbitraryPlayer game) $ \target -> do
+        let command = lynchVoteCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_lynchVoteCommandErrorsWhenTargetDoesNotExist :: Game -> Player -> Property
 prop_lynchVoteCommandErrorsWhenTargetDoesNotExist game target =
     not (doesPlayerExist (target ^. name) (game ^. players))
-    ==> forAll (arbitraryPlayer game) $ \caller ->
-        verbose_runCommandErrors game (lynchVoteCommand (caller ^. name) (target ^. name))
+    ==> forAll (arbitraryPlayer game) $ \caller -> do
+        let command = lynchVoteCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_lynchVoteCommandErrorsWhenCallerIsDead :: Game -> Property
 prop_lynchVoteCommandErrorsWhenCallerIsDead game =
@@ -318,44 +334,48 @@ prop_poisonCommandErrorsWhenGameIsOver game =
 prop_poisonCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_poisonCommandErrorsWhenCallerDoesNotExist game caller =
     not (doesPlayerExist (caller ^. name) (game ^. players))
-    ==> forAll (arbitraryPlayer game) $ \target ->
-        verbose_runCommandErrors game (poisonCommand (caller ^. name) (target ^. name))
+    ==> forAll (arbitraryPlayer game) $ \target -> do
+        let command = poisonCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_poisonCommandErrorsWhenTargetDoesNotExist :: Game -> Player -> Property
-prop_poisonCommandErrorsWhenTargetDoesNotExist game target =
+prop_poisonCommandErrorsWhenTargetDoesNotExist game target = do
+    let witch   = head . filterWitches $ game ^. players
+    let command = poisonCommand (witch ^. name) (target ^. name)
+
     not (doesPlayerExist (target ^. name) (game ^. players))
-    ==> forAll (arbitraryPlayer game) $ \caller ->
-        verbose_runCommandErrors game (poisonCommand (caller ^. name) (target ^. name))
+        ==> verbose_runCommandErrors game command
 
 prop_poisonCommandErrorsWhenCallerIsDead :: Game -> Property
-prop_poisonCommandErrorsWhenCallerIsDead game =
-    forAll (arbitraryPlayer game) $ \caller ->
+prop_poisonCommandErrorsWhenCallerIsDead game = do
+    let witch = head . filterWitches $ game ^. players
+
     forAll (arbitraryPlayer game) $ \target -> do
-        let game'   = killPlayer game caller
-        let command = poisonCommand (caller ^. name) (target ^. name)
+        let game'   = killPlayer game witch
+        let command = poisonCommand (witch ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
 prop_poisonCommandErrorsWhenTargetIsDead :: Game -> Property
-prop_poisonCommandErrorsWhenTargetIsDead game =
-    forAll (arbitraryPlayer game) $ \caller ->
+prop_poisonCommandErrorsWhenTargetIsDead game = do
+    let witch = head . filterWitches $ game ^. players
+
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer game target
-        let command = poisonCommand (caller ^. name) (target ^. name)
+        let command = poisonCommand (witch ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
-prop_poisonCommandErrorsWhenTargetIsDevoured :: Game -> Property
-prop_poisonCommandErrorsWhenTargetIsDevoured game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    length (getVoteResult game'') == 1
-    ==> forAll (arbitraryWitch game'') $ \caller ->
-        let game''' = run_ checkStage game''
-            votee   = head (getVoteResult game'')
-        in verbose_runCommandErrors game''' (poisonCommand (caller ^. name) (votee ^. name))
-    where
-        game'   = game { _stage = WerewolvesTurn }
-        n       = length . filterWerewolves $ game' ^. players
+prop_poisonCommandErrorsWhenTargetIsDevoured :: Gen Property
+prop_poisonCommandErrorsWhenTargetIsDevoured = do
+    game                            <- arbitraryGameWithDevourEvent
+    let (DevourEvent targetName)    = fromJust $ getDevourEvent game
+
+    let witch   = head . filterWitches $ game ^. players
+    let command = poisonCommand (witch ^. name) targetName
+
+    return $ verbose_runCommandErrors game command
 
 prop_poisonCommandErrorsWhenNotWitchsTurn :: Game -> Property
 prop_poisonCommandErrorsWhenNotWitchsTurn game =
@@ -363,19 +383,21 @@ prop_poisonCommandErrorsWhenNotWitchsTurn game =
     ==> forAll (arbitraryPoisonCommand game) $ verbose_runCommandErrors game
 
 prop_poisonCommandErrorsWhenCallerHasPoisoned :: Game -> Property
-prop_poisonCommandErrorsWhenCallerHasPoisoned game =
-    forAll (arbitraryWitch game') $ \caller ->
-    forAll (arbitraryPlayer game') $ \target ->
-    let command = poisonCommand (caller ^. name) (target ^. name)
-    in verbose_runCommandErrors (run_ (apply command) game') command
+prop_poisonCommandErrorsWhenCallerHasPoisoned game = do
+    forAll (arbitraryPoisonCommand game') $ \command -> do
+        let game'' = run_ (apply command) game'
+
+        verbose_runCommandErrors game'' command
     where
         game' = game { _stage = WitchsTurn }
 
 prop_poisonCommandErrorsWhenCallerNotWitch :: Game -> Property
 prop_poisonCommandErrorsWhenCallerNotWitch game =
     forAll (suchThat (arbitraryPlayer game) (not . isWitch)) $ \caller ->
-    forAll (arbitraryPlayer game) $ \target ->
-    verbose_runCommandErrors game (poisonCommand (caller ^. name) (target ^. name))
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = poisonCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
 
 prop_poisonCommandSetsPoison :: Game -> Property
 prop_poisonCommandSetsPoison game =
@@ -406,28 +428,30 @@ prop_protectCommandErrorsWhenCallerDoesNotExist game caller =
         verbose_runCommandErrors game command
 
 prop_protectCommandErrorsWhenTargetDoesNotExist :: Game -> Player -> Property
-prop_protectCommandErrorsWhenTargetDoesNotExist game target =
-    not (doesPlayerExist (target ^. name) (game ^. players))
-    ==> forAll (arbitraryDefender game) $ \caller -> do
-        let command = protectCommand (caller ^. name) (target ^. name)
+prop_protectCommandErrorsWhenTargetDoesNotExist game target = do
+    let defender    = head . filterDefenders $ game ^. players
+    let command     = protectCommand (defender ^. name) (target ^. name)
 
-        verbose_runCommandErrors game command
+    not (doesPlayerExist (target ^. name) (game ^. players))
+        ==> verbose_runCommandErrors game command
 
 prop_protectCommandErrorsWhenCallerIsDead :: Game -> Property
-prop_protectCommandErrorsWhenCallerIsDead game =
-    forAll (arbitraryDefender game) $ \caller ->
-    forAll (arbitraryPlayer game) $ \target -> do
-        let game'   = killPlayer game caller
-        let command = protectCommand (caller ^. name) (target ^. name)
+prop_protectCommandErrorsWhenCallerIsDead game = do
+    let defender    = head . filterDefenders $ game ^. players
+    let game'       = killPlayer game defender
+
+    forAll (arbitraryPlayer game') $ \target -> do
+        let command = protectCommand (defender ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
 prop_protectCommandErrorsWhenTargetIsDead :: Game -> Property
-prop_protectCommandErrorsWhenTargetIsDead game =
-    forAll (arbitraryDefender game) $ \caller ->
+prop_protectCommandErrorsWhenTargetIsDead game = do
+    let defender = head . filterDefenders $ game ^. players
+
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer game target
-        let command = protectCommand (caller ^. name) (target ^. name)
+        let command = protectCommand (defender ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
@@ -445,21 +469,21 @@ prop_protectCommandErrorsWhenCallerNotDefender game =
         verbose_runCommandErrors game command
 
 prop_protectCommandErrorsWhenTargetIsCaller :: Game -> Property
-prop_protectCommandErrorsWhenTargetIsCaller game =
-    forAll (arbitraryDefender game) $ \caller -> do
-        let command = protectCommand (caller ^. name) (caller ^. name)
+prop_protectCommandErrorsWhenTargetIsCaller game = do
+    let defender    = head . filterDefenders $ game ^. players
+    let command     = protectCommand (defender ^. name) (defender ^. name)
 
-        verbose_runCommandErrors game command
+    verbose_runCommandErrors game command
 
 prop_protectCommandErrorsWhenTargetIsPriorProtect :: Gen Property
 prop_protectCommandErrorsWhenTargetIsPriorProtect = do
-    game <- arbitraryGameWithProtect
-    let game' = game { _protect = Nothing }
+    game        <- arbitraryGameWithProtect
+    let game'   = game { _protect = Nothing }
 
-    return $ forAll (arbitraryDefender game') $ \caller -> do
-        let command = protectCommand (caller ^. name) (fromJust $ game' ^. priorProtect)
+    let defender    = head . filterDefenders $ game' ^. players
+    let command     = protectCommand (defender ^. name) (fromJust $ game' ^. priorProtect)
 
-        verbose_runCommandErrors game' command
+    return $ verbose_runCommandErrors game' command
 
 prop_protectCommandSetsPriorProtect :: Game -> Property
 prop_protectCommandSetsPriorProtect game =
@@ -488,100 +512,85 @@ prop_quitCommandErrorsWhenCallerDoesNotExist game caller =
 
 prop_quitCommandErrorsWhenCallerIsDead :: Game -> Property
 prop_quitCommandErrorsWhenCallerIsDead game =
-    forAll (arbitraryPlayer game) $ \caller ->
-    verbose_runCommandErrors (killPlayer game caller) (quitCommand $ caller ^. name)
+    forAll (arbitraryPlayer game) $ \caller -> do
+        let game'   = killPlayer game caller
+        let command = quitCommand $ caller ^. name
+
+        verbose_runCommandErrors game' command
 
 prop_quitCommandKillsPlayer :: Game -> Property
 prop_quitCommandKillsPlayer game =
     not (isGameOver game)
-    ==> forAll (arbitraryQuitCommand game) $ \command ->
-        length (filterDead $ run_ (apply command) game ^. players) == 1
+    ==> forAll (arbitraryQuitCommand game) $ \command -> do
+        let game' = run_ (apply command) game
 
-prop_quitCommandClearsHealWhenCallerIsWitch :: Game -> Property
-prop_quitCommandClearsHealWhenCallerIsWitch game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    length (getVoteResult game'') == 1
-    ==> let target = head $ getVoteResult game''
-        in not (isWitch target)
-        ==> forAll (arbitraryWitch game'') $ \caller ->
-            let command = healCommand (caller ^. name)
-                game''' = run_ (apply command) $ run_ checkStage game''
-            in not $ run_ (apply $ quitCommand (caller ^. name)) game''' ^. heal
-    where
-        game'   = game { _stage = WerewolvesTurn }
-        n       = length . filterWerewolves $ game' ^. players
+        length (filterDead $ game' ^. players) == 1
 
-prop_quitCommandClearsHealUsedWhenCallerIsWitch :: Game -> Property
-prop_quitCommandClearsHealUsedWhenCallerIsWitch game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    length (getVoteResult game'') == 1
-    ==> let target = head $ getVoteResult game''
-        in not (isWitch target)
-        ==> forAll (arbitraryWitch game'') $ \caller ->
-            let command = healCommand (caller ^. name)
-                game''' = run_ (apply command) $ run_ checkStage game''
-            in not $ run_ (apply $ quitCommand (caller ^. name)) game''' ^. healUsed
-    where
-        game'   = game { _stage = WerewolvesTurn }
-        n       = length . filterWerewolves $ game' ^. players
+prop_quitCommandClearsHealWhenCallerIsWitch :: Gen Bool
+prop_quitCommandClearsHealWhenCallerIsWitch = do
+    game        <- arbitraryGameWithHeal
+    let witch   = head . filterWitches $ game ^. players
+    let command = quitCommand (witch ^. name)
 
-prop_quitCommandClearsPoisonWhenCallerIsWitch :: Game -> Property
-prop_quitCommandClearsPoisonWhenCallerIsWitch game =
-    forAll (arbitraryWitch game') $ \caller ->
-    forAll (arbitraryPlayer game') $ \target ->
-    let game'' = run_ (apply $ poisonCommand (caller ^. name) (target ^. name)) game'
-    in isNothing $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. poison
-    where
-        game' = game { _stage = WitchsTurn }
+    return . not $ run_ (apply command) game ^. heal
 
-prop_quitCommandClearsPriorProtectWhenCallerIsDefender :: Game -> Property
-prop_quitCommandClearsPriorProtectWhenCallerIsDefender game =
-    forAll (arbitraryDefender game') $ \caller ->
-    forAll (suchThat (arbitraryPlayer game') (not . isDefender)) $ \target -> do
-        let command = protectCommand (caller ^. name) (target ^. name)
-        let game''  = run_ (apply command) game'
+prop_quitCommandClearsHealUsedWhenCallerIsWitch :: Gen Bool
+prop_quitCommandClearsHealUsedWhenCallerIsWitch = do
+    game        <- arbitraryGameWithHeal
+    let witch   = head . filterWitches $ game ^. players
+    let command = quitCommand (witch ^. name)
 
-        isNothing $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. priorProtect
-    where
-        game' = game { _stage = DefendersTurn }
+    return . not $ run_ (apply command) game ^. healUsed
 
-prop_quitCommandClearsProtectWhenCallerIsDefender :: Game -> Property
-prop_quitCommandClearsProtectWhenCallerIsDefender game =
-    forAll (arbitraryDefender game') $ \caller ->
-    forAll (suchThat (arbitraryPlayer game') (not . isDefender)) $ \target -> do
-        let command = protectCommand (caller ^. name) (target ^. name)
-        let game''  = run_ (apply command) game'
+prop_quitCommandClearsPoisonWhenCallerIsWitch :: Gen Bool
+prop_quitCommandClearsPoisonWhenCallerIsWitch = do
+    game        <- arbitraryGameWithPoison
+    let witch   = head . filterWitches $ game ^. players
+    let command = quitCommand (witch ^. name)
 
-        isNothing $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. protect
-    where
-        game' = game { _stage = DefendersTurn }
+    return . isNothing $ run_ (apply command) game ^. poison
 
-prop_quitCommandClearsPoisonUsedWhenCallerIsWitch :: Game -> Property
-prop_quitCommandClearsPoisonUsedWhenCallerIsWitch game =
-    forAll (arbitraryWitch game') $ \caller ->
-    forAll (arbitraryPlayer game') $ \target ->
-    let game'' = run_ (apply $ poisonCommand (caller ^. name) (target ^. name)) game'
-    in not $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. poisonUsed
-    where
-        game' = game { _stage = WitchsTurn }
+prop_quitCommandClearsPoisonUsedWhenCallerIsWitch :: Gen Bool
+prop_quitCommandClearsPoisonUsedWhenCallerIsWitch = do
+    game        <- arbitraryGameWithPoison
+    let witch   = head . filterWitches $ game ^. players
+    let command = quitCommand (witch ^. name)
 
-prop_quitCommandClearsPlayersDevourVote :: Game -> Property
-prop_quitCommandClearsPlayersDevourVote game =
-    forAll (arbitraryWerewolf game') $ \caller ->
-    forAll (suchThat (arbitraryPlayer game') (not . isWerewolf)) $ \target ->
-    let game'' = run_ (apply $ devourVoteCommand (caller ^. name) (target ^. name)) game'
-    in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
-    where
-        game' = game { _stage = WerewolvesTurn }
+    return . not $ run_ (apply command) game ^. poisonUsed
 
-prop_quitCommandClearsPlayersLynchVote :: Game -> Property
-prop_quitCommandClearsPlayersLynchVote game =
-    forAll (arbitraryPlayer game') $ \caller ->
-    forAll (arbitraryPlayer game') $ \target ->
-    let game'' = run_ (apply $ lynchVoteCommand (caller ^. name) (target ^. name)) game'
-        in Map.null $ run_ (apply $ quitCommand (caller ^. name)) game'' ^. votes
-    where
-        game' = game { _stage = VillagesTurn }
+prop_quitCommandClearsPriorProtectWhenCallerIsDefender :: Gen Bool
+prop_quitCommandClearsPriorProtectWhenCallerIsDefender = do
+    game            <- arbitraryGameWithProtect
+    let defender    = head . filterDefenders $ game ^. players
+    let command     = quitCommand (defender ^. name)
+
+    return . isNothing $ run_ (apply command) game ^. priorProtect
+
+prop_quitCommandClearsProtectWhenCallerIsDefender :: Gen Bool
+prop_quitCommandClearsProtectWhenCallerIsDefender = do
+    game            <- arbitraryGameWithProtect
+    let defender    = head . filterDefenders $ game ^. players
+    let command     = quitCommand (defender ^. name)
+
+    return . isNothing $ run_ (apply command) game ^. protect
+
+prop_quitCommandClearsPlayersDevourVote :: Gen Property
+prop_quitCommandClearsPlayersDevourVote = do
+    game <- arbitraryGameWithDevourVotes
+
+    return $ forAll (arbitraryWerewolf game) $ \caller -> do
+        let command = quitCommand (caller ^. name)
+
+        isNothing $ run_ (apply command) game ^. votes . at (caller ^. name)
+
+prop_quitCommandClearsPlayersLynchVote :: Gen Property
+prop_quitCommandClearsPlayersLynchVote = do
+    game <- arbitraryGameWithLynchVotes
+
+    return $ forAll (arbitraryPlayer game) $ \caller -> do
+        let command = quitCommand (caller ^. name)
+
+        isNothing $ run_ (apply command) game ^. votes . at (caller ^. name)
 
 prop_seeCommandErrorsWhenGameIsOver :: Game -> Property
 prop_seeCommandErrorsWhenGameIsOver game =
@@ -598,28 +607,30 @@ prop_seeCommandErrorsWhenCallerDoesNotExist game caller =
         verbose_runCommandErrors game command
 
 prop_seeCommandErrorsWhenTargetDoesNotExist :: Game -> Player -> Property
-prop_seeCommandErrorsWhenTargetDoesNotExist game target =
-    not (doesPlayerExist (target ^. name) (game ^. players))
-    ==> forAll (arbitrarySeer game) $ \caller -> do
-        let command = seeCommand (caller ^. name) (target ^. name)
+prop_seeCommandErrorsWhenTargetDoesNotExist game target = do
+    let seer    = head . filterSeers $ game ^. players
+    let command = seeCommand (seer ^. name) (target ^. name)
 
-        verbose_runCommandErrors game command
+    not (doesPlayerExist (target ^. name) (game ^. players))
+        ==> verbose_runCommandErrors game command
 
 prop_seeCommandErrorsWhenCallerIsDead :: Game -> Property
-prop_seeCommandErrorsWhenCallerIsDead game =
-    forAll (arbitrarySeer game) $ \caller ->
-    forAll (arbitraryPlayer game) $ \target -> do
-        let game'   = killPlayer game caller
-        let command = seeCommand (caller ^. name) (target ^. name)
+prop_seeCommandErrorsWhenCallerIsDead game = do
+    let seer    = head . filterSeers $ game ^. players
+    let game'   = killPlayer game seer
+
+    forAll (arbitraryPlayer game') $ \target -> do
+        let command = seeCommand (seer ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
 prop_seeCommandErrorsWhenTargetIsDead :: Game -> Property
-prop_seeCommandErrorsWhenTargetIsDead game =
-    forAll (arbitrarySeer game) $ \caller ->
+prop_seeCommandErrorsWhenTargetIsDead game = do
+    let seer = head . filterSeers $ game ^. players
+
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer game target
-        let command = seeCommand (caller ^. name) (target ^. name)
+        let command = seeCommand (seer ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 

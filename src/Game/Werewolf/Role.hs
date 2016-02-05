@@ -47,7 +47,7 @@ defenderRole = Role
     , _allegiance   = Villagers
     , _description  = T.unwords
         [ "A knight living in Miller's Hollow."
-        , "The Defender has the ability to protect one player each night."
+        , "The Defender has the ability to protect one player, except themself, each night."
         ]
     , _advice       =
         "Be careful when you choose to protect someone, you cannot protect them 2 nights in a row."
