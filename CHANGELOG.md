@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.2.2
+
 *Revisions*
 
 * Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
