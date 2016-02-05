@@ -1,5 +1,5 @@
 name:           werewolf
-version:        0.4.3.0
+version:        0.4.3.1
 
 author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
@@ -29,6 +29,7 @@ executable werewolf
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
         Werewolf.Commands.End,
+        Werewolf.Commands.Heal,
         Werewolf.Commands.Help,
         Werewolf.Commands.Interpret,
         Werewolf.Commands.Pass,

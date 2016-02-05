@@ -2,11 +2,23 @@
 
 #### Upcoming
 
-#### v0.4.3
+#### v0.4.3.1
+
+*Revisions*
+
+* Added missing module to Cabal file.
+
+#### v0.4.3.0
 
 *Minor*
 
 * Added the Defender role. ([#38](https://github.com/hjwylde/werewolf/issues/38))
+
+#### v0.4.2.2
+
+*Revisions*
+
+* Added missing module to Cabal file.
 
 #### v0.4.2.1
 
@@ -19,6 +31,12 @@
 *Minor*
 
 * Added the Villager-Villager role. ([#37](https://github.com/hjwylde/werewolf/issues/37))
+
+#### v0.4.1.2
+
+*Revisions*
+
+* Added missing module to Cabal file.
 
 #### v0.4.1.1
 
