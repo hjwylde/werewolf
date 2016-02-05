@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.1.2
+
 *Revisions*
 
 * Added missing module to Cabal file.
