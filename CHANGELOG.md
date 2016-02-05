@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
+
 #### v0.4.2.1
 
 *Revisions*
@@ -13,6 +17,13 @@
 *Minor*
 
 * Added the Villager role. ([#37](https://github.com/hjwylde/werewolf/issues/37))
+
+#### v0.4.1.2
+
+*Revisions*
+
+* Added missing module to Cabal file.
+>>>>>>> release/0.4.1
 
 #### v0.4.1.1
 
