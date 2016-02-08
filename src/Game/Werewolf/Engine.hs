@@ -67,7 +67,7 @@ import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name, _name)
+import           Game.Werewolf.Role     hiding (name)
 import qualified Game.Werewolf.Role     as Role
 
 import System.Directory
@@ -149,7 +149,7 @@ advanceStage = do
     stage'          <- use stage
     alivePlayers    <- uses players filterAlive
 
-    let nextStage = if length (nub $ map (_allegiance . _role) alivePlayers) <= 1
+    let nextStage = if length (nub $ map (view $ role . allegiance) alivePlayers) <= 1
         then GameOver
         else head $ filter (stageAvailable game) (drop1 $ dropWhile (stage' /=) stageCycle)
 
@@ -195,7 +195,7 @@ applyEvent (ProtectEvent name) = tell [playerProtectedMessage name]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
-    aliveAllegiances <- uses players $ nub . map (_allegiance . _role) . filterAlive
+    aliveAllegiances <- uses players $ nub . map (view $ role . allegiance) . filterAlive
 
     when (length aliveAllegiances <= 1) $ stage .= GameOver >> get >>= tell . gameOverMessages
 
@@ -204,8 +204,9 @@ startGame callerName players = do
     when (playerNames /= nub playerNames)   $ throwError [privateMessage callerName "Player names must be unique."]
     when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage callerName "Cannot have more than 24 players."]
-    forM_ restrictedRoles $ \role ->
-        when (length (filter ((role ==) . _role) players) > 1) $ throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role ^. Role.name, "."]]
+    forM_ restrictedRoles $ \role' ->
+        when (length (filter ((role' ==) . view role) players) > 1) $
+            throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role' ^. Role.name, "."]]
 
     let game = newGame players
 
@@ -213,7 +214,7 @@ startGame callerName players = do
 
     return game
     where
-        playerNames = map _name players
+        playerNames = map (view name) players
         restrictedRoles = [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole]
 
 killPlayer :: MonadState Game m => Player -> m ()
@@ -297,8 +298,8 @@ isPlayerDead name = uses players $ isDead . findByName_ name
 randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
 randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ werewolfRoles ++ villagerRoles
     where
-        extraWerewolfRoles = filter ((==) Role.Werewolves . _allegiance) extraRoles
-        extraVillagerRoles = filter ((==) Role.Villagers . _allegiance) extraRoles
+        extraWerewolfRoles = filter ((==) Role.Werewolves . view allegiance) extraRoles
+        extraVillagerRoles = filter ((==) Role.Villagers . view allegiance) extraRoles
 
         werewolfRoles = replicate (n `quot` 6 + 1 - length extraWerewolfRoles) werewolfRole
         villagerRoles = replicate (n - length (extraVillagerRoles ++ werewolfRoles)) villagerRole

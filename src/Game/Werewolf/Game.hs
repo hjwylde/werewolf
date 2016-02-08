@@ -13,7 +13,7 @@ Game and stage data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game(..), stage, players, events, passes, heal, healUsed, poison, poisonUsed, priorProtect,
+    Game, stage, players, events, passes, heal, healUsed, poison, poisonUsed, priorProtect,
     protect, see, votes,
     newGame,
 
@@ -72,7 +72,7 @@ makeLenses ''Game
 makeLenses ''Stage
 
 newGame :: [Player] -> Game
-newGame players = game { _stage = head $ filter (stageAvailable game) stageCycle }
+newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
     where
         game = Game
             { _stage        = Sunset
@@ -126,7 +126,7 @@ getPlayerVote :: Text -> Game -> Maybe Text
 getPlayerVote playerName game = game ^. votes . at playerName
 
 getPendingVoters :: Game -> [Player]
-getPendingVoters game = filter (flip Map.notMember votes' . _name) alivePlayers
+getPendingVoters game = filter (flip Map.notMember votes' . view name) alivePlayers
     where
         votes'          = game ^. votes
         alivePlayers    = filterAlive $ game ^. players
@@ -151,7 +151,7 @@ stageAvailable _ Sunset             = True
 stageAvailable _ VillagesTurn       = True
 stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
 stageAvailable game WitchsTurn      =
-    (any isWitch (filterAlive $ game ^. players))
+    any isWitch (filterAlive $ game ^. players)
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
 
 getDevourEvent :: Game -> Maybe Event

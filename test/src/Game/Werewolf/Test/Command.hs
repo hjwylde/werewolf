@@ -86,7 +86,7 @@ prop_devourVoteCommandErrorsWhenGameIsOver :: Game -> Property
 prop_devourVoteCommandErrorsWhenGameIsOver game =
     forAll (arbitraryDevourVoteCommand game') $ verbose_runCommandErrors game'
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_devourVoteCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_devourVoteCommandErrorsWhenCallerDoesNotExist game caller =
@@ -144,7 +144,7 @@ prop_devourVoteCommandErrorsWhenCallerHasVoted game =
 
         verbose_runCommandErrors game'' command
     where
-        game' = game { _stage = WerewolvesTurn }
+        game' = game & stage .~ WerewolvesTurn
 
 prop_devourVoteCommandErrorsWhenTargetWerewolf :: Game -> Property
 prop_devourVoteCommandErrorsWhenTargetWerewolf game =
@@ -159,7 +159,7 @@ prop_devourVoteCommandUpdatesVotes game =
 
         Map.size (game'' ^. votes) == 1
     where
-        game' = game { _stage = WerewolvesTurn }
+        game' = game & stage .~ WerewolvesTurn
 
 prop_healCommandErrorsWhenGameIsOver :: Game -> Property
 prop_healCommandErrorsWhenGameIsOver game = do
@@ -168,7 +168,7 @@ prop_healCommandErrorsWhenGameIsOver game = do
 
     verbose_runCommandErrors game' command
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_healCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_healCommandErrorsWhenCallerDoesNotExist game caller =
@@ -231,7 +231,7 @@ prop_lynchVoteCommandErrorsWhenGameIsOver :: Game -> Property
 prop_lynchVoteCommandErrorsWhenGameIsOver game =
     forAll (arbitraryLynchVoteCommand game') $ verbose_runCommandErrors game'
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_lynchVoteCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_lynchVoteCommandErrorsWhenCallerDoesNotExist game caller =
@@ -281,7 +281,7 @@ prop_lynchVoteCommandErrorsWhenCallerHasVoted game =
 
         verbose_runCommandErrors game'' command
     where
-        game' = game { _stage = VillagesTurn }
+        game' = game & stage .~ VillagesTurn
 
 prop_lynchVoteCommandUpdatesVotes :: Game -> Property
 prop_lynchVoteCommandUpdatesVotes game =
@@ -290,13 +290,13 @@ prop_lynchVoteCommandUpdatesVotes game =
 
         Map.size (game'' ^. votes) == 1
     where
-        game' = game { _stage = VillagesTurn }
+        game' = game & stage .~ VillagesTurn
 
 prop_passCommandErrorsWhenGameIsOver :: Game -> Property
 prop_passCommandErrorsWhenGameIsOver game =
     forAll (arbitraryPassCommand game') $ verbose_runCommandErrors game'
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_passCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_passCommandErrorsWhenCallerDoesNotExist game caller =
@@ -323,13 +323,13 @@ prop_passCommandUpdatesPasses game =
 
         length (game'' ^. passes) == 1
     where
-        game' = game { _stage = WitchsTurn }
+        game' = game & stage .~ WitchsTurn
 
 prop_poisonCommandErrorsWhenGameIsOver :: Game -> Property
 prop_poisonCommandErrorsWhenGameIsOver game =
     forAll (arbitraryPoisonCommand game') $ verbose_runCommandErrors game'
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_poisonCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_poisonCommandErrorsWhenCallerDoesNotExist game caller =
@@ -389,7 +389,7 @@ prop_poisonCommandErrorsWhenCallerHasPoisoned game = do
 
         verbose_runCommandErrors game'' command
     where
-        game' = game { _stage = WitchsTurn }
+        game' = game & stage .~ WitchsTurn
 
 prop_poisonCommandErrorsWhenCallerNotWitch :: Game -> Property
 prop_poisonCommandErrorsWhenCallerNotWitch game =
@@ -404,20 +404,20 @@ prop_poisonCommandSetsPoison game =
     forAll (arbitraryPoisonCommand game') $ \command ->
     isJust (run_ (apply command) game' ^. poison)
     where
-        game' = game { _stage = WitchsTurn }
+        game' = game & stage .~ WitchsTurn
 
 prop_poisonCommandSetsPoisonUsed :: Game -> Property
 prop_poisonCommandSetsPoisonUsed game =
     forAll (arbitraryPoisonCommand game') $ \command ->
     run_ (apply command) game' ^. poisonUsed
     where
-        game' = game { _stage = WitchsTurn }
+        game' = game & stage .~ WitchsTurn
 
 prop_protectCommandErrorsWhenGameIsOver :: Game -> Property
 prop_protectCommandErrorsWhenGameIsOver game =
     forAll (arbitraryProtectCommand game') $ verbose_runCommandErrors game'
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_protectCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_protectCommandErrorsWhenCallerDoesNotExist game caller =
@@ -478,7 +478,7 @@ prop_protectCommandErrorsWhenTargetIsCaller game = do
 prop_protectCommandErrorsWhenTargetIsPriorProtect :: Gen Property
 prop_protectCommandErrorsWhenTargetIsPriorProtect = do
     game        <- arbitraryGameWithProtect
-    let game'   = game { _protect = Nothing }
+    let game'   = game & protect .~ Nothing
 
     let defender    = head . filterDefenders $ game' ^. players
     let command     = protectCommand (defender ^. name) (fromJust $ game' ^. priorProtect)
@@ -490,20 +490,20 @@ prop_protectCommandSetsPriorProtect game =
     forAll (arbitraryProtectCommand game') $ \command ->
     isJust $ run_ (apply command) game' ^. priorProtect
     where
-        game' = game { _stage = DefendersTurn }
+        game' = game & stage .~ DefendersTurn
 
 prop_protectCommandSetsProtect :: Game -> Property
 prop_protectCommandSetsProtect game =
     forAll (arbitraryProtectCommand game') $ \command ->
     isJust $ run_ (apply command) game' ^. protect
     where
-        game' = game { _stage = DefendersTurn }
+        game' = game & stage .~ DefendersTurn
 
 prop_quitCommandErrorsWhenGameIsOver :: Game -> Property
 prop_quitCommandErrorsWhenGameIsOver game =
     forAll (arbitraryQuitCommand game') $ verbose_runCommandErrors game'
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_quitCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_quitCommandErrorsWhenCallerDoesNotExist game caller =
@@ -596,7 +596,7 @@ prop_seeCommandErrorsWhenGameIsOver :: Game -> Property
 prop_seeCommandErrorsWhenGameIsOver game =
     forAll (arbitrarySeeCommand game') $ verbose_runCommandErrors game'
     where
-        game' = game { _stage = GameOver }
+        game' = game & stage .~ GameOver
 
 prop_seeCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_seeCommandErrorsWhenCallerDoesNotExist game caller =
@@ -652,7 +652,10 @@ prop_seeCommandSetsSee game =
     forAll (arbitrarySeeCommand game') $ \command ->
     isJust $ run_ (apply command) game' ^. see
     where
-        game' = game { _stage = SeersTurn }
+        game' = game & stage .~ SeersTurn
 
 verbose_runCommandErrors :: Game -> Command -> Property
-verbose_runCommandErrors game command = whenFail (mapM_ putStrLn [show game, show . fromRight $ run (apply command) game]) (isLeft $ run (apply command) game)
+verbose_runCommandErrors game command = whenFail (mapM_ putStrLn data_) (isLeft result)
+    where
+        result  = run (apply command) game
+        data_   = [show game, show $ fromRight result]

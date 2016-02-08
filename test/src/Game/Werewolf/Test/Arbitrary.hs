@@ -41,7 +41,7 @@ import Game.Werewolf.Command
 import Game.Werewolf.Engine    (checkStage)
 import Game.Werewolf.Game
 import Game.Werewolf.Player
-import Game.Werewolf.Role      hiding (name, _name)
+import Game.Werewolf.Role      hiding (name)
 import Game.Werewolf.Test.Util
 
 import Test.QuickCheck
@@ -52,9 +52,9 @@ instance Show Command where
 instance Arbitrary Game where
     arbitrary = do
         game    <- arbitraryNewGame
-        stage   <- arbitrary
+        stage'  <- arbitrary
 
-        return $ game { _stage = stage }
+        return $ game & stage .~ stage'
 
 instance Arbitrary Stage where
     arbitrary = elements
@@ -85,7 +85,7 @@ arbitraryGameWithDevourVotes :: Gen Game
 arbitraryGameWithDevourVotes = do
     game <- arbitrary
 
-    runArbitraryCommands (length $ game ^. players) (game { _stage = WerewolvesTurn })
+    runArbitraryCommands (length . filterAlive $ game ^. players) (game & stage .~ WerewolvesTurn)
 
 arbitraryGameWithHeal :: Gen Game
 arbitraryGameWithHeal = do
@@ -98,12 +98,12 @@ arbitraryGameWithLynchVotes :: Gen Game
 arbitraryGameWithLynchVotes = do
     game <- arbitrary
 
-    runArbitraryCommands (length $ game ^. players) (game { _stage = VillagesTurn })
+    runArbitraryCommands (length $ game ^. players) (game & stage .~ VillagesTurn)
 
 arbitraryGameWithProtect :: Gen Game
 arbitraryGameWithProtect = do
     game        <- arbitrary
-    let game'   = game { _stage = DefendersTurn }
+    let game'   = game & stage .~ DefendersTurn
     command     <- arbitraryProtectCommand game'
 
     return $ run_ (apply command) game'
@@ -113,12 +113,12 @@ arbitraryGameWithProtectAndDevourVotes = do
     game        <- arbitraryGameWithProtect
     let game'   = run_ checkStage game
 
-    runArbitraryCommands (length $ game' ^. players) game'
+    runArbitraryCommands (length . filterAlive $ game' ^. players) game'
 
 arbitraryGameWithPoison :: Gen Game
 arbitraryGameWithPoison = do
     game        <- arbitrary
-    let game'   = game { _stage = WitchsTurn }
+    let game'   = game & stage .~ WitchsTurn
     command     <- arbitraryPoisonCommand game'
 
     return $ run_ (apply command) game'
@@ -126,7 +126,7 @@ arbitraryGameWithPoison = do
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
     n <- choose (10, 24)
-    players <- nubOn _name <$> infiniteList
+    players <- nubOn (view name) <$> infiniteList
 
     let defender            = head $ filterDefenders players
     let scapegoat           = head $ filterScapegoats players
@@ -180,7 +180,7 @@ arbitraryHealCommand game = do
 
     return $ if game ^. healUsed
         then noopCommand
-        else seq (fromJust (getDevourEvent game)) $ healCommand (witch ^. name)
+        else seq (fromJust $ getDevourEvent game) $ healCommand (witch ^. name)
 
 arbitraryPassCommand :: Game -> Gen Command
 arbitraryPassCommand game = do
@@ -200,6 +200,7 @@ arbitraryPoisonCommand game = do
 arbitraryProtectCommand :: Game -> Gen Command
 arbitraryProtectCommand game = do
     let defender    = head . filterDefenders $ game ^. players
+    -- TODO (hjw): suchThat (/= priorProtect)
     target          <- suchThat (arbitraryPlayer game) (defender /=)
 
     return $ if isJust (game ^. protect)
@@ -212,7 +213,8 @@ arbitraryQuitCommand game = do
 
     if null applicableCallers
         then return noopCommand
-        else elements applicableCallers >>= \caller -> return $ quitCommand (caller ^. name)
+        else elements applicableCallers >>= \caller ->
+            return $ quitCommand (caller ^. name)
 
 arbitrarySeeCommand :: Game -> Gen Command
 arbitrarySeeCommand game = do
@@ -234,16 +236,16 @@ iterateM 0 _ a = return a
 iterateM n f a = f a >>= iterateM (n - 1) f
 
 arbitraryPlayer :: Game -> Gen Player
-arbitraryPlayer = elements . filterAlive . _players
+arbitraryPlayer = elements . filterAlive . view players
 
 arbitraryDefender :: Game -> Gen Player
-arbitraryDefender = elements . filterAlive . filterDefenders . _players
+arbitraryDefender = elements . filterAlive . filterDefenders . view players
 
 arbitrarySeer :: Game -> Gen Player
-arbitrarySeer = elements . filterAlive . filterSeers . _players
+arbitrarySeer = elements . filterAlive . filterSeers . view players
 
 arbitraryWerewolf :: Game -> Gen Player
-arbitraryWerewolf = elements . filterAlive . filterWerewolves . _players
+arbitraryWerewolf = elements . filterAlive . filterWerewolves . view players
 
 arbitraryWitch :: Game -> Gen Player
-arbitraryWitch = elements . filterAlive . filterWitches . _players
+arbitraryWitch = elements . filterAlive . filterWitches . view players
