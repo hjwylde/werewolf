@@ -49,16 +49,16 @@ executable werewolf
     other-extensions:
         OverloadedStrings
     build-depends:
-        aeson >= 0.8,
+        aeson >= 0.8 && < 0.11,
         base >= 4.8 && < 5,
-        directory >= 1.2,
-        extra >= 1.4,
-        filepath >= 1.4,
-        lens >= 4.12,
-        mtl >= 2.2,
-        optparse-applicative >= 0.11,
-        text >= 1.2,
-        transformers >= 0.4,
+        directory == 1.2.*,
+        extra == 1.4.*,
+        filepath == 1.4.*,
+        lens >= 4.12 && < 4.14,
+        mtl == 2.2.*,
+        optparse-applicative >= 0.11 && < 0.13,
+        text == 1.2.*,
+        transformers == 0.4.*,
         werewolf
 
 library
@@ -81,18 +81,18 @@ library
         RankNTypes,
         TemplateHaskell
     build-depends:
-        aeson >= 0.8,
+        aeson >= 0.8 && < 0.11,
         base >= 4.8 && < 5,
-        containers >= 0.5,
-        directory >= 1.2,
-        extra >= 1.4,
-        filepath >= 1.4,
-        lens >= 4.12,
-        MonadRandom >= 0.4,
-        mtl >= 2.2,
+        containers == 0.5.*,
+        directory == 1.2.*,
+        extra == 1.4.*,
+        filepath == 1.4.*,
+        lens >= 4.12 && < 4.14,
+        MonadRandom == 0.4.*,
+        mtl == 2.2.*,
         random-shuffle,
-        text >= 1.2,
-        transformers >= 0.4
+        text == 1.2.*,
+        transformers == 0.4.*
 
 test-suite werewolf-test
     type:           exitcode-stdio-1.0
@@ -112,12 +112,12 @@ test-suite werewolf-test
         OverloadedStrings
     build-depends:
         base >= 4.8 && < 5,
-        containers >= 0.5,
-        extra >= 1.4,
-        lens >= 4.12,
-        mtl >= 2.2,
-        QuickCheck >= 2.8,
+        containers == 0.5.*,
+        extra == 1.4.*,
+        lens >= 4.12 && < 4.14,
+        mtl == 2.2.*,
+        QuickCheck == 2.8.*,
         tasty >= 0.10 && < 0.12,
-        tasty-quickcheck >= 0.8,
-        text >= 1.2,
+        tasty-quickcheck == 0.8.*,
+        text == 1.2.*,
         werewolf
