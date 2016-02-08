@@ -13,7 +13,7 @@ Player data structures.
 
 module Game.Werewolf.Player (
     -- * Player
-    Player(..), name, role, state,
+    Player, name, role, state,
     newPlayer,
 
     -- ** Searches
@@ -40,7 +40,7 @@ import Data.List
 import Data.Maybe
 import Data.Text  (Text)
 
-import Game.Werewolf.Role hiding (name, _name)
+import Game.Werewolf.Role hiding (name)
 
 data Player = Player
     { _name  :: Text
@@ -57,7 +57,7 @@ newPlayer :: Text -> Role -> Player
 newPlayer name role = Player name role Alive
 
 findByName :: Text -> [Player] -> Maybe Player
-findByName name = find ((name ==) . _name)
+findByName name' = find ((name' ==) . view name)
 
 findByName_ :: Text -> [Player] -> Player
 findByName_ name = fromJust . findByName name

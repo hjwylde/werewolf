@@ -53,7 +53,7 @@ devourVoteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- uses players $ map _name . filterAlive . filterWerewolves
+    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterWerewolves
 
     tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
 
@@ -107,12 +107,12 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         pendingVoters <- getPendingVoters
 
         tell [waitingOnMessage Nothing pendingVoters]
-        tell $ map (pingPlayerMessage . _name) pendingVoters
+        tell $ map (pingPlayerMessage . view name) pendingVoters
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
         tell [pingWerewolvesMessage]
-        tell $ map (pingPlayerMessage . _name) (filterWerewolves pendingVoters)
+        tell $ map (pingPlayerMessage . view name) (filterWerewolves pendingVoters)
     WitchsTurn      -> do
         witch <- uses players $ head . filterWitches
 
@@ -208,7 +208,7 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     where
         standardStatusMessages stage players =
             currentStageMessages callerName stage ++ [
-            rolesInGameMessage (Just callerName) $ map _role players,
+            rolesInGameMessage (Just callerName) $ map (view role) players,
             playersInGameMessage callerName players
             ]
 

@@ -17,6 +17,7 @@ module Werewolf.Commands.Start (
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -60,4 +61,4 @@ handle callerName (Options extraRoleNames playerNames) = do
 
 
 findByName :: Text -> Maybe Role
-findByName name = find ((name ==) . T.toLower . _name) allRoles
+findByName name' = find ((name' ==) . T.toLower . view name) allRoles

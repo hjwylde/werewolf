@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Privatised underscore methods and changed old uses to using lens. ([#20](https://github.com/hjwylde/werewolf/issues/20))
+
 #### v0.4.3.1
 
 *Revisions*

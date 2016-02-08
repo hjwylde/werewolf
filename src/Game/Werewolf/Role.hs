@@ -14,7 +14,7 @@ Role data structures.
 
 module Game.Werewolf.Role (
     -- * Role
-    Role(..), name, allegiance, description, advice,
+    Role, name, allegiance, description, advice,
 
     -- ** Instances
     allRoles, defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole,
