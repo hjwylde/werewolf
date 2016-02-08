@@ -197,11 +197,9 @@ prop_healCommandErrorsWhenNotWitchsTurn game = do
 
     not (isWitchsTurn game) ==> verbose_runCommandErrors game command
 
-prop_healCommandErrorsWhenCallerHasHealed :: Gen Property
-prop_healCommandErrorsWhenCallerHasHealed = do
-    game <- arbitraryGameWithDevourEvent
-
-    return $ forAll (arbitraryHealCommand game) $ \command -> do
+prop_healCommandErrorsWhenCallerHasHealed :: GameWithDevourEvent -> Property
+prop_healCommandErrorsWhenCallerHasHealed (GameWithDevourEvent game) =
+    forAll (arbitraryHealCommand game) $ \command -> do
         let game' = run_ (apply command) game
 
         verbose_runCommandErrors game' command
@@ -213,18 +211,14 @@ prop_healCommandErrorsWhenCallerNotWitch game =
 
         verbose_runCommandErrors game command
 
-prop_healCommandSetsHeal :: Gen Property
-prop_healCommandSetsHeal = do
-    game <- arbitraryGameWithDevourEvent
-
-    return $ forAll (arbitraryHealCommand game) $ \command ->
+prop_healCommandSetsHeal :: GameWithDevourEvent -> Property
+prop_healCommandSetsHeal (GameWithDevourEvent game) =
+    forAll (arbitraryHealCommand game) $ \command ->
         (run_ (apply command) game) ^. heal
 
-prop_healCommandSetsHealUsed :: Gen Property
-prop_healCommandSetsHealUsed = do
-    game <- arbitraryGameWithDevourEvent
-
-    return $ forAll (arbitraryHealCommand game) $ \command ->
+prop_healCommandSetsHealUsed :: GameWithDevourEvent -> Property
+prop_healCommandSetsHealUsed (GameWithDevourEvent game) =
+    forAll (arbitraryHealCommand game) $ \command ->
         (run_ (apply command) game) ^. healUsed
 
 prop_lynchVoteCommandErrorsWhenGameIsOver :: Game -> Property
@@ -367,15 +361,14 @@ prop_poisonCommandErrorsWhenTargetIsDead game = do
 
         verbose_runCommandErrors game' command
 
-prop_poisonCommandErrorsWhenTargetIsDevoured :: Gen Property
-prop_poisonCommandErrorsWhenTargetIsDevoured = do
-    game                            <- arbitraryGameWithDevourEvent
-    let (DevourEvent targetName)    = fromJust $ getDevourEvent game
+prop_poisonCommandErrorsWhenTargetIsDevoured :: GameWithDevourEvent -> Property
+prop_poisonCommandErrorsWhenTargetIsDevoured (GameWithDevourEvent game) = do
+    let (DevourEvent targetName) = fromJust $ getDevourEvent game
 
     let witch   = head . filterWitches $ game ^. players
     let command = poisonCommand (witch ^. name) targetName
 
-    return $ verbose_runCommandErrors game command
+    verbose_runCommandErrors game command
 
 prop_poisonCommandErrorsWhenNotWitchsTurn :: Game -> Property
 prop_poisonCommandErrorsWhenNotWitchsTurn game =
@@ -475,15 +468,14 @@ prop_protectCommandErrorsWhenTargetIsCaller game = do
 
     verbose_runCommandErrors game command
 
-prop_protectCommandErrorsWhenTargetIsPriorProtect :: Gen Property
-prop_protectCommandErrorsWhenTargetIsPriorProtect = do
-    game        <- arbitraryGameWithProtect
-    let game'   = game { _protect = Nothing }
+prop_protectCommandErrorsWhenTargetIsPriorProtect :: GameWithProtect -> Property
+prop_protectCommandErrorsWhenTargetIsPriorProtect (GameWithProtect game) = do
+    let game' = game { _protect = Nothing }
 
     let defender    = head . filterDefenders $ game' ^. players
     let command     = protectCommand (defender ^. name) (fromJust $ game' ^. priorProtect)
 
-    return $ verbose_runCommandErrors game' command
+    verbose_runCommandErrors game' command
 
 prop_protectCommandSetsPriorProtect :: Game -> Property
 prop_protectCommandSetsPriorProtect game =
@@ -526,68 +518,58 @@ prop_quitCommandKillsPlayer game =
 
         length (filterDead $ game' ^. players) == 1
 
-prop_quitCommandClearsHealWhenCallerIsWitch :: Gen Bool
-prop_quitCommandClearsHealWhenCallerIsWitch = do
-    game        <- arbitraryGameWithHeal
+prop_quitCommandClearsHealWhenCallerIsWitch :: GameWithHeal -> Bool
+prop_quitCommandClearsHealWhenCallerIsWitch (GameWithHeal game) = do
     let witch   = head . filterWitches $ game ^. players
     let command = quitCommand (witch ^. name)
 
-    return . not $ run_ (apply command) game ^. heal
+    not $ run_ (apply command) game ^. heal
 
-prop_quitCommandClearsHealUsedWhenCallerIsWitch :: Gen Bool
-prop_quitCommandClearsHealUsedWhenCallerIsWitch = do
-    game        <- arbitraryGameWithHeal
+prop_quitCommandClearsHealUsedWhenCallerIsWitch :: GameWithHeal -> Bool
+prop_quitCommandClearsHealUsedWhenCallerIsWitch (GameWithHeal game) = do
     let witch   = head . filterWitches $ game ^. players
     let command = quitCommand (witch ^. name)
 
-    return . not $ run_ (apply command) game ^. healUsed
+    not $ run_ (apply command) game ^. healUsed
 
-prop_quitCommandClearsPoisonWhenCallerIsWitch :: Gen Bool
-prop_quitCommandClearsPoisonWhenCallerIsWitch = do
-    game        <- arbitraryGameWithPoison
+prop_quitCommandClearsPoisonWhenCallerIsWitch :: GameWithPoison -> Bool
+prop_quitCommandClearsPoisonWhenCallerIsWitch (GameWithPoison game) = do
     let witch   = head . filterWitches $ game ^. players
     let command = quitCommand (witch ^. name)
 
-    return . isNothing $ run_ (apply command) game ^. poison
+    isNothing $ run_ (apply command) game ^. poison
 
-prop_quitCommandClearsPoisonUsedWhenCallerIsWitch :: Gen Bool
-prop_quitCommandClearsPoisonUsedWhenCallerIsWitch = do
-    game        <- arbitraryGameWithPoison
+prop_quitCommandClearsPoisonUsedWhenCallerIsWitch :: GameWithPoison -> Bool
+prop_quitCommandClearsPoisonUsedWhenCallerIsWitch (GameWithPoison game) = do
     let witch   = head . filterWitches $ game ^. players
     let command = quitCommand (witch ^. name)
 
-    return . not $ run_ (apply command) game ^. poisonUsed
+    not $ run_ (apply command) game ^. poisonUsed
 
-prop_quitCommandClearsPriorProtectWhenCallerIsDefender :: Gen Bool
-prop_quitCommandClearsPriorProtectWhenCallerIsDefender = do
-    game            <- arbitraryGameWithProtect
+prop_quitCommandClearsPriorProtectWhenCallerIsDefender :: GameWithProtect -> Bool
+prop_quitCommandClearsPriorProtectWhenCallerIsDefender (GameWithProtect game) = do
     let defender    = head . filterDefenders $ game ^. players
     let command     = quitCommand (defender ^. name)
 
-    return . isNothing $ run_ (apply command) game ^. priorProtect
+    isNothing $ run_ (apply command) game ^. priorProtect
 
-prop_quitCommandClearsProtectWhenCallerIsDefender :: Gen Bool
-prop_quitCommandClearsProtectWhenCallerIsDefender = do
-    game            <- arbitraryGameWithProtect
+prop_quitCommandClearsProtectWhenCallerIsDefender :: GameWithProtect -> Bool
+prop_quitCommandClearsProtectWhenCallerIsDefender (GameWithProtect game) = do
     let defender    = head . filterDefenders $ game ^. players
     let command     = quitCommand (defender ^. name)
 
-    return . isNothing $ run_ (apply command) game ^. protect
+    isNothing $ run_ (apply command) game ^. protect
 
-prop_quitCommandClearsPlayersDevourVote :: Gen Property
-prop_quitCommandClearsPlayersDevourVote = do
-    game <- arbitraryGameWithDevourVotes
-
-    return $ forAll (arbitraryWerewolf game) $ \caller -> do
+prop_quitCommandClearsPlayersDevourVote :: GameWithDevourVotes -> Property
+prop_quitCommandClearsPlayersDevourVote (GameWithDevourVotes game) =
+    forAll (arbitraryWerewolf game) $ \caller -> do
         let command = quitCommand (caller ^. name)
 
         isNothing $ run_ (apply command) game ^. votes . at (caller ^. name)
 
-prop_quitCommandClearsPlayersLynchVote :: Gen Property
-prop_quitCommandClearsPlayersLynchVote = do
-    game <- arbitraryGameWithLynchVotes
-
-    return $ forAll (arbitraryPlayer game) $ \caller -> do
+prop_quitCommandClearsPlayersLynchVote :: GameWithLynchVotes -> Property
+prop_quitCommandClearsPlayersLynchVote (GameWithLynchVotes game) =
+    forAll (arbitraryPlayer game) $ \caller -> do
         let command = quitCommand (caller ^. name)
 
         isNothing $ run_ (apply command) game ^. votes . at (caller ^. name)

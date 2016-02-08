@@ -224,22 +224,23 @@ prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus game =
 
 prop_checkWerewolvesTurnKillsNoOneWhenConflicted :: Gen Bool
 prop_checkWerewolvesTurnKillsNoOneWhenConflicted = do
-    game <- suchThat arbitraryGameWithDevourVotes $ \game -> length (getVoteResult game) > 1
+    (GameWithDevourVotes game) <- suchThat arbitrary $ \(GameWithDevourVotes game) ->
+        length (getVoteResult game) > 1
 
     return . isNothing . getDevourEvent $ run_ checkStage game
 
 prop_checkWerewolvesTurnKillsNoOneWhenTargetDefended :: Gen Bool
 prop_checkWerewolvesTurnKillsNoOneWhenTargetDefended = do
-    game        <- suchThat arbitraryGameWithDevourVotes $ \game -> length (getVoteResult game) == 1
-    let game'   = game { _protect = Just $ head (getVoteResult game) ^. name }
+    (GameWithDevourVotes game) <- suchThat arbitrary $ \(GameWithDevourVotes game) ->
+        length (getVoteResult game) == 1
+
+    let game' = game & protect .~ Just (head (getVoteResult game) ^. name)
 
     return . isNothing . getDevourEvent $ run_ checkStage game'
 
-prop_checkWerewolvesTurnResetsProtect :: Gen Bool
-prop_checkWerewolvesTurnResetsProtect = do
-    game <- arbitraryGameWithProtectAndDevourVotes
-
-    return . isNothing $ run_ checkStage game ^. protect
+prop_checkWerewolvesTurnResetsProtect :: GameWithProtectAndDevourVotes -> Bool
+prop_checkWerewolvesTurnResetsProtect (GameWithProtectAndDevourVotes game) =
+    isNothing $ run_ checkStage game ^. protect
 
 prop_checkWerewolvesTurnResetsVotes :: Game -> Property
 prop_checkWerewolvesTurnResetsVotes game =

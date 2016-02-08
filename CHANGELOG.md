@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Tidied up arbitrary instances by using `newtype`'s. ([#78](https://github.com/hjwylde/werewolf/issues/78))
+
 #### v0.4.3.1
 
 *Revisions*
