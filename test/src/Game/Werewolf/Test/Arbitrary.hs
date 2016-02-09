@@ -12,9 +12,10 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Initial arbitraries
 
     -- ** Game
-    arbitraryNewGame, arbitraryGameWithDevourEvent, arbitraryGameWithDevourVotes,
-    arbitraryGameWithHeal, arbitraryGameWithLynchVotes, arbitraryGameWithPoison,
-    arbitraryGameWithProtect, arbitraryGameWithProtectAndDevourVotes,
+    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtVillagesTurn(..), GameAtWerewolvesTurn(..),
+    GameAtWitchsTurn(..), GameAtSeersTurn(..),
+    GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
+    GameWithPoison(..), GameWithProtect(..), GameWithProtectAndDevourVotes(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -27,7 +28,7 @@ module Game.Werewolf.Test.Arbitrary (
     arbitrarySeeCommand, runArbitraryCommands,
 
     -- ** Player
-    arbitraryPlayer, arbitraryDefender, arbitrarySeer, arbitraryWerewolf, arbitraryWitch,
+    arbitraryPlayer, arbitraryWerewolf,
 ) where
 
 import Control.Lens hiding (elements)
@@ -51,7 +52,7 @@ instance Show Command where
 
 instance Arbitrary Game where
     arbitrary = do
-        game    <- arbitraryNewGame
+        game    <- newGame <$> arbitraryPlayerSet
         stage'  <- arbitrary
 
         return $ game & stage .~ stage'
@@ -72,56 +73,129 @@ instance Arbitrary Role where
 instance Arbitrary Text where
     arbitrary = T.pack <$> vectorOf 6 (elements ['a'..'z'])
 
-arbitraryNewGame :: Gen Game
-arbitraryNewGame = newGame <$> arbitraryPlayerSet
+newtype GameAtDefendersTurn = GameAtDefendersTurn Game
+    deriving (Eq, Show)
 
-arbitraryGameWithDevourEvent :: Gen Game
-arbitraryGameWithDevourEvent = do
-    game <- suchThat arbitraryGameWithDevourVotes $ \game -> length (getVoteResult game) == 1
+instance Arbitrary GameAtDefendersTurn where
+    arbitrary = do
+        game <- arbitrary
 
-    return $ run_ checkStage game
+        return $ GameAtDefendersTurn (game & stage .~ DefendersTurn)
 
-arbitraryGameWithDevourVotes :: Gen Game
-arbitraryGameWithDevourVotes = do
-    game <- arbitrary
+newtype GameAtGameOver = GameAtGameOver Game
+    deriving (Eq, Show)
 
-    runArbitraryCommands (length . filterAlive $ game ^. players) (game & stage .~ WerewolvesTurn)
+instance Arbitrary GameAtGameOver where
+    arbitrary = do
+        game <- arbitrary
 
-arbitraryGameWithHeal :: Gen Game
-arbitraryGameWithHeal = do
-    game        <- arbitraryGameWithDevourEvent
-    command     <- arbitraryHealCommand game
+        return $ GameAtGameOver (game & stage .~ GameOver)
 
-    return $ run_ (apply command) game
+newtype GameAtVillagesTurn = GameAtVillagesTurn Game
+    deriving (Eq, Show)
 
-arbitraryGameWithLynchVotes :: Gen Game
-arbitraryGameWithLynchVotes = do
-    game <- arbitrary
+instance Arbitrary GameAtVillagesTurn where
+    arbitrary = do
+        game <- arbitrary
 
-    runArbitraryCommands (length $ game ^. players) (game & stage .~ VillagesTurn)
+        return $ GameAtVillagesTurn (game & stage .~ VillagesTurn)
 
-arbitraryGameWithProtect :: Gen Game
-arbitraryGameWithProtect = do
-    game        <- arbitrary
-    let game'   = game & stage .~ DefendersTurn
-    command     <- arbitraryProtectCommand game'
+newtype GameAtWerewolvesTurn = GameAtWerewolvesTurn Game
+    deriving (Eq, Show)
 
-    return $ run_ (apply command) game'
+instance Arbitrary GameAtWerewolvesTurn where
+    arbitrary = do
+        game <- arbitrary
 
-arbitraryGameWithProtectAndDevourVotes :: Gen Game
-arbitraryGameWithProtectAndDevourVotes = do
-    game        <- arbitraryGameWithProtect
-    let game'   = run_ checkStage game
+        return $ GameAtWerewolvesTurn (game & stage .~ WerewolvesTurn)
 
-    runArbitraryCommands (length . filterAlive $ game' ^. players) game'
+newtype GameAtWitchsTurn = GameAtWitchsTurn Game
+    deriving (Eq, Show)
 
-arbitraryGameWithPoison :: Gen Game
-arbitraryGameWithPoison = do
-    game        <- arbitrary
-    let game'   = game & stage .~ WitchsTurn
-    command     <- arbitraryPoisonCommand game'
+instance Arbitrary GameAtWitchsTurn where
+    arbitrary = do
+        game <- arbitrary
 
-    return $ run_ (apply command) game'
+        return $ GameAtWitchsTurn (game & stage .~ WitchsTurn)
+
+newtype GameAtSeersTurn = GameAtSeersTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtSeersTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtSeersTurn (game & stage .~ SeersTurn)
+
+newtype GameWithDevourEvent = GameWithDevourEvent Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithDevourEvent where
+    arbitrary = do
+        (GameWithDevourVotes game) <- suchThat arbitrary $ \(GameWithDevourVotes game) ->
+            length (getVoteResult game) == 1
+
+        return $ GameWithDevourEvent (run_ checkStage game)
+
+newtype GameWithDevourVotes = GameWithDevourVotes Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithDevourVotes where
+    arbitrary = do
+        game <- arbitrary
+
+        GameWithDevourVotes <$> runArbitraryCommands (length $ game ^. players) (game & stage .~ WerewolvesTurn)
+
+newtype GameWithHeal = GameWithHeal Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithHeal where
+    arbitrary = do
+        (GameWithDevourEvent game)  <- arbitrary
+        command                     <- arbitraryHealCommand game
+
+        return $ GameWithHeal (run_ (apply command) game)
+
+newtype GameWithLynchVotes = GameWithLynchVotes Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithLynchVotes where
+    arbitrary = do
+        game <- arbitrary
+
+        GameWithLynchVotes <$> runArbitraryCommands (length $ game ^. players) (game & stage .~ VillagesTurn)
+
+newtype GameWithProtect = GameWithProtect Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithProtect where
+    arbitrary = do
+        game        <- arbitrary
+        let game'   = game & stage .~ DefendersTurn
+        command     <- arbitraryProtectCommand game'
+
+        return $ GameWithProtect (run_ (apply command) game')
+
+newtype GameWithProtectAndDevourVotes = GameWithProtectAndDevourVotes Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithProtectAndDevourVotes where
+    arbitrary = do
+        (GameWithProtect game)  <- arbitrary
+        let game'               = run_ checkStage game
+
+        GameWithProtectAndDevourVotes <$> runArbitraryCommands (length $ game' ^. players) game'
+
+newtype GameWithPoison = GameWithPoison Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithPoison where
+    arbitrary = do
+        game        <- arbitrary
+        let game'   = game & stage .~ WitchsTurn
+        command     <- arbitraryPoisonCommand game'
+
+        return $ GameWithPoison (run_ (apply command) game')
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
@@ -238,14 +312,5 @@ iterateM n f a = f a >>= iterateM (n - 1) f
 arbitraryPlayer :: Game -> Gen Player
 arbitraryPlayer = elements . filterAlive . view players
 
-arbitraryDefender :: Game -> Gen Player
-arbitraryDefender = elements . filterAlive . filterDefenders . view players
-
-arbitrarySeer :: Game -> Gen Player
-arbitrarySeer = elements . filterAlive . filterSeers . view players
-
 arbitraryWerewolf :: Game -> Gen Player
 arbitraryWerewolf = elements . filterAlive . filterWerewolves . view players
-
-arbitraryWitch :: Game -> Gen Player
-arbitraryWitch = elements . filterAlive . filterWitches . view players
