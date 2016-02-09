@@ -138,6 +138,12 @@ checkStage' = use stage >>= \stage' -> case stage' of
             events %= (++ [PoisonEvent targetName])
             poison .= Nothing
 
+        whenM (use heal) $ do
+            devourEvent <- uses events $ \events -> head [event | event@(DevourEvent _) <- events]
+
+            events  %= cons NoDevourEvent . delete devourEvent
+            heal    .= False
+
         witch <- uses players (head . filterWitches)
 
         whenM (use healUsed &&^ use poisonUsed) advanceStage
@@ -175,16 +181,11 @@ eventAvailable (PoisonEvent _)  = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
-    player  <- uses players $ findByName_ targetName
-    heal'   <- use heal
+    player <- uses players $ findByName_ targetName
 
-    if heal'
-        then tell [noPlayerDevouredMessage]
-        else do
-            killPlayer player
-            tell [playerDevouredMessage player]
+    killPlayer player
 
-    heal .= False
+    tell [playerDevouredMessage player]
 applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
 applyEvent (PoisonEvent name)       = do
     player <- uses players $ findByName_ name
