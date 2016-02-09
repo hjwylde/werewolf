@@ -125,9 +125,9 @@ checkStage' = use stage >>= \stage' -> case stage' of
             getVoteResult >>= \votees -> case votees of
                 [target]    ->
                     ifM (uses protect $ maybe False (== target ^. name))
-                        (events %= cons (ProtectEvent $ target ^. name))
+                        (events %= cons NoDevourEvent)
                         (events %= cons (DevourEvent $ target ^. name))
-                _           -> tell [noPlayerDevouredMessage]
+                _           -> events %= cons NoDevourEvent
 
             protect .= Nothing
 
@@ -137,6 +137,12 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenJustM (use poison) $ \targetName -> do
             events %= (++ [PoisonEvent targetName])
             poison .= Nothing
+
+        whenM (use heal) $ do
+            devourEvent <- uses events $ \events -> head [event | event@(DevourEvent _) <- events]
+
+            events  %= cons NoDevourEvent . delete devourEvent
+            heal    .= False
 
         witch <- uses players (head . filterWitches)
 
@@ -169,29 +175,24 @@ checkEvents = do
     mapM_ applyEvent available
 
 eventAvailable :: MonadState Game m => Event -> m Bool
-eventAvailable (DevourEvent _) = gets isSunrise
-eventAvailable (PoisonEvent _) = gets isSunrise
-eventAvailable (ProtectEvent _) = gets isSunrise
+eventAvailable (DevourEvent _)  = gets isSunrise
+eventAvailable NoDevourEvent    = gets isSunrise
+eventAvailable (PoisonEvent _)  = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
-    player  <- uses players $ findByName_ targetName
-    heal'   <- use heal
+    player <- uses players $ findByName_ targetName
 
-    if heal'
-        then tell [playerHealedMessage $ player ^. name]
-        else do
-            killPlayer player
-            tell [playerDevouredMessage player]
+    killPlayer player
 
-    heal .= False
-applyEvent (PoisonEvent name) = do
+    tell [playerDevouredMessage player]
+applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
+applyEvent (PoisonEvent name)       = do
     player <- uses players $ findByName_ name
 
     killPlayer player
 
     tell [playerPoisonedMessage player]
-applyEvent (ProtectEvent name) = tell [playerProtectedMessage name]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do

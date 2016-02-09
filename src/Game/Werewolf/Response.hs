@@ -40,9 +40,6 @@ module Game.Werewolf.Response (
     -- ** Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
 
-    -- ** Defender's turn messages
-    playerProtectedMessage,
-
     -- ** Seer's turn messages
     playerSeenMessage,
 
@@ -54,7 +51,7 @@ module Game.Werewolf.Response (
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
 
     -- ** Witch's turn messages
-    playerHealedMessage, playerPoisonedMessage,
+    playerPoisonedMessage,
 
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
@@ -320,12 +317,6 @@ waitingOnMessage mTo players = Message mTo $ T.concat [
     where
         playerNames = map (view name) players
 
-playerProtectedMessage :: Text -> Message
-playerProtectedMessage name = publicMessage $ T.unwords
-    [ "As you emerge from your home you see", name, "outside waving a wolf paw around."
-    , "Some poor Werewolf must have tried to attack them while the Defender was on watch."
-    ]
-
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat [
     target ^. name, " is aligned with the ", T.pack . show $ target ^. role . allegiance, "."
@@ -379,13 +370,6 @@ noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords [
     "Surprisingly you see everyone present at the town square.",
     "Perhaps the Werewolves have left Miller's Hollow?"
-    ]
-
-playerHealedMessage :: Text -> Message
-playerHealedMessage name = publicMessage $ T.unwords [
-    "As you open them you notice a door broken down and blood over the cobblestones.",
-    name, "hobbles over, clutching the bandages round their stomach.",
-    "The Witch must have seen their body and healed them..."
     ]
 
 playerPoisonedMessage :: Player -> Message
