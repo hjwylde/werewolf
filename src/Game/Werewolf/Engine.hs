@@ -125,7 +125,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
             getVoteResult >>= \votees -> case votees of
                 [target]    ->
                     ifM (uses protect $ maybe False (== target ^. name))
-                        (events %= cons (ProtectEvent $ target ^. name))
+                        (events %= cons NoDevourEvent)
                         (events %= cons (DevourEvent $ target ^. name))
                 _           -> events %= cons NoDevourEvent
 
@@ -172,7 +172,6 @@ eventAvailable :: MonadState Game m => Event -> m Bool
 eventAvailable (DevourEvent _)  = gets isSunrise
 eventAvailable NoDevourEvent    = gets isSunrise
 eventAvailable (PoisonEvent _)  = gets isSunrise
-eventAvailable (ProtectEvent _) = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
@@ -193,7 +192,6 @@ applyEvent (PoisonEvent name)       = do
     killPlayer player
 
     tell [playerPoisonedMessage player]
-applyEvent (ProtectEvent name)      = tell [playerProtectedMessage name]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do

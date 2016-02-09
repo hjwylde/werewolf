@@ -40,9 +40,6 @@ module Game.Werewolf.Response (
     -- ** Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
 
-    -- ** Defender's turn messages
-    playerProtectedMessage,
-
     -- ** Seer's turn messages
     playerSeenMessage,
 
@@ -319,12 +316,6 @@ waitingOnMessage mTo players = Message mTo $ T.concat [
     ]
     where
         playerNames = map (view name) players
-
-playerProtectedMessage :: Text -> Message
-playerProtectedMessage name = publicMessage $ T.unwords
-    [ "As you emerge from your home you see", name, "outside waving a wolf paw around."
-    , "Some poor Werewolf must have tried to attack them while the Defender was on watch."
-    ]
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat [
