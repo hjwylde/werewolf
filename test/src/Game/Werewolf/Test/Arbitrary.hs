@@ -12,6 +12,8 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Initial arbitraries
 
     -- ** Game
+    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtVillagesTurn(..), GameAtWerewolvesTurn(..),
+    GameAtWitchsTurn(..), GameAtSeersTurn(..),
     GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
     GameWithPoison(..), GameWithProtect(..), GameWithProtectAndDevourVotes(..),
 
@@ -26,7 +28,7 @@ module Game.Werewolf.Test.Arbitrary (
     arbitrarySeeCommand, runArbitraryCommands,
 
     -- ** Player
-    arbitraryPlayer, arbitraryDefender, arbitrarySeer, arbitraryWerewolf, arbitraryWitch,
+    arbitraryPlayer, arbitraryWerewolf,
 ) where
 
 import Control.Lens hiding (elements)
@@ -70,6 +72,60 @@ instance Arbitrary Role where
 
 instance Arbitrary Text where
     arbitrary = T.pack <$> vectorOf 6 (elements ['a'..'z'])
+
+newtype GameAtDefendersTurn = GameAtDefendersTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtDefendersTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtDefendersTurn (game & stage .~ DefendersTurn)
+
+newtype GameAtGameOver = GameAtGameOver Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtGameOver where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtGameOver (game & stage .~ GameOver)
+
+newtype GameAtVillagesTurn = GameAtVillagesTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtVillagesTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtVillagesTurn (game & stage .~ VillagesTurn)
+
+newtype GameAtWerewolvesTurn = GameAtWerewolvesTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtWerewolvesTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtWerewolvesTurn (game & stage .~ WerewolvesTurn)
+
+newtype GameAtWitchsTurn = GameAtWitchsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtWitchsTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtWitchsTurn (game & stage .~ WitchsTurn)
+
+newtype GameAtSeersTurn = GameAtSeersTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtSeersTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtSeersTurn (game & stage .~ SeersTurn)
 
 newtype GameWithDevourEvent = GameWithDevourEvent Game
     deriving (Eq, Show)
@@ -254,14 +310,5 @@ iterateM n f a = f a >>= iterateM (n - 1) f
 arbitraryPlayer :: Game -> Gen Player
 arbitraryPlayer = elements . filterAlive . _players
 
-arbitraryDefender :: Game -> Gen Player
-arbitraryDefender = elements . filterAlive . filterDefenders . _players
-
-arbitrarySeer :: Game -> Gen Player
-arbitrarySeer = elements . filterAlive . filterSeers . _players
-
 arbitraryWerewolf :: Game -> Gen Player
 arbitraryWerewolf = elements . filterAlive . filterWerewolves . _players
-
-arbitraryWitch :: Game -> Gen Player
-arbitraryWitch = elements . filterAlive . filterWitches . _players

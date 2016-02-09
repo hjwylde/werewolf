@@ -198,10 +198,10 @@ prop_checkWerewolvesTurnAdvancesToWitchsTurn game =
         game'   = game { _stage = WerewolvesTurn }
         n       = length . filterWerewolves $ game' ^. players
 
-prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured :: Game -> Property
+prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured :: Game -> Bool
 prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured game =
-    forAll (arbitraryWitch game) $ \witch ->
-    let devourVoteCommands = map (\werewolf -> devourVoteCommand (werewolf ^. name) (witch ^. name)) (filterWerewolves $ game ^. players)
+    let witch = head . filterWitches $ game ^. players
+        devourVoteCommands = map (\werewolf -> devourVoteCommand (werewolf ^. name) (witch ^. name)) (filterWerewolves $ game ^. players)
         game'' = foldl (flip $ run_ . apply) game' devourVoteCommands
     in isWitchsTurn $ run_ checkStage game''
     where
