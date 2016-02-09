@@ -64,7 +64,7 @@ data Stage  = GameOver | DefendersTurn | SeersTurn | Sunrise | Sunset | Villages
             | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
-data Event = DevourEvent Text | PoisonEvent Text | ProtectEvent Text
+data Event = DevourEvent Text | NoDevourEvent | PoisonEvent Text | ProtectEvent Text
     deriving (Eq, Read, Show)
 
 makeLenses ''Game

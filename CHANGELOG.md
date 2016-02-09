@@ -6,6 +6,8 @@
 
 * Privatised underscore methods and changed old uses to using lens. ([#20](https://github.com/hjwylde/werewolf/issues/20))
 * Tidied up arbitrary instances by using `newtype`'s. ([#78](https://github.com/hjwylde/werewolf/issues/78))
+* Fixed the `noPlayerDevouredMessage` to be displayed after sunrise. ([#80](https://github.com/hjwylde/werewolf/issues/80))
+* Removed `playerHealedMessage` and replaced with the generic `noPlayerDevouredMessage`. ([#80](https://github.com/hjwylde/werewolf/issues/80))
 
 #### v0.4.3.1
 

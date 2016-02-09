@@ -54,7 +54,7 @@ module Game.Werewolf.Response (
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
 
     -- ** Witch's turn messages
-    playerHealedMessage, playerPoisonedMessage,
+    playerPoisonedMessage,
 
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
@@ -379,13 +379,6 @@ noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords [
     "Surprisingly you see everyone present at the town square.",
     "Perhaps the Werewolves have left Miller's Hollow?"
-    ]
-
-playerHealedMessage :: Text -> Message
-playerHealedMessage name = publicMessage $ T.unwords [
-    "As you open them you notice a door broken down and blood over the cobblestones.",
-    name, "hobbles over, clutching the bandages round their stomach.",
-    "The Witch must have seen their body and healed them..."
     ]
 
 playerPoisonedMessage :: Player -> Message
