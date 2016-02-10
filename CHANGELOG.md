@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.4.0
+
 *Minor*
 
 * Removed `playerHealedMessage` and replaced with the generic `noPlayerDevouredMessage`. ([#80](https://github.com/hjwylde/werewolf/issues/80))
