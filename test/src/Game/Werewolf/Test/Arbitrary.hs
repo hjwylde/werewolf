@@ -15,7 +15,7 @@ module Game.Werewolf.Test.Arbitrary (
     GameAtDefendersTurn(..), GameAtGameOver(..), GameAtVillagesTurn(..), GameAtWerewolvesTurn(..),
     GameAtWitchsTurn(..), GameAtSeersTurn(..),
     GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
-    GameWithPoison(..), GameWithProtect(..), GameWithProtectAndDevourVotes(..),
+    GameWithPoison(..), GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithSee(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -46,9 +46,6 @@ import Game.Werewolf.Role      hiding (name)
 import Game.Werewolf.Test.Util
 
 import Test.QuickCheck
-
-instance Show Command where
-    show _ = "command"
 
 instance Arbitrary Game where
     arbitrary = do
@@ -152,7 +149,7 @@ newtype GameWithHeal = GameWithHeal Game
 instance Arbitrary GameWithHeal where
     arbitrary = do
         (GameWithDevourEvent game)  <- arbitrary
-        command                     <- arbitraryHealCommand game
+        (Blind command)             <- arbitraryHealCommand game
 
         return $ GameWithHeal (run_ (apply command) game)
 
@@ -165,14 +162,25 @@ instance Arbitrary GameWithLynchVotes where
 
         GameWithLynchVotes <$> runArbitraryCommands (length $ game ^. players) (game & stage .~ VillagesTurn)
 
+newtype GameWithPoison = GameWithPoison Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithPoison where
+    arbitrary = do
+        game            <- arbitrary
+        let game'       = game & stage .~ WitchsTurn
+        (Blind command) <- arbitraryPoisonCommand game'
+
+        return $ GameWithPoison (run_ (apply command) game')
+
 newtype GameWithProtect = GameWithProtect Game
     deriving (Eq, Show)
 
 instance Arbitrary GameWithProtect where
     arbitrary = do
-        game        <- arbitrary
-        let game'   = game & stage .~ DefendersTurn
-        command     <- arbitraryProtectCommand game'
+        game            <- arbitrary
+        let game'       = game & stage .~ DefendersTurn
+        (Blind command) <- arbitraryProtectCommand game'
 
         return $ GameWithProtect (run_ (apply command) game')
 
@@ -186,16 +194,16 @@ instance Arbitrary GameWithProtectAndDevourVotes where
 
         GameWithProtectAndDevourVotes <$> runArbitraryCommands (length $ game' ^. players) game'
 
-newtype GameWithPoison = GameWithPoison Game
+newtype GameWithSee = GameWithSee Game
     deriving (Eq, Show)
 
-instance Arbitrary GameWithPoison where
+instance Arbitrary GameWithSee where
     arbitrary = do
-        game        <- arbitrary
-        let game'   = game & stage .~ WitchsTurn
-        command     <- arbitraryPoisonCommand game'
+        game            <- arbitrary
+        let game'       = game & stage .~ SeersTurn
+        (Blind command) <- arbitrarySeeCommand game'
 
-        return $ GameWithPoison (run_ (apply command) game')
+        return $ GameWithSee (run_ (apply command) game')
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
@@ -213,12 +221,12 @@ arbitraryPlayerSet = do
 
     return $ defender:scapegoat:seer:villagerVillager:witch:werewolves ++ villagers
 
-arbitraryCommand :: Game -> Gen Command
+arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
-    GameOver        -> return noopCommand
+    GameOver        -> return $ Blind noopCommand
     DefendersTurn   -> arbitraryProtectCommand game
-    Sunrise         -> return noopCommand
-    Sunset          -> return noopCommand
+    Sunrise         -> return $ Blind noopCommand
+    Sunset          -> return $ Blind noopCommand
     SeersTurn       -> arbitrarySeeCommand game
     VillagesTurn    -> arbitraryLynchVoteCommand game
     WerewolvesTurn  -> arbitraryDevourVoteCommand game
@@ -228,80 +236,80 @@ arbitraryCommand game = case game ^. stage of
         arbitraryPoisonCommand game
         ]
 
-arbitraryDevourVoteCommand :: Game -> Gen Command
+arbitraryDevourVoteCommand :: Game -> Gen (Blind Command)
 arbitraryDevourVoteCommand game = do
     let applicableCallers   = filterWerewolves $ getPendingVoters game
     target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
 
     if null applicableCallers
-        then return noopCommand
+        then return $ Blind noopCommand
         else elements applicableCallers >>= \caller ->
-            return $ devourVoteCommand (caller ^. name) (target ^. name)
+            return . Blind $ devourVoteCommand (caller ^. name) (target ^. name)
 
-arbitraryLynchVoteCommand :: Game -> Gen Command
+arbitraryLynchVoteCommand :: Game -> Gen (Blind Command)
 arbitraryLynchVoteCommand game = do
     let applicableCallers   = getPendingVoters game
     target                  <- arbitraryPlayer game
 
     if null applicableCallers
-        then return noopCommand
+        then return $ Blind noopCommand
         else elements applicableCallers >>= \caller ->
-            return $ lynchVoteCommand (caller ^. name) (target ^. name)
+            return . Blind $ lynchVoteCommand (caller ^. name) (target ^. name)
 
-arbitraryHealCommand :: Game -> Gen Command
+arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do
     let witch = head . filterWitches $ game ^. players
 
     return $ if game ^. healUsed
-        then noopCommand
-        else seq (fromJust $ getDevourEvent game) $ healCommand (witch ^. name)
+        then Blind noopCommand
+        else seq (fromJust $ getDevourEvent game) (Blind $ healCommand (witch ^. name))
 
-arbitraryPassCommand :: Game -> Gen Command
+arbitraryPassCommand :: Game -> Gen (Blind Command)
 arbitraryPassCommand game = do
     let witch = head . filterWitches $ game ^. players
 
-    return $ passCommand (witch ^. name)
+    return . Blind $ passCommand (witch ^. name)
 
-arbitraryPoisonCommand :: Game -> Gen Command
+arbitraryPoisonCommand :: Game -> Gen (Blind Command)
 arbitraryPoisonCommand game = do
     let witch   = head . filterWitches $ game ^. players
     target      <- arbitraryPlayer game
 
     return $ if isJust (game ^. poison)
-        then noopCommand
-        else poisonCommand (witch ^. name) (target ^. name)
+        then Blind noopCommand
+        else Blind $ poisonCommand (witch ^. name) (target ^. name)
 
-arbitraryProtectCommand :: Game -> Gen Command
+arbitraryProtectCommand :: Game -> Gen (Blind Command)
 arbitraryProtectCommand game = do
     let defender    = head . filterDefenders $ game ^. players
     -- TODO (hjw): suchThat (/= priorProtect)
     target          <- suchThat (arbitraryPlayer game) (defender /=)
 
     return $ if isJust (game ^. protect)
-        then noopCommand
-        else protectCommand (defender ^. name) (target ^. name)
+        then Blind noopCommand
+        else Blind $ protectCommand (defender ^. name) (target ^. name)
 
-arbitraryQuitCommand :: Game -> Gen Command
+arbitraryQuitCommand :: Game -> Gen (Blind Command)
 arbitraryQuitCommand game = do
     let applicableCallers = filterAlive $ game ^. players
 
     if null applicableCallers
-        then return noopCommand
+        then return $ Blind noopCommand
         else elements applicableCallers >>= \caller ->
-            return $ quitCommand (caller ^. name)
+            return . Blind $ quitCommand (caller ^. name)
 
-arbitrarySeeCommand :: Game -> Gen Command
+arbitrarySeeCommand :: Game -> Gen (Blind Command)
 arbitrarySeeCommand game = do
     let seer    = head . filterSeers $ game ^. players
     target      <- arbitraryPlayer game
 
     return $ if isJust (game ^. see)
-        then noopCommand
-        else seeCommand (seer ^. name) (target ^. name)
+        then Blind noopCommand
+        else Blind $ seeCommand (seer ^. name) (target ^. name)
 
 runArbitraryCommands :: Int -> Game -> Gen Game
 runArbitraryCommands n = iterateM n $ \game -> do
-    command <- arbitraryCommand game
+    (Blind command) <- arbitraryCommand game
 
     return $ run_ (apply command) game
 
