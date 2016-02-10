@@ -9,6 +9,7 @@
 * Fixed the `noPlayerDevouredMessage` to be displayed after sunrise. ([#80](https://github.com/hjwylde/werewolf/issues/80))
 * Removed `playerHealedMessage` and replaced with the generic `noPlayerDevouredMessage`. ([#80](https://github.com/hjwylde/werewolf/issues/80))
 * Removed `playerProtectedMessage` and replaced with the generic `noPlayerDevouredMessage`. ([#80](https://github.com/hjwylde/werewolf/issues/80))
+* Removed `Show` instance for `Command` and used `Blind`. ([#78](https://github.com/hjwylde/werewolf/issues/78))
 
 #### v0.4.3.1
 

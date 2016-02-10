@@ -24,7 +24,6 @@ module Game.Werewolf.Test.Engine (
     prop_checkVillagesTurnDoesNothingUnlessAllVoted,
 
     prop_checkWerewolvesTurnAdvancesToWitchsTurn,
-    prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured,
     prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned,
     prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus,
     prop_checkWerewolvesTurnKillsNoOneWhenConflicted,
@@ -79,79 +78,55 @@ import           Game.Werewolf.Test.Util
 import Test.QuickCheck
 import Test.QuickCheck.Monadic
 
-prop_checkStageSkipsDefendersTurnWhenNoDefender :: Game -> Property
-prop_checkStageSkipsDefendersTurnWhenNoDefender game =
-    forAll (arbitrarySeeCommand game') $ \command ->
-    not . isDefendersTurn $ run_ (apply command >> checkStage) game'
+prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithSee -> Bool
+prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithSee game) =
+    not . isDefendersTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (filterDefenders $ game ^. players) & stage .~ SeersTurn
+        game' = foldl killPlayer game (filterDefenders $ game ^. players)
 
-prop_checkStageSkipsSeersTurnWhenNoSeer :: Game -> Property
-prop_checkStageSkipsSeersTurnWhenNoSeer game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    not . isSeersTurn $ run_ checkStage game''
+prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Bool
+prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
+    not . isSeersTurn $ run_ checkStage game'
     where
-        game'   = foldl killPlayer game (filterSeers $ game ^. players) & stage .~ VillagesTurn
-        n       = length $ game' ^. players
+        game' = foldl killPlayer game (filterSeers $ game ^. players)
 
-prop_checkStageSkipsWitchsTurnWhenNoWitch :: Game -> Property
-prop_checkStageSkipsWitchsTurnWhenNoWitch game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    not . isWitchsTurn $ run_ checkStage game''
+prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Bool
+prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
+    not . isWitchsTurn $ run_ checkStage game'
     where
-        game'   = foldl killPlayer game (filterWitches $ game ^. players) & stage .~ WerewolvesTurn
-        n       = length . filterWerewolves $ game' ^. players
+        game' = foldl killPlayer game (filterWitches $ game ^. players)
 
-prop_checkStageDoesNothingWhenGameOver :: Game -> Property
-prop_checkStageDoesNothingWhenGameOver game =
-    run_ checkStage game' === game'
-    where
-        game' = game & stage .~ GameOver
+prop_checkStageDoesNothingWhenGameOver :: GameAtGameOver -> Property
+prop_checkStageDoesNothingWhenGameOver (GameAtGameOver game) =
+    run_ checkStage game === game
 
-prop_checkDefendersTurnAdvancesToWerewolvesTurn :: Game -> Property
-prop_checkDefendersTurnAdvancesToWerewolvesTurn game =
-    forAll (arbitraryProtectCommand game') $ \command ->
-    isWerewolvesTurn $ run_ (apply command >> checkStage) game'
-    where
-        game' = game & stage .~ DefendersTurn
+prop_checkDefendersTurnAdvancesToWerewolvesTurn :: GameWithProtect -> Bool
+prop_checkDefendersTurnAdvancesToWerewolvesTurn (GameWithProtect game) =
+    isWerewolvesTurn $ run_ checkStage game
 
-prop_checkSeersTurnAdvancesToDefendersTurn :: Game -> Property
-prop_checkSeersTurnAdvancesToDefendersTurn game =
-    forAll (arbitraryCommand game') $ \command ->
-    isDefendersTurn $ run_ (apply command >> checkStage) game'
-    where
-        game' = game & stage .~ SeersTurn
+prop_checkSeersTurnAdvancesToDefendersTurn :: GameWithSee -> Bool
+prop_checkSeersTurnAdvancesToDefendersTurn (GameWithSee game) =
+    isDefendersTurn $ run_ checkStage game
 
-prop_checkSeersTurnResetsSee :: Game -> Property
-prop_checkSeersTurnResetsSee game =
-    forAll (arbitraryCommand game') $ \command ->
-    isNothing $ run_ (apply command >> checkStage) game' ^. see
-    where
-        game' = game & stage .~ SeersTurn
+prop_checkSeersTurnResetsSee :: GameWithSee -> Bool
+prop_checkSeersTurnResetsSee (GameWithSee game) =
+    isNothing $ run_ checkStage game ^. see
 
-prop_checkSeersTurnDoesNothingUnlessSeen :: Game -> Bool
-prop_checkSeersTurnDoesNothingUnlessSeen game = isSeersTurn $ run_ checkStage game'
-    where
-        game' = game & stage .~ SeersTurn
+prop_checkSeersTurnDoesNothingUnlessSeen :: GameAtSeersTurn -> Bool
+prop_checkSeersTurnDoesNothingUnlessSeen (GameAtSeersTurn game) =
+    isSeersTurn $ run_ checkStage game
 
-prop_checkVillagesTurnAdvancesToSeersTurn :: Game -> Property
-prop_checkVillagesTurnAdvancesToSeersTurn game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    not (null . filterAlive . filterSeers $ run_ checkStage game'' ^. players)
-    ==> isSeersTurn $ run_ checkStage game''
-    where
-        game'   = game & stage .~ VillagesTurn
-        n       = length $ game' ^. players
+prop_checkVillagesTurnAdvancesToSeersTurn :: GameWithLynchVotes -> Property
+prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
+    any isSeer (filterAlive $ run_ checkStage game ^. players)
+    ==> isSeersTurn $ run_ checkStage game
 
-prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: Game -> Property
-prop_checkVillagesTurnLynchesOnePlayerWhenConsensus game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    length (getVoteResult game'') == 1
-    ==> length (filterDead $ run_ checkStage game'' ^. players) == 1
-    where
-        game'   = game & stage .~ VillagesTurn
-        n       = length $ game' ^. players
+prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: GameWithLynchVotes -> Property
+prop_checkVillagesTurnLynchesOnePlayerWhenConsensus (GameWithLynchVotes game) =
+    length (getVoteResult game) == 1
+    ==> length (filterDead $ run_ checkStage game ^. players) == 1
 
+-- TODO (hjw)
 prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property
 prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
     forAll (runArbitraryCommands n game') $ \game'' ->
@@ -161,110 +136,72 @@ prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
         game'   = foldl killPlayer game (filterScapegoats $ game ^. players) & stage .~ VillagesTurn
         n       = length $ game' ^. players
 
-prop_checkVillagesTurnLynchesScapegoatWhenConflicted :: Game -> Property
-prop_checkVillagesTurnLynchesScapegoatWhenConflicted game =
-    forAll (runArbitraryCommands n game') $ \game'' -> and [
-        length (getVoteResult game'') > 1,
-        any isScapegoat $ game' ^. players
-        ] ==> isScapegoat $ head (filterDead $ run_ checkStage game'' ^. players)
-    where
-        game'   = game & stage .~ VillagesTurn
-        n       = length $ game' ^. players
+prop_checkVillagesTurnLynchesScapegoatWhenConflicted :: GameWithLynchVotes -> Property
+prop_checkVillagesTurnLynchesScapegoatWhenConflicted (GameWithLynchVotes game) =
+    length (getVoteResult game) > 1
+    ==> isScapegoat $ head (filterDead $ run_ checkStage game ^. players)
 
-prop_checkVillagesTurnResetsVotes :: Game -> Property
-prop_checkVillagesTurnResetsVotes game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    Map.null $ run_ checkStage game'' ^. votes
-    where
-        game'   = game & stage .~ VillagesTurn
-        n       = length $ game' ^. players
+prop_checkVillagesTurnResetsVotes :: GameWithLynchVotes -> Bool
+prop_checkVillagesTurnResetsVotes (GameWithLynchVotes game) =
+    Map.null $ run_ checkStage game ^. votes
 
-prop_checkVillagesTurnDoesNothingUnlessAllVoted :: Game -> Property
-prop_checkVillagesTurnDoesNothingUnlessAllVoted game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    isVillagesTurn $ run_ checkStage game''
+prop_checkVillagesTurnDoesNothingUnlessAllVoted :: GameAtVillagesTurn -> Property
+prop_checkVillagesTurnDoesNothingUnlessAllVoted (GameAtVillagesTurn game) =
+    forAll (runArbitraryCommands n game) $ \game' ->
+    isVillagesTurn $ run_ checkStage game'
     where
-        game'   = game & stage .~ VillagesTurn
-        n       = length (game' ^. players) - 1
+        n = length (game ^. players) - 1
 
-prop_checkWerewolvesTurnAdvancesToWitchsTurn :: Game -> Property
-prop_checkWerewolvesTurnAdvancesToWitchsTurn game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    length (getVoteResult game'') == 1
-    ==> let target = head $ getVoteResult game''
-        in not (isWitch target)
-        ==> isWitchsTurn $ run_ checkStage game''
-    where
-        game'   = game & stage .~ WerewolvesTurn
-        n       = length . filterWerewolves $ game' ^. players
+prop_checkWerewolvesTurnAdvancesToWitchsTurn :: GameWithDevourVotes -> Property
+prop_checkWerewolvesTurnAdvancesToWitchsTurn (GameWithDevourVotes game) =
+    length (getVoteResult game) == 1
+    ==> isWitchsTurn $ run_ checkStage game
 
-prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured :: Game -> Bool
-prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured game =
-    let witch = head . filterWitches $ game ^. players
-        devourVoteCommands = map (\werewolf -> devourVoteCommand (werewolf ^. name) (witch ^. name)) (filterWerewolves $ game ^. players)
-        game'' = foldl (flip $ run_ . apply) game' devourVoteCommands
-    in isWitchsTurn $ run_ checkStage game''
-    where
-        game' = game & stage .~ WerewolvesTurn
-
-prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned :: Game -> Bool
-prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned game =
+prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned :: GameWithDevourVotes -> Bool
+prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned (GameWithDevourVotes game) =
     not . isWitchsTurn $ run_ checkStage game'
     where
-        game' = game & stage .~ WerewolvesTurn & healUsed .~ True & poisonUsed .~ True
+        game' = game & healUsed .~ True & poisonUsed .~ True
 
-prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus :: Game -> Property
-prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    length (getVoteResult game'') == 1
-    ==> length (filterDead . filter (not . isWitch) $ run_ checkStage game'' ^. players) == 1
+prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus :: GameWithDevourVotes -> Property
+prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus (GameWithDevourVotes game) =
+    length (getVoteResult game) == 1
+    ==> isJust . getDevourEvent $ run_ checkStage game
+
+prop_checkWerewolvesTurnKillsNoOneWhenConflicted :: GameWithDevourVotes -> Property
+prop_checkWerewolvesTurnKillsNoOneWhenConflicted (GameWithDevourVotes game) =
+    length (getVoteResult game) > 1
+    ==> isNothing . getDevourEvent $ run_ checkStage game
+
+prop_checkWerewolvesTurnKillsNoOneWhenTargetDefended :: GameWithProtectAndDevourVotes -> Property
+prop_checkWerewolvesTurnKillsNoOneWhenTargetDefended (GameWithProtectAndDevourVotes game) =
+    length (getVoteResult game) == 1
+    ==> isNothing . getDevourEvent $ run_ checkStage game'
     where
-        game'   = foldl killPlayer game (filterWitches $ game ^. players) & stage .~ WerewolvesTurn
-        n       = length . filterWerewolves $ game' ^. players
-
-prop_checkWerewolvesTurnKillsNoOneWhenConflicted :: Gen Bool
-prop_checkWerewolvesTurnKillsNoOneWhenConflicted = do
-    (GameWithDevourVotes game) <- suchThat arbitrary $ \(GameWithDevourVotes game) ->
-        length (getVoteResult game) > 1
-
-    return . isNothing . getDevourEvent $ run_ checkStage game
-
-prop_checkWerewolvesTurnKillsNoOneWhenTargetDefended :: Gen Bool
-prop_checkWerewolvesTurnKillsNoOneWhenTargetDefended = do
-    (GameWithDevourVotes game) <- suchThat arbitrary $ \(GameWithDevourVotes game) ->
-        length (getVoteResult game) == 1
-
-    let game' = game & protect .~ Just (head (getVoteResult game) ^. name)
-
-    return . isNothing . getDevourEvent $ run_ checkStage game'
+        target  = head $ getVoteResult game
+        game'   = game & protect .~ Just (target ^. name)
 
 prop_checkWerewolvesTurnResetsProtect :: GameWithProtectAndDevourVotes -> Bool
 prop_checkWerewolvesTurnResetsProtect (GameWithProtectAndDevourVotes game) =
     isNothing $ run_ checkStage game ^. protect
 
-prop_checkWerewolvesTurnResetsVotes :: Game -> Property
-prop_checkWerewolvesTurnResetsVotes game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    Map.null $ run_ checkStage game'' ^. votes
-    where
-        game'   = game & stage .~ WerewolvesTurn
-        n       = length . filterWerewolves $ game' ^. players
+prop_checkWerewolvesTurnResetsVotes :: GameWithDevourVotes -> Bool
+prop_checkWerewolvesTurnResetsVotes (GameWithDevourVotes game) =
+    Map.null $ run_ checkStage game ^. votes
 
-prop_checkWerewolvesTurnDoesNothingUnlessAllVoted :: Game -> Property
-prop_checkWerewolvesTurnDoesNothingUnlessAllVoted game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    isWerewolvesTurn $ run_ checkStage game''
+prop_checkWerewolvesTurnDoesNothingUnlessAllVoted :: GameAtWerewolvesTurn -> Property
+prop_checkWerewolvesTurnDoesNothingUnlessAllVoted (GameAtWerewolvesTurn game) =
+    forAll (runArbitraryCommands n game) $ \game' ->
+    isWerewolvesTurn $ run_ checkStage game'
     where
-        game'   = game & stage .~ WerewolvesTurn
-        n       = length (filterWerewolves $ game' ^. players) - 1
+        n = length (filterWerewolves $ game ^. players) - 1
 
-prop_checkWitchsTurnAdvancesToVillagesTurn :: Game -> Property
-prop_checkWitchsTurnAdvancesToVillagesTurn game =
-    forAll (arbitraryPassCommand game') $ \command ->
-    isVillagesTurn $ run_ (apply command >> checkStage) game'
-    where
-        game' = game & stage .~ WitchsTurn
+prop_checkWitchsTurnAdvancesToVillagesTurn :: GameAtWitchsTurn -> Property
+prop_checkWitchsTurnAdvancesToVillagesTurn (GameAtWitchsTurn game) =
+    forAll (arbitraryPassCommand game) $ \(Blind command) ->
+    isVillagesTurn $ run_ (apply command >> checkStage) game
 
+-- TODO (hjw)
 prop_checkWitchsTurnHealsDevoureeWhenHealed :: Game -> Property
 prop_checkWitchsTurnHealsDevoureeWhenHealed game =
     forAll (runArbitraryCommands n game') $ \game'' ->
@@ -272,8 +209,8 @@ prop_checkWitchsTurnHealsDevoureeWhenHealed game =
     ==> let target = head $ getVoteResult game''
         in not (isWitch target)
         ==> let game''' = run_ checkStage game''
-            in forAll (arbitraryHealCommand game''') $ \command ->
-            forAll (arbitraryPassCommand game''') $ \passCommand ->
+            in forAll (arbitraryHealCommand game''') $ \(Blind command) ->
+            forAll (arbitraryPassCommand game''') $ \(Blind passCommand) ->
             null . filterDead $ run_ checkStage
                 (run_ (apply passCommand) $
                     run_ (apply command) game'''
@@ -282,46 +219,27 @@ prop_checkWitchsTurnHealsDevoureeWhenHealed game =
         game'   = game & stage .~ WerewolvesTurn
         n       = length . filterWerewolves $ game' ^. players
 
-prop_checkWitchsTurnKillsOnePlayerWhenPoisoned :: Game -> Property
-prop_checkWitchsTurnKillsOnePlayerWhenPoisoned game =
-    forAll (arbitraryPoisonCommand game') $ \command ->
-    forAll (arbitraryPassCommand game') $ \passCommand ->
-    length (filterDead $ run_ (apply command >> apply passCommand >> checkStage) game' ^. players) == 1
-    where
-        game' = game & stage .~ WitchsTurn
+prop_checkWitchsTurnKillsOnePlayerWhenPoisoned :: GameWithPoison -> Property
+prop_checkWitchsTurnKillsOnePlayerWhenPoisoned (GameWithPoison game) =
+    forAll (arbitraryPassCommand game) $ \(Blind command) ->
+    length (filterDead $ run_ (apply command >> checkStage) game ^. players) == 1
 
-prop_checkWitchsTurnDoesNothingWhenPassed :: Game -> Property
-prop_checkWitchsTurnDoesNothingWhenPassed game =
-    forAll (arbitraryPassCommand game') $ \command ->
-    null . filterDead $ run_ (apply command >> checkStage) game' ^. players
-    where
-        game' = game & stage .~ WitchsTurn
+prop_checkWitchsTurnDoesNothingWhenPassed :: GameAtWitchsTurn -> Property
+prop_checkWitchsTurnDoesNothingWhenPassed (GameAtWitchsTurn game) =
+    forAll (arbitraryPassCommand game) $ \(Blind command) ->
+    null . filterDead $ run_ (apply command >> checkStage) game ^. players
 
-prop_checkWitchsTurnResetsHeal :: Game -> Property
-prop_checkWitchsTurnResetsHeal game =
-    forAll (runArbitraryCommands n game') $ \game'' ->
-    length (getVoteResult game'') == 1
-    ==> let target = head $ getVoteResult game''
-        in not (isWitch target)
-        ==> let game''' = run_ checkStage game''
-            in forAll (arbitraryHealCommand game''') $ \command ->
-            forAll (arbitraryPassCommand game''') $ \passCommand ->
-            not $ run_ checkStage
-                (run_ (apply passCommand) $
-                    run_ (apply command) game'''
-                    ) ^. heal
-    where
-        game'   = game & stage .~ WerewolvesTurn
-        n       = length . filterWerewolves $ game' ^. players
+prop_checkWitchsTurnResetsHeal :: GameWithHeal -> Property
+prop_checkWitchsTurnResetsHeal (GameWithHeal game) =
+    forAll (arbitraryPassCommand game) $ \(Blind command) ->
+    not $ run_ (apply command >> checkStage) game ^. heal
 
+prop_checkWitchsTurnResetsPoison :: GameWithPoison -> Property
+prop_checkWitchsTurnResetsPoison (GameWithPoison game) =
+    forAll (arbitraryPassCommand game) $ \(Blind command) ->
+    isNothing $ run_ (apply command >> checkStage) game ^. poison
 
-prop_checkWitchsTurnResetsPoison :: Game -> Property
-prop_checkWitchsTurnResetsPoison game =
-    forAll (arbitraryPoisonCommand game') $ \command ->
-    isNothing $ run_ (apply command >> checkStage) game' ^. poison
-    where
-        game' = game & stage .~ WitchsTurn
-
+-- TODO (hjw)
 prop_checkGameOverAdvancesStage :: Game -> Property
 prop_checkGameOverAdvancesStage game =
     forAll (sublistOf $ game ^. players) $ \players' ->
@@ -329,6 +247,7 @@ prop_checkGameOverAdvancesStage game =
         length (nub . map (view $ role . allegiance) . filterAlive $ game' ^. players) <= 1
         ==> isGameOver $ run_ checkGameOver game'
 
+-- TODO (hjw)
 prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive :: Game -> Property
 prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
     not (isGameOver game)
@@ -349,45 +268,46 @@ prop_startGameUsesGivenPlayers =
 
 prop_startGameErrorsUnlessUniquePlayerNames :: Game -> Property
 prop_startGameErrorsUnlessUniquePlayerNames game =
-    forAll (elements players') $ \player -> isLeft (runExcept . runWriterT $ startGame "" (player:players'))
+    forAll (elements players') $ \player ->
+    isLeft (runExcept . runWriterT $ startGame "" (player:players'))
     where
         players' = game ^. players
 
 prop_startGameErrorsWhenLessThan7Players :: [Player] -> Property
 prop_startGameErrorsWhenLessThan7Players players =
     length players < 7
-    ==> isLeft (runExcept . runWriterT $ startGame "" players)
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan24Players :: Property
 prop_startGameErrorsWhenMoreThan24Players =
     forAll (resize 30 $ listOf arbitrary) $ \players ->
         length players > 24
-        ==> isLeft (runExcept . runWriterT $ startGame "" players)
+        ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Defender :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Defender players =
     length (filterDefenders players) > 1
-    ==> isLeft (runExcept . runWriterT $ startGame "" players)
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Scapegoat :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Scapegoat players =
     length (filterScapegoats players) > 1
-    ==> isLeft (runExcept . runWriterT $ startGame "" players)
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Seer :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Seer players =
     length (filterSeers players) > 1
-    ==> isLeft (runExcept . runWriterT $ startGame "" players)
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1VillagerVillager :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1VillagerVillager players =
     length (filterVillagerVillagers players) > 1
-    ==> isLeft (runExcept . runWriterT $ startGame "" players)
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Witch :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Witch players =
     length (filterWitches players) > 1
-    ==> isLeft (runExcept . runWriterT $ startGame "" players)
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property
 prop_createPlayersUsesGivenPlayerNames playerNames extraRoles = monadicIO $ do
@@ -405,7 +325,7 @@ prop_createPlayersCreatesAlivePlayers :: [Text] -> [Role] -> Property
 prop_createPlayersCreatesAlivePlayers playerNames extraRoles = monadicIO $ do
     players <- createPlayers playerNames extraRoles
 
-    return $ all ((Alive ==) . view state) players
+    return $ all isAlive players
 
 prop_randomiseRolesReturnsNRoles :: [Role] -> Int -> Property
 prop_randomiseRolesReturnsNRoles extraRoles n = monadicIO $ do

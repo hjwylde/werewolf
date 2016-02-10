@@ -75,6 +75,8 @@ allCommandTests =
     , testProperty "poison command errors when not witch's turn"        prop_poisonCommandErrorsWhenNotWitchsTurn
     , testProperty "poison command errors when caller has poisoned"     prop_poisonCommandErrorsWhenCallerHasPoisoned
     , testProperty "poison command errors when caller not witch"        prop_poisonCommandErrorsWhenCallerNotWitch
+    -- TODO (hjw)
+    --, testProperty "poison command errors when caller devoured and not healed"   prop_poisonCommandErrorsWhenCallerDevouredAndNotHealed
     , testProperty "poison command sets poison"                         prop_poisonCommandSetsPoison
     , testProperty "poison command sets poison used"                    prop_poisonCommandSetsPoisonUsed
 
@@ -121,8 +123,12 @@ allEngineTests =
     , testProperty "check stage does nothing when game over"            prop_checkStageDoesNothingWhenGameOver
 
     , testProperty "check defender's turn advances to werewolves' turn" prop_checkDefendersTurnAdvancesToWerewolvesTurn
+    -- TODO (hjw)
+    --, testProperty "check defender's turn advances when no defender"    prop_checkDefendersTurnAdvancesWhenNoDefender
 
     , testProperty "check seer's turn advances to defender's turn"  prop_checkSeersTurnAdvancesToDefendersTurn
+    -- TODO (hjw)
+    --, testProperty "check seer's turn advances when no seer"        prop_checkSeersTurnAdvancesWhenNoSeer
     , testProperty "check seer's turn resets sees"                  prop_checkSeersTurnResetsSee
     , testProperty "check seer's turn does nothing unless seen"     prop_checkSeersTurnDoesNothingUnlessSeen
 
@@ -134,7 +140,6 @@ allEngineTests =
     , testProperty "check villages' turn does nothing unless all voted"                     prop_checkVillagesTurnDoesNothingUnlessAllVoted
 
     , testProperty "check werewolves' turn advances to witch's turn"                    prop_checkWerewolvesTurnAdvancesToWitchsTurn
-    , testProperty "check werewolves' turn doesn't skip witch's turn when witch devoured" prop_checkWerewolvesTurnDoesntSkipWitchsTurnWhenWitchDevoured
     , testProperty "check werewolves' turn skips witch's turn when healed and poisoned" prop_checkWerewolvesTurnSkipsWitchsTurnWhenHealedAndPoisoned
     , testProperty "check werewolves' turn kills one player when consensus"             prop_checkWerewolvesTurnKillsOnePlayerWhenConsensus
     , testProperty "check werewolves' turn kills no one when conflicted"                prop_checkWerewolvesTurnKillsNoOneWhenConflicted
@@ -144,6 +149,8 @@ allEngineTests =
     , testProperty "check werewolves' turn does nothing unless all voted"               prop_checkWerewolvesTurnDoesNothingUnlessAllVoted
 
     , testProperty "check witch's turn advances to villages' turn"      prop_checkWitchsTurnAdvancesToVillagesTurn
+    -- TODO (hjw)
+    --, testProperty "check witch's turn advances when no witch"          prop_checkWitchsTurnAdvancesWhenNoWitch
     , testProperty "check witch's turn heals devouree when healed"      prop_checkWitchsTurnHealsDevoureeWhenHealed
     , testProperty "check witch's turn kills one player when poisoned"  prop_checkWitchsTurnKillsOnePlayerWhenPoisoned
     , testProperty "check witch's turn does nothing when passed"        prop_checkWitchsTurnDoesNothingWhenPassed
