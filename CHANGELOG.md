@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added a `version` command. ([#84](https://github.com/hjwylde/werewolf/issues/84))
+
 #### v0.4.4.0
 
 *Minor*
