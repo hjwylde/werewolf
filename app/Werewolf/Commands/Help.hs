@@ -64,8 +64,8 @@ commandsMessages = map (T.intercalate "\n") [[
     "end",
     "- Ends the current game."
     ], [
-    "heal PLAYER",
-    "- Heal a devoured player. The Witch may heal a devoured player at nighttime."
+    "heal",
+    "- Heal the devoured player. The Witch may heal the devoured player at nighttime."
     ], [
     "pass",
     "- Pass. A Witch may pass on poisoning a player."

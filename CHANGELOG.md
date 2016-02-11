@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed the `heal` command help message to not require a `PLAYER` argument. ([#82](https://github.com/hjwylde/werewolf/issues/82))
+
 #### v0.4.1.2
 
 *Revisions*
