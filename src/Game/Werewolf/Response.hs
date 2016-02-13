@@ -288,6 +288,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat [
     ]]
     where
         showTurn :: Stage -> Text
+        showTurn DefendersTurn  = "Defender's"
         showTurn GameOver       = undefined
         showTurn SeersTurn      = "Seer's"
         showTurn Sunrise        = undefined
