@@ -252,10 +252,17 @@ currentStageMessages :: Text -> Stage -> [Message]
 currentStageMessages to GameOver    = [gameIsOverMessage to]
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
-    -- TODO (hjw): pluralise this correctly for the Seer
 currentStageMessages to turn        = [privateMessage to $ T.concat [
-    "It's currently the ", T.pack $ show turn, "' turn."
+    "It's currently the ", showTurn turn, " turn."
     ]]
+    where
+        showTurn :: Stage -> Text
+        showTurn GameOver       = undefined
+        showTurn SeersTurn      = "Seer's"
+        showTurn Sunrise        = undefined
+        showTurn Sunset         = undefined
+        showTurn VillagesTurn   = "Village's"
+        showTurn WerewolvesTurn = "Werewolves'"
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat [

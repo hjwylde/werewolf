@@ -4,6 +4,7 @@
 
 *Revisions*
 
+* Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
 * Fixed the `heal` command help message to not require a `PLAYER` argument. ([#82](https://github.com/hjwylde/werewolf/issues/82))
 
 #### v0.4.1.2
@@ -23,6 +24,12 @@
 *Minor*
 
 * Added a Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
+
+#### v0.4.0.1
+
+*Revisions*
+
+* Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
 
 #### v0.4.0.0
 
