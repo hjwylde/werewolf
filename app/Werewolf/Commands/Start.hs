@@ -59,6 +59,5 @@ handle callerName (Options extraRoleNames playerNames) = do
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game, messages)  -> writeGame game >> exitWith success { messages = messages }
 
-
 findByName :: Text -> Maybe Role
 findByName name' = find ((name' ==) . T.toLower . view name) allRoles

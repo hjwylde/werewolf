@@ -61,7 +61,8 @@ handle callerName (Options Nothing) = exitWith success
 
 commandsMessages :: [Text]
 commandsMessages =
-    [ "end - ends the current game."
+    [ "choose ALLEGIANCE - choose an allegiance."
+    , "end - ends the current game."
     , "heal PLAYER - heal a devoured player."
     , "pass - pass on healing or poisoning a player."
     , "ping - pings the status of the current game publicly."
@@ -118,12 +119,13 @@ rulesMessages = map (T.intercalate "\n")
         , "at the start of the game. A game begins at night and follows a standard cycle."
         ]
       , "1. The village falls asleep."
-      , "2. The Defender wakes up and protects someone."
-      , "3. The Seer wakes up and sees someone's allegiance."
-      , "4. The Werewolves wake up and select a victim."
-      , "5. The Witch wakes up and may heal the victim and/or poison someone."
-      , "6. The village wakes up and find the victim."
-      , "7. The village votes to lynch a suspect."
+      , "2. (First round only) the Wolf-hound wakes up and chooses an allegiance."
+      , "3. The Defender wakes up and protects someone."
+      , "4. The Seer wakes up and sees someone's allegiance."
+      , "5. The Werewolves wake up and select a victim."
+      , "6. The Witch wakes up and may heal the victim and/or poison someone."
+      , "7. The village wakes up and find the victim."
+      , "8. The village votes to lynch a suspect."
       , "The game is over when only Villagers or Werewolves are left alive."
       ]
     ]

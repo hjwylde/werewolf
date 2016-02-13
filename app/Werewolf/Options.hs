@@ -24,6 +24,7 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 import           Data.Version    (showVersion)
 
+import qualified Werewolf.Commands.Choose    as Choose
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
 import qualified Werewolf.Commands.Poison    as Poison
@@ -43,7 +44,8 @@ data Options = Options
 
 -- | Command.
 data Command
-    = End
+    = Choose Choose.Options
+    | End
     | Heal
     | Help Help.Options
     | Interpret Interpret.Options
@@ -88,7 +90,8 @@ werewolf = Options
         , help "Specify the calling player's name"
         ])
     <*> subparser (mconcat
-        [ command "end"         $ info (helper <*> end)         (fullDesc <> progDesc "End the current game")
+        [ command "choose"      $ info (helper <*> choose)      (fullDesc <> progDesc "Choose an allegiance")
+        , command "end"         $ info (helper <*> end)         (fullDesc <> progDesc "End the current game")
         , command "heal"        $ info (helper <*> heal)        (fullDesc <> progDesc "Heal the devoured player")
         , command "help"        $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents")
         , command "interpret"   $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command" <> noIntersperse)
@@ -102,6 +105,9 @@ werewolf = Options
         , command "status"      $ info (helper <*> status)      (fullDesc <> progDesc "Get the status of the current game")
         , command "vote"        $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
         ])
+
+choose :: Parser Command
+choose = Choose . Choose.Options . T.pack <$> strArgument (metavar "ALLEGIANCE")
 
 end :: Parser Command
 end = pure End

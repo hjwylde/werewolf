@@ -55,6 +55,7 @@ module Game.Werewolf.Response (
     -- ** Generic error messages
     gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
     playerCannotDoThatRightNowMessage, playerIsDeadMessage, roleDoesNotExistMessage,
+    allegianceDoesNotExistMessage,
 
     -- ** Seer's turn error messages
     playerCannotProtectSelfMessage, playerCannotProtectSamePlayerTwiceInARowMessage,
@@ -413,6 +414,9 @@ playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
 
 roleDoesNotExistMessage :: Text -> Text -> Message
 roleDoesNotExistMessage to name = privateMessage to $ T.unwords ["Role", name, "does not exist."]
+
+allegianceDoesNotExistMessage :: Text -> Text -> Message
+allegianceDoesNotExistMessage to name = privateMessage to $ T.unwords ["Allegiance", name, "does not exist."]
 
 playerCannotProtectSelfMessage :: Text -> Message
 playerCannotProtectSelfMessage to = privateMessage to "You cannot protect yourself!"
