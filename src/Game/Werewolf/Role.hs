@@ -148,8 +148,14 @@ wolfHoundRole :: Role
 wolfHoundRole = Role
     { _name         = "Wolf-hound"
     , _allegiance   = Villagers
-    , _description  = ""
-    , _advice       = ""
+    , _description  = T.unwords
+        [ "All dogs know in the depths of their soul that their acestors were wolves"
+        , "and that it's Mankind who has kept them in the state of childishness and fear,"
+        , "the faithful and generous companions."
+        , "In any case, only the Wolf-hound can decide if he'll obey his human and civilized master"
+        , "or if he'll listen to the call of wild nature buried within him."
+        ]
+    , _advice       = "The choice of being a Villager or Werewolf is final, so decide carefully!"
     }
 
 allAllegiances :: [Allegiance]
