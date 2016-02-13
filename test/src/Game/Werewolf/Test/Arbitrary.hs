@@ -215,11 +215,12 @@ arbitraryPlayerSet = do
     let seer                = head $ filterSeers players
     let villagerVillager    = head $ filterVillagerVillagers players
     let witch               = head $ filterWitches players
+    let wolfHound           = head $ filterWolfHounds players
 
     let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
-    let villagers   = take (n - 5 - (length werewolves)) $ filterVillagers players
+    let villagers   = take (n - 6 - (length werewolves)) $ filterVillagers players
 
-    return $ defender:scapegoat:seer:villagerVillager:witch:werewolves ++ villagers
+    return $ defender:scapegoat:seer:villagerVillager:witch:wolfHound:werewolves ++ villagers
 
 arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of

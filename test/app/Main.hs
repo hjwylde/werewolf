@@ -170,6 +170,7 @@ allEngineTests =
     , testProperty "start game errors when more than 1 seer"                prop_startGameErrorsWhenMoreThan1Seer
     , testProperty "start game errors when more than 1 villager-villager"   prop_startGameErrorsWhenMoreThan1VillagerVillager
     , testProperty "start game errors when more than 1 witch"               prop_startGameErrorsWhenMoreThan1Witch
+    , testProperty "start game errors when more than 1 wolf hound"          prop_startGameErrorsWhenMoreThan1WolfHound
 
     , testProperty "create players uses given player names" prop_createPlayersUsesGivenPlayerNames
     , testProperty "create players uses given roles"        prop_createPlayersUsesGivenRoles

@@ -17,8 +17,9 @@ module Game.Werewolf.Role (
     Role, name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles, defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole,
-    werewolfRole, witchRole,
+    allRoles,
+    defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole,
+    witchRole, wolfHoundRole,
 
     -- * Allegiance
     Allegiance(..),
@@ -56,6 +57,7 @@ allRoles =
     , villagerVillagerRole
     , werewolfRole
     , witchRole
+    , wolfHoundRole
     ]
 
 defenderRole :: Role
@@ -134,4 +136,12 @@ witchRole = Role
         [ "Each potion may only be used once per game,"
         , "but there are no restrictions on using both on one night."
         ]
+    }
+
+wolfHoundRole :: Role
+wolfHoundRole = Role
+    { _name         = "Wolf-hound"
+    , _allegiance   = Villagers
+    , _description  = ""
+    , _advice       = ""
     }

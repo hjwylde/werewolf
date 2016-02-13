@@ -215,8 +215,9 @@ startGame callerName players = do
 
     return game
     where
-        playerNames = map (view name) players
-        restrictedRoles = [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole]
+        playerNames     = map (view name) players
+        restrictedRoles =
+            [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole, wolfHoundRole]
 
 killPlayer :: MonadState Game m => Player -> m ()
 killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')

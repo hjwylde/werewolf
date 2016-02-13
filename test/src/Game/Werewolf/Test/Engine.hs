@@ -43,6 +43,7 @@ module Game.Werewolf.Test.Engine (
     prop_startGameErrorsWhenMoreThan24Players, prop_startGameErrorsWhenMoreThan1Defender,
     prop_startGameErrorsWhenMoreThan1Scapegoat, prop_startGameErrorsWhenMoreThan1Seer,
     prop_startGameErrorsWhenMoreThan1VillagerVillager, prop_startGameErrorsWhenMoreThan1Witch,
+    prop_startGameErrorsWhenMoreThan1WolfHound,
 
     -- * createPlayers
     prop_createPlayersUsesGivenPlayerNames, prop_createPlayersUsesGivenRoles,
@@ -307,6 +308,11 @@ prop_startGameErrorsWhenMoreThan1VillagerVillager players =
 prop_startGameErrorsWhenMoreThan1Witch :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Witch players =
     length (filterWitches players) > 1
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
+
+prop_startGameErrorsWhenMoreThan1WolfHound :: [Player] -> Property
+prop_startGameErrorsWhenMoreThan1WolfHound players =
+    length (filterWolfHounds players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property
