@@ -18,8 +18,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    devourVoteCommand, healCommand, lynchVoteCommand, noopCommand, passCommand, pingCommand,
-    poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
+    chooseCommand, devourVoteCommand, healCommand, lynchVoteCommand, noopCommand, passCommand,
+    pingCommand, poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -33,27 +33,43 @@ import qualified Data.Map   as Map
 import           Data.Maybe
 import           Data.Text  (Text)
 
-import Game.Werewolf.Engine
-import Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote,
-                               isDefendersTurn, isGameOver, isSeersTurn, isVillagesTurn,
-                               isWerewolvesTurn, isWitchsTurn, killPlayer)
-import Game.Werewolf.Player   hiding (doesPlayerExist)
-import Game.Werewolf.Response
+import           Game.Werewolf.Engine
+import           Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote,
+                                         isDefendersTurn, isGameOver, isSeersTurn, isVillagesTurn,
+                                         isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
+                                         killPlayer)
+import           Game.Werewolf.Player   hiding (doesPlayerExist)
+import           Game.Werewolf.Response
+import           Game.Werewolf.Role     (Allegiance (..), allegiance)
+import qualified Game.Werewolf.Role     as Role
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
+
+chooseCommand :: Text -> Allegiance -> Command
+chooseCommand callerName allegiance' = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWolfHound callerName)  $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWolfHoundsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
+
+    passes %= nub . cons callerName
+
+    when (allegiance' == Werewolves) $
+        players %= map (\player -> if player ^. name == callerName
+            then player & role . allegiance .~ allegiance'
+            else player)
 
 devourVoteCommand :: Text -> Text -> Command
 devourVoteCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
+    unlessM (isPlayerAlignedWithWerewolves callerName)  $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWerewolvesTurn                            $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenJustM (getPlayerVote callerName) . const        $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
-    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
+    whenM (isPlayerAlignedWithWerewolves targetName)    $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterWerewolves
+    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterAlignedWithWerewolves
 
     tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
 
@@ -94,12 +110,12 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
     DefendersTurn   -> do
         defender <- uses players $ head . filterDefenders
 
-        tell [pingDefenderMessage]
+        tell [pingRoleMessage $ defender ^. role . Role.name]
         tell [pingPlayerMessage $ defender ^. name]
     SeersTurn       -> do
         seer <- uses players $ head . filterSeers
 
-        tell [pingSeerMessage]
+        tell [pingRoleMessage $ seer ^. role . Role.name]
         tell [pingPlayerMessage $ seer ^. name]
     Sunrise         -> return ()
     Sunset          -> return ()
@@ -112,12 +128,17 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         pendingVoters <- getPendingVoters
 
         tell [pingWerewolvesMessage]
-        tell $ map (pingPlayerMessage . view name) (filterWerewolves pendingVoters)
+        tell $ map (pingPlayerMessage . view name) (filterAlignedWithWerewolves pendingVoters)
     WitchsTurn      -> do
         witch <- uses players $ head . filterWitches
 
-        tell [pingWitchMessage]
+        tell [pingRoleMessage $ witch ^. role . Role.name]
         tell [pingPlayerMessage $ witch ^. name]
+    WolfHoundsTurn  -> do
+        wolfHound <- uses players $ head . filterWolfHounds
+
+        tell [pingRoleMessage $ wolfHound ^. role . Role.name]
+        tell [pingPlayerMessage $ wolfHound ^. name]
 
 poisonCommand :: Text -> Text -> Command
 poisonCommand callerName targetName = Command $ do
@@ -196,12 +217,16 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell [waitingOnMessage (Just callerName) pendingVoters]
     WerewolvesTurn  -> do
         game            <- get
-        pendingVoters   <- filterWerewolves <$> getPendingVoters
+        pendingVoters   <- filterAlignedWithWerewolves <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
-        whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
+        whenM (doesPlayerExist callerName &&^ isPlayerAlignedWithWerewolves callerName) $
             tell [waitingOnMessage (Just callerName) pendingVoters]
     WitchsTurn      -> do
+        game <- get
+
+        tell $ standardStatusMessages stage' (game ^. players)
+    WolfHoundsTurn  -> do
         game <- get
 
         tell $ standardStatusMessages stage' (game ^. players)

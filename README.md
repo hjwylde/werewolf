@@ -27,6 +27,7 @@ The current implemented roles are:
 * Villager-Villager.
 * Werewolf.
 * Witch.
+* Wolf-hound.
 
 ### Installing
 

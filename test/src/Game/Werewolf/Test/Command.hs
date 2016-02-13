@@ -8,14 +8,20 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Game.Werewolf.Test.Command (
+    -- * chooseCommand
+    prop_chooseCommandErrorsWhenGameIsOver, prop_chooseCommandErrorsWhenCallerDoesNotExist,
+    prop_chooseCommandErrorsWhenCallerIsDead, prop_chooseCommandErrorsWhenNotWolfHoundsTurn,
+    prop_chooseCommandErrorsWhenCallerNotWolfHound, prop_chooseCommandSetsCallersAllegiance,
+    prop_chooseCommandUpdatesPasses,
+
     -- * devourVoteCommand
     prop_devourVoteCommandErrorsWhenGameIsOver, prop_devourVoteCommandErrorsWhenCallerDoesNotExist,
     prop_devourVoteCommandErrorsWhenTargetDoesNotExist,
     prop_devourVoteCommandErrorsWhenCallerIsDead, prop_devourVoteCommandErrorsWhenTargetIsDead,
     prop_devourVoteCommandErrorsWhenNotWerewolvesTurn,
-    prop_devourVoteCommandErrorsWhenCallerNotWerewolf,
-    prop_devourVoteCommandErrorsWhenCallerHasVoted, prop_devourVoteCommandErrorsWhenTargetWerewolf,
-    prop_devourVoteCommandUpdatesVotes,
+    prop_devourVoteCommandErrorsWhenCallerNotAlignedWithWerewolves,
+    prop_devourVoteCommandErrorsWhenCallerHasVoted,
+    prop_devourVoteCommandErrorsWhenTargetAlignedWithWerewolves, prop_devourVoteCommandUpdatesVotes,
 
     -- * healCommand
     prop_healCommandErrorsWhenGameIsOver, prop_healCommandErrorsWhenCallerDoesNotExist,
@@ -77,10 +83,57 @@ import           Data.Maybe
 import Game.Werewolf.Command
 import Game.Werewolf.Game
 import Game.Werewolf.Player
+import Game.Werewolf.Role           (Allegiance, allegiance)
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
 import Test.QuickCheck
+
+prop_chooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
+prop_chooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
+    forAll (arbitraryChooseCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_chooseCommandErrorsWhenCallerDoesNotExist :: GameAtWolfHoundsTurn -> Player -> Allegiance -> Property
+prop_chooseCommandErrorsWhenCallerDoesNotExist (GameAtWolfHoundsTurn game) caller allegiance = do
+    let command = chooseCommand (caller ^. name) allegiance
+
+    not (doesPlayerExist (caller ^. name) (game ^. players))
+        ==> verbose_runCommandErrors game command
+
+prop_chooseCommandErrorsWhenCallerIsDead :: GameAtWolfHoundsTurn -> Allegiance -> Property
+prop_chooseCommandErrorsWhenCallerIsDead (GameAtWolfHoundsTurn game) allegiance = do
+    let wolfHound   = head . filterWolfHounds $ game ^. players
+    let game'       = killPlayer game wolfHound
+    let command     = chooseCommand (wolfHound ^. name) allegiance
+
+    verbose_runCommandErrors game' command
+
+prop_chooseCommandErrorsWhenNotWolfHoundsTurn :: Game -> Property
+prop_chooseCommandErrorsWhenNotWolfHoundsTurn game =
+    not (isWolfHoundsTurn game)
+    ==> forAll (arbitraryChooseCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_chooseCommandErrorsWhenCallerNotWolfHound :: GameAtWolfHoundsTurn -> Allegiance -> Property
+prop_chooseCommandErrorsWhenCallerNotWolfHound (GameAtWolfHoundsTurn game) allegiance =
+    forAll (suchThat (arbitraryPlayer game) (not . isWolfHound)) $ \caller -> do
+        let command = chooseCommand (caller ^. name) allegiance
+
+        verbose_runCommandErrors game command
+
+prop_chooseCommandSetsCallersAllegiance :: GameAtWolfHoundsTurn -> Allegiance -> Property
+prop_chooseCommandSetsCallersAllegiance (GameAtWolfHoundsTurn game) allegiance' = do
+    let wolfHound   = head . filterWolfHounds $ game ^. players
+    let command     = chooseCommand (wolfHound ^. name) allegiance'
+    let game'       = run_ (apply command) game
+
+    findByName_ (wolfHound ^. name) (game' ^. players) ^. role . allegiance === allegiance'
+
+prop_chooseCommandUpdatesPasses :: GameAtWolfHoundsTurn -> Property
+prop_chooseCommandUpdatesPasses (GameAtWolfHoundsTurn game) =
+    forAll (arbitraryChooseCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command) game
+
+        length (game' ^. passes) == 1
 
 prop_devourVoteCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_devourVoteCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -97,14 +150,14 @@ prop_devourVoteCommandErrorsWhenCallerDoesNotExist (GameAtWerewolvesTurn game) c
 prop_devourVoteCommandErrorsWhenTargetDoesNotExist :: GameAtWerewolvesTurn -> Player -> Property
 prop_devourVoteCommandErrorsWhenTargetDoesNotExist (GameAtWerewolvesTurn game) target =
     not (doesPlayerExist (target ^. name) (game ^. players))
-    ==> forAll (arbitraryWerewolf game) $ \caller -> do
+    ==> forAll (arbitraryPlayerAlignedWithWerewolves game) $ \caller -> do
         let command = devourVoteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
 prop_devourVoteCommandErrorsWhenCallerIsDead :: GameAtWerewolvesTurn -> Property
 prop_devourVoteCommandErrorsWhenCallerIsDead (GameAtWerewolvesTurn game) =
-    forAll (arbitraryWerewolf game) $ \caller ->
+    forAll (arbitraryPlayerAlignedWithWerewolves game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer game caller
         let command = devourVoteCommand (caller ^. name) (target ^. name)
@@ -113,7 +166,7 @@ prop_devourVoteCommandErrorsWhenCallerIsDead (GameAtWerewolvesTurn game) =
 
 prop_devourVoteCommandErrorsWhenTargetIsDead :: GameAtWerewolvesTurn -> Property
 prop_devourVoteCommandErrorsWhenTargetIsDead (GameAtWerewolvesTurn game) =
-    forAll (arbitraryWerewolf game) $ \caller ->
+    forAll (arbitraryPlayerAlignedWithWerewolves game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer game target
         let command = devourVoteCommand (caller ^. name) (target ^. name)
@@ -125,9 +178,9 @@ prop_devourVoteCommandErrorsWhenNotWerewolvesTurn game =
     not (isWerewolvesTurn game)
     ==> forAll (arbitraryDevourVoteCommand game) $ verbose_runCommandErrors game . getBlind
 
-prop_devourVoteCommandErrorsWhenCallerNotWerewolf :: GameAtWerewolvesTurn -> Property
-prop_devourVoteCommandErrorsWhenCallerNotWerewolf (GameAtWerewolvesTurn game) =
-    forAll (suchThat (arbitraryPlayer game) (not . isWerewolf)) $ \caller ->
+prop_devourVoteCommandErrorsWhenCallerNotAlignedWithWerewolves :: GameAtWerewolvesTurn -> Property
+prop_devourVoteCommandErrorsWhenCallerNotAlignedWithWerewolves (GameAtWerewolvesTurn game) =
+    forAll (suchThat (arbitraryPlayer game) (not . isAlignedWithWerewolves)) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
         let command = devourVoteCommand (caller ^. name) (target ^. name)
 
@@ -135,16 +188,16 @@ prop_devourVoteCommandErrorsWhenCallerNotWerewolf (GameAtWerewolvesTurn game) =
 
 prop_devourVoteCommandErrorsWhenCallerHasVoted :: GameWithDevourVotes -> Property
 prop_devourVoteCommandErrorsWhenCallerHasVoted (GameWithDevourVotes game) =
-    forAll (arbitraryWerewolf game) $ \caller ->
-    forAll (suchThat (arbitraryPlayer game) (not . isWerewolf)) $ \target -> do
+    forAll (arbitraryPlayerAlignedWithWerewolves game) $ \caller ->
+    forAll (suchThat (arbitraryPlayer game) (not . isAlignedWithWerewolves)) $ \target -> do
         let command = devourVoteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
-prop_devourVoteCommandErrorsWhenTargetWerewolf :: GameAtWerewolvesTurn -> Property
-prop_devourVoteCommandErrorsWhenTargetWerewolf (GameAtWerewolvesTurn game) =
-    forAll (suchThat (arbitraryPlayer game) isWerewolf) $ \target ->
+prop_devourVoteCommandErrorsWhenTargetAlignedWithWerewolves :: GameAtWerewolvesTurn -> Property
+prop_devourVoteCommandErrorsWhenTargetAlignedWithWerewolves (GameAtWerewolvesTurn game) =
     forAll (arbitraryPlayer game) $ \caller ->
+    forAll (arbitraryPlayerAlignedWithWerewolves game) $ \target ->
     verbose_runCommandErrors game (devourVoteCommand (caller ^. name) (target ^. name))
 
 prop_devourVoteCommandUpdatesVotes :: GameAtWerewolvesTurn -> Property
@@ -528,7 +581,7 @@ prop_quitCommandClearsProtectWhenCallerIsDefender (GameWithProtect game) = do
 
 prop_quitCommandClearsPlayersDevourVote :: GameWithDevourVotes -> Property
 prop_quitCommandClearsPlayersDevourVote (GameWithDevourVotes game) =
-    forAll (arbitraryWerewolf game) $ \caller -> do
+    forAll (arbitraryPlayerAlignedWithWerewolves game) $ \caller -> do
         let command = quitCommand (caller ^. name)
 
         isNothing $ run_ (apply command) game ^. votes . at (caller ^. name)

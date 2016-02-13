@@ -30,16 +30,24 @@ tests = return $ testGroup "Tests" (concat
 
 allCommandTests :: [TestTree]
 allCommandTests =
-    [ testProperty "devour vote command errors when game is over"           prop_devourVoteCommandErrorsWhenGameIsOver
-    , testProperty "devour vote command errors when caller does not exist"  prop_devourVoteCommandErrorsWhenCallerDoesNotExist
-    , testProperty "devour vote command errors when target does not exist"  prop_devourVoteCommandErrorsWhenTargetDoesNotExist
-    , testProperty "devour vote command errors when caller is dead"         prop_devourVoteCommandErrorsWhenCallerIsDead
-    , testProperty "devour vote command errors when target is dead"         prop_devourVoteCommandErrorsWhenTargetIsDead
-    , testProperty "devour vote command errors when not werewolves turn"    prop_devourVoteCommandErrorsWhenNotWerewolvesTurn
-    , testProperty "devour vote command errors when caller not werewolf"    prop_devourVoteCommandErrorsWhenCallerNotWerewolf
-    , testProperty "devour vote command errors when caller has voted"       prop_devourVoteCommandErrorsWhenCallerHasVoted
-    , testProperty "devour vote command errors when target werewolf"        prop_devourVoteCommandErrorsWhenTargetWerewolf
-    , testProperty "devour vote command updates votes"                      prop_devourVoteCommandUpdatesVotes
+    [ testProperty "choose command errors when game is over"            prop_chooseCommandErrorsWhenGameIsOver
+    , testProperty "choose command errors when caller does not exist"   prop_chooseCommandErrorsWhenCallerDoesNotExist
+    , testProperty "choose command errors when caller is dead"          prop_chooseCommandErrorsWhenCallerIsDead
+    , testProperty "choose command errors when not wolf-hound's turn"   prop_chooseCommandErrorsWhenNotWolfHoundsTurn
+    , testProperty "choose command errors when caller not wolf-hound"   prop_chooseCommandErrorsWhenCallerNotWolfHound
+    , testProperty "choose command sets caller's allegiance"            prop_chooseCommandSetsCallersAllegiance
+    , testProperty "choose command updates passes"                      prop_chooseCommandUpdatesPasses
+
+    , testProperty "devour vote command errors when game is over"                       prop_devourVoteCommandErrorsWhenGameIsOver
+    , testProperty "devour vote command errors when caller does not exist"              prop_devourVoteCommandErrorsWhenCallerDoesNotExist
+    , testProperty "devour vote command errors when target does not exist"              prop_devourVoteCommandErrorsWhenTargetDoesNotExist
+    , testProperty "devour vote command errors when caller is dead"                     prop_devourVoteCommandErrorsWhenCallerIsDead
+    , testProperty "devour vote command errors when target is dead"                     prop_devourVoteCommandErrorsWhenTargetIsDead
+    , testProperty "devour vote command errors when not werewolves turn"                prop_devourVoteCommandErrorsWhenNotWerewolvesTurn
+    , testProperty "devour vote command errors when caller not aligned with werewolves" prop_devourVoteCommandErrorsWhenCallerNotAlignedWithWerewolves
+    , testProperty "devour vote command errors when caller has voted"                   prop_devourVoteCommandErrorsWhenCallerHasVoted
+    , testProperty "devour vote command errors when target aligned with werewolves"     prop_devourVoteCommandErrorsWhenTargetAlignedWithWerewolves
+    , testProperty "devour vote command updates votes"                                  prop_devourVoteCommandUpdatesVotes
 
     , testProperty "heal command errors when game is over"          prop_healCommandErrorsWhenGameIsOver
     , testProperty "heal command errors when caller does not exist" prop_healCommandErrorsWhenCallerDoesNotExist
@@ -75,7 +83,7 @@ allCommandTests =
     , testProperty "poison command errors when not witch's turn"        prop_poisonCommandErrorsWhenNotWitchsTurn
     , testProperty "poison command errors when caller has poisoned"     prop_poisonCommandErrorsWhenCallerHasPoisoned
     , testProperty "poison command errors when caller not witch"        prop_poisonCommandErrorsWhenCallerNotWitch
-    -- TODO (hjw)
+    -- TODO (hjw): implement this test case
     --, testProperty "poison command errors when caller devoured and not healed"   prop_poisonCommandErrorsWhenCallerDevouredAndNotHealed
     , testProperty "poison command sets poison"                         prop_poisonCommandSetsPoison
     , testProperty "poison command sets poison used"                    prop_poisonCommandSetsPoisonUsed
@@ -117,22 +125,25 @@ allCommandTests =
 
 allEngineTests :: [TestTree]
 allEngineTests =
-    [ testProperty "check stage skips defender's turn when no defender" prop_checkStageSkipsDefendersTurnWhenNoDefender
-    , testProperty "check stage skips seer's turn when no seer"         prop_checkStageSkipsSeersTurnWhenNoSeer
-    , testProperty "check stage skips witch's turn when no witch"       prop_checkStageSkipsWitchsTurnWhenNoWitch
-    , testProperty "check stage does nothing when game over"            prop_checkStageDoesNothingWhenGameOver
+    [ testProperty "check stage advances to wolf-hound's turn on first round"   prop_checkStageAdvancesToWolfHoundsTurnOnFirstRound
+    , testProperty "check stage skips defender's turn when no defender"         prop_checkStageSkipsDefendersTurnWhenNoDefender
+    , testProperty "check stage skips seer's turn when no seer"                 prop_checkStageSkipsSeersTurnWhenNoSeer
+    , testProperty "check stage skips witch's turn when no witch"               prop_checkStageSkipsWitchsTurnWhenNoWitch
+    , testProperty "check stage skips wolf-hound's turn when no wolf-hound"     prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound
+    , testProperty "check stage does nothing when game over"                    prop_checkStageDoesNothingWhenGameOver
 
     , testProperty "check defender's turn advances to werewolves' turn" prop_checkDefendersTurnAdvancesToWerewolvesTurn
-    -- TODO (hjw)
+    -- TODO (hjw): implement this test case
     --, testProperty "check defender's turn advances when no defender"    prop_checkDefendersTurnAdvancesWhenNoDefender
 
     , testProperty "check seer's turn advances to defender's turn"  prop_checkSeersTurnAdvancesToDefendersTurn
-    -- TODO (hjw)
+    -- TODO (hjw): implement this test case
     --, testProperty "check seer's turn advances when no seer"        prop_checkSeersTurnAdvancesWhenNoSeer
     , testProperty "check seer's turn resets sees"                  prop_checkSeersTurnResetsSee
     , testProperty "check seer's turn does nothing unless seen"     prop_checkSeersTurnDoesNothingUnlessSeen
 
     , testProperty "check villages' turn advances to seer's turn"                           prop_checkVillagesTurnAdvancesToSeersTurn
+    , testProperty "check villages' turn increments round"                                  prop_checkVillagesTurnIncrementsRound
     , testProperty "check villages' turn lynches one player when consensus"                 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus
     , testProperty "check villages' turn lynches no one when conflicted and no scapegoats"  prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats
     , testProperty "check villages' turn lynches scapegoat when conflicted"                 prop_checkVillagesTurnLynchesScapegoatWhenConflicted
@@ -149,18 +160,23 @@ allEngineTests =
     , testProperty "check werewolves' turn does nothing unless all voted"               prop_checkWerewolvesTurnDoesNothingUnlessAllVoted
 
     , testProperty "check witch's turn advances to villages' turn"      prop_checkWitchsTurnAdvancesToVillagesTurn
-    -- TODO (hjw)
+    -- TODO (hjw): implement this test case
     --, testProperty "check witch's turn advances when no witch"          prop_checkWitchsTurnAdvancesWhenNoWitch
     , testProperty "check witch's turn heals devouree when healed"      prop_checkWitchsTurnHealsDevoureeWhenHealed
     , testProperty "check witch's turn kills one player when poisoned"  prop_checkWitchsTurnKillsOnePlayerWhenPoisoned
     , testProperty "check witch's turn does nothing when passed"        prop_checkWitchsTurnDoesNothingWhenPassed
     , testProperty "check witch's turn resets heal"                     prop_checkWitchsTurnResetsHeal
     , testProperty "check witch's turn resets poison"                   prop_checkWitchsTurnResetsPoison
+    , testProperty "check witch's turn clears passes"                   prop_checkWitchsTurnClearsPasses
+
+    , testProperty "check wolf-hound's turn advances to seer's turn"    prop_checkWolfHoundsTurnAdvancesToSeersTurn
+    -- TODO (hjw): implement this test case
+    --, testProperty "check wolf-hound's turn advances when no wolf-hound"    prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
+    , testProperty "check wolf-hound's turn clears passes"                  prop_checkWolfHoundsTurnClearsPasses
 
     , testProperty "check game over advances stage"                                     prop_checkGameOverAdvancesStage
     , testProperty "check game over does nothing when at least two allegiances alive"   prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive
 
-    , testProperty "start game starts with sunset stage"                    prop_startGameStartsWithSunsetStage
     , testProperty "start game uses given players"                          prop_startGameUsesGivenPlayers
     , testProperty "start game errors unless unique player names"           prop_startGameErrorsUnlessUniquePlayerNames
     , testProperty "start game errors when less than 7 players"             prop_startGameErrorsWhenLessThan7Players
@@ -170,6 +186,7 @@ allEngineTests =
     , testProperty "start game errors when more than 1 seer"                prop_startGameErrorsWhenMoreThan1Seer
     , testProperty "start game errors when more than 1 villager-villager"   prop_startGameErrorsWhenMoreThan1VillagerVillager
     , testProperty "start game errors when more than 1 witch"               prop_startGameErrorsWhenMoreThan1Witch
+    , testProperty "start game errors when more than 1 wolf-hound"          prop_startGameErrorsWhenMoreThan1WolfHound
 
     , testProperty "create players uses given player names" prop_createPlayersUsesGivenPlayerNames
     , testProperty "create players uses given roles"        prop_createPlayersUsesGivenRoles
@@ -183,6 +200,7 @@ allEngineTests =
 allGameTests :: [TestTree]
 allGameTests =
     [ testProperty "new game starts with sunset stage"      prop_newGameStartsWithSunsetStage
+    , testProperty "new game starts on first round"         prop_newGameStartsOnFirstRound
     , testProperty "new game starts with events empty"      prop_newGameStartsWithEventsEmpty
     , testProperty "new game starts with passes empty"      prop_newGameStartsWithPassesEmpty
     , testProperty "new game starts with no heal"           prop_newGameStartsWithNoHeal

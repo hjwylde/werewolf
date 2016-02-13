@@ -12,8 +12,9 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Initial arbitraries
 
     -- ** Game
-    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtVillagesTurn(..), GameAtWerewolvesTurn(..),
-    GameAtWitchsTurn(..), GameAtSeersTurn(..),
+    NewGame(..),
+    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtSeersTurn(..), GameAtVillagesTurn(..),
+    GameAtWerewolvesTurn(..), GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
     GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
     GameWithPoison(..), GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithSee(..),
 
@@ -23,12 +24,13 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
 
     -- ** Command
-    arbitraryCommand, arbitraryDevourVoteCommand, arbitraryHealCommand, arbitraryLynchVoteCommand,
-    arbitraryPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand, arbitraryQuitCommand,
-    arbitrarySeeCommand, runArbitraryCommands,
+    arbitraryCommand, arbitraryChooseCommand, arbitraryDevourVoteCommand, arbitraryHealCommand,
+    arbitraryLynchVoteCommand, arbitraryPassCommand, arbitraryPoisonCommand,
+    arbitraryProtectCommand, arbitraryQuitCommand, arbitrarySeeCommand,
+    runArbitraryCommands,
 
     -- ** Player
-    arbitraryPlayer, arbitraryWerewolf,
+    arbitraryPlayer, arbitraryPlayerAlignedWithWerewolves,
 ) where
 
 import Control.Lens hiding (elements)
@@ -49,14 +51,14 @@ import Test.QuickCheck
 
 instance Arbitrary Game where
     arbitrary = do
-        game    <- newGame <$> arbitraryPlayerSet
-        stage'  <- arbitrary
+        (NewGame game)  <- arbitrary
+        stage'          <- arbitrary
 
         return $ game & stage .~ stage'
 
 instance Arbitrary Stage where
     arbitrary = elements
-        [GameOver, DefendersTurn, SeersTurn, VillagesTurn, WerewolvesTurn, WitchsTurn]
+        [GameOver, DefendersTurn, SeersTurn, VillagesTurn, WerewolvesTurn, WitchsTurn, WolfHoundsTurn]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary
@@ -67,8 +69,17 @@ instance Arbitrary State where
 instance Arbitrary Role where
     arbitrary = elements allRoles
 
+instance Arbitrary Allegiance where
+    arbitrary = elements allAllegiances
+
 instance Arbitrary Text where
     arbitrary = T.pack <$> vectorOf 6 (elements ['a'..'z'])
+
+newtype NewGame = NewGame Game
+    deriving (Eq, Show)
+
+instance Arbitrary NewGame where
+    arbitrary = NewGame . newGame <$> arbitraryPlayerSet
 
 newtype GameAtDefendersTurn = GameAtDefendersTurn Game
     deriving (Eq, Show)
@@ -87,6 +98,15 @@ instance Arbitrary GameAtGameOver where
         game <- arbitrary
 
         return $ GameAtGameOver (game & stage .~ GameOver)
+
+newtype GameAtSeersTurn = GameAtSeersTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtSeersTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtSeersTurn (game & stage .~ SeersTurn)
 
 newtype GameAtVillagesTurn = GameAtVillagesTurn Game
     deriving (Eq, Show)
@@ -115,14 +135,14 @@ instance Arbitrary GameAtWitchsTurn where
 
         return $ GameAtWitchsTurn (game & stage .~ WitchsTurn)
 
-newtype GameAtSeersTurn = GameAtSeersTurn Game
+newtype GameAtWolfHoundsTurn = GameAtWolfHoundsTurn Game
     deriving (Eq, Show)
 
-instance Arbitrary GameAtSeersTurn where
+instance Arbitrary GameAtWolfHoundsTurn where
     arbitrary = do
         game <- arbitrary
 
-        return $ GameAtSeersTurn (game & stage .~ SeersTurn)
+        return $ GameAtWolfHoundsTurn (game & stage .~ WolfHoundsTurn)
 
 newtype GameWithDevourEvent = GameWithDevourEvent Game
     deriving (Eq, Show)
@@ -210,16 +230,12 @@ arbitraryPlayerSet = do
     n <- choose (10, 24)
     players <- nubOn (view name) <$> infiniteList
 
-    let defender            = head $ filterDefenders players
-    let scapegoat           = head $ filterScapegoats players
-    let seer                = head $ filterSeers players
-    let villagerVillager    = head $ filterVillagerVillagers players
-    let witch               = head $ filterWitches players
+    let playersWithRestrictedRole = map (\role' -> head $ filter ((role' ==) . view role) players) restrictedRoles
 
     let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
-    let villagers   = take (n - 5 - (length werewolves)) $ filterVillagers players
+    let villagers   = take (n - length restrictedRoles - length werewolves) $ filterVillagers players
 
-    return $ defender:scapegoat:seer:villagerVillager:witch:werewolves ++ villagers
+    return $ playersWithRestrictedRole ++ werewolves ++ villagers
 
 arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
@@ -235,11 +251,19 @@ arbitraryCommand game = case game ^. stage of
         arbitraryPassCommand game,
         arbitraryPoisonCommand game
         ]
+    WolfHoundsTurn  -> arbitraryChooseCommand game
+
+arbitraryChooseCommand :: Game -> Gen (Blind Command)
+arbitraryChooseCommand game = do
+    let wolfHound   = head . filterWolfHounds $ game ^. players
+    allegiance      <- elements [Villagers, Werewolves]
+
+    return . Blind $ chooseCommand (wolfHound ^. name) (allegiance)
 
 arbitraryDevourVoteCommand :: Game -> Gen (Blind Command)
 arbitraryDevourVoteCommand game = do
-    let applicableCallers   = filterWerewolves $ getPendingVoters game
-    target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
+    let applicableCallers   = filterAlignedWithWerewolves $ getPendingVoters game
+    target                  <- suchThat (arbitraryPlayer game) $ not . isAlignedWithWerewolves
 
     if null applicableCallers
         then return $ Blind noopCommand
@@ -282,7 +306,7 @@ arbitraryPoisonCommand game = do
 arbitraryProtectCommand :: Game -> Gen (Blind Command)
 arbitraryProtectCommand game = do
     let defender    = head . filterDefenders $ game ^. players
-    -- TODO (hjw): suchThat (/= priorProtect)
+    -- TODO (hjw): add suchThat (/= priorProtect)
     target          <- suchThat (arbitraryPlayer game) (defender /=)
 
     return $ if isJust (game ^. protect)
@@ -320,5 +344,6 @@ iterateM n f a = f a >>= iterateM (n - 1) f
 arbitraryPlayer :: Game -> Gen Player
 arbitraryPlayer = elements . filterAlive . view players
 
-arbitraryWerewolf :: Game -> Gen Player
-arbitraryWerewolf = elements . filterAlive . filterWerewolves . view players
+arbitraryPlayerAlignedWithWerewolves :: Game -> Gen Player
+arbitraryPlayerAlignedWithWerewolves =
+    elements . filterAlive . filterAlignedWithWerewolves . view players

@@ -17,17 +17,22 @@ module Game.Werewolf.Role (
     Role, name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles, defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole,
-    werewolfRole, witchRole,
+    allRoles, restrictedRoles,
+    defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole,
+    witchRole, wolfHoundRole,
 
     -- * Allegiance
     Allegiance(..),
+
+    -- ** Instances
+    allAllegiances,
 ) where
 
 import Control.Lens
 
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.Function
+import           Data.Text     (Text)
+import qualified Data.Text     as T
 
 import Prelude hiding (all)
 
@@ -36,10 +41,30 @@ data Role = Role
     , _allegiance  :: Allegiance
     , _description :: Text
     , _advice      :: Text
-    } deriving (Eq, Read, Show)
+    } deriving (Read, Show)
+
+data Allegiance = Villagers | Werewolves
+    deriving (Eq, Read, Show)
+
+makeLenses ''Role
+
+instance Eq Role where
+    (==) = (==) `on` view name
 
 allRoles :: [Role]
-allRoles = [defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole, witchRole]
+allRoles =
+    [ defenderRole
+    , scapegoatRole
+    , seerRole
+    , villagerRole
+    , villagerVillagerRole
+    , werewolfRole
+    , witchRole
+    , wolfHoundRole
+    ]
+
+restrictedRoles :: [Role]
+restrictedRoles = [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole, wolfHoundRole]
 
 defenderRole :: Role
 defenderRole = Role
@@ -119,7 +144,19 @@ witchRole = Role
         ]
     }
 
-data Allegiance = Villagers | Werewolves
-    deriving (Eq, Read, Show)
+wolfHoundRole :: Role
+wolfHoundRole = Role
+    { _name         = "Wolf-hound"
+    , _allegiance   = Villagers
+    , _description  = T.unwords
+        [ "All dogs know in the depths of their soul that their acestors were wolves"
+        , "and that it's Mankind who has kept them in the state of childishness and fear,"
+        , "the faithful and generous companions."
+        , "In any case, only the Wolf-hound can decide if he'll obey his human and civilized master"
+        , "or if he'll listen to the call of wild nature buried within him."
+        ]
+    , _advice       = "The choice of being a Villager or Werewolf is final, so decide carefully!"
+    }
 
-makeLenses ''Role
+allAllegiances :: [Allegiance]
+allAllegiances = [Villagers, Werewolves]

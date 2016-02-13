@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added the Wolf-hound role. ([#50](https://github.com/hjwylde/werewolf/issues/50))
+
 #### v0.4.4.1
 
 *Revisions*
