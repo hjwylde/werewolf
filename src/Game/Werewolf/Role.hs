@@ -27,9 +27,9 @@ module Game.Werewolf.Role (
 
 import Control.Lens
 
-import Data.Function
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.Function
+import           Data.Text     (Text)
+import qualified Data.Text     as T
 
 import Prelude hiding (all)
 

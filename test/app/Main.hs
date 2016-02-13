@@ -133,6 +133,7 @@ allEngineTests =
     , testProperty "check seer's turn does nothing unless seen"     prop_checkSeersTurnDoesNothingUnlessSeen
 
     , testProperty "check villages' turn advances to seer's turn"                           prop_checkVillagesTurnAdvancesToSeersTurn
+    , testProperty "check villages' turn increments round"                                  prop_checkVillagesTurnIncrementsRound
     , testProperty "check villages' turn lynches one player when consensus"                 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus
     , testProperty "check villages' turn lynches no one when conflicted and no scapegoats"  prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats
     , testProperty "check villages' turn lynches scapegoat when conflicted"                 prop_checkVillagesTurnLynchesScapegoatWhenConflicted
@@ -160,7 +161,6 @@ allEngineTests =
     , testProperty "check game over advances stage"                                     prop_checkGameOverAdvancesStage
     , testProperty "check game over does nothing when at least two allegiances alive"   prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive
 
-    , testProperty "start game starts with sunset stage"                    prop_startGameStartsWithSunsetStage
     , testProperty "start game uses given players"                          prop_startGameUsesGivenPlayers
     , testProperty "start game errors unless unique player names"           prop_startGameErrorsUnlessUniquePlayerNames
     , testProperty "start game errors when less than 7 players"             prop_startGameErrorsWhenLessThan7Players
@@ -184,6 +184,7 @@ allEngineTests =
 allGameTests :: [TestTree]
 allGameTests =
     [ testProperty "new game starts with sunset stage"      prop_newGameStartsWithSunsetStage
+    , testProperty "new game starts on round 0"             prop_newGameStartsOnRound0
     , testProperty "new game starts with events empty"      prop_newGameStartsWithEventsEmpty
     , testProperty "new game starts with passes empty"      prop_newGameStartsWithPassesEmpty
     , testProperty "new game starts with no heal"           prop_newGameStartsWithNoHeal

@@ -70,6 +70,8 @@ import           Game.Werewolf.Response
 import           Game.Werewolf.Role     hiding (name)
 import qualified Game.Werewolf.Role     as Role
 
+import Prelude hiding (round)
+
 import System.Directory
 import System.FilePath
 import System.Random.Shuffle
@@ -158,6 +160,8 @@ advanceStage = do
     let nextStage = if length (nub $ map (view $ role . allegiance) alivePlayers) <= 1
         then GameOver
         else head $ filter (stageAvailable game) (drop1 $ dropWhile (stage' /=) stageCycle)
+
+    when (nextStage == head stageCycle) $ round += 1
 
     stage   .= nextStage
     passes  .= []

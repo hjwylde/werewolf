@@ -13,7 +13,7 @@ Game and stage data structures.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game, stage, players, events, passes, heal, healUsed, poison, poisonUsed, priorProtect,
+    Game, stage, round, players, events, passes, heal, healUsed, poison, poisonUsed, priorProtect,
     protect, see, votes,
     newGame,
 
@@ -45,8 +45,11 @@ import           Data.Text       (Text)
 
 import Game.Werewolf.Player
 
+import Prelude hiding (round)
+
 data Game = Game
     { _stage        :: Stage
+    , _round        :: Int
     , _players      :: [Player]
     , _events       :: [Event]
     , _passes       :: [Text]
@@ -76,6 +79,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
     where
         game = Game
             { _stage        = Sunset
+            , _round        = 0
             , _players      = players
             , _events       = []
             , _passes       = []

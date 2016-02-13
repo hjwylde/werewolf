@@ -18,7 +18,8 @@ module Game.Werewolf.Test.Engine (
     prop_checkSeersTurnAdvancesToDefendersTurn, prop_checkSeersTurnResetsSee,
     prop_checkSeersTurnDoesNothingUnlessSeen,
 
-    prop_checkVillagesTurnAdvancesToSeersTurn, prop_checkVillagesTurnLynchesOnePlayerWhenConsensus,
+    prop_checkVillagesTurnAdvancesToSeersTurn, prop_checkVillagesTurnIncrementsRound,
+    prop_checkVillagesTurnLynchesOnePlayerWhenConsensus,
     prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats,
     prop_checkVillagesTurnLynchesScapegoatWhenConflicted, prop_checkVillagesTurnResetsVotes,
     prop_checkVillagesTurnDoesNothingUnlessAllVoted,
@@ -38,12 +39,11 @@ module Game.Werewolf.Test.Engine (
     prop_checkGameOverAdvancesStage, prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
 
     -- * startGame
-    prop_startGameStartsWithSunsetStage, prop_startGameUsesGivenPlayers,
-    prop_startGameErrorsUnlessUniquePlayerNames, prop_startGameErrorsWhenLessThan7Players,
-    prop_startGameErrorsWhenMoreThan24Players, prop_startGameErrorsWhenMoreThan1Defender,
-    prop_startGameErrorsWhenMoreThan1Scapegoat, prop_startGameErrorsWhenMoreThan1Seer,
-    prop_startGameErrorsWhenMoreThan1VillagerVillager, prop_startGameErrorsWhenMoreThan1Witch,
-    prop_startGameErrorsWhenMoreThan1WolfHound,
+    prop_startGameUsesGivenPlayers, prop_startGameErrorsUnlessUniquePlayerNames,
+    prop_startGameErrorsWhenLessThan7Players, prop_startGameErrorsWhenMoreThan24Players,
+    prop_startGameErrorsWhenMoreThan1Defender, prop_startGameErrorsWhenMoreThan1Scapegoat,
+    prop_startGameErrorsWhenMoreThan1Seer, prop_startGameErrorsWhenMoreThan1VillagerVillager,
+    prop_startGameErrorsWhenMoreThan1Witch, prop_startGameErrorsWhenMoreThan1WolfHound,
 
     -- * createPlayers
     prop_createPlayersUsesGivenPlayerNames, prop_createPlayersUsesGivenRoles,
@@ -75,6 +75,8 @@ import           Game.Werewolf.Role           hiding (name)
 import qualified Game.Werewolf.Role           as Role
 import           Game.Werewolf.Test.Arbitrary
 import           Game.Werewolf.Test.Util
+
+import Prelude hiding (round)
 
 import Test.QuickCheck
 import Test.QuickCheck.Monadic
@@ -121,6 +123,10 @@ prop_checkVillagesTurnAdvancesToSeersTurn :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
     any isSeer (filterAlive $ run_ checkStage game ^. players)
     ==> isSeersTurn $ run_ checkStage game
+
+prop_checkVillagesTurnIncrementsRound :: GameWithLynchVotes -> Property
+prop_checkVillagesTurnIncrementsRound (GameWithLynchVotes game) =
+    run_ checkStage game ^. round === game ^. round + 1
 
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus (GameWithLynchVotes game) =
@@ -256,11 +262,6 @@ prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
         let game' = foldl killPlayer game players' in
             length (nub . map (view $ role . allegiance) . filterAlive $ game' ^. players) > 1
             ==> not . isGameOver $ run_ checkGameOver game'
-
-prop_startGameStartsWithSunsetStage :: Property
-prop_startGameStartsWithSunsetStage =
-    forAll arbitraryPlayerSet $ \players ->
-    isSunset (fst . fromRight . runExcept . runWriterT $ startGame "" players)
 
 prop_startGameUsesGivenPlayers :: Property
 prop_startGameUsesGivenPlayers =

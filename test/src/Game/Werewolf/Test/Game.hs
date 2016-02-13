@@ -8,9 +8,9 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Game.Werewolf.Test.Game (
-    prop_newGameStartsWithSunsetStage, prop_newGameStartsWithEventsEmpty,
-    prop_newGameStartsWithPassesEmpty, prop_newGameStartsWithNoHeal,
-    prop_newGameStartsWithNoHealUsed, prop_newGameStartsWithNoPoison,
+    prop_newGameStartsWithSunsetStage, prop_newGameStartsOnRound0,
+    prop_newGameStartsWithEventsEmpty, prop_newGameStartsWithPassesEmpty,
+    prop_newGameStartsWithNoHeal, prop_newGameStartsWithNoHealUsed, prop_newGameStartsWithNoPoison,
     prop_newGameStartsWithNoPoisonUsed, prop_newGameStartsWithNoPriorProtect,
     prop_newGameStartsWithNoProtect, prop_newGameStartsWithNoSee,
     prop_newGameStartsWithVotesEmpty, prop_newGameUsesGivenPlayers,
@@ -24,8 +24,13 @@ import           Data.Maybe
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 
+import Prelude hiding (round)
+
 prop_newGameStartsWithSunsetStage :: [Player] -> Bool
 prop_newGameStartsWithSunsetStage players = isSunset (newGame players)
+
+prop_newGameStartsOnRound0 :: [Player] -> Bool
+prop_newGameStartsOnRound0 players = newGame players ^. round == 0
 
 prop_newGameStartsWithEventsEmpty :: [Player] -> Bool
 prop_newGameStartsWithEventsEmpty players = null $ newGame players ^. events
