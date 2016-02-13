@@ -26,6 +26,7 @@ module Game.Werewolf.Role (
 
 import Control.Lens
 
+import Data.Function
 import           Data.Text (Text)
 import qualified Data.Text as T
 
@@ -36,10 +37,26 @@ data Role = Role
     , _allegiance  :: Allegiance
     , _description :: Text
     , _advice      :: Text
-    } deriving (Eq, Read, Show)
+    } deriving (Read, Show)
+
+data Allegiance = Villagers | Werewolves
+    deriving (Eq, Read, Show)
+
+makeLenses ''Role
+
+instance Eq Role where
+    (==) = (==) `on` view name
 
 allRoles :: [Role]
-allRoles = [defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole, witchRole]
+allRoles =
+    [ defenderRole
+    , scapegoatRole
+    , seerRole
+    , villagerRole
+    , villagerVillagerRole
+    , werewolfRole
+    , witchRole
+    ]
 
 defenderRole :: Role
 defenderRole = Role
@@ -118,8 +135,3 @@ witchRole = Role
         , "but there are no restrictions on using both on one night."
         ]
     }
-
-data Allegiance = Villagers | Werewolves
-    deriving (Eq, Read, Show)
-
-makeLenses ''Role
