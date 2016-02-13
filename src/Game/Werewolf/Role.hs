@@ -17,12 +17,15 @@ module Game.Werewolf.Role (
     Role, name, allegiance, description, advice,
 
     -- ** Instances
-    allRoles,
+    allRoles, restrictedRoles,
     defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole,
     witchRole, wolfHoundRole,
 
     -- * Allegiance
     Allegiance(..),
+
+    -- ** Instances
+    allAllegiances,
 ) where
 
 import Control.Lens
@@ -59,6 +62,9 @@ allRoles =
     , witchRole
     , wolfHoundRole
     ]
+
+restrictedRoles :: [Role]
+restrictedRoles = [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole, wolfHoundRole]
 
 defenderRole :: Role
 defenderRole = Role
@@ -145,3 +151,6 @@ wolfHoundRole = Role
     , _description  = ""
     , _advice       = ""
     }
+
+allAllegiances :: [Allegiance]
+allAllegiances = [Villagers, Werewolves]

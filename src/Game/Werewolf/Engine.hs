@@ -24,6 +24,7 @@ module Game.Werewolf.Engine (
 
     -- ** Queries
     isGameOver, isDefendersTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+    isWolfHoundsTurn,
     getPlayerVote, getPendingVoters, getVoteResult,
 
     -- ** Reading and writing
@@ -40,8 +41,9 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerDefender, isPlayerSeer, isPlayerWerewolf, isPlayerWitch, isPlayerAlive,
-    isPlayerDead,
+    doesPlayerExist, isPlayerDefender, isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
+    isPlayerAlignedWithWerewolves,
+    isPlayerAlive, isPlayerDead,
 
     -- * Role
     randomiseRoles,
@@ -62,7 +64,7 @@ import qualified Data.Text       as T
 import           Game.Werewolf.Game     hiding (getDevourEvent, getPassers, getPendingVoters,
                                          getPlayerVote, getVoteResult, isDefendersTurn, isGameOver,
                                          isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                         isWitchsTurn, killPlayer)
+                                         isWitchsTurn, isWolfHoundsTurn, killPlayer)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -121,7 +123,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
             advanceStage
 
     WerewolvesTurn -> do
-        aliveWerewolves <- uses players (filterAlive . filterWerewolves)
+        aliveWerewolves <- uses players (filterAlive . filterAlignedWithWerewolves)
 
         whenM (uses votes $ (length aliveWerewolves ==) . Map.size) $ do
             getVoteResult >>= \votees -> case votees of
@@ -146,10 +148,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
             events  %= cons NoDevourEvent . delete devourEvent
             heal    .= False
 
-        witch <- uses players (head . filterWitches)
-
         whenM (use healUsed &&^ use poisonUsed) advanceStage
-        whenM (fmap (witch `elem`) getPassers)  advanceStage
+        whenM (any isWitch <$> getPassers)      advanceStage
+
+    WolfHoundsTurn -> whenM (fmap (any isWolfHound) getPassers) advanceStage
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
@@ -219,9 +221,7 @@ startGame callerName players = do
 
     return game
     where
-        playerNames     = map (view name) players
-        restrictedRoles =
-            [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole, wolfHoundRole]
+        playerNames = map (view name) players
 
 killPlayer :: MonadState Game m => Player -> m ()
 killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
@@ -240,6 +240,9 @@ isWerewolvesTurn = gets Game.isWerewolvesTurn
 
 isWitchsTurn :: MonadState Game m => m Bool
 isWitchsTurn = gets Game.isWitchsTurn
+
+isWolfHoundsTurn :: MonadState Game m => m Bool
+isWolfHoundsTurn = gets Game.isWolfHoundsTurn
 
 isGameOver :: MonadState Game m => m Bool
 isGameOver = gets Game.isGameOver
@@ -289,11 +292,14 @@ isPlayerDefender name = uses players $ isDefender . findByName_ name
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name = uses players $ isSeer . findByName_ name
 
-isPlayerWerewolf :: MonadState Game m => Text -> m Bool
-isPlayerWerewolf name = uses players $ isWerewolf . findByName_ name
-
 isPlayerWitch :: MonadState Game m => Text -> m Bool
 isPlayerWitch name = uses players $ isWitch . findByName_ name
+
+isPlayerWolfHound :: MonadState Game m => Text -> m Bool
+isPlayerWolfHound name = uses players $ isWolfHound . findByName_ name
+
+isPlayerAlignedWithWerewolves :: MonadState Game m => Text -> m Bool
+isPlayerAlignedWithWerewolves name = uses players $ isAlignedWithWerewolves . findByName_ name
 
 isPlayerAlive :: MonadState Game m => Text -> m Bool
 isPlayerAlive name = uses players $ isAlive . findByName_ name
@@ -304,8 +310,8 @@ isPlayerDead name = uses players $ isDead . findByName_ name
 randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
 randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ werewolfRoles ++ villagerRoles
     where
-        extraWerewolfRoles = filter ((==) Role.Werewolves . view allegiance) extraRoles
-        extraVillagerRoles = filter ((==) Role.Villagers . view allegiance) extraRoles
+        extraWerewolfRoles = filter ((Role.Werewolves ==) . view allegiance) extraRoles
+        extraVillagerRoles = filter ((Role.Villagers ==) . view allegiance) extraRoles
 
         werewolfRoles = replicate (n `quot` 6 + 1 - length extraWerewolfRoles) werewolfRole
         villagerRoles = replicate (n - length (extraVillagerRoles ++ werewolfRoles)) villagerRole

@@ -8,7 +8,7 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Game.Werewolf.Test.Game (
-    prop_newGameStartsWithSunsetStage, prop_newGameStartsOnRound0,
+    prop_newGameStartsWithSunsetStage, prop_newGameStartsOnFirstRound,
     prop_newGameStartsWithEventsEmpty, prop_newGameStartsWithPassesEmpty,
     prop_newGameStartsWithNoHeal, prop_newGameStartsWithNoHealUsed, prop_newGameStartsWithNoPoison,
     prop_newGameStartsWithNoPoisonUsed, prop_newGameStartsWithNoPriorProtect,
@@ -29,8 +29,8 @@ import Prelude hiding (round)
 prop_newGameStartsWithSunsetStage :: [Player] -> Bool
 prop_newGameStartsWithSunsetStage players = isSunset (newGame players)
 
-prop_newGameStartsOnRound0 :: [Player] -> Bool
-prop_newGameStartsOnRound0 players = newGame players ^. round == 0
+prop_newGameStartsOnFirstRound :: [Player] -> Bool
+prop_newGameStartsOnFirstRound players = isFirstRound $ newGame players
 
 prop_newGameStartsWithEventsEmpty :: [Player] -> Bool
 prop_newGameStartsWithEventsEmpty players = null $ newGame players ^. events

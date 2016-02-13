@@ -21,8 +21,9 @@ module Game.Werewolf.Game (
     killPlayer,
 
     -- ** Queries
-    isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
-    isWitchsTurn, getPassers, getPlayerVote, getPendingVoters, getVoteResult,
+    isFirstRound, isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
+    isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn, getPassers, getPlayerVote, getPendingVoters,
+    getVoteResult,
 
     -- * Stage
     Stage(..),
@@ -64,7 +65,7 @@ data Game = Game
     } deriving (Eq, Read, Show)
 
 data Stage  = GameOver | DefendersTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
-            | WerewolvesTurn | WitchsTurn
+            | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
 data Event = DevourEvent Text | NoDevourEvent | PoisonEvent Text
@@ -96,6 +97,9 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
 killPlayer :: Game -> Player -> Game
 killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
 
+isFirstRound :: Game -> Bool
+isFirstRound game = game ^. round == 0
+
 isGameOver :: Game -> Bool
 isGameOver game = game ^. stage == GameOver
 
@@ -119,6 +123,9 @@ isWerewolvesTurn game = game ^. stage == WerewolvesTurn
 
 isWitchsTurn :: Game -> Bool
 isWitchsTurn game = game ^. stage == WitchsTurn
+
+isWolfHoundsTurn :: Game -> Bool
+isWolfHoundsTurn game = game ^. stage == WolfHoundsTurn
 
 getPassers :: Game -> [Player]
 getPassers game = map (`findByName_` players') passes'
@@ -144,7 +151,15 @@ getVoteResult game = map (`findByName_` players') result
 
 stageCycle :: [Stage]
 stageCycle = cycle
-    [Sunset, SeersTurn, DefendersTurn, WerewolvesTurn, WitchsTurn, Sunrise, VillagesTurn]
+    [ Sunset
+    , WolfHoundsTurn
+    , SeersTurn
+    , DefendersTurn
+    , WerewolvesTurn
+    , WitchsTurn
+    , Sunrise
+    , VillagesTurn
+    ]
 
 stageAvailable :: Game -> Stage -> Bool
 stageAvailable _ GameOver           = False
@@ -153,10 +168,13 @@ stageAvailable game SeersTurn       = any isSeer (filterAlive $ game ^. players)
 stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
 stageAvailable _ VillagesTurn       = True
-stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
+stageAvailable game WerewolvesTurn  = any isAlignedWithWerewolves (filterAlive $ game ^. players)
 stageAvailable game WitchsTurn      =
     any isWitch (filterAlive $ game ^. players)
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
+stageAvailable game WolfHoundsTurn  =
+    any isWolfHound (filterAlive $ game ^. players)
+    && isFirstRound game
 
 getDevourEvent :: Game -> Maybe Event
 getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]
