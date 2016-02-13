@@ -62,7 +62,7 @@ handle callerName (Options Nothing) = exitWith success
 commandsMessages :: [Text]
 commandsMessages =
     [ "end - ends the current game."
-    , "heal PLAYER - heal a devoured player."
+    , "heal - heal a devoured player."
     , "pass - pass on healing or poisoning a player."
     , "ping - pings the status of the current game publicly."
     , "poison PLAYER - poison a player."
