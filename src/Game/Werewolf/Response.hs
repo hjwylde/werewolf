@@ -263,6 +263,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat [
         showTurn Sunset         = undefined
         showTurn VillagesTurn   = "Village's"
         showTurn WerewolvesTurn = "Werewolves'"
+        showTurn WitchsTurn     = "Witch's"
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat [
