@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.1.3
+
 *Revisions*
 
 * Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
