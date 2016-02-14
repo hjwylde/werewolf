@@ -125,14 +125,14 @@ allCommandTests =
 
 allEngineTests :: [TestTree]
 allEngineTests =
-    [ testProperty "check stage advances to wolf-hound's turn on first round"   prop_checkStageAdvancesToWolfHoundsTurnOnFirstRound
-    , testProperty "check stage skips defender's turn when no defender"         prop_checkStageSkipsDefendersTurnWhenNoDefender
+    [ testProperty "check stage skips defender's turn when no defender"         prop_checkStageSkipsDefendersTurnWhenNoDefender
     , testProperty "check stage skips seer's turn when no seer"                 prop_checkStageSkipsSeersTurnWhenNoSeer
     , testProperty "check stage skips witch's turn when no witch"               prop_checkStageSkipsWitchsTurnWhenNoWitch
     , testProperty "check stage skips wolf-hound's turn when no wolf-hound"     prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound
     , testProperty "check stage does nothing when game over"                    prop_checkStageDoesNothingWhenGameOver
 
-    , testProperty "check defender's turn advances to werewolves' turn" prop_checkDefendersTurnAdvancesToWerewolvesTurn
+    , testProperty "check defender's turn advances to wolf-hound's turn on first round"     prop_checkDefendersTurnAdvancesToWolfHoundsTurnOnFirstRound
+    , testProperty "check defender's turn advances to werewolves' turn after first round"   prop_checkDefendersTurnAdvancesToWerewolvesTurnAfterFirstRound
     -- TODO (hjw): implement this test case
     --, testProperty "check defender's turn advances when no defender"    prop_checkDefendersTurnAdvancesWhenNoDefender
 
@@ -169,7 +169,7 @@ allEngineTests =
     , testProperty "check witch's turn resets poison"                   prop_checkWitchsTurnResetsPoison
     , testProperty "check witch's turn clears passes"                   prop_checkWitchsTurnClearsPasses
 
-    , testProperty "check wolf-hound's turn advances to seer's turn"    prop_checkWolfHoundsTurnAdvancesToSeersTurn
+    , testProperty "check wolf-hound's turn advances to werewolves' turn"    prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn
     -- TODO (hjw): implement this test case
     --, testProperty "check wolf-hound's turn advances when no wolf-hound"    prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
     , testProperty "check wolf-hound's turn clears passes"                  prop_checkWolfHoundsTurnClearsPasses

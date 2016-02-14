@@ -152,9 +152,9 @@ getVoteResult game = map (`findByName_` players') result
 stageCycle :: [Stage]
 stageCycle = cycle
     [ Sunset
-    , WolfHoundsTurn
     , SeersTurn
     , DefendersTurn
+    , WolfHoundsTurn
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise
