@@ -173,7 +173,7 @@ quitCommand callerName = Command $ do
 
     caller <- uses players $ findByName_ callerName
 
-    killPlayer caller
+    killPlayer callerName
     tell [playerQuitMessage caller]
 
     passes %= delete callerName

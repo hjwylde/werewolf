@@ -94,8 +94,8 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _votes        = Map.empty
             }
 
-killPlayer :: Game -> Player -> Game
-killPlayer game player = game & players %~ map (\player' -> if player' == player then player' & state .~ Dead else player')
+killPlayer :: Game -> Text -> Game
+killPlayer game name' = game & players %~ map (\player -> if player ^. name == name' then player & state .~ Dead else player)
 
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0

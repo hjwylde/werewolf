@@ -90,25 +90,25 @@ prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithSee -> Bool
 prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithSee game) =
     not . isDefendersTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (filterDefenders $ game ^. players)
+        game' = foldl killPlayer game (map (view name) . filterDefenders $ game ^. players)
 
 prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Bool
 prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
     not . isSeersTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (filterSeers $ game ^. players)
+        game' = foldl killPlayer game (map (view name) . filterSeers $ game ^. players)
 
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Bool
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
     not . isWitchsTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (filterWitches $ game ^. players)
+        game' = foldl killPlayer game (map (view name) . filterWitches $ game ^. players)
 
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound :: NewGame -> Bool
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound (NewGame game) =
     not . isWolfHoundsTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (filterWolfHounds $ game ^. players)
+        game' = foldl killPlayer game (map (view name) . filterWolfHounds $ game ^. players)
 
 prop_checkStageDoesNothingWhenGameOver :: GameAtGameOver -> Property
 prop_checkStageDoesNothingWhenGameOver (GameAtGameOver game) =
@@ -157,7 +157,7 @@ prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
     length (getVoteResult game'') > 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == length (filterDead $ game' ^. players)
     where
-        game'   = foldl killPlayer game (filterScapegoats $ game ^. players) & stage .~ VillagesTurn
+        game'   = foldl killPlayer game (map (view name) . filterScapegoats $ game ^. players) & stage .~ VillagesTurn
         n       = length $ game' ^. players
 
 prop_checkVillagesTurnLynchesScapegoatWhenConflicted :: GameWithLynchVotes -> Property
@@ -273,16 +273,11 @@ prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn (GameAtWolfHoundsTurn game) =
     forAll (arbitraryChooseCommand game) $ \(Blind command) ->
     isWerewolvesTurn $ run_ (apply command >> checkStage) game
 
-prop_checkWolfHoundsTurnClearsPasses :: GameAtWolfHoundsTurn -> Property
-prop_checkWolfHoundsTurnClearsPasses (GameAtWolfHoundsTurn game) =
-    forAll (arbitraryChooseCommand game) $ \(Blind command) ->
-    null $ run_ (apply command >> checkStage) game ^. passes
-
 -- TODO (hjw): tidy this test
 prop_checkGameOverAdvancesStage :: Game -> Property
 prop_checkGameOverAdvancesStage game =
     forAll (sublistOf $ game ^. players) $ \players' -> do
-        let game' = foldl killPlayer game players'
+        let game' = foldl killPlayer game (map (view name) players')
 
         length (nub . map (view $ role . allegiance) . filterAlive $ game' ^. players) <= 1
             ==> isGameOver $ run_ checkGameOver game'
@@ -292,7 +287,7 @@ prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive :: Game -> Property
 prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
     not (isGameOver game)
     ==> forAll (sublistOf $ game ^. players) $ \players' ->
-        let game' = foldl killPlayer game players' in
+        let game' = foldl killPlayer game (map (view name) players') in
             length (nub . map (view $ role . allegiance) . filterAlive $ game' ^. players) > 1
             ==> not . isGameOver $ run_ checkGameOver game'
 

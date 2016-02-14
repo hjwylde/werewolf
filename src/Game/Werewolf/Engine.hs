@@ -113,11 +113,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             getVoteResult >>= \votees -> case votees of
                 [votee]   -> do
-                    killPlayer votee
+                    killPlayer $ votee ^. name
                     tell [playerLynchedMessage votee]
                 _               ->
                     uses players (filterAlive . filterScapegoats) >>= \aliveScapegoats -> case aliveScapegoats of
-                        [scapegoat] -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
+                        [scapegoat] -> killPlayer (scapegoat ^. name) >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
                         _           -> tell [noPlayerLynchedMessage]
 
             advanceStage
@@ -189,15 +189,13 @@ applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
     player <- uses players $ findByName_ targetName
 
-    killPlayer player
-
+    killPlayer targetName
     tell [playerDevouredMessage player]
 applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
 applyEvent (PoisonEvent name)       = do
     player <- uses players $ findByName_ name
 
-    killPlayer player
-
+    killPlayer name
     tell [playerPoisonedMessage player]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
@@ -223,8 +221,8 @@ startGame callerName players = do
     where
         playerNames = map (view name) players
 
-killPlayer :: MonadState Game m => Player -> m ()
-killPlayer player = modify (`Game.killPlayer` player)
+killPlayer :: MonadState Game m => Text -> m ()
+killPlayer name = modify (`Game.killPlayer` name)
 
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = gets Game.isDefendersTurn
