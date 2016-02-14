@@ -18,8 +18,8 @@ module Game.Werewolf.Role (
 
     -- ** Instances
     allRoles, restrictedRoles,
-    defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villagerVillagerRole, werewolfRole,
-    witchRole, wolfHoundRole,
+    defenderRole, scapegoatRole, seerRole, simpleVillagerRole, simpleWerewolfRole,
+    villagerVillagerRole, witchRole, wolfHoundRole,
 
     -- * Allegiance
     Allegiance(..),
@@ -58,14 +58,14 @@ allRoles =
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
+    , simpleWerewolfRole
     , villagerVillagerRole
-    , werewolfRole
     , witchRole
     , wolfHoundRole
     ]
 
 restrictedRoles :: [Role]
-restrictedRoles = allRoles \\ [simpleVillagerRole, werewolfRole]
+restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 
 defenderRole :: Role
 defenderRole = Role
@@ -119,6 +119,18 @@ simpleVillagerRole = Role
         "Bluffing can be a good technique, but you had better be convincing about what you say."
     }
 
+simpleWerewolfRole :: Role
+simpleWerewolfRole = Role
+    { _name         = "Simple Werewolf"
+    , _allegiance   = Werewolves
+    , _description  = T.unwords
+        [ "Each night they devour a Villager."
+        , "During the day they try to hide their nocturnal identity to avoid mob justice."
+        ]
+    , _advice       =
+        "Voting to lynch your partner can be a good way to deflect suspicion from yourself."
+    }
+
 villagerVillagerRole :: Role
 villagerVillagerRole = Role
     { _name         = "Villager-Villager"
@@ -129,18 +141,6 @@ villagerVillagerRole = Role
         , "and will make their word decisive in crucial moments."
         ]
     , _advice       = "You'll make friends quickly, but be wary about whom you trust."
-    }
-
-werewolfRole :: Role
-werewolfRole = Role
-    { _name         = "Werewolf"
-    , _allegiance   = Werewolves
-    , _description  = T.unwords
-        [ "Each night they devour a Villager."
-        , "During the day they try to hide their nocturnal identity to avoid mob justice."
-        ]
-    , _advice       =
-        "Voting to lynch your partner can be a good way to deflect suspicion from yourself."
     }
 
 witchRole :: Role

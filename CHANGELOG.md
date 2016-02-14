@@ -10,6 +10,7 @@
 *Revisions*
 
 * Renamed the Villager role to Simple Villager.
+* Renamed the Werewolf role to Simple Werewolf.
 
 #### v0.4.4.1
 

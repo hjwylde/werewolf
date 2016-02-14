@@ -24,8 +24,8 @@ The current implemented roles are:
 * Scapegoat.
 * Seer.
 * Simple Villager.
+* Simple Werewolf.
 * Villager-Villager.
-* Werewolf.
 * Witch.
 * Wolf-hound.
 
@@ -59,8 +59,8 @@ E.g., to start a game:
 > werewolf --caller @foo start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
     {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
-    {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4), Werewolf (2)."},
-    {"to":"@foo","message":"You're a Werewolf, along with @baz.\nA shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."},
+    {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4), Simple Werewolf (2)."},
+    {"to":"@foo","message":"You're a Simple Werewolf, along with @baz.\nA shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."},
     ...,
     {"to":null,"message":"Night falls, the village is asleep."},
     {"to":null,"message":"The Seer wakes up."},
