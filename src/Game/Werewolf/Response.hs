@@ -28,7 +28,7 @@ module Game.Werewolf.Response (
     publicMessage, privateMessage, groupMessages,
 
     -- ** Binary messages
-    noGameRunningMessage, gameAlreadyRunningMessage,
+    noGameRunningMessage, gameAlreadyRunningMessage, engineVersionMessage,
 
     -- ** Generic messages
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
@@ -83,6 +83,7 @@ import           Data.Text               (Text)
 import qualified Data.Text               as T
 import qualified Data.Text.Lazy.Encoding as T
 import qualified Data.Text.Lazy.IO       as T
+import           Data.Version
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
@@ -141,6 +142,9 @@ noGameRunningMessage to = privateMessage to "No game is running."
 
 gameAlreadyRunningMessage :: Text -> Message
 gameAlreadyRunningMessage to = privateMessage to "A game is already running."
+
+engineVersionMessage :: Text -> Version -> Message
+engineVersionMessage to version = privateMessage to $ T.unwords ["Version", T.pack $ showVersion version]
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat

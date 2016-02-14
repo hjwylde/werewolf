@@ -32,7 +32,7 @@ import qualified Werewolf.Commands.Protect   as Protect
 import qualified Werewolf.Commands.See       as See
 import qualified Werewolf.Commands.Start     as Start
 import qualified Werewolf.Commands.Vote      as Vote
-import           Werewolf.Version            as This
+import qualified Werewolf.Version            as This
 
 import Options.Applicative
 
@@ -57,6 +57,7 @@ data Command
     | See See.Options
     | Start Start.Options
     | Status
+    | Version
     | Vote Vote.Options
     deriving (Eq, Show)
 
@@ -103,6 +104,7 @@ werewolf = Options
         , command "see"         $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance")
         , command "start"       $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game")
         , command "status"      $ info (helper <*> status)      (fullDesc <> progDesc "Get the status of the current game")
+        , command "version"     $ info (helper <*> version)     (fullDesc <> progDesc "Show this engine's version")
         , command "vote"        $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
         ])
 
@@ -158,6 +160,9 @@ start = fmap Start $ Start.Options
 
 status :: Parser Command
 status = pure Status
+
+version :: Parser Command
+version = pure Version
 
 vote :: Parser Command
 vote = Vote . Vote.Options <$> playerArgument

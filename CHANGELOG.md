@@ -5,6 +5,7 @@
 *Minor*
 
 * Added the Wolf-hound role. ([#50](https://github.com/hjwylde/werewolf/issues/50))
+* Added a `version` command. ([#84](https://github.com/hjwylde/werewolf/issues/84))
 
 #### v0.4.4.1
 
