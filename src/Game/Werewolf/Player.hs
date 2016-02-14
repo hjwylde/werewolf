@@ -17,16 +17,16 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Searches
-    findByName, findByName_,
+    findByName, findByName_, findByRole, findByRole_,
 
     -- ** Filters
-    filterDefenders, filterScapegoats, filterSeers, filterVillagers, filterVillagerVillagers,
-    filterWerewolves, filterWitches, filterWolfHounds,
+    filterByRole,
     filterAlignedWithWerewolves,
 
     -- ** Queries
     doesPlayerExist,
-    isDefender, isScapegoat, isSeer, isVillager, isWerewolf, isWitch, isWolfHound,
+    isDefender, isScapegoat, isSeer, isVillager, isVillagerVillager, isWerewolf, isWitch,
+    isWolfHound,
     isAlignedWithWerewolves,
     isAlive, isDead,
 
@@ -65,29 +65,39 @@ findByName name' = find ((name' ==) . view name)
 findByName_ :: Text -> [Player] -> Player
 findByName_ name = fromJust . findByName name
 
-filterDefenders :: [Player] -> [Player]
-filterDefenders = filter isDefender
+findByRole :: Role -> [Player] -> Maybe Player
+findByRole role' = find ((role' ==) . view role)
 
-filterScapegoats :: [Player] -> [Player]
-filterScapegoats = filter isScapegoat
+findByRole_ :: Role -> [Player] -> Player
+findByRole_ role = fromJust . findByRole role
 
-filterSeers :: [Player] -> [Player]
-filterSeers = filter isSeer
+filterByRole :: Role -> [Player] -> [Player]
+filterByRole role' = filter ((role' ==) . view role)
 
-filterVillagers :: [Player] -> [Player]
-filterVillagers = filter isVillager
+-- TODO (hjw): delete or uncomment
+--filterDefenders :: [Player] -> [Player]
+--filterDefenders = filter isDefender
 
-filterVillagerVillagers :: [Player] -> [Player]
-filterVillagerVillagers = filter isVillagerVillager
+--filterScapegoats :: [Player] -> [Player]
+--filterScapegoats = filter isScapegoat
 
-filterWerewolves :: [Player] -> [Player]
-filterWerewolves = filter isWerewolf
+--filterSeers :: [Player] -> [Player]
+--filterSeers = filter isSeer
 
-filterWitches :: [Player] -> [Player]
-filterWitches = filter isWitch
+--filterVillagers :: [Player] -> [Player]
+--filterVillagers = filter isVillager
 
-filterWolfHounds :: [Player] -> [Player]
-filterWolfHounds = filter isWolfHound
+--filterVillagerVillagers :: [Player] -> [Player]
+--filterVillagerVillagers = filter isVillagerVillager
+
+--filterWerewolves :: [Player] -> [Player]
+--filterWerewolves = filter isWerewolf
+
+--filterWitches :: [Player] -> [Player]
+--filterWitches = filter isWitch
+
+--filterWolfHounds :: [Player] -> [Player]
+--filterWolfHounds = filter isWolfHound
 
 filterAlignedWithWerewolves :: [Player] -> [Player]
 filterAlignedWithWerewolves = filter isAlignedWithWerewolves

@@ -87,7 +87,7 @@ import           Data.Version
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
-import           Game.Werewolf.Role   (Role, allegiance, description, restrictedRoles)
+import           Game.Werewolf.Role   hiding (name)
 import qualified Game.Werewolf.Role   as Role
 import           GHC.Generics
 
@@ -156,9 +156,9 @@ newGameMessages game = concat
     where
         players'                    = game ^. players
         villagerVillagerMessages    =
-            case filterVillagerVillagers players' of
-                [villagerVillager]  -> [villagerVillagerMessage $ villagerVillager ^. name]
-                _                   -> []
+            case findByRole villagerVillagerRole players' of
+                Just villagerVillager   -> [villagerVillagerMessage $ villagerVillager ^. name]
+                _                       -> []
 
 newPlayersInGameMessage :: [Player] -> Message
 newPlayersInGameMessage players = publicMessage $ T.concat
@@ -199,10 +199,10 @@ stageMessages game = case game ^. stage of
     WolfHoundsTurn  -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
-        defendersName       = view name . head $ filterDefenders players'
-        seersName           = view name . head $ filterSeers players'
+        defendersName       = findByRole_ defenderRole players' ^. name
+        seersName           = findByRole_ seerRole players' ^. name
         aliveWerewolfNames  = map (view name) . filterAlive $ filterAlignedWithWerewolves players'
-        wolfHoundsName      = view name . head $ filterWolfHounds players'
+        wolfHoundsName      = findByRole_ wolfHoundRole players' ^. name
 
 defendersTurnMessages :: Text -> [Message]
 defendersTurnMessages to =
@@ -256,7 +256,7 @@ witchsTurnMessages game = concat
     , [passMessage]
     ]
     where
-        witchsName      = (head . filterWitches $ game ^. players) ^. name
+        witchsName      = findByRole_ witchRole (game ^. players) ^. name
         wakeUpMessage   = publicMessage "The Witch wakes up."
         passMessage     = privateMessage witchsName "Type `pass` to end your turn."
         devourMessages  = case getDevourEvent game of

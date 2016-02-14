@@ -21,9 +21,10 @@ module Game.Werewolf.Game (
     killPlayer, setPlayerRole,
 
     -- ** Queries
-    isFirstRound, isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
-    isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn, getPassers, getPlayerVote, getPendingVoters,
-    getVoteResult,
+    isFirstRound,
+    isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
+    isWitchsTurn, isWolfHoundsTurn,
+    getPassers, getPlayerVote, getPendingVoters, getVoteResult,
 
     -- * Stage
     Stage(..),
@@ -95,11 +96,11 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _votes        = Map.empty
             }
 
-killPlayer :: Game -> Text -> Game
-killPlayer game name' = game & players %~ map (\player -> if player ^. name == name' then player & state .~ Dead else player)
+killPlayer :: Text -> Game -> Game
+killPlayer name' game = game & players %~ map (\player -> if player ^. name == name' then player & state .~ Dead else player)
 
-setPlayerRole :: Game -> Text -> Role -> Game
-setPlayerRole game name' role' = game & players %~ map (\player -> if player ^. name == name' then player & role .~ role' else player)
+setPlayerRole :: Text -> Role -> Game -> Game
+setPlayerRole name' role' game = game & players %~ map (\player -> if player ^. name == name' then player & role .~ role' else player)
 
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0

@@ -89,25 +89,29 @@ prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithSee -> Bool
 prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithSee game) =
     not . isDefendersTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (map (view name) . filterDefenders $ game ^. players)
+        defendersName   = findByRole_ defenderRole (game ^. players) ^. name
+        game'           = killPlayer defendersName game
 
 prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Bool
 prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
     not . isSeersTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (map (view name) . filterSeers $ game ^. players)
+        seersName   = findByRole_ seerRole (game ^. players) ^. name
+        game'       = killPlayer seersName game
 
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Bool
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
     not . isWitchsTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (map (view name) . filterWitches $ game ^. players)
+        witchsName  = findByRole_ witchRole (game ^. players) ^. name
+        game'       = killPlayer witchsName game
 
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound :: GameWithProtect -> Bool
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound (GameWithProtect game) =
     not . isWolfHoundsTurn $ run_ checkStage game'
     where
-        game' = foldl killPlayer game (map (view name) . filterWolfHounds $ game ^. players)
+        wolfHoundsName  = findByRole_ wolfHoundRole (game ^. players) ^. name
+        game'           = killPlayer wolfHoundsName game
 
 prop_checkStageDoesNothingWhenGameOver :: GameAtGameOver -> Property
 prop_checkStageDoesNothingWhenGameOver (GameAtGameOver game) =
@@ -131,7 +135,7 @@ prop_checkSeersTurnDoesNothingUnlessSeen (GameAtSeersTurn game) =
 
 prop_checkVillagesTurnAdvancesToSeersTurn :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
-    any isSeer (filterAlive $ run_ checkStage game ^. players)
+    isAlive (findByRole_ seerRole $ run_ checkStage game ^. players)
     ==> isSeersTurn $ run_ checkStage game
 
 prop_checkVillagesTurnIncrementsRound :: GameWithLynchVotes -> Property
@@ -150,13 +154,14 @@ prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
     length (getVoteResult game'') > 1
     ==> length (filterDead $ run_ checkStage game'' ^. players) == length (filterDead $ game' ^. players)
     where
-        game'   = foldl killPlayer game (map (view name) . filterScapegoats $ game ^. players) & stage .~ VillagesTurn
-        n       = length $ game' ^. players
+        scapegoatsName  = findByRole_ scapegoatRole (game ^. players) ^. name
+        game'           = killPlayer scapegoatsName game & stage .~ VillagesTurn
+        n               = length $ game' ^. players
 
 prop_checkVillagesTurnLynchesScapegoatWhenConflicted :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnLynchesScapegoatWhenConflicted (GameWithLynchVotes game) =
     length (getVoteResult game) > 1
-    ==> isScapegoat $ head (filterDead $ run_ checkStage game ^. players)
+    ==> isDead . findByRole_ scapegoatRole $ run_ checkStage game ^. players
 
 prop_checkVillagesTurnResetsVotes :: GameWithLynchVotes -> Bool
 prop_checkVillagesTurnResetsVotes (GameWithLynchVotes game) =
@@ -270,7 +275,7 @@ prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn (GameAtWolfHoundsTurn game) =
 prop_checkGameOverAdvancesStage :: Game -> Property
 prop_checkGameOverAdvancesStage game =
     forAll (sublistOf $ game ^. players) $ \players' -> do
-        let game' = foldl killPlayer game (map (view name) players')
+        let game' = foldr killPlayer game (map (view name) players')
 
         length (nub . map (view $ role . allegiance) . filterAlive $ game' ^. players) <= 1
             ==> isGameOver $ run_ checkGameOver game'
@@ -280,7 +285,7 @@ prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive :: Game -> Property
 prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive game =
     not (isGameOver game)
     ==> forAll (sublistOf $ game ^. players) $ \players' ->
-        let game' = foldl killPlayer game (map (view name) players') in
+        let game' = foldr killPlayer game (map (view name) players') in
             length (nub . map (view $ role . allegiance) . filterAlive $ game' ^. players) > 1
             ==> not . isGameOver $ run_ checkGameOver game'
 
@@ -309,32 +314,32 @@ prop_startGameErrorsWhenMoreThan24Players =
 
 prop_startGameErrorsWhenMoreThan1Defender :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Defender players =
-    length (filterDefenders players) > 1
+    length (filter isDefender players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Scapegoat :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Scapegoat players =
-    length (filterScapegoats players) > 1
+    length (filter isScapegoat players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Seer :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Seer players =
-    length (filterSeers players) > 1
+    length (filter isSeer players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1VillagerVillager :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1VillagerVillager players =
-    length (filterVillagerVillagers players) > 1
+    length (filter isVillagerVillager players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Witch :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Witch players =
-    length (filterWitches players) > 1
+    length (filter isWitch players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1WolfHound :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1WolfHound players =
-    length (filterWolfHounds players) > 1
+    length (filter isWolfHound players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property

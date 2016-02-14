@@ -248,10 +248,10 @@ arbitraryPlayerSet = do
     n <- choose (10, 24)
     players <- nubOn (view name) <$> infiniteList
 
-    let playersWithRestrictedRole = map (\role' -> head $ filter ((role' ==) . view role) players) restrictedRoles
+    let playersWithRestrictedRole = map (\role -> head $ filterByRole role players) restrictedRoles
 
-    let werewolves  = take (n `quot` 6 + 1) $ filterWerewolves players
-    let villagers   = take (n - length restrictedRoles - length werewolves) $ filterVillagers players
+    let werewolves  = take (n `quot` 6 + 1) $ filterAlignedWithWerewolves players
+    let villagers   = take (n - length restrictedRoles - length werewolves) $ filter isVillager players
 
     return $ playersWithRestrictedRole ++ werewolves ++ villagers
 
@@ -273,7 +273,7 @@ arbitraryCommand game = case game ^. stage of
 
 arbitraryChooseCommand :: Game -> Gen (Blind Command)
 arbitraryChooseCommand game = do
-    let wolfHound   = head . filterWolfHounds $ game ^. players
+    let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
     allegiance      <- elements [Villagers, Werewolves]
 
     return . Blind $ chooseCommand (wolfHound ^. name) (allegiance)
@@ -300,7 +300,7 @@ arbitraryLynchVoteCommand game = do
 
 arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do
-    let witch = head . filterWitches $ game ^. players
+    let witch = findByRole_ witchRole (game ^. players)
 
     return $ if game ^. healUsed
         then Blind noopCommand
@@ -308,13 +308,13 @@ arbitraryHealCommand game = do
 
 arbitraryPassCommand :: Game -> Gen (Blind Command)
 arbitraryPassCommand game = do
-    let witch = head . filterWitches $ game ^. players
+    let witch = findByRole_ witchRole (game ^. players)
 
     return . Blind $ passCommand (witch ^. name)
 
 arbitraryPoisonCommand :: Game -> Gen (Blind Command)
 arbitraryPoisonCommand game = do
-    let witch   = head . filterWitches $ game ^. players
+    let witch   = findByRole_ witchRole (game ^. players)
     target      <- arbitraryPlayer game
 
     return $ if isJust (game ^. poison)
@@ -323,7 +323,7 @@ arbitraryPoisonCommand game = do
 
 arbitraryProtectCommand :: Game -> Gen (Blind Command)
 arbitraryProtectCommand game = do
-    let defender    = head . filterDefenders $ game ^. players
+    let defender    = findByRole_ defenderRole (game ^. players)
     -- TODO (hjw): add suchThat (/= priorProtect)
     target          <- suchThat (arbitraryPlayer game) (defender /=)
 
@@ -342,7 +342,7 @@ arbitraryQuitCommand game = do
 
 arbitrarySeeCommand :: Game -> Gen (Blind Command)
 arbitrarySeeCommand game = do
-    let seer    = head . filterSeers $ game ^. players
+    let seer    = findByRole_ seerRole (game ^. players)
     target      <- arbitraryPlayer game
 
     return $ if isJust (game ^. see)

@@ -22,6 +22,9 @@ module Game.Werewolf.Engine (
     -- ** Manipulations
     startGame, killPlayer, setPlayerRole,
 
+    -- ** Searches
+    findPlayerByName_, findPlayerByRole_,
+
     -- ** Queries
     isGameOver, isDefendersTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
     isWolfHoundsTurn,
@@ -93,8 +96,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
     DefendersTurn -> whenJustM (use protect) $ const advanceStage
 
     SeersTurn -> whenJustM (use see) $ \targetName -> do
-        seer    <- uses players (head . filterSeers)
-        target  <- uses players (findByName_ targetName)
+        seer    <- findPlayerByRole_ seerRole
+        target  <- findPlayerByName_ targetName
 
         tell [playerSeenMessage (seer ^. name) target]
 
@@ -116,9 +119,9 @@ checkStage' = use stage >>= \stage' -> case stage' of
                     killPlayer $ votee ^. name
                     tell [playerLynchedMessage votee]
                 _               ->
-                    uses players (filterAlive . filterScapegoats) >>= \aliveScapegoats -> case aliveScapegoats of
-                        [scapegoat] -> killPlayer (scapegoat ^. name) >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
-                        _           -> tell [noPlayerLynchedMessage]
+                    findPlayerByRole scapegoatRole >>= \mScapegoat -> case mScapegoat of
+                        Just scapegoat  -> killPlayer (scapegoat ^. name) >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
+                        _               -> tell [noPlayerLynchedMessage]
 
             advanceStage
 
@@ -187,13 +190,13 @@ eventAvailable (PoisonEvent _)  = gets isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
-    player <- uses players $ findByName_ targetName
+    player <- findPlayerByName_ targetName
 
     killPlayer targetName
     tell [playerDevouredMessage player]
 applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
 applyEvent (PoisonEvent name)       = do
-    player <- uses players $ findByName_ name
+    player <- findPlayerByName_ name
 
     killPlayer name
     tell [playerPoisonedMessage player]
@@ -222,10 +225,19 @@ startGame callerName players = do
         playerNames = map (view name) players
 
 killPlayer :: MonadState Game m => Text -> m ()
-killPlayer name = modify (`Game.killPlayer` name)
+killPlayer name = modify $ Game.killPlayer name
 
 setPlayerRole :: MonadState Game m => Text -> Role -> m ()
-setPlayerRole name role = modify $ \game -> Game.setPlayerRole game name role
+setPlayerRole name role = modify $ Game.setPlayerRole name role
+
+findPlayerByName_ :: MonadState Game m => Text -> m Player
+findPlayerByName_ name = uses players $ findByName_ name
+
+findPlayerByRole :: MonadState Game m => Role -> m (Maybe Player)
+findPlayerByRole role = uses players $ findByRole role
+
+findPlayerByRole_ :: MonadState Game m => Role -> m Player
+findPlayerByRole_ role = uses players $ findByRole_ role
 
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = gets Game.isDefendersTurn
@@ -288,25 +300,25 @@ doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = uses players $ Player.doesPlayerExist name
 
 isPlayerDefender :: MonadState Game m => Text -> m Bool
-isPlayerDefender name = uses players $ isDefender . findByName_ name
+isPlayerDefender name = isDefender <$> findPlayerByName_ name
 
 isPlayerSeer :: MonadState Game m => Text -> m Bool
-isPlayerSeer name = uses players $ isSeer . findByName_ name
+isPlayerSeer name = isSeer <$> findPlayerByName_ name
 
 isPlayerWitch :: MonadState Game m => Text -> m Bool
-isPlayerWitch name = uses players $ isWitch . findByName_ name
+isPlayerWitch name = isWitch <$> findPlayerByName_ name
 
 isPlayerWolfHound :: MonadState Game m => Text -> m Bool
-isPlayerWolfHound name = uses players $ isWolfHound . findByName_ name
+isPlayerWolfHound name = isWolfHound <$> findPlayerByName_ name
 
 isPlayerAlignedWithWerewolves :: MonadState Game m => Text -> m Bool
-isPlayerAlignedWithWerewolves name = uses players $ isAlignedWithWerewolves . findByName_ name
+isPlayerAlignedWithWerewolves name = isAlignedWithWerewolves <$> findPlayerByName_ name
 
 isPlayerAlive :: MonadState Game m => Text -> m Bool
-isPlayerAlive name = uses players $ isAlive . findByName_ name
+isPlayerAlive name = isAlive <$> findPlayerByName_ name
 
 isPlayerDead :: MonadState Game m => Text -> m Bool
-isPlayerDead name = uses players $ isDead . findByName_ name
+isPlayerDead name = isDead <$> findPlayerByName_ name
 
 randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
 randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ werewolfRoles ++ villagerRoles

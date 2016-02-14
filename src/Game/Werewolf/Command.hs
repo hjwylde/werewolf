@@ -41,7 +41,7 @@ import           Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters
                                          killPlayer, setPlayerRole)
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     (Allegiance (..), villagerRole, werewolfRole)
+import           Game.Werewolf.Role     hiding (name)
 import qualified Game.Werewolf.Role     as Role
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
@@ -108,12 +108,12 @@ pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> return ()
     DefendersTurn   -> do
-        defender <- uses players $ head . filterDefenders
+        defender <- findPlayerByRole_ defenderRole
 
         tell [pingRoleMessage $ defender ^. role . Role.name]
         tell [pingPlayerMessage $ defender ^. name]
     SeersTurn       -> do
-        seer <- uses players $ head . filterSeers
+        seer <- findPlayerByRole_ seerRole
 
         tell [pingRoleMessage $ seer ^. role . Role.name]
         tell [pingPlayerMessage $ seer ^. name]
@@ -130,12 +130,12 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         tell [pingRoleMessage "Werewolves"]
         tell $ map (pingPlayerMessage . view name) (filterAlignedWithWerewolves pendingVoters)
     WitchsTurn      -> do
-        witch <- uses players $ head . filterWitches
+        witch <- findPlayerByRole_ witchRole
 
         tell [pingRoleMessage $ witch ^. role . Role.name]
         tell [pingPlayerMessage $ witch ^. name]
     WolfHoundsTurn  -> do
-        wolfHound <- uses players $ head . filterWolfHounds
+        wolfHound <- findPlayerByRole_ wolfHoundRole
 
         tell [pingRoleMessage $ wolfHound ^. role . Role.name]
         tell [pingPlayerMessage $ wolfHound ^. name]
@@ -170,7 +170,7 @@ quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
     validatePlayer callerName callerName
 
-    caller <- uses players $ findByName_ callerName
+    caller <- findPlayerByName_ callerName
 
     killPlayer callerName
     tell [playerQuitMessage caller]
