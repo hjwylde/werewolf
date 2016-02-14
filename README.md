@@ -23,7 +23,7 @@ The current implemented roles are:
 * Defender.
 * Scapegoat.
 * Seer.
-* Villager.
+* Simple Villager.
 * Villager-Villager.
 * Werewolf.
 * Witch.
@@ -59,7 +59,7 @@ E.g., to start a game:
 > werewolf --caller @foo start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
     {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
-    {"to":null,"message":"The roles in play are Seer (1), Villager (4), Werewolf (2)."},
+    {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4), Werewolf (2)."},
     {"to":"@foo","message":"You're a Werewolf, along with @baz.\nA shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."},
     ...,
     {"to":null,"message":"Night falls, the village is asleep."},
@@ -98,7 +98,7 @@ Let's have the Werewolves, _@foo_ and _@baz_, vote to devour a Villager.
 {"ok":true,"messages":[
     {"to":"@foo","message":"@baz voted to devour @bar."},
     {"to":null,"message":"The sun rises. Everybody wakes up and opens their eyes..."},
-    {"to":null,"message":"As you open them you notice a door broken down and @bar's guts half devoured and spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Villager."},
+    {"to":null,"message":"As you open them you notice a door broken down and @bar's guts half devoured and spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Simple Villager."},
     {"to":null,"message":"As the village gathers in the town square the town clerk calls for a vote."},
     {"to":null,"message":"Whom would you like to lynch?"}
     ]}

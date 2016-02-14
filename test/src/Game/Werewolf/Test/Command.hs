@@ -128,7 +128,7 @@ prop_chooseCommandSetsCallersRole (GameAtWolfHoundsTurn game) allegiance' = do
     findByName_ (wolfHound ^. name) (game' ^. players) ^. role === role'
     where
         role' = case allegiance' of
-            Villagers   -> villagerRole
+            Villagers   -> simpleVillagerRole
             Werewolves  -> werewolfRole
 
 prop_devourVoteCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property

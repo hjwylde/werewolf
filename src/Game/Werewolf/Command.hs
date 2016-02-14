@@ -55,7 +55,7 @@ chooseCommand callerName allegiance' = Command $ do
     setPlayerRole callerName role
     where
         role = case allegiance' of
-            Villagers   -> villagerRole
+            Villagers   -> simpleVillagerRole
             Werewolves  -> werewolfRole
 
 devourVoteCommand :: Text -> Text -> Command

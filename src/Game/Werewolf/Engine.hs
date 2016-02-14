@@ -321,10 +321,10 @@ isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = isDead <$> findPlayerByName_ name
 
 randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
-randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ werewolfRoles ++ villagerRoles
+randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ werewolfRoles ++ simpleVillagerRoles
     where
         extraWerewolfRoles = filter ((Role.Werewolves ==) . view allegiance) extraRoles
         extraVillagerRoles = filter ((Role.Villagers ==) . view allegiance) extraRoles
 
         werewolfRoles = replicate (n `quot` 6 + 1 - length extraWerewolfRoles) werewolfRole
-        villagerRoles = replicate (n - length (extraVillagerRoles ++ werewolfRoles)) villagerRole
+        simpleVillagerRoles = replicate (n - length (extraVillagerRoles ++ werewolfRoles)) simpleVillagerRole

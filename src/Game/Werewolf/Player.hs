@@ -25,7 +25,7 @@ module Game.Werewolf.Player (
 
     -- ** Queries
     doesPlayerExist,
-    isDefender, isScapegoat, isSeer, isVillager, isVillagerVillager, isWerewolf, isWitch,
+    isDefender, isScapegoat, isSeer, isSimpleVillager, isVillagerVillager, isWerewolf, isWitch,
     isWolfHound,
     isAlignedWithWerewolves,
     isAlive, isDead,
@@ -74,31 +74,6 @@ findByRole_ role = fromJust . findByRole role
 filterByRole :: Role -> [Player] -> [Player]
 filterByRole role' = filter ((role' ==) . view role)
 
--- TODO (hjw): delete or uncomment
---filterDefenders :: [Player] -> [Player]
---filterDefenders = filter isDefender
-
---filterScapegoats :: [Player] -> [Player]
---filterScapegoats = filter isScapegoat
-
---filterSeers :: [Player] -> [Player]
---filterSeers = filter isSeer
-
---filterVillagers :: [Player] -> [Player]
---filterVillagers = filter isVillager
-
---filterVillagerVillagers :: [Player] -> [Player]
---filterVillagerVillagers = filter isVillagerVillager
-
---filterWerewolves :: [Player] -> [Player]
---filterWerewolves = filter isWerewolf
-
---filterWitches :: [Player] -> [Player]
---filterWitches = filter isWitch
-
---filterWolfHounds :: [Player] -> [Player]
---filterWolfHounds = filter isWolfHound
-
 filterAlignedWithWerewolves :: [Player] -> [Player]
 filterAlignedWithWerewolves = filter isAlignedWithWerewolves
 
@@ -114,8 +89,8 @@ isScapegoat player = player ^. role == scapegoatRole
 isSeer :: Player -> Bool
 isSeer player = player ^. role == seerRole
 
-isVillager :: Player -> Bool
-isVillager player = player ^. role == villagerRole
+isSimpleVillager :: Player -> Bool
+isSimpleVillager player = player ^. role == simpleVillagerRole
 
 isVillagerVillager :: Player -> Bool
 isVillagerVillager player = player ^. role == villagerVillagerRole

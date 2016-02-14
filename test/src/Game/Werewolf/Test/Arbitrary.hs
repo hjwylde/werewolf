@@ -250,10 +250,10 @@ arbitraryPlayerSet = do
 
     let playersWithRestrictedRole = map (\role -> head $ filterByRole role players) restrictedRoles
 
-    let werewolves  = take (n `quot` 6 + 1) $ filterAlignedWithWerewolves players
-    let villagers   = take (n - length restrictedRoles - length werewolves) $ filter isVillager players
+    let werewolves      = take (n `quot` 6 + 1) $ filterAlignedWithWerewolves players
+    let simpleVillagers = take (n - length restrictedRoles - length werewolves) $ filter isSimpleVillager players
 
-    return $ playersWithRestrictedRole ++ werewolves ++ villagers
+    return $ playersWithRestrictedRole ++ werewolves ++ simpleVillagers
 
 arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of

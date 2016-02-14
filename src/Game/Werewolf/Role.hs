@@ -18,7 +18,7 @@ module Game.Werewolf.Role (
 
     -- ** Instances
     allRoles, restrictedRoles,
-    defenderRole, scapegoatRole, seerRole, villagerRole, villagerVillagerRole, werewolfRole,
+    defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villagerVillagerRole, werewolfRole,
     witchRole, wolfHoundRole,
 
     -- * Allegiance
@@ -57,7 +57,7 @@ allRoles =
     [ defenderRole
     , scapegoatRole
     , seerRole
-    , villagerRole
+    , simpleVillagerRole
     , villagerVillagerRole
     , werewolfRole
     , witchRole
@@ -65,7 +65,7 @@ allRoles =
     ]
 
 restrictedRoles :: [Role]
-restrictedRoles = allRoles \\ [villagerRole, werewolfRole]
+restrictedRoles = allRoles \\ [simpleVillagerRole, werewolfRole]
 
 defenderRole :: Role
 defenderRole = Role
@@ -102,9 +102,9 @@ seerRole = Role
         ]
     }
 
-villagerRole :: Role
-villagerRole = Role
-    { _name         = "Villager"
+simpleVillagerRole :: Role
+simpleVillagerRole = Role
+    { _name         = "Simple Villager"
     , _allegiance   = Villagers
     , _description  = "An ordinary townsperson humbly living in Millers Hollow."
     , _advice       =
@@ -156,7 +156,8 @@ wolfHoundRole = Role
         , "In any case, only the Wolf-hound can decide if he'll obey his human and civilized master"
         , "or if he'll listen to the call of wild nature buried within him."
         ]
-    , _advice       = "The choice of being a Villager or Werewolf is final, so decide carefully!"
+    , _advice       =
+        "The choice of being a Simple Villager or Werewolf is final, so decide carefully!"
     }
 
 allAllegiances :: [Allegiance]
