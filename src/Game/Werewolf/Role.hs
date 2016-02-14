@@ -31,6 +31,7 @@ module Game.Werewolf.Role (
 import Control.Lens
 
 import           Data.Function
+import           Data.List
 import           Data.Text     (Text)
 import qualified Data.Text     as T
 
@@ -64,7 +65,7 @@ allRoles =
     ]
 
 restrictedRoles :: [Role]
-restrictedRoles = [defenderRole, scapegoatRole, seerRole, villagerVillagerRole, witchRole, wolfHoundRole]
+restrictedRoles = allRoles \\ [villagerRole, werewolfRole]
 
 defenderRole :: Role
 defenderRole = Role

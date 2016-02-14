@@ -58,7 +58,14 @@ instance Arbitrary Game where
 
 instance Arbitrary Stage where
     arbitrary = elements
-        [GameOver, DefendersTurn, SeersTurn, VillagesTurn, WerewolvesTurn, WitchsTurn, WolfHoundsTurn]
+        [ DefendersTurn
+        , GameOver
+        , SeersTurn
+        , VillagesTurn
+        , WerewolvesTurn
+        , WitchsTurn
+        , WolfHoundsTurn
+        ]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary
@@ -209,10 +216,21 @@ newtype GameWithProtectAndDevourVotes = GameWithProtectAndDevourVotes Game
 
 instance Arbitrary GameWithProtectAndDevourVotes where
     arbitrary = do
-        (GameWithProtect game)  <- arbitrary
-        let game'               = run_ checkStage game
+        (GameWithProtectAndWolfHoundChoice game)    <- arbitrary
+        let game'                                   = run_ checkStage game
 
         GameWithProtectAndDevourVotes <$> runArbitraryCommands (length $ game' ^. players) game'
+
+newtype GameWithProtectAndWolfHoundChoice = GameWithProtectAndWolfHoundChoice Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithProtectAndWolfHoundChoice where
+    arbitrary = do
+        (GameWithProtect game)  <- arbitrary
+        let game'               = run_ checkStage game
+        (Blind command)         <- arbitraryChooseCommand game'
+
+        return $ GameWithProtectAndWolfHoundChoice (run_ (apply command) game')
 
 newtype GameWithSee = GameWithSee Game
     deriving (Eq, Show)

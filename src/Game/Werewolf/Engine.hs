@@ -20,7 +20,7 @@ module Game.Werewolf.Engine (
     -- * Game
 
     -- ** Manipulations
-    startGame, killPlayer,
+    startGame, killPlayer, setPlayerRole,
 
     -- ** Queries
     isGameOver, isDefendersTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
@@ -64,7 +64,7 @@ import qualified Data.Text       as T
 import           Game.Werewolf.Game     hiding (getDevourEvent, getPassers, getPendingVoters,
                                          getPlayerVote, getVoteResult, isDefendersTurn, isGameOver,
                                          isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                         isWitchsTurn, isWolfHoundsTurn, killPlayer)
+                                         isWitchsTurn, isWolfHoundsTurn, killPlayer, setPlayerRole)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -113,11 +113,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             getVoteResult >>= \votees -> case votees of
                 [votee]   -> do
-                    killPlayer votee
+                    killPlayer $ votee ^. name
                     tell [playerLynchedMessage votee]
                 _               ->
                     uses players (filterAlive . filterScapegoats) >>= \aliveScapegoats -> case aliveScapegoats of
-                        [scapegoat] -> killPlayer scapegoat >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
+                        [scapegoat] -> killPlayer (scapegoat ^. name) >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
                         _           -> tell [noPlayerLynchedMessage]
 
             advanceStage
@@ -151,7 +151,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (use healUsed &&^ use poisonUsed) advanceStage
         whenM (any isWitch <$> getPassers)      advanceStage
 
-    WolfHoundsTurn -> whenM (fmap (any isWolfHound) getPassers) advanceStage
+    WolfHoundsTurn -> unlessM (uses players (any isWolfHound . filterAlive)) advanceStage
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
@@ -189,15 +189,13 @@ applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
     player <- uses players $ findByName_ targetName
 
-    killPlayer player
-
+    killPlayer targetName
     tell [playerDevouredMessage player]
 applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
 applyEvent (PoisonEvent name)       = do
     player <- uses players $ findByName_ name
 
-    killPlayer player
-
+    killPlayer name
     tell [playerPoisonedMessage player]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
@@ -223,8 +221,11 @@ startGame callerName players = do
     where
         playerNames = map (view name) players
 
-killPlayer :: MonadState Game m => Player -> m ()
-killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
+killPlayer :: MonadState Game m => Text -> m ()
+killPlayer name = modify (`Game.killPlayer` name)
+
+setPlayerRole :: MonadState Game m => Text -> Role -> m ()
+setPlayerRole name role = modify $ \game -> Game.setPlayerRole game name role
 
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = gets Game.isDefendersTurn

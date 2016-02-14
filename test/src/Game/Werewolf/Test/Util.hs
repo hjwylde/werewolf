@@ -6,7 +6,6 @@ Maintainer  : public@hjwylde.com
 -}
 
 {-# OPTIONS_HADDOCK hide, prune #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Game.Werewolf.Test.Util (
     -- * Utility functions

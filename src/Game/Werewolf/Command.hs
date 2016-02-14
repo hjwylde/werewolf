@@ -11,6 +11,7 @@ Command data structures.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE RankNTypes            #-}
 
 module Game.Werewolf.Command (
@@ -37,10 +38,10 @@ import           Game.Werewolf.Engine
 import           Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote,
                                          isDefendersTurn, isGameOver, isSeersTurn, isVillagesTurn,
                                          isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
-                                         killPlayer)
+                                         killPlayer, setPlayerRole)
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     (Allegiance (..), allegiance)
+import           Game.Werewolf.Role     (Allegiance (..), villagerRole, werewolfRole)
 import qualified Game.Werewolf.Role     as Role
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
@@ -51,12 +52,11 @@ chooseCommand callerName allegiance' = Command $ do
     unlessM (isPlayerWolfHound callerName)  $ throwError [playerCannotDoThatMessage callerName]
     unlessM isWolfHoundsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
 
-    passes %= nub . cons callerName
-
-    when (allegiance' == Werewolves) $
-        players %= map (\player -> if player ^. name == callerName
-            then player & role . allegiance .~ allegiance'
-            else player)
+    setPlayerRole callerName role
+    where
+        role = case allegiance' of
+            Villagers   -> villagerRole
+            Werewolves  -> werewolfRole
 
 devourVoteCommand :: Text -> Text -> Command
 devourVoteCommand callerName targetName = Command $ do
@@ -127,7 +127,7 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
-        tell [pingWerewolvesMessage]
+        tell [pingRoleMessage "Werewolves"]
         tell $ map (pingPlayerMessage . view name) (filterAlignedWithWerewolves pendingVoters)
     WitchsTurn      -> do
         witch <- uses players $ head . filterWitches
@@ -172,7 +172,7 @@ quitCommand callerName = Command $ do
 
     caller <- uses players $ findByName_ callerName
 
-    killPlayer caller
+    killPlayer callerName
     tell [playerQuitMessage caller]
 
     passes %= delete callerName
