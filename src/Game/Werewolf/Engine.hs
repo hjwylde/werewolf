@@ -224,7 +224,7 @@ startGame callerName players = do
         playerNames = map (view name) players
 
 killPlayer :: MonadState Game m => Player -> m ()
-killPlayer player = players %= map (\player' -> if player' == player then player' & state .~ Dead else player')
+killPlayer player = modify (`Game.killPlayer` player)
 
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = gets Game.isDefendersTurn

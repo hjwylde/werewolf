@@ -11,6 +11,7 @@ Command data structures.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE RankNTypes            #-}
 
 module Game.Werewolf.Command (
@@ -127,7 +128,7 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
-        tell [pingWerewolvesMessage]
+        tell [pingRoleMessage "Werewolves"]
         tell $ map (pingPlayerMessage . view name) (filterAlignedWithWerewolves pendingVoters)
     WitchsTurn      -> do
         witch <- uses players $ head . filterWitches
