@@ -35,8 +35,7 @@ allCommandTests =
     , testProperty "choose command errors when caller is dead"          prop_chooseCommandErrorsWhenCallerIsDead
     , testProperty "choose command errors when not wolf-hound's turn"   prop_chooseCommandErrorsWhenNotWolfHoundsTurn
     , testProperty "choose command errors when caller not wolf-hound"   prop_chooseCommandErrorsWhenCallerNotWolfHound
-    , testProperty "choose command sets caller's allegiance"            prop_chooseCommandSetsCallersAllegiance
-    , testProperty "choose command updates passes"                      prop_chooseCommandUpdatesPasses
+    , testProperty "choose command sets caller's role"                  prop_chooseCommandSetsCallersRole
 
     , testProperty "devour vote command errors when game is over"                       prop_devourVoteCommandErrorsWhenGameIsOver
     , testProperty "devour vote command errors when caller does not exist"              prop_devourVoteCommandErrorsWhenCallerDoesNotExist
@@ -132,7 +131,6 @@ allEngineTests =
     , testProperty "check stage does nothing when game over"                    prop_checkStageDoesNothingWhenGameOver
 
     , testProperty "check defender's turn advances to wolf-hound's turn on first round"     prop_checkDefendersTurnAdvancesToWolfHoundsTurnOnFirstRound
-    , testProperty "check defender's turn advances to werewolves' turn after first round"   prop_checkDefendersTurnAdvancesToWerewolvesTurnAfterFirstRound
     -- TODO (hjw): implement this test case
     --, testProperty "check defender's turn advances when no defender"    prop_checkDefendersTurnAdvancesWhenNoDefender
 
@@ -172,7 +170,6 @@ allEngineTests =
     , testProperty "check wolf-hound's turn advances to werewolves' turn"    prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn
     -- TODO (hjw): implement this test case
     --, testProperty "check wolf-hound's turn advances when no wolf-hound"    prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
-    , testProperty "check wolf-hound's turn clears passes"                  prop_checkWolfHoundsTurnClearsPasses
 
     , testProperty "check game over advances stage"                                     prop_checkGameOverAdvancesStage
     , testProperty "check game over does nothing when at least two allegiances alive"   prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive

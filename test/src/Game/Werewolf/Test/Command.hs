@@ -11,8 +11,7 @@ module Game.Werewolf.Test.Command (
     -- * chooseCommand
     prop_chooseCommandErrorsWhenGameIsOver, prop_chooseCommandErrorsWhenCallerDoesNotExist,
     prop_chooseCommandErrorsWhenCallerIsDead, prop_chooseCommandErrorsWhenNotWolfHoundsTurn,
-    prop_chooseCommandErrorsWhenCallerNotWolfHound, prop_chooseCommandSetsCallersAllegiance,
-    prop_chooseCommandUpdatesPasses,
+    prop_chooseCommandErrorsWhenCallerNotWolfHound, prop_chooseCommandSetsCallersRole,
 
     -- * devourVoteCommand
     prop_devourVoteCommandErrorsWhenGameIsOver, prop_devourVoteCommandErrorsWhenCallerDoesNotExist,
@@ -83,7 +82,7 @@ import           Data.Maybe
 import Game.Werewolf.Command
 import Game.Werewolf.Game
 import Game.Werewolf.Player
-import Game.Werewolf.Role           (Allegiance, allegiance)
+import Game.Werewolf.Role           (Allegiance (..), villagerRole, werewolfRole)
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -120,20 +119,17 @@ prop_chooseCommandErrorsWhenCallerNotWolfHound (GameAtWolfHoundsTurn game) alleg
 
         verbose_runCommandErrors game command
 
-prop_chooseCommandSetsCallersAllegiance :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_chooseCommandSetsCallersAllegiance (GameAtWolfHoundsTurn game) allegiance' = do
+prop_chooseCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Allegiance -> Property
+prop_chooseCommandSetsCallersRole (GameAtWolfHoundsTurn game) allegiance' = do
     let wolfHound   = head . filterWolfHounds $ game ^. players
     let command     = chooseCommand (wolfHound ^. name) allegiance'
     let game'       = run_ (apply command) game
 
-    findByName_ (wolfHound ^. name) (game' ^. players) ^. role . allegiance === allegiance'
-
-prop_chooseCommandUpdatesPasses :: GameAtWolfHoundsTurn -> Property
-prop_chooseCommandUpdatesPasses (GameAtWolfHoundsTurn game) =
-    forAll (arbitraryChooseCommand game) $ \(Blind command) -> do
-        let game' = run_ (apply command) game
-
-        length (game' ^. passes) == 1
+    findByName_ (wolfHound ^. name) (game' ^. players) ^. role === role'
+    where
+        role' = case allegiance' of
+            Villagers   -> villagerRole
+            Werewolves  -> werewolfRole
 
 prop_devourVoteCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_devourVoteCommandErrorsWhenGameIsOver (GameAtGameOver game) =

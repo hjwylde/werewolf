@@ -358,7 +358,7 @@ playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
-    | isAlignedWithWerewolves player = publicMessage $ T.unwords
+    | isWerewolf player = publicMessage $ T.unwords
         [ player ^. name, "is tied up to a pyre and set alight."
         , "As they scream their body starts to contort and writhe, transforming into a Werewolf."
         , "Thankfully they go limp before breaking free of their restraints."

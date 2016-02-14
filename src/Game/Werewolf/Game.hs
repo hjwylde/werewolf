@@ -18,7 +18,7 @@ module Game.Werewolf.Game (
     newGame,
 
     -- ** Manipulations
-    killPlayer,
+    killPlayer, setPlayerRole,
 
     -- ** Queries
     isFirstRound, isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
@@ -45,6 +45,7 @@ import           Data.Maybe
 import           Data.Text       (Text)
 
 import Game.Werewolf.Player
+import Game.Werewolf.Role   (Role)
 
 import Prelude hiding (round)
 
@@ -96,6 +97,9 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
 
 killPlayer :: Game -> Text -> Game
 killPlayer game name' = game & players %~ map (\player -> if player ^. name == name' then player & state .~ Dead else player)
+
+setPlayerRole :: Game -> Text -> Role -> Game
+setPlayerRole game name' role' = game & players %~ map (\player -> if player ^. name == name' then player & role .~ role' else player)
 
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0
@@ -172,9 +176,7 @@ stageAvailable game WerewolvesTurn  = any isAlignedWithWerewolves (filterAlive $
 stageAvailable game WitchsTurn      =
     any isWitch (filterAlive $ game ^. players)
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
-stageAvailable game WolfHoundsTurn  =
-    any isWolfHound (filterAlive $ game ^. players)
-    && isFirstRound game
+stageAvailable game WolfHoundsTurn  = any isWolfHound (filterAlive $ game ^. players)
 
 getDevourEvent :: Game -> Maybe Event
 getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]

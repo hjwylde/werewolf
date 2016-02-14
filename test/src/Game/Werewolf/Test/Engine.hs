@@ -15,7 +15,6 @@ module Game.Werewolf.Test.Engine (
     prop_checkStageDoesNothingWhenGameOver,
 
     prop_checkDefendersTurnAdvancesToWolfHoundsTurnOnFirstRound,
-    prop_checkDefendersTurnAdvancesToWerewolvesTurnAfterFirstRound,
 
     prop_checkSeersTurnAdvancesToDefendersTurn, prop_checkSeersTurnResetsSee,
     prop_checkSeersTurnDoesNothingUnlessSeen,
@@ -38,7 +37,7 @@ module Game.Werewolf.Test.Engine (
     prop_checkWitchsTurnResetsHeal, prop_checkWitchsTurnResetsPoison,
     prop_checkWitchsTurnClearsPasses,
 
-    prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn, prop_checkWolfHoundsTurnClearsPasses,
+    prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn,
 
     -- * checkGameOver
     prop_checkGameOverAdvancesStage, prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive,
@@ -104,8 +103,8 @@ prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
     where
         game' = foldl killPlayer game (map (view name) . filterWitches $ game ^. players)
 
-prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound :: NewGame -> Bool
-prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound (NewGame game) =
+prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound :: GameWithProtect -> Bool
+prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound (GameWithProtect game) =
     not . isWolfHoundsTurn $ run_ checkStage game'
     where
         game' = foldl killPlayer game (map (view name) . filterWolfHounds $ game ^. players)
@@ -117,12 +116,6 @@ prop_checkStageDoesNothingWhenGameOver (GameAtGameOver game) =
 prop_checkDefendersTurnAdvancesToWolfHoundsTurnOnFirstRound :: GameWithProtect -> Bool
 prop_checkDefendersTurnAdvancesToWolfHoundsTurnOnFirstRound (GameWithProtect game) =
     isWolfHoundsTurn $ run_ checkStage game
-
-prop_checkDefendersTurnAdvancesToWerewolvesTurnAfterFirstRound :: GameWithProtect -> Bool
-prop_checkDefendersTurnAdvancesToWerewolvesTurnAfterFirstRound (GameWithProtect game) =
-    isWerewolvesTurn $ run_ checkStage game'
-    where
-        game' = game & round .~ 1
 
 prop_checkSeersTurnAdvancesToDefendersTurn :: GameWithSee -> Bool
 prop_checkSeersTurnAdvancesToDefendersTurn (GameWithSee game) =
