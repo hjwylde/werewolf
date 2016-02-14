@@ -73,7 +73,7 @@ defenderRole = Role
     , _allegiance   = Villagers
     , _description  = T.unwords
         [ "A knight living in Miller's Hollow."
-        , "The Defender has the ability to protect one player, except themself, each night."
+        , "The Defender can save the Villagers (bar himself!) from the bite of the Werewolves."
         ]
     , _advice       =
         "Be careful when you choose to protect someone, you cannot protect them 2 nights in a row."
@@ -83,7 +83,10 @@ scapegoatRole :: Role
 scapegoatRole = Role
     { _name         = "Scapegoat"
     , _allegiance   = Villagers
-    , _description  = "That one person everyone loves to blame."
+    , _description  = T.unwords
+        [ "It's sad to say, but in Miller's Hollow, when something doesn't go right"
+        , "it's always him who unjustly suffers the consequences."
+        ]
     , _advice       = "Cross your fingers that the votes don't end up tied."
     }
 
@@ -106,7 +109,12 @@ simpleVillagerRole :: Role
 simpleVillagerRole = Role
     { _name         = "Simple Villager"
     , _allegiance   = Villagers
-    , _description  = "An ordinary townsperson humbly living in Millers Hollow."
+    , _description  = T.unwords
+        [ "A simple, ordinary townsperson in every way."
+        , "Their only weapons are the ability to analyze behaviour to identify Werewolves,"
+        , "and the strength of their conviction to prevent"
+        , "the execution of the innocents like themselves."
+        ]
     , _advice       =
         "Bluffing can be a good technique, but you had better be convincing about what you say."
     }
@@ -115,7 +123,11 @@ villagerVillagerRole :: Role
 villagerVillagerRole = Role
     { _name         = "Villager-Villager"
     , _allegiance   = Villagers
-    , _description  = "An honest townsperson humbly living in Millers Hollow."
+    , _description  = T.unwords
+        [ "This person has a soul as clear and transparent as the water from a mountain stream."
+        , "They will deserve the attentive ear of their peers"
+        , "and will make their word decisive in crucial moments."
+        ]
     , _advice       = "You'll make friends quickly, but be wary about whom you trust."
     }
 
@@ -123,10 +135,12 @@ werewolfRole :: Role
 werewolfRole = Role
     { _name         = "Werewolf"
     , _allegiance   = Werewolves
-    , _description  =
-        "A shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."
+    , _description  = T.unwords
+        [ "Each night they devour a Villager."
+        , "During the day they try to hide their nocturnal identity to avoid mob justice."
+        ]
     , _advice       =
-        "Voting against your partner can be a good way to deflect suspicion from yourself."
+        "Voting to lynch your partner can be a good way to deflect suspicion from yourself."
     }
 
 witchRole :: Role
@@ -134,8 +148,7 @@ witchRole = Role
     { _name         = "Witch"
     , _allegiance   = Villagers
     , _description  = T.unwords
-        [ "A conniving townsperson."
-        , "She knows how to make up 2 extremely powerful potions;"
+        [ "She knows how to make up 2 extremely powerful potions;"
         , "one healing potion which can revive the Werewolves' victim,"
         , "one poison potion which when used can kill a player."
         ]
@@ -150,8 +163,8 @@ wolfHoundRole = Role
     { _name         = "Wolf-hound"
     , _allegiance   = Villagers
     , _description  = T.unwords
-        [ "All dogs know in the depths of their soul that their acestors were wolves"
-        , "and that it's Mankind who has kept them in the state of childishness and fear,"
+        [ "All dogs know in the depths of their soul that their ancestors were wolves"
+        , "and that it's mankind who has kept them in the state of childishness and fear,"
         , "the faithful and generous companions."
         , "In any case, only the Wolf-hound can decide if he'll obey his human and civilized master"
         , "or if he'll listen to the call of wild nature buried within him."
