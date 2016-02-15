@@ -173,7 +173,7 @@ stageAvailable game SeersTurn       = any isSeer (filterAlive $ game ^. players)
 stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
 stageAvailable _ VillagesTurn       = True
-stageAvailable game WerewolvesTurn  = any isAlignedWithWerewolves (filterAlive $ game ^. players)
+stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
 stageAvailable game WitchsTurn      =
     any isWitch (filterAlive $ game ^. players)
     && (not (game ^. healUsed) || not (game ^. poisonUsed))

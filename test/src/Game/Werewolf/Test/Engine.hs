@@ -216,7 +216,7 @@ prop_checkWerewolvesTurnDoesNothingUnlessAllVoted (GameAtWerewolvesTurn game) =
     forAll (runArbitraryCommands n game) $ \game' ->
     isWerewolvesTurn $ run_ checkStage game'
     where
-        n = length (filterAlignedWithWerewolves $ game ^. players) - 1
+        n = length (filterWerewolves $ game ^. players) - 1
 
 prop_checkWitchsTurnAdvancesToVillagesTurn :: GameAtWitchsTurn -> Property
 prop_checkWitchsTurnAdvancesToVillagesTurn (GameAtWitchsTurn game) =
@@ -239,7 +239,7 @@ prop_checkWitchsTurnHealsDevoureeWhenHealed game =
                     ) ^. players
     where
         game'   = game & stage .~ WerewolvesTurn
-        n       = length . filterAlignedWithWerewolves $ game' ^. players
+        n       = length . filterWerewolves $ game' ^. players
 
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned :: GameWithPoison -> Property
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned (GameWithPoison game) =

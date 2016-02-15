@@ -201,7 +201,7 @@ stageMessages game = case game ^. stage of
         players'            = game ^. players
         defendersName       = findByRole_ defenderRole players' ^. name
         seersName           = findByRole_ seerRole players' ^. name
-        aliveWerewolfNames  = map (view name) . filterAlive $ filterAlignedWithWerewolves players'
+        aliveWerewolfNames  = map (view name) . filterAlive $ filterWerewolves players'
         wolfHoundsName      = findByRole_ wolfHoundRole players' ^. name
 
 defendersTurnMessages :: Text -> [Message]
@@ -372,7 +372,7 @@ playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
-    | isAlignedWithWerewolves player = publicMessage $ T.concat
+    | isWerewolf player = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight."
         , " As they scream their body starts to contort and writhe, transforming into "
         , article playerRole, " ", playerRole ^. Role.name, "."

@@ -30,7 +30,7 @@ module Game.Werewolf.Test.Arbitrary (
     runArbitraryCommands,
 
     -- ** Player
-    arbitraryPlayer, arbitraryPlayerAlignedWithWerewolves,
+    arbitraryPlayer, arbitraryWerewolf,
 ) where
 
 import Control.Lens hiding (elements)
@@ -250,10 +250,10 @@ arbitraryPlayerSet = do
 
     let playersWithRestrictedRole = map (\role -> head $ filterByRole role players) restrictedRoles
 
-    let werewolves      = take (n `quot` 6 + 1) $ filterAlignedWithWerewolves players
-    let simpleVillagers = take (n - length restrictedRoles - length werewolves) $ filter isSimpleVillager players
+    let simpleWerewolves    = take (n `quot` 6 + 1) $ filter isSimpleWerewolf players
+    let simpleVillagers     = take (n - length restrictedRoles - length simpleWerewolves) $ filter isSimpleVillager players
 
-    return $ playersWithRestrictedRole ++ werewolves ++ simpleVillagers
+    return $ playersWithRestrictedRole ++ simpleVillagers ++ simpleWerewolves
 
 arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
@@ -280,8 +280,8 @@ arbitraryChooseCommand game = do
 
 arbitraryDevourVoteCommand :: Game -> Gen (Blind Command)
 arbitraryDevourVoteCommand game = do
-    let applicableCallers   = filterAlignedWithWerewolves $ getPendingVoters game
-    target                  <- suchThat (arbitraryPlayer game) $ not . isAlignedWithWerewolves
+    let applicableCallers   = filterWerewolves $ getPendingVoters game
+    target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
 
     if null applicableCallers
         then return $ Blind noopCommand
@@ -362,6 +362,5 @@ iterateM n f a = f a >>= iterateM (n - 1) f
 arbitraryPlayer :: Game -> Gen Player
 arbitraryPlayer = elements . filterAlive . view players
 
-arbitraryPlayerAlignedWithWerewolves :: Game -> Gen Player
-arbitraryPlayerAlignedWithWerewolves =
-    elements . filterAlive . filterAlignedWithWerewolves . view players
+arbitraryWerewolf :: Game -> Gen Player
+arbitraryWerewolf = elements . filterAlive . filterWerewolves . view players

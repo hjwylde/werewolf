@@ -61,15 +61,15 @@ chooseCommand callerName allegiance' = Command $ do
 devourVoteCommand :: Text -> Text -> Command
 devourVoteCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM (isPlayerAlignedWithWerewolves callerName)  $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWerewolvesTurn                            $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerVote callerName) . const        $ throwError [playerHasAlreadyVotedMessage callerName]
+    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
-    whenM (isPlayerAlignedWithWerewolves targetName)    $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
+    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterAlignedWithWerewolves
+    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterWerewolves
 
     tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
 
@@ -128,7 +128,7 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         pendingVoters <- getPendingVoters
 
         tell [pingRoleMessage "Werewolves"]
-        tell $ map (pingPlayerMessage . view name) (filterAlignedWithWerewolves pendingVoters)
+        tell $ map (pingPlayerMessage . view name) (filterWerewolves pendingVoters)
     WitchsTurn      -> do
         witch <- findPlayerByRole_ witchRole
 
@@ -217,10 +217,10 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell [waitingOnMessage (Just callerName) pendingVoters]
     WerewolvesTurn  -> do
         game            <- get
-        pendingVoters   <- filterAlignedWithWerewolves <$> getPendingVoters
+        pendingVoters   <- filterWerewolves <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
-        whenM (doesPlayerExist callerName &&^ isPlayerAlignedWithWerewolves callerName) $
+        whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
             tell [waitingOnMessage (Just callerName) pendingVoters]
     WitchsTurn      -> do
         game <- get

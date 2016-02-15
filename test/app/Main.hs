@@ -37,16 +37,16 @@ allCommandTests =
     , testProperty "choose command errors when caller not wolf-hound"   prop_chooseCommandErrorsWhenCallerNotWolfHound
     , testProperty "choose command sets caller's role"                  prop_chooseCommandSetsCallersRole
 
-    , testProperty "devour vote command errors when game is over"                       prop_devourVoteCommandErrorsWhenGameIsOver
-    , testProperty "devour vote command errors when caller does not exist"              prop_devourVoteCommandErrorsWhenCallerDoesNotExist
-    , testProperty "devour vote command errors when target does not exist"              prop_devourVoteCommandErrorsWhenTargetDoesNotExist
-    , testProperty "devour vote command errors when caller is dead"                     prop_devourVoteCommandErrorsWhenCallerIsDead
-    , testProperty "devour vote command errors when target is dead"                     prop_devourVoteCommandErrorsWhenTargetIsDead
-    , testProperty "devour vote command errors when not werewolves turn"                prop_devourVoteCommandErrorsWhenNotWerewolvesTurn
-    , testProperty "devour vote command errors when caller not aligned with werewolves" prop_devourVoteCommandErrorsWhenCallerNotAlignedWithWerewolves
-    , testProperty "devour vote command errors when caller has voted"                   prop_devourVoteCommandErrorsWhenCallerHasVoted
-    , testProperty "devour vote command errors when target aligned with werewolves"     prop_devourVoteCommandErrorsWhenTargetAlignedWithWerewolves
-    , testProperty "devour vote command updates votes"                                  prop_devourVoteCommandUpdatesVotes
+    , testProperty "devour vote command errors when game is over"           prop_devourVoteCommandErrorsWhenGameIsOver
+    , testProperty "devour vote command errors when caller does not exist"  prop_devourVoteCommandErrorsWhenCallerDoesNotExist
+    , testProperty "devour vote command errors when target does not exist"  prop_devourVoteCommandErrorsWhenTargetDoesNotExist
+    , testProperty "devour vote command errors when caller is dead"         prop_devourVoteCommandErrorsWhenCallerIsDead
+    , testProperty "devour vote command errors when target is dead"         prop_devourVoteCommandErrorsWhenTargetIsDead
+    , testProperty "devour vote command errors when not werewolves turn"    prop_devourVoteCommandErrorsWhenNotWerewolvesTurn
+    , testProperty "devour vote command errors when caller not werewolf"    prop_devourVoteCommandErrorsWhenCallerNotWerewolf
+    , testProperty "devour vote command errors when caller has voted"       prop_devourVoteCommandErrorsWhenCallerHasVoted
+    , testProperty "devour vote command errors when target werewolf"        prop_devourVoteCommandErrorsWhenTargetWerewolf
+    , testProperty "devour vote command updates votes"                      prop_devourVoteCommandUpdatesVotes
 
     , testProperty "heal command errors when game is over"          prop_healCommandErrorsWhenGameIsOver
     , testProperty "heal command errors when caller does not exist" prop_healCommandErrorsWhenCallerDoesNotExist

@@ -45,7 +45,7 @@ module Game.Werewolf.Engine (
 
     -- ** Queries
     doesPlayerExist, isPlayerDefender, isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
-    isPlayerAlignedWithWerewolves,
+    isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 
     -- * Role
@@ -126,7 +126,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
             advanceStage
 
     WerewolvesTurn -> do
-        aliveWerewolves <- uses players (filterAlive . filterAlignedWithWerewolves)
+        aliveWerewolves <- uses players (filterAlive . filterWerewolves)
 
         whenM (uses votes $ (length aliveWerewolves ==) . Map.size) $ do
             getVoteResult >>= \votees -> case votees of
@@ -311,8 +311,8 @@ isPlayerWitch name = isWitch <$> findPlayerByName_ name
 isPlayerWolfHound :: MonadState Game m => Text -> m Bool
 isPlayerWolfHound name = isWolfHound <$> findPlayerByName_ name
 
-isPlayerAlignedWithWerewolves :: MonadState Game m => Text -> m Bool
-isPlayerAlignedWithWerewolves name = isAlignedWithWerewolves <$> findPlayerByName_ name
+isPlayerWerewolf :: MonadState Game m => Text -> m Bool
+isPlayerWerewolf name = isWerewolf <$> findPlayerByName_ name
 
 isPlayerAlive :: MonadState Game m => Text -> m Bool
 isPlayerAlive name = isAlive <$> findPlayerByName_ name
