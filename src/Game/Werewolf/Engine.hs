@@ -95,15 +95,22 @@ checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
     GameOver -> return ()
 
-    DefendersTurn -> whenJustM (use protect) $ const advanceStage
+    DefendersTurn -> do
+        whenM (isDead <$> findPlayerByRole_ defenderRole) advanceStage
 
-    SeersTurn -> whenJustM (use see) $ \targetName -> do
-        seer    <- findPlayerByRole_ seerRole
-        target  <- findPlayerByName_ targetName
+        whenJustM (use protect) $ const advanceStage
 
-        tell [playerSeenMessage (seer ^. name) target]
+    SeersTurn -> do
+        seer <- findPlayerByRole_ seerRole
 
-        advanceStage
+        when (isDead seer) advanceStage
+
+        whenJustM (use see) $ \targetName -> do
+            target <- findPlayerByName_ targetName
+
+            tell [playerSeenMessage (seer ^. name) target]
+
+            advanceStage
 
     Sunrise -> advanceStage
 
@@ -154,9 +161,14 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             advanceStage
 
-    WildChildsTurn -> whenJustM (use roleModel) $ const advanceStage
+    WildChildsTurn -> do
+        whenM (isDead <$> findPlayerByRole_ wildChildRole) advanceStage
+
+        whenJustM (use roleModel) $ const advanceStage
 
     WitchsTurn -> do
+        whenM (isDead <$> findPlayerByRole_ witchRole) advanceStage
+
         whenJustM (use poison) $ \targetName -> do
             events %= (++ [PoisonEvent targetName])
             poison .= Nothing

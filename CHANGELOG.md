@@ -13,6 +13,7 @@
 * Renamed the Villager role to Simple Villager.
 * Renamed the Werewolf role to Simple Werewolf.
 * Renamed the devourVoteCommand and lynchVoteCommand to voteDevourCommand and voteLynchCommand. ([#49](https://github.com/hjwylde/werewolf/issues/49))
+* Fixed `quit` to advance the stage when the only role for that stage has quit.
 
 #### v0.4.4.1
 

@@ -169,6 +169,7 @@ quitCommand callerName = Command $ do
         protect         .= Nothing
         priorProtect    .= Nothing
     when (isSeer caller)        $ see .= Nothing
+    when (isWildChild caller)   $ roleModel .= Nothing
     when (isWitch caller)       $ do
         heal        .= False
         healUsed    .= False
