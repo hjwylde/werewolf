@@ -37,7 +37,7 @@ module Game.Werewolf.Response (
     pingPlayerMessage, pingRoleMessage,
 
     -- ** Status messages
-    currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
+    currentStageMessages, playersInGameMessage, waitingOnMessage,
 
     -- ** Seer's turn messages
     playerSeenMessage,
@@ -154,7 +154,7 @@ engineVersionMessage to version = privateMessage to $ T.unwords ["Version", T.pa
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
-    [ [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map (view role) players']
+    [ [newPlayersInGameMessage players', rolesInGameMessage $ map (view role) players']
     , map newPlayerMessage players'
     , villagerVillagerMessages
     , stageMessages game
@@ -340,8 +340,8 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn WitchsTurn     = "Witch's"
         showTurn WolfHoundsTurn = "Wolf-hound's"
 
-rolesInGameMessage :: Maybe Text -> [Role] -> Message
-rolesInGameMessage mTo roles = Message mTo $ T.concat
+rolesInGameMessage :: [Role] -> Message
+rolesInGameMessage roles = publicMessage $ T.concat
     [ "The roles in play are "
     , T.intercalate ", " $ map (\(role, count) ->
         T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
