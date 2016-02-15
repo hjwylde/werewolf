@@ -106,6 +106,7 @@ allEngineTests =
     , testProperty "start game errors unless unique player names"           prop_startGameErrorsUnlessUniquePlayerNames
     , testProperty "start game errors when less than 7 players"             prop_startGameErrorsWhenLessThan7Players
     , testProperty "start game errors when more than 24 players"            prop_startGameErrorsWhenMoreThan24Players
+    , testProperty "start game errors when more than 1 angel"               prop_startGameErrorsWhenMoreThan1Angel
     , testProperty "start game errors when more than 1 defender"            prop_startGameErrorsWhenMoreThan1Defender
     , testProperty "start game errors when more than 1 scapegoat"           prop_startGameErrorsWhenMoreThan1Scapegoat
     , testProperty "start game errors when more than 1 seer"                prop_startGameErrorsWhenMoreThan1Seer
@@ -401,6 +402,11 @@ prop_startGameErrorsWhenMoreThan24Players =
     forAll (resize 30 $ listOf arbitrary) $ \players ->
         length players > 24
         ==> isLeft . runExcept . runWriterT $ startGame "" players
+
+prop_startGameErrorsWhenMoreThan1Angel :: [Player] -> Property
+prop_startGameErrorsWhenMoreThan1Angel players =
+    length (filter isAngel players) > 1
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Defender :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Defender players =

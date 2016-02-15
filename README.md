@@ -14,12 +14,14 @@ Each night, murders are committed by the Villagers, who due to some mysterious p
 It is now time to take control and eliminate this ancient evil, before the town loses its last few inhabitants.
 
 Objective of the Game:  
+For the Angel: die in the first round.  
 For the Villagers: lynch all of the Werewolves.  
 For the Werewolves: devour all of the Villagers.
 
 #### Roles
 
 The current implemented roles are:
+* Angel.
 * Defender.
 * Scapegoat.
 * Seer.

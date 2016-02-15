@@ -25,8 +25,8 @@ module Game.Werewolf.Player (
 
     -- ** Queries
     doesPlayerExist,
-    isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf, isVillagerVillager,
-    isWildChild, isWitch, isWolfHound,
+    isAngel, isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf,
+    isVillagerVillager, isWildChild, isWitch, isWolfHound,
     isVillager, isWerewolf,
     isAlive, isDead,
 
@@ -79,6 +79,9 @@ filterWerewolves = filter isWerewolf
 
 doesPlayerExist :: Text -> [Player] -> Bool
 doesPlayerExist name = isJust . findByName name
+
+isAngel :: Player -> Bool
+isAngel player = player ^. role == angelRole
 
 isDefender :: Player -> Bool
 isDefender player = player ^. role == defenderRole

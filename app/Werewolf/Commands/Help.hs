@@ -92,6 +92,7 @@ descriptionMessages = map (T.intercalate "\n")
         ]
       ]
     , [ "Objective of the Game:"
+      , "For the Angel: die in the first round."
       , "For the Villagers: lynch all of the Werewolves."
       , "For the Werewolves: devour all of the Villagers."
       ]
@@ -117,16 +118,20 @@ rulesMessages = map (T.intercalate "\n")
     , [ T.unwords
         [ "Each player is informed of their role (see `help roles' for a list)"
         , "at the start of the game. A game begins at night and follows a standard cycle."
+        , "(N.B., when the Angel is in play the game begins with the village vote.)"
         ]
-      , "1. The village falls asleep."
-      , "2. (First round only) the Wolf-hound wakes up and chooses an allegiance."
-      , "3. The Defender wakes up and protects someone."
-      , "4. The Seer wakes up and sees someone's allegiance."
-      , "5. The Werewolves wake up and select a victim."
-      , "6. The Witch wakes up and may heal the victim and/or poison someone."
-      , "7. The village wakes up and find the victim."
-      , "8. The village votes to lynch a suspect."
+      , "1. (When the Angel is in play) the village votes to lynch a suspect."
+      , "2. The village falls asleep."
+      , "3. (First round only) the Wild-child wakes up and chooses a role model."
+      , "4. The Defender wakes up and protects someone."
+      , "5. The Seer wakes up and sees someone's allegiance."
+      , "6. (First round only) the Wolf-hound wakes up and chooses an allegiance."
+      , "7. The Werewolves wake up and select a victim."
+      , "8. The Witch wakes up and may heal the victim and/or poison someone."
+      , "9. The village wakes up and find the victim."
+      , "10. The village votes to lynch a suspect."
       , "The game is over when only Villagers or Werewolves are left alive."
+      , "Or, when the Angel is in play, the game ends if the Angel is killed within the first night."
       ]
     ]
 

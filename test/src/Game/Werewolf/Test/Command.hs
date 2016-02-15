@@ -176,17 +176,20 @@ prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist (GameAtWolfHoundsTu
     allegiance `notElem` ["Villagers", "Werewolves"]
         ==> verbose_runCommandErrors game command
 
-prop_chooseAllegianceCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_chooseAllegianceCommandSetsCallersRole (GameAtWolfHoundsTurn game) allegiance' = do
-    let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
-    let command     = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance')
-    let game'       = run_ (apply command) game
+prop_chooseAllegianceCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Property
+prop_chooseAllegianceCommandSetsCallersRole (GameAtWolfHoundsTurn game) = do
+    let wolfHound = findByRole_ wolfHoundRole (game ^. players)
 
-    findByName_ (wolfHound ^. name) (game' ^. players) ^. role === role'
+    forAll (elements [Villagers, Werewolves]) $ \allegiance' -> do
+        let command = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance')
+        let game'   = run_ (apply command) game
+
+        findByName_ (wolfHound ^. name) (game' ^. players) ^. role === roleForAllegiance allegiance'
     where
-        role' = case allegiance' of
+        roleForAllegiance allegiance = case allegiance of
             Villagers   -> simpleVillagerRole
             Werewolves  -> simpleWerewolfRole
+            _           -> undefined
 
 prop_choosePlayerCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_choosePlayerCommandErrorsWhenGameIsOver (GameAtGameOver game) =

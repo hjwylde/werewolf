@@ -7,6 +7,7 @@
 * Added the Wolf-hound role. ([#50](https://github.com/hjwylde/werewolf/issues/50))
 * Added a `version` command. ([#84](https://github.com/hjwylde/werewolf/issues/84))
 * Added the Wild-child role. ([#49](https://github.com/hjwylde/werewolf/issues/49))
+* Added the Angel role. ([#52](https://github.com/hjwylde/werewolf/issues/52))
 
 *Revisions*
 
