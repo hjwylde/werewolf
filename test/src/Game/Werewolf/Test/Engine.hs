@@ -100,9 +100,11 @@ allEngineTests =
     , testProperty "check wolf-hound's turn advances when no wolf-hound"    prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
     , testProperty "check wolf-hound's turn does nothing unless chosen"     prop_checkWolfHoundsTurnDoesNothingUnlessChosen
 
-    , testProperty "check game over advances stage" prop_checkGameOverAdvancesStage
+    , testProperty "check game over advances stage when zero allegiances alive" prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive
+    , testProperty "check game over advances stage when one allegiance alive" prop_checkGameOverAdvancesStageWhenOneAllegianceAlive
     -- TODO (hjw): pending
     --, testProperty "check game over does nothing when at least two allegiances alive"   prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive
+    , testProperty "check game over advances stage when second round and angel dead" prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead
 
     , testProperty "start game uses given players"                          prop_startGameUsesGivenPlayers
     , testProperty "start game errors unless unique player names"           prop_startGameErrorsUnlessUniquePlayerNames
@@ -376,8 +378,12 @@ prop_checkWolfHoundsTurnDoesNothingUnlessChosen :: GameAtWolfHoundsTurn -> Bool
 prop_checkWolfHoundsTurnDoesNothingUnlessChosen (GameAtWolfHoundsTurn game) =
     isWolfHoundsTurn $ run_ checkStage game
 
-prop_checkGameOverAdvancesStage :: GameWithOneAllegianceAlive -> Property
-prop_checkGameOverAdvancesStage (GameWithOneAllegianceAlive game) =
+prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive :: GameWithZeroAllegiancesAlive -> Bool
+prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive (GameWithZeroAllegiancesAlive game) =
+    isGameOver $ run_ checkGameOver game
+
+prop_checkGameOverAdvancesStageWhenOneAllegianceAlive :: GameWithOneAllegianceAlive -> Property
+prop_checkGameOverAdvancesStageWhenOneAllegianceAlive (GameWithOneAllegianceAlive game) =
     forAll (sublistOf . filterAlive $ game ^. players) $ \players' -> do
         let game' = foldr killPlayer game (map (view name) players')
 
@@ -388,6 +394,13 @@ prop_checkGameOverAdvancesStage (GameWithOneAllegianceAlive game) =
 --prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive (GameWithDeadPlayers game) =
 --    length (nub . map (view $ role . allegiance) . filterAlive $ game ^. players) > 1
 --    ==> not . isGameOver $ run_ checkGameOver game
+
+prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead :: GameOnSecondRound -> Bool
+prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead (GameOnSecondRound game) = do
+    let angel = findByRole_ angelRole (game ^. players)
+    let game' = killPlayer (angel ^. name) game
+
+    isGameOver $ run_ checkGameOver game'
 
 prop_startGameUsesGivenPlayers :: Property
 prop_startGameUsesGivenPlayers =

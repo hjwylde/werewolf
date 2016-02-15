@@ -192,11 +192,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
-    game            <- get
-    stage'          <- use stage
-    alivePlayers    <- uses players filterAlive
+    game                <- get
+    stage'              <- use stage
+    aliveAllegiances    <- uses players (nub . map (view $ role . allegiance) . filterAlive)
 
-    let nextStage = if length (nub $ map (view $ role . allegiance) alivePlayers) <= 1
+    let nextStage = if length aliveAllegiances <= 1 && any isAngel (filterDead $ game ^. players)
         then GameOver
         else head $ filter (stageAvailable game) (drop1 $ dropWhile (stage' /=) stageCycle)
 
@@ -235,9 +235,13 @@ applyEvent (PoisonEvent name)       = do
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = do
-    aliveAllegiances <- uses players $ nub . map (view $ role . allegiance) . filterAlive
+    aliveAllegiances    <- uses players (nub . map (view $ role . allegiance) . filterAlive)
+    deadPlayers         <- uses players filterDead
 
-    when (length aliveAllegiances <= 1) $ stage .= GameOver >> get >>= tell . gameOverMessages
+    when (length aliveAllegiances <= 1 || any isAngel deadPlayers) $ do
+        stage .= GameOver
+
+        tell . gameOverMessages =<< get
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
