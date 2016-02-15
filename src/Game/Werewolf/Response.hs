@@ -207,13 +207,13 @@ stageMessages game = case game ^. stage of
 defendersTurnMessages :: Text -> [Message]
 defendersTurnMessages to =
     [ publicMessage "The Defender wakes up."
-    , privateMessage to "Whom would you like to protect?"
+    , privateMessage to "Whom would you like to `protect`?"
     ]
 
 seersTurnMessages :: Text -> [Message]
 seersTurnMessages to =
     [ publicMessage "The Seer wakes up."
-    , privateMessage to "Whose allegiance would you like to see?"
+    , privateMessage to "Whose allegiance would you like to `see`?"
     ]
 
 sunriseMessage :: Message
@@ -225,7 +225,7 @@ nightFallsMessage = publicMessage "Night falls, the village is asleep."
 villagesTurnMessages :: [Message]
 villagesTurnMessages =
     [ publicMessage "As the village gathers in the square the town clerk calls for a vote."
-    , publicMessage "Whom would you like to lynch?"
+    , publicMessage "Whom would you like to lynch? (Use `vote`.)"
     ]
 
 firstWerewolvesTurnMessages :: [Text] -> [Message]
@@ -245,7 +245,7 @@ firstWerewolvesTurnMessages tos = concat
 werewolvesTurnMessages :: [Text] -> [Message]
 werewolvesTurnMessages tos =
     [ publicMessage "The Werewolves wake up, recognise one another and choose a new victim."
-    ] ++ groupMessages tos "Whom would you like to devour?"
+    ] ++ groupMessages tos "Whom would you like to devour? (Use `vote`.)"
 
 witchsTurnMessages :: Game -> [Message]
 witchsTurnMessages game = concat
@@ -267,16 +267,16 @@ witchsTurnMessages game = concat
             _                               -> []
         healMessages
             | not (game ^. healUsed)
-                && isJust (getDevourEvent game) = [privateMessage witchsName "Would you like to heal them?"]
+                && isJust (getDevourEvent game) = [privateMessage witchsName "Would you like to `heal` them?"]
             | otherwise                         = []
         poisonMessages
-            | not (game ^. poisonUsed)          = [privateMessage witchsName "Would you like to poison anyone?"]
+            | not (game ^. poisonUsed)          = [privateMessage witchsName "Would you like to `poison` anyone?"]
             | otherwise                         = []
 
 wolfHoundsTurnMessages :: Text -> [Message]
 wolfHoundsTurnMessages to =
     [ publicMessage "The Wolf-hound wakes up."
-    , privateMessage to "Whom would you like to be aligned with?"
+    , privateMessage to "Which allegiance would you like to be aligned with? (Use `choose`.)"
     ]
 
 gameOverMessages :: Game -> [Message]
