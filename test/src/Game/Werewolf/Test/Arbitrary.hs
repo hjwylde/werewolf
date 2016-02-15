@@ -14,9 +14,12 @@ module Game.Werewolf.Test.Arbitrary (
     -- ** Game
     NewGame(..),
     GameAtDefendersTurn(..), GameAtGameOver(..), GameAtSeersTurn(..), GameAtVillagesTurn(..),
-    GameAtWerewolvesTurn(..), GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
-    GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
-    GameWithPoison(..), GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithSee(..),
+    GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..), GameAtWitchsTurn(..),
+    GameAtWolfHoundsTurn(..),
+    GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
+    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPoison(..),
+    GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
+    GameWithRoleModelAtVillagesTurn(..), GameWithSee(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -24,9 +27,10 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
 
     -- ** Command
-    arbitraryCommand, arbitraryChooseCommand, arbitraryVoteDevourCommand, arbitraryHealCommand,
-    arbitraryVoteLynchCommand, arbitraryPassCommand, arbitraryPoisonCommand,
-    arbitraryProtectCommand, arbitraryQuitCommand, arbitrarySeeCommand,
+    arbitraryCommand, arbitraryChooseAllegianceCommand, arbitraryChoosePlayerCommand,
+    arbitraryHealCommand, arbitraryPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
+    arbitraryQuitCommand, arbitrarySeeCommand, arbitraryVoteDevourCommand,
+    arbitraryVoteLynchCommand,
     runArbitraryCommands,
 
     -- ** Player
@@ -57,15 +61,7 @@ instance Arbitrary Game where
         return $ game & stage .~ stage'
 
 instance Arbitrary Stage where
-    arbitrary = elements
-        [ DefendersTurn
-        , GameOver
-        , SeersTurn
-        , VillagesTurn
-        , WerewolvesTurn
-        , WitchsTurn
-        , WolfHoundsTurn
-        ]
+    arbitrary = elements $ allStages \\ [GameOver, Sunrise, Sunset]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary
@@ -133,6 +129,15 @@ instance Arbitrary GameAtWerewolvesTurn where
 
         return $ GameAtWerewolvesTurn (game & stage .~ WerewolvesTurn)
 
+newtype GameAtWildChildsTurn = GameAtWildChildsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtWildChildsTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtWildChildsTurn (game & stage .~ WildChildsTurn)
+
 newtype GameAtWitchsTurn = GameAtWitchsTurn Game
     deriving (Eq, Show)
 
@@ -150,6 +155,17 @@ instance Arbitrary GameAtWolfHoundsTurn where
         game <- arbitrary
 
         return $ GameAtWolfHoundsTurn (game & stage .~ WolfHoundsTurn)
+
+newtype GameWithDeadPlayers = GameWithDeadPlayers Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithDeadPlayers where
+    arbitrary = do
+        game        <- arbitrary
+        players'    <- sublistOf $ game ^. players
+        let game'   = foldr killPlayer game (map (view name) players')
+
+        return $ GameWithDeadPlayers (run_ checkStage game')
 
 newtype GameWithDevourEvent = GameWithDevourEvent Game
     deriving (Eq, Show)
@@ -188,6 +204,18 @@ instance Arbitrary GameWithLynchVotes where
         game <- arbitrary
 
         GameWithLynchVotes <$> runArbitraryCommands (length $ game ^. players) (game & stage .~ VillagesTurn)
+
+newtype GameWithOneAllegianceAlive = GameWithOneAllegianceAlive Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithOneAllegianceAlive where
+    arbitrary = do
+        game            <- arbitrary
+        allegiance'     <- arbitrary
+        let players'    = filter ((allegiance' /=) . view (role . allegiance)) (game ^. players)
+        let game'       = foldr killPlayer game (map (view name) players')
+
+        return $ GameWithOneAllegianceAlive game'
 
 newtype GameWithPoison = GameWithPoison Game
     deriving (Eq, Show)
@@ -228,9 +256,29 @@ instance Arbitrary GameWithProtectAndWolfHoundChoice where
     arbitrary = do
         (GameWithProtect game)  <- arbitrary
         let game'               = run_ checkStage game
-        (Blind command)         <- arbitraryChooseCommand game'
+        (Blind command)         <- arbitraryChooseAllegianceCommand game'
 
         return $ GameWithProtectAndWolfHoundChoice (run_ (apply command) game')
+
+newtype GameWithRoleModel = GameWithRoleModel Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithRoleModel where
+    arbitrary = do
+        (GameAtWildChildsTurn game) <- arbitrary
+        (Blind command)             <- arbitraryChoosePlayerCommand game
+        let game'                   = run_ (apply command) game
+
+        return $ GameWithRoleModel game'
+
+newtype GameWithRoleModelAtVillagesTurn = GameWithRoleModelAtVillagesTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithRoleModelAtVillagesTurn where
+    arbitrary = do
+        (GameWithRoleModel game) <- arbitrary
+
+        return $ GameWithRoleModelAtVillagesTurn (game & stage .~ VillagesTurn)
 
 newtype GameWithSee = GameWithSee Game
     deriving (Eq, Show)
@@ -245,7 +293,7 @@ instance Arbitrary GameWithSee where
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
-    n <- choose (10, 24)
+    n <- choose (14, 24)
     players <- nubOn (view name) <$> infiniteList
 
     let playersWithRestrictedRole = map (\role -> head $ filterByRole role players) restrictedRoles
@@ -264,19 +312,27 @@ arbitraryCommand game = case game ^. stage of
     SeersTurn       -> arbitrarySeeCommand game
     VillagesTurn    -> arbitraryVoteLynchCommand game
     WerewolvesTurn  -> arbitraryVoteDevourCommand game
+    WildChildsTurn  -> arbitraryChoosePlayerCommand game
     WitchsTurn      -> oneof [
         arbitraryHealCommand game,
         arbitraryPassCommand game,
         arbitraryPoisonCommand game
         ]
-    WolfHoundsTurn  -> arbitraryChooseCommand game
+    WolfHoundsTurn  -> arbitraryChooseAllegianceCommand game
 
-arbitraryChooseCommand :: Game -> Gen (Blind Command)
-arbitraryChooseCommand game = do
+arbitraryChooseAllegianceCommand :: Game -> Gen (Blind Command)
+arbitraryChooseAllegianceCommand game = do
     let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
-    allegiance      <- elements [Villagers, Werewolves]
+    allegianceName  <- elements $ map (T.pack . show) [Villagers, Werewolves]
 
-    return . Blind $ chooseCommand (wolfHound ^. name) (allegiance)
+    return . Blind $ chooseAllegianceCommand (wolfHound ^. name) allegianceName
+
+arbitraryChoosePlayerCommand :: Game -> Gen (Blind Command)
+arbitraryChoosePlayerCommand game = do
+    let wildChild   = findByRole_ wildChildRole (game ^. players)
+    target          <- suchThat (arbitraryPlayer game) (wildChild /=)
+
+    return . Blind $ choosePlayerCommand (wildChild ^. name) (target ^. name)
 
 arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do

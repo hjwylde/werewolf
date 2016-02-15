@@ -6,71 +6,11 @@ Maintainer  : public@hjwylde.com
 -}
 
 {-# OPTIONS_HADDOCK hide, prune #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Game.Werewolf.Test.Command (
-    -- * chooseCommand
-    prop_chooseCommandErrorsWhenGameIsOver, prop_chooseCommandErrorsWhenCallerDoesNotExist,
-    prop_chooseCommandErrorsWhenCallerIsDead, prop_chooseCommandErrorsWhenNotWolfHoundsTurn,
-    prop_chooseCommandErrorsWhenCallerNotWolfHound, prop_chooseCommandSetsCallersRole,
-
-    -- * healCommand
-    prop_healCommandErrorsWhenGameIsOver, prop_healCommandErrorsWhenCallerDoesNotExist,
-    prop_healCommandErrorsWhenCallerIsDead, prop_healCommandErrorsWhenNoTargetIsDevoured,
-    prop_healCommandErrorsWhenNotWitchsTurn, prop_healCommandErrorsWhenCallerHasHealed,
-    prop_healCommandErrorsWhenCallerNotWitch, prop_healCommandSetsHeal,
-    prop_healCommandSetsHealUsed,
-
-    -- * passCommand
-    prop_passCommandErrorsWhenGameIsOver, prop_passCommandErrorsWhenCallerDoesNotExist,
-    prop_passCommandErrorsWhenCallerIsDead, prop_passCommandErrorsWhenNotWitchsTurn,
-    prop_passCommandUpdatesPasses,
-
-    -- * poisonCommand
-    prop_poisonCommandErrorsWhenGameIsOver, prop_poisonCommandErrorsWhenCallerDoesNotExist,
-    prop_poisonCommandErrorsWhenTargetDoesNotExist, prop_poisonCommandErrorsWhenCallerIsDead,
-    prop_poisonCommandErrorsWhenTargetIsDead, prop_poisonCommandErrorsWhenTargetIsDevoured,
-    prop_poisonCommandErrorsWhenNotWitchsTurn, prop_poisonCommandErrorsWhenCallerHasPoisoned,
-    prop_poisonCommandErrorsWhenCallerNotWitch, prop_poisonCommandSetsPoison,
-    prop_poisonCommandSetsPoisonUsed,
-
-    -- * protectCommand
-    prop_protectCommandErrorsWhenGameIsOver, prop_protectCommandErrorsWhenCallerDoesNotExist,
-    prop_protectCommandErrorsWhenTargetDoesNotExist, prop_protectCommandErrorsWhenCallerIsDead,
-    prop_protectCommandErrorsWhenTargetIsDead, prop_protectCommandErrorsWhenNotDefendersTurn,
-    prop_protectCommandErrorsWhenCallerNotDefender, prop_protectCommandErrorsWhenTargetIsCaller,
-    prop_protectCommandErrorsWhenTargetIsPriorProtect, prop_protectCommandSetsPriorProtect,
-    prop_protectCommandSetsProtect,
-
-    -- * quitCommand
-    prop_quitCommandErrorsWhenGameIsOver, prop_quitCommandErrorsWhenCallerDoesNotExist,
-    prop_quitCommandErrorsWhenCallerIsDead, prop_quitCommandKillsPlayer,
-    prop_quitCommandClearsHealWhenCallerIsWitch, prop_quitCommandClearsHealUsedWhenCallerIsWitch,
-    prop_quitCommandClearsPoisonWhenCallerIsWitch,
-    prop_quitCommandClearsPoisonUsedWhenCallerIsWitch,
-    prop_quitCommandClearsPriorProtectWhenCallerIsDefender,
-    prop_quitCommandClearsProtectWhenCallerIsDefender, prop_quitCommandClearsPlayersDevourVote,
-    prop_quitCommandClearsPlayersLynchVote,
-
-    -- * seeCommand
-    prop_seeCommandErrorsWhenGameIsOver, prop_seeCommandErrorsWhenCallerDoesNotExist,
-    prop_seeCommandErrorsWhenTargetDoesNotExist, prop_seeCommandErrorsWhenCallerIsDead,
-    prop_seeCommandErrorsWhenTargetIsDead, prop_seeCommandErrorsWhenNotSeersTurn,
-    prop_seeCommandErrorsWhenCallerNotSeer, prop_seeCommandSetsSee,
-
-    -- * voteDevourCommand
-    prop_voteDevourCommandErrorsWhenGameIsOver, prop_voteDevourCommandErrorsWhenCallerDoesNotExist,
-    prop_voteDevourCommandErrorsWhenTargetDoesNotExist,
-    prop_voteDevourCommandErrorsWhenCallerIsDead, prop_voteDevourCommandErrorsWhenTargetIsDead,
-    prop_voteDevourCommandErrorsWhenNotWerewolvesTurn,
-    prop_voteDevourCommandErrorsWhenCallerNotWerewolf,
-    prop_voteDevourCommandErrorsWhenCallerHasVoted,
-    prop_voteDevourCommandErrorsWhenTargetWerewolf, prop_voteDevourCommandUpdatesVotes,
-
-    -- * voteLynchCommand
-    prop_voteLynchCommandErrorsWhenGameIsOver, prop_voteLynchCommandErrorsWhenCallerDoesNotExist,
-    prop_voteLynchCommandErrorsWhenTargetDoesNotExist, prop_voteLynchCommandErrorsWhenCallerIsDead,
-    prop_voteLynchCommandErrorsWhenTargetIsDead, prop_voteLynchCommandErrorsWhenNotVillagesTurn,
-    prop_voteLynchCommandErrorsWhenCallerHasVoted, prop_voteLynchCommandUpdatesVotes,
+    -- * Tests
+    allCommandTests,
 ) where
 
 import Control.Lens hiding (elements)
@@ -78,6 +18,8 @@ import Control.Lens hiding (elements)
 import           Data.Either.Extra
 import qualified Data.Map          as Map
 import           Data.Maybe
+import           Data.Text         (Text)
+import qualified Data.Text         as T
 
 import Game.Werewolf.Command
 import Game.Werewolf.Game
@@ -86,43 +28,157 @@ import Game.Werewolf.Role           hiding (name)
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
-import Test.QuickCheck
+import Test.Tasty
+import Test.Tasty.QuickCheck
 
-prop_chooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
-prop_chooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
-    forAll (arbitraryChooseCommand game) $ verbose_runCommandErrors game . getBlind
+allCommandTests :: [TestTree]
+allCommandTests =
+    [ testProperty "choose allegiance command errors when game is over"                 prop_chooseAllegianceCommandErrorsWhenGameIsOver
+    , testProperty "choose allegiance command errors when caller does not exist"        prop_chooseAllegianceCommandErrorsWhenCallerDoesNotExist
+    , testProperty "choose allegiance command errors when caller is dead"               prop_chooseAllegianceCommandErrorsWhenCallerIsDead
+    , testProperty "choose allegiance command errors when not wolf-hound's turn"        prop_chooseAllegianceCommandErrorsWhenNotWolfHoundsTurn
+    , testProperty "choose allegiance command errors when caller not wolf-hound"        prop_chooseAllegianceCommandErrorsWhenCallerNotWolfHound
+    , testProperty "choose allegiance command errors when allegiance does not exist"    prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist
+    , testProperty "choose allegiance command sets caller's role"                       prop_chooseAllegianceCommandSetsCallersRole
 
-prop_chooseCommandErrorsWhenCallerDoesNotExist :: GameAtWolfHoundsTurn -> Player -> Allegiance -> Property
-prop_chooseCommandErrorsWhenCallerDoesNotExist (GameAtWolfHoundsTurn game) caller allegiance = do
-    let command = chooseCommand (caller ^. name) allegiance
+    , testProperty "choose player command errors when game is over"             prop_choosePlayerCommandErrorsWhenGameIsOver
+    , testProperty "choose player command errors when caller does not exist"    prop_choosePlayerCommandErrorsWhenCallerDoesNotExist
+    , testProperty "choose player command errors when target does not exist"    prop_choosePlayerCommandErrorsWhenTargetDoesNotExist
+    , testProperty "choose player command errors when caller is dead"           prop_choosePlayerCommandErrorsWhenCallerIsDead
+    , testProperty "choose player command errors when target is dead"           prop_choosePlayerCommandErrorsWhenTargetIsDead
+    , testProperty "choose player command errors when target is caller"         prop_choosePlayerCommandErrorsWhenTargetIsCaller
+    , testProperty "choose player command errors when not wild-child's turn"    prop_choosePlayerCommandErrorsWhenNotWildChildsTurn
+    , testProperty "choose player command errors when caller not wild-child"    prop_choosePlayerCommandErrorsWhenCallerNotWildChild
+    , testProperty "choose player command sets role model"                      prop_choosePlayerCommandSetsRoleModel
+
+    , testProperty "heal command errors when game is over"          prop_healCommandErrorsWhenGameIsOver
+    , testProperty "heal command errors when caller does not exist" prop_healCommandErrorsWhenCallerDoesNotExist
+    , testProperty "heal command errors when caller is dead"        prop_healCommandErrorsWhenCallerIsDead
+    , testProperty "heal command errors when no target is devoured" prop_healCommandErrorsWhenNoTargetIsDevoured
+    , testProperty "heal command errors when not witch's turn"      prop_healCommandErrorsWhenNotWitchsTurn
+    , testProperty "heal command errors when caller has healed"     prop_healCommandErrorsWhenCallerHasHealed
+    , testProperty "heal command errors when caller not witch"      prop_healCommandErrorsWhenCallerNotWitch
+    , testProperty "heal command sets heal"                         prop_healCommandSetsHeal
+    , testProperty "heal command sets heal used"                    prop_healCommandSetsHealUsed
+
+    , testProperty "pass command errors when game is over"          prop_passCommandErrorsWhenGameIsOver
+    , testProperty "pass command errors when caller does not exist" prop_passCommandErrorsWhenCallerDoesNotExist
+    , testProperty "pass command errors when caller is dead"        prop_passCommandErrorsWhenCallerIsDead
+    , testProperty "pass command errors when not witch's turn"      prop_passCommandErrorsWhenNotWitchsTurn
+    , testProperty "pass command updates passes"                    prop_passCommandUpdatesPasses
+
+    , testProperty "poison command errors when game is over"            prop_poisonCommandErrorsWhenGameIsOver
+    , testProperty "poison command errors when caller does not exist"   prop_poisonCommandErrorsWhenCallerDoesNotExist
+    , testProperty "poison command errors when target does not exist"   prop_poisonCommandErrorsWhenTargetDoesNotExist
+    , testProperty "poison command errors when caller is dead"          prop_poisonCommandErrorsWhenCallerIsDead
+    , testProperty "poison command errors when target is dead"          prop_poisonCommandErrorsWhenTargetIsDead
+    , testProperty "poison command errors when target is devoured"      prop_poisonCommandErrorsWhenTargetIsDevoured
+    , testProperty "poison command errors when not witch's turn"        prop_poisonCommandErrorsWhenNotWitchsTurn
+    , testProperty "poison command errors when caller has poisoned"     prop_poisonCommandErrorsWhenCallerHasPoisoned
+    , testProperty "poison command errors when caller not witch"        prop_poisonCommandErrorsWhenCallerNotWitch
+    -- TODO (hjw): implement this test case
+    --, testProperty "poison command errors when caller devoured and not healed"   prop_poisonCommandErrorsWhenCallerDevouredAndNotHealed
+    , testProperty "poison command sets poison"                         prop_poisonCommandSetsPoison
+    , testProperty "poison command sets poison used"                    prop_poisonCommandSetsPoisonUsed
+
+    , testProperty "protect command errors when game is over"               prop_protectCommandErrorsWhenGameIsOver
+    , testProperty "protect command errors when caller does not exist"      prop_protectCommandErrorsWhenCallerDoesNotExist
+    , testProperty "protect command errors when target does not exist"      prop_protectCommandErrorsWhenTargetDoesNotExist
+    , testProperty "protect command errors when caller is dead"             prop_protectCommandErrorsWhenCallerIsDead
+    , testProperty "protect command errors when target is dead"             prop_protectCommandErrorsWhenTargetIsDead
+    , testProperty "protect command errors when not defender's turn"        prop_protectCommandErrorsWhenNotDefendersTurn
+    , testProperty "protect command errors when caller not defender"        prop_protectCommandErrorsWhenCallerNotDefender
+    , testProperty "protect command errors when target is caller"           prop_protectCommandErrorsWhenTargetIsCaller
+    , testProperty "protect command errors when target is prior protect"    prop_protectCommandErrorsWhenTargetIsPriorProtect
+    , testProperty "protect command sets prior protect"                     prop_protectCommandSetsPriorProtect
+    , testProperty "protect command sets protect"                           prop_protectCommandSetsProtect
+
+    , testProperty "quit command errors when game is over"                      prop_quitCommandErrorsWhenGameIsOver
+    , testProperty "quit command errors when caller does not exist"             prop_quitCommandErrorsWhenCallerDoesNotExist
+    , testProperty "quit command errors when caller is dead"                    prop_quitCommandErrorsWhenCallerIsDead
+    , testProperty "quit command kills player"                                  prop_quitCommandKillsPlayer
+    , testProperty "quit command clears heal when caller is witch"              prop_quitCommandClearsHealWhenCallerIsWitch
+    , testProperty "quit command clears heal used when caller is witch"         prop_quitCommandClearsHealUsedWhenCallerIsWitch
+    , testProperty "quit command clears poison when caller is witch"            prop_quitCommandClearsPoisonWhenCallerIsWitch
+    , testProperty "quit command clears poison used when caller is witch"       prop_quitCommandClearsPoisonUsedWhenCallerIsWitch
+    , testProperty "quit command clears prior protect when caller is defender"  prop_quitCommandClearsPriorProtectWhenCallerIsDefender
+    , testProperty "quit command clears protect when caller is defender"        prop_quitCommandClearsProtectWhenCallerIsDefender
+    , testProperty "quit command clears player's devour vote"                   prop_quitCommandClearsPlayersDevourVote
+    , testProperty "quit command clears player's lynch vote"                    prop_quitCommandClearsPlayersLynchVote
+
+    , testProperty "see command errors when game is over"           prop_seeCommandErrorsWhenGameIsOver
+    , testProperty "see command errors when caller does not exist"  prop_seeCommandErrorsWhenCallerDoesNotExist
+    , testProperty "see command errors when target does not exist"  prop_seeCommandErrorsWhenTargetDoesNotExist
+    , testProperty "see command errors when caller is dead"         prop_seeCommandErrorsWhenCallerIsDead
+    , testProperty "see command errors when target is dead"         prop_seeCommandErrorsWhenTargetIsDead
+    , testProperty "see command errors when not seer's turn"        prop_seeCommandErrorsWhenNotSeersTurn
+    , testProperty "see command errors when caller not seer"        prop_seeCommandErrorsWhenCallerNotSeer
+    , testProperty "see command sets see"                           prop_seeCommandSetsSee
+
+    , testProperty "vote devour command errors when game is over"           prop_voteDevourCommandErrorsWhenGameIsOver
+    , testProperty "vote devour command errors when caller does not exist"  prop_voteDevourCommandErrorsWhenCallerDoesNotExist
+    , testProperty "vote devour command errors when target does not exist"  prop_voteDevourCommandErrorsWhenTargetDoesNotExist
+    , testProperty "vote devour command errors when caller is dead"         prop_voteDevourCommandErrorsWhenCallerIsDead
+    , testProperty "vote devour command errors when target is dead"         prop_voteDevourCommandErrorsWhenTargetIsDead
+    , testProperty "vote devour command errors when not werewolves turn"    prop_voteDevourCommandErrorsWhenNotWerewolvesTurn
+    , testProperty "vote devour command errors when caller not werewolf"    prop_voteDevourCommandErrorsWhenCallerNotWerewolf
+    , testProperty "vote devour command errors when caller has voted"       prop_voteDevourCommandErrorsWhenCallerHasVoted
+    , testProperty "vote devour command errors when target werewolf"        prop_voteDevourCommandErrorsWhenTargetWerewolf
+    , testProperty "vote devour command updates votes"                      prop_voteDevourCommandUpdatesVotes
+
+    , testProperty "vote lynch command errors when game is over"            prop_voteLynchCommandErrorsWhenGameIsOver
+    , testProperty "vote lynch command errors when caller does not exist"   prop_voteLynchCommandErrorsWhenCallerDoesNotExist
+    , testProperty "vote lynch command errors when target does not exist"   prop_voteLynchCommandErrorsWhenTargetDoesNotExist
+    , testProperty "vote lynch command errors when caller is dead"          prop_voteLynchCommandErrorsWhenCallerIsDead
+    , testProperty "vote lynch command errors when target is dead"          prop_voteLynchCommandErrorsWhenTargetIsDead
+    , testProperty "vote lynch command errors when not villages turn"       prop_voteLynchCommandErrorsWhenNotVillagesTurn
+    , testProperty "vote lynch command errors when caller has voted"        prop_voteLynchCommandErrorsWhenCallerHasVoted
+    , testProperty "vote lynch command updates votes"                       prop_voteLynchCommandUpdatesVotes
+    ]
+
+prop_chooseAllegianceCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
+prop_chooseAllegianceCommandErrorsWhenGameIsOver (GameAtGameOver game) =
+    forAll (arbitraryChooseAllegianceCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_chooseAllegianceCommandErrorsWhenCallerDoesNotExist :: GameAtWolfHoundsTurn -> Player -> Allegiance -> Property
+prop_chooseAllegianceCommandErrorsWhenCallerDoesNotExist (GameAtWolfHoundsTurn game) caller allegiance = do
+    let command = chooseAllegianceCommand (caller ^. name) (T.pack $ show allegiance)
 
     not (doesPlayerExist (caller ^. name) (game ^. players))
         ==> verbose_runCommandErrors game command
 
-prop_chooseCommandErrorsWhenCallerIsDead :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_chooseCommandErrorsWhenCallerIsDead (GameAtWolfHoundsTurn game) allegiance = do
+prop_chooseAllegianceCommandErrorsWhenCallerIsDead :: GameAtWolfHoundsTurn -> Allegiance -> Property
+prop_chooseAllegianceCommandErrorsWhenCallerIsDead (GameAtWolfHoundsTurn game) allegiance = do
     let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
     let game'       = killPlayer (wolfHound ^. name) game
-    let command     = chooseCommand (wolfHound ^. name) allegiance
+    let command     = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance)
 
     verbose_runCommandErrors game' command
 
-prop_chooseCommandErrorsWhenNotWolfHoundsTurn :: Game -> Property
-prop_chooseCommandErrorsWhenNotWolfHoundsTurn game =
+prop_chooseAllegianceCommandErrorsWhenNotWolfHoundsTurn :: Game -> Property
+prop_chooseAllegianceCommandErrorsWhenNotWolfHoundsTurn game =
     not (isWolfHoundsTurn game)
-    ==> forAll (arbitraryChooseCommand game) $ verbose_runCommandErrors game . getBlind
+    ==> forAll (arbitraryChooseAllegianceCommand game) $ verbose_runCommandErrors game . getBlind
 
-prop_chooseCommandErrorsWhenCallerNotWolfHound :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_chooseCommandErrorsWhenCallerNotWolfHound (GameAtWolfHoundsTurn game) allegiance =
+prop_chooseAllegianceCommandErrorsWhenCallerNotWolfHound :: GameAtWolfHoundsTurn -> Allegiance -> Property
+prop_chooseAllegianceCommandErrorsWhenCallerNotWolfHound (GameAtWolfHoundsTurn game) allegiance =
     forAll (suchThat (arbitraryPlayer game) (not . isWolfHound)) $ \caller -> do
-        let command = chooseCommand (caller ^. name) allegiance
+        let command = chooseAllegianceCommand (caller ^. name) (T.pack $ show allegiance)
 
         verbose_runCommandErrors game command
 
-prop_chooseCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_chooseCommandSetsCallersRole (GameAtWolfHoundsTurn game) allegiance' = do
+prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist :: GameAtWolfHoundsTurn -> Text -> Property
+prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist (GameAtWolfHoundsTurn game) allegiance = do
     let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
-    let command     = chooseCommand (wolfHound ^. name) allegiance'
+    let command     = chooseAllegianceCommand (wolfHound ^. name) allegiance
+
+    allegiance `notElem` ["Villagers", "Werewolves"]
+        ==> verbose_runCommandErrors game command
+
+prop_chooseAllegianceCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Allegiance -> Property
+prop_chooseAllegianceCommandSetsCallersRole (GameAtWolfHoundsTurn game) allegiance' = do
+    let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
+    let command     = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance')
     let game'       = run_ (apply command) game
 
     findByName_ (wolfHound ^. name) (game' ^. players) ^. role === role'
@@ -130,6 +186,76 @@ prop_chooseCommandSetsCallersRole (GameAtWolfHoundsTurn game) allegiance' = do
         role' = case allegiance' of
             Villagers   -> simpleVillagerRole
             Werewolves  -> simpleWerewolfRole
+
+prop_choosePlayerCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
+prop_choosePlayerCommandErrorsWhenGameIsOver (GameAtGameOver game) =
+    forAll (arbitraryChoosePlayerCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_choosePlayerCommandErrorsWhenCallerDoesNotExist :: GameAtWildChildsTurn -> Player -> Property
+prop_choosePlayerCommandErrorsWhenCallerDoesNotExist (GameAtWildChildsTurn game) caller =
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = choosePlayerCommand (caller ^. name) (target ^. name)
+
+        not (doesPlayerExist (caller ^. name) (game ^. players))
+            ==> verbose_runCommandErrors game command
+
+prop_choosePlayerCommandErrorsWhenTargetDoesNotExist :: GameAtWildChildsTurn -> Player -> Property
+prop_choosePlayerCommandErrorsWhenTargetDoesNotExist (GameAtWildChildsTurn game) target = do
+    let wildChild   = findByRole_ wildChildRole (game ^. players)
+    let command     = choosePlayerCommand (wildChild ^. name) (target ^. name)
+
+    not (doesPlayerExist (target ^. name) (game ^. players))
+        ==> verbose_runCommandErrors game command
+
+prop_choosePlayerCommandErrorsWhenCallerIsDead :: GameAtWildChildsTurn -> Property
+prop_choosePlayerCommandErrorsWhenCallerIsDead (GameAtWildChildsTurn game) = do
+    let wildChild   = findByRole_ wildChildRole (game ^. players)
+    let game'       = killPlayer (wildChild ^. name) game
+
+    forAll (arbitraryPlayer game') $ \target -> do
+        let command = choosePlayerCommand (wildChild ^. name) (target ^. name)
+
+        verbose_runCommandErrors game' command
+
+prop_choosePlayerCommandErrorsWhenTargetIsDead :: GameAtWildChildsTurn -> Property
+prop_choosePlayerCommandErrorsWhenTargetIsDead (GameAtWildChildsTurn game) = do
+    let wildChild = findByRole_ wildChildRole (game ^. players)
+
+    forAll (arbitraryPlayer game) $ \target -> do
+        let game'   = killPlayer (target ^. name) game
+        let command = choosePlayerCommand (wildChild ^. name) (target ^. name)
+
+        verbose_runCommandErrors game' command
+
+prop_choosePlayerCommandErrorsWhenTargetIsCaller :: GameAtWildChildsTurn -> Property
+prop_choosePlayerCommandErrorsWhenTargetIsCaller (GameAtWildChildsTurn game) = do
+    let wildChild   = findByRole_ wildChildRole (game ^. players)
+    let command     = choosePlayerCommand (wildChild ^. name) (wildChild ^. name)
+
+    verbose_runCommandErrors game command
+
+prop_choosePlayerCommandErrorsWhenNotWildChildsTurn :: Game -> Property
+prop_choosePlayerCommandErrorsWhenNotWildChildsTurn game =
+    not (isWildChildsTurn game)
+    ==> forAll (arbitraryChoosePlayerCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_choosePlayerCommandErrorsWhenCallerNotWildChild :: GameAtWildChildsTurn -> Property
+prop_choosePlayerCommandErrorsWhenCallerNotWildChild (GameAtWildChildsTurn game) =
+    forAll (suchThat (arbitraryPlayer game) (not . isWildChild)) $ \caller ->
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = choosePlayerCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
+
+prop_choosePlayerCommandSetsRoleModel :: GameAtWildChildsTurn -> Property
+prop_choosePlayerCommandSetsRoleModel (GameAtWildChildsTurn game) = do
+    let wildChild   = findByRole_ wildChildRole (game ^. players)
+
+    forAll (suchThat (arbitraryPlayer game) (not . isWildChild)) $ \target -> do
+        let command = choosePlayerCommand (wildChild ^. name) (target ^. name)
+        let game'   = run_ (apply command) game
+
+        fromJust (game' ^. roleModel) === target ^. name
 
 prop_healCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_healCommandErrorsWhenGameIsOver (GameAtGameOver game) = do

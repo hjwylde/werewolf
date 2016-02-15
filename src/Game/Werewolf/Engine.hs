@@ -26,8 +26,8 @@ module Game.Werewolf.Engine (
     findPlayerByName_, findPlayerByRole_,
 
     -- ** Queries
-    isGameOver, isDefendersTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-    isWolfHoundsTurn,
+    isGameOver, isDefendersTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
+    isWitchsTurn, isWolfHoundsTurn,
     getPlayerVote, getPendingVoters, getVoteResult,
 
     -- ** Reading and writing
@@ -44,7 +44,8 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerDefender, isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
+    doesPlayerExist, isPlayerDefender, isPlayerSeer, isPlayerWildChild, isPlayerWitch,
+    isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 
@@ -67,7 +68,8 @@ import qualified Data.Text       as T
 import           Game.Werewolf.Game     hiding (getDevourEvent, getPassers, getPendingVoters,
                                          getPlayerVote, getVoteResult, isDefendersTurn, isGameOver,
                                          isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                         isWitchsTurn, isWolfHoundsTurn, killPlayer, setPlayerRole)
+                                         isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
+                                         killPlayer, setPlayerAllegiance, setPlayerRole)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -105,7 +107,19 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     Sunrise -> advanceStage
 
-    Sunset -> advanceStage
+    Sunset -> do
+        whenJustM (use roleModel) $ \roleModelsName -> do
+            wildChild <- findPlayerByRole_ wildChildRole
+
+            whenM (isPlayerDead roleModelsName &&^ return (isVillager wildChild)) $ do
+                aliveWerewolfNames <- uses players (map (view name) . filterAlive . filterWerewolves)
+
+                setPlayerAllegiance (wildChild ^. name) Werewolves
+
+                tell [playerJoinedPackMessage (wildChild ^. name) aliveWerewolfNames]
+                tell $ wildChildJoinedPackMessages aliveWerewolfNames (wildChild ^. name)
+
+        advanceStage
 
     VillagesTurn -> do
         playersCount    <- uses players (length . filterAlive)
@@ -139,6 +153,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
             protect .= Nothing
 
             advanceStage
+
+    WildChildsTurn -> whenJustM (use roleModel) $ const advanceStage
 
     WitchsTurn -> do
         whenJustM (use poison) $ \targetName -> do
@@ -230,6 +246,9 @@ killPlayer name = modify $ Game.killPlayer name
 setPlayerRole :: MonadState Game m => Text -> Role -> m ()
 setPlayerRole name role = modify $ Game.setPlayerRole name role
 
+setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
+setPlayerAllegiance name allegiance = modify $ Game.setPlayerAllegiance name allegiance
+
 findPlayerByName_ :: MonadState Game m => Text -> m Player
 findPlayerByName_ name = uses players $ findByName_ name
 
@@ -250,6 +269,9 @@ isVillagesTurn = gets Game.isVillagesTurn
 
 isWerewolvesTurn :: MonadState Game m => m Bool
 isWerewolvesTurn = gets Game.isWerewolvesTurn
+
+isWildChildsTurn :: MonadState Game m => m Bool
+isWildChildsTurn = gets Game.isWildChildsTurn
 
 isWitchsTurn :: MonadState Game m => m Bool
 isWitchsTurn = gets Game.isWitchsTurn
@@ -305,6 +327,9 @@ isPlayerDefender name = isDefender <$> findPlayerByName_ name
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name = isSeer <$> findPlayerByName_ name
 
+isPlayerWildChild :: MonadState Game m => Text -> m Bool
+isPlayerWildChild name = isWildChild <$> findPlayerByName_ name
+
 isPlayerWitch :: MonadState Game m => Text -> m Bool
 isPlayerWitch name = isWitch <$> findPlayerByName_ name
 
@@ -325,5 +350,5 @@ randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ sim
     where
         extraWerewolfRoles = filter ((Role.Werewolves ==) . view allegiance) extraRoles
 
-        simpleVillagerRoles = replicate (n - length extraRoles) simpleVillagerRole
         simpleWerewolfRoles = replicate (n `quot` 6 + 1 - length extraWerewolfRoles) simpleWerewolfRole
+        simpleVillagerRoles = replicate (n - length extraRoles - length simpleWerewolfRoles) simpleVillagerRole
