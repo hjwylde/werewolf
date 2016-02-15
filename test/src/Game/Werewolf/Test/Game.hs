@@ -8,12 +8,8 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Game.Werewolf.Test.Game (
-    prop_newGameStartsWithSunsetStage, prop_newGameStartsOnFirstRound,
-    prop_newGameStartsWithEventsEmpty, prop_newGameStartsWithPassesEmpty,
-    prop_newGameStartsWithNoHeal, prop_newGameStartsWithNoHealUsed, prop_newGameStartsWithNoPoison,
-    prop_newGameStartsWithNoPoisonUsed, prop_newGameStartsWithNoPriorProtect,
-    prop_newGameStartsWithNoProtect, prop_newGameStartsWithNoSee,
-    prop_newGameStartsWithVotesEmpty, prop_newGameUsesGivenPlayers,
+    -- * Tests
+    allGameTests,
 ) where
 
 import Control.Lens
@@ -23,8 +19,29 @@ import           Data.Maybe
 
 import Game.Werewolf.Game
 import Game.Werewolf.Player
+import Game.Werewolf.Test.Arbitrary ()
 
 import Prelude hiding (round)
+
+import Test.Tasty
+import Test.Tasty.QuickCheck
+
+allGameTests :: [TestTree]
+allGameTests =
+    [ testProperty "new game starts with sunset stage"      prop_newGameStartsWithSunsetStage
+    , testProperty "new game starts on first round"         prop_newGameStartsOnFirstRound
+    , testProperty "new game starts with events empty"      prop_newGameStartsWithEventsEmpty
+    , testProperty "new game starts with passes empty"      prop_newGameStartsWithPassesEmpty
+    , testProperty "new game starts with no heal"           prop_newGameStartsWithNoHeal
+    , testProperty "new game starts with no heal used"      prop_newGameStartsWithNoHealUsed
+    , testProperty "new game starts with no poison"         prop_newGameStartsWithNoPoison
+    , testProperty "new game starts with no poison used"    prop_newGameStartsWithNoPoisonUsed
+    , testProperty "new game starts with no prior protect"  prop_newGameStartsWithNoPriorProtect
+    , testProperty "new game starts with no protect"        prop_newGameStartsWithNoProtect
+    , testProperty "new game starts with no see"            prop_newGameStartsWithNoSee
+    , testProperty "new game starts with votes empty"       prop_newGameStartsWithVotesEmpty
+    , testProperty "new game uses given players"            prop_newGameUsesGivenPlayers
+    ]
 
 prop_newGameStartsWithSunsetStage :: [Player] -> Bool
 prop_newGameStartsWithSunsetStage players = isSunset (newGame players)

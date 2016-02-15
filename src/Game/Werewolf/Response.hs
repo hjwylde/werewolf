@@ -49,6 +49,9 @@ module Game.Werewolf.Response (
     -- ** Werewolves' turn messages
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
 
+    -- ** Wild-child's turn messages
+    playerJoinedPackMessage, wildChildJoinedPackMessages,
+
     -- ** Witch's turn messages
     playerPoisonedMessage,
 
@@ -57,7 +60,7 @@ module Game.Werewolf.Response (
     playerCannotDoThatRightNowMessage, playerIsDeadMessage, roleDoesNotExistMessage,
     allegianceDoesNotExistMessage,
 
-    -- ** Seer's turn error messages
+    -- ** Defender's turn error messages
     playerCannotProtectSelfMessage, playerCannotProtectSamePlayerTwiceInARowMessage,
 
     -- ** Voting turn error messages
@@ -65,6 +68,9 @@ module Game.Werewolf.Response (
 
     -- ** Werewolves' turn error messages
     playerCannotDevourAnotherWerewolfMessage,
+
+    -- ** Wild-child's turn error messages
+    playerCannotChooseSelfMessage,
 
     -- ** Witch's turn error messages
     playerHasAlreadyHealedMessage, playerHasAlreadyPoisonedMessage,
@@ -135,7 +141,7 @@ privateMessage :: Text -> Text -> Message
 privateMessage to = Message (Just to)
 
 groupMessages :: [Text] -> Text -> [Message]
-groupMessages tos message = map (\to -> privateMessage to message) tos
+groupMessages tos message = map (`privateMessage` message) tos
 
 noGameRunningMessage :: Text -> Message
 noGameRunningMessage to = privateMessage to "No game is running."
@@ -195,6 +201,7 @@ stageMessages game = case game ^. stage of
     WerewolvesTurn  -> if isFirstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
+    WildChildsTurn  -> wildChildsTurnMessages wildChildsName
     WitchsTurn      -> witchsTurnMessages game
     WolfHoundsTurn  -> wolfHoundsTurnMessages wolfHoundsName
     where
@@ -202,18 +209,19 @@ stageMessages game = case game ^. stage of
         defendersName       = findByRole_ defenderRole players' ^. name
         seersName           = findByRole_ seerRole players' ^. name
         aliveWerewolfNames  = map (view name) . filterAlive $ filterWerewolves players'
+        wildChildsName      = findByRole_ wildChildRole players' ^. name
         wolfHoundsName      = findByRole_ wolfHoundRole players' ^. name
 
 defendersTurnMessages :: Text -> [Message]
 defendersTurnMessages to =
     [ publicMessage "The Defender wakes up."
-    , privateMessage to "Whom would you like to protect?"
+    , privateMessage to "Whom would you like to `protect`?"
     ]
 
 seersTurnMessages :: Text -> [Message]
 seersTurnMessages to =
     [ publicMessage "The Seer wakes up."
-    , privateMessage to "Whose allegiance would you like to see?"
+    , privateMessage to "Whose allegiance would you like to `see`?"
     ]
 
 sunriseMessage :: Message
@@ -225,7 +233,7 @@ nightFallsMessage = publicMessage "Night falls, the village is asleep."
 villagesTurnMessages :: [Message]
 villagesTurnMessages =
     [ publicMessage "As the village gathers in the square the town clerk calls for a vote."
-    , publicMessage "Whom would you like to lynch?"
+    , publicMessage "Whom would you like to vote to lynch?"
     ]
 
 firstWerewolvesTurnMessages :: [Text] -> [Message]
@@ -245,7 +253,13 @@ firstWerewolvesTurnMessages tos = concat
 werewolvesTurnMessages :: [Text] -> [Message]
 werewolvesTurnMessages tos =
     [ publicMessage "The Werewolves wake up, recognise one another and choose a new victim."
-    ] ++ groupMessages tos "Whom would you like to devour?"
+    ] ++ groupMessages tos "Whom would you like to `vote` to devour?"
+
+wildChildsTurnMessages :: Text -> [Message]
+wildChildsTurnMessages to =
+    [ publicMessage "The Wild-child wakes up."
+    , privateMessage to "Whom do you `choose` to be your role model?"
+    ]
 
 witchsTurnMessages :: Game -> [Message]
 witchsTurnMessages game = concat
@@ -267,16 +281,16 @@ witchsTurnMessages game = concat
             _                               -> []
         healMessages
             | not (game ^. healUsed)
-                && isJust (getDevourEvent game) = [privateMessage witchsName "Would you like to heal them?"]
+                && isJust (getDevourEvent game) = [privateMessage witchsName "Would you like to `heal` them?"]
             | otherwise                         = []
         poisonMessages
-            | not (game ^. poisonUsed)          = [privateMessage witchsName "Would you like to poison anyone?"]
+            | not (game ^. poisonUsed)          = [privateMessage witchsName "Would you like to `poison` anyone?"]
             | otherwise                         = []
 
 wolfHoundsTurnMessages :: Text -> [Message]
 wolfHoundsTurnMessages to =
     [ publicMessage "The Wolf-hound wakes up."
-    , privateMessage to "Whom would you like to be aligned with?"
+    , privateMessage to "Which allegiance do you `choose` to be aligned with?"
     ]
 
 gameOverMessages :: Game -> [Message]
@@ -322,6 +336,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn Sunset         = undefined
         showTurn VillagesTurn   = "Village's"
         showTurn WerewolvesTurn = "Werewolves'"
+        showTurn WildChildsTurn = "Wild-child's"
         showTurn WitchsTurn     = "Witch's"
         showTurn WolfHoundsTurn = "Wolf-hound's"
 
@@ -372,13 +387,14 @@ playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
-    | isWerewolf player = publicMessage $ T.concat
+    | isWerewolf player
+        && not (isWildChild player) = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight."
         , " As they scream their body starts to contort and writhe, transforming into "
         , article playerRole, " ", playerRole ^. Role.name, "."
         , " Thankfully they go limp before breaking free of their restraints."
         ]
-    | otherwise         = publicMessage $ T.concat
+    | otherwise                     = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight."
         , " Eventually the screams start to die and with their last breath,"
         , " they reveal themselves as "
@@ -421,6 +437,21 @@ noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords
     [ "Surprisingly you see everyone present at the town square."
     , "Perhaps the Werewolves have left Miller's Hollow?"
+    ]
+
+playerJoinedPackMessage :: Text -> [Text] -> Message
+playerJoinedPackMessage to werewolfNames = privateMessage to $ T.unwords
+    [ "The death of your role model is distressing."
+    , "Without second thought you abandon the Villagers and run off into the woods,"
+    , "towards your old home."
+    , "As you arrive you see the familiar faces of", T.intercalate ", " werewolfNames
+    , "waiting and happy to have you back."
+    ]
+
+wildChildJoinedPackMessages :: [Text] -> Text -> [Message]
+wildChildJoinedPackMessages tos wildChildsName = groupMessages tos $ T.unwords
+    [ wildChildsName, "the Wild-child scampers off into the woods."
+    , "Without his role model nothing is holding back his true, wolfish, nature."
     ]
 
 playerPoisonedMessage :: Player -> Message
@@ -473,6 +504,9 @@ targetIsDeadMessage to targetName = privateMessage to $ T.unwords
 playerCannotDevourAnotherWerewolfMessage :: Text -> Message
 playerCannotDevourAnotherWerewolfMessage to =
     privateMessage to "You cannot devour another Werewolf!"
+
+playerCannotChooseSelfMessage :: Text -> Message
+playerCannotChooseSelfMessage to = privateMessage to "You cannot choose yourself!"
 
 playerHasAlreadyHealedMessage :: Text -> Message
 playerHasAlreadyHealedMessage to = privateMessage to "You've already healed someone!"

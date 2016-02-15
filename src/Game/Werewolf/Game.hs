@@ -14,21 +14,24 @@ Game and stage data structures.
 module Game.Werewolf.Game (
     -- * Game
     Game, stage, round, players, events, passes, heal, healUsed, poison, poisonUsed, priorProtect,
-    protect, see, votes,
+    protect, roleModel, see, votes,
     newGame,
 
     -- ** Manipulations
-    killPlayer, setPlayerRole,
+    killPlayer, setPlayerRole, setPlayerAllegiance,
 
     -- ** Queries
     isFirstRound,
-    isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
-    isWitchsTurn, isWolfHoundsTurn,
     getPassers, getPlayerVote, getPendingVoters, getVoteResult,
 
     -- * Stage
     Stage(..),
+    allStages,
     stageCycle, stageAvailable,
+
+    -- ** Queries
+    isGameOver, isDefendersTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn, isWerewolvesTurn,
+    isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
 
     -- * Event
     Event(..),
@@ -46,7 +49,7 @@ import           Data.Maybe
 import           Data.Text       (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role   (Role)
+import Game.Werewolf.Role   hiding (name)
 
 import Prelude hiding (round)
 
@@ -62,12 +65,13 @@ data Game = Game
     , _poisonUsed   :: Bool
     , _priorProtect :: Maybe Text
     , _protect      :: Maybe Text
+    , _roleModel    :: Maybe Text
     , _see          :: Maybe Text
     , _votes        :: Map Text Text
     } deriving (Eq, Read, Show)
 
 data Stage  = GameOver | DefendersTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
-            | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
+            | WerewolvesTurn | WildChildsTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
 data Event = DevourEvent Text | NoDevourEvent | PoisonEvent Text
@@ -92,6 +96,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _poisonUsed   = False
             , _priorProtect = Nothing
             , _protect      = Nothing
+            , _roleModel    = Nothing
             , _see          = Nothing
             , _votes        = Map.empty
             }
@@ -102,35 +107,11 @@ killPlayer name' game = game & players %~ map (\player -> if player ^. name == n
 setPlayerRole :: Text -> Role -> Game -> Game
 setPlayerRole name' role' game = game & players %~ map (\player -> if player ^. name == name' then player & role .~ role' else player)
 
+setPlayerAllegiance :: Text -> Allegiance -> Game -> Game
+setPlayerAllegiance name' allegiance' game = game & players %~ map (\player -> if player ^. name == name' then player & role . allegiance .~ allegiance' else player)
+
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0
-
-isGameOver :: Game -> Bool
-isGameOver game = game ^. stage == GameOver
-
-isDefendersTurn :: Game -> Bool
-isDefendersTurn game = game ^. stage == DefendersTurn
-
-isSeersTurn :: Game -> Bool
-isSeersTurn game = game ^. stage == SeersTurn
-
-isSunrise :: Game -> Bool
-isSunrise game = game ^. stage == Sunrise
-
-isSunset :: Game -> Bool
-isSunset game = game ^. stage == Sunset
-
-isVillagesTurn :: Game -> Bool
-isVillagesTurn game = game ^. stage == VillagesTurn
-
-isWerewolvesTurn :: Game -> Bool
-isWerewolvesTurn game = game ^. stage == WerewolvesTurn
-
-isWitchsTurn :: Game -> Bool
-isWitchsTurn game = game ^. stage == WitchsTurn
-
-isWolfHoundsTurn :: Game -> Bool
-isWolfHoundsTurn game = game ^. stage == WolfHoundsTurn
 
 getPassers :: Game -> [Player]
 getPassers game = map (`findByName_` players') passes'
@@ -154,10 +135,25 @@ getVoteResult game = map (`findByName_` players') result
         votees      = Map.elems $ game ^. votes
         result      = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
 
+allStages :: [Stage]
+allStages =
+    [ GameOver
+    , DefendersTurn
+    , SeersTurn
+    , Sunrise
+    , Sunset
+    , VillagesTurn
+    , WerewolvesTurn
+    , WildChildsTurn
+    , WitchsTurn
+    , WolfHoundsTurn
+    ]
+
 stageCycle :: [Stage]
 stageCycle = cycle
     [ Sunset
     , SeersTurn
+    , WildChildsTurn
     , DefendersTurn
     , WolfHoundsTurn
     , WerewolvesTurn
@@ -174,10 +170,43 @@ stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
 stageAvailable _ VillagesTurn       = True
 stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
+stageAvailable game WildChildsTurn  =
+    any isWildChild (filterAlive $ game ^. players)
+    && isNothing (game ^. roleModel)
 stageAvailable game WitchsTurn      =
     any isWitch (filterAlive $ game ^. players)
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
 stageAvailable game WolfHoundsTurn  = any isWolfHound (filterAlive $ game ^. players)
+
+isGameOver :: Game -> Bool
+isGameOver game = game ^. stage == GameOver
+
+isDefendersTurn :: Game -> Bool
+isDefendersTurn game = game ^. stage == DefendersTurn
+
+isSeersTurn :: Game -> Bool
+isSeersTurn game = game ^. stage == SeersTurn
+
+isSunrise :: Game -> Bool
+isSunrise game = game ^. stage == Sunrise
+
+isSunset :: Game -> Bool
+isSunset game = game ^. stage == Sunset
+
+isVillagesTurn :: Game -> Bool
+isVillagesTurn game = game ^. stage == VillagesTurn
+
+isWerewolvesTurn :: Game -> Bool
+isWerewolvesTurn game = game ^. stage == WerewolvesTurn
+
+isWildChildsTurn :: Game -> Bool
+isWildChildsTurn game = game ^. stage == WildChildsTurn
+
+isWitchsTurn :: Game -> Bool
+isWitchsTurn game = game ^. stage == WitchsTurn
+
+isWolfHoundsTurn :: Game -> Bool
+isWolfHoundsTurn game = game ^. stage == WolfHoundsTurn
 
 getDevourEvent :: Game -> Maybe Event
 getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]

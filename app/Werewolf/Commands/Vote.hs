@@ -44,8 +44,8 @@ handle callerName (Options targetName) = do
     game <- readGame
 
     let command = (if isWerewolvesTurn game
-            then devourVoteCommand
-            else lynchVoteCommand
+            then voteDevourCommand
+            else voteLynchCommand
             ) callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of

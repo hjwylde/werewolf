@@ -61,7 +61,7 @@ handle callerName (Options Nothing) = exitWith success
 
 commandsMessages :: [Text]
 commandsMessages =
-    [ "choose ALLEGIANCE - choose an allegiance."
+    [ "choose (ALLEGIANCE|PLAYER) - choose an allegiance or player."
     , "end - ends the current game."
     , "heal - heal the devoured player."
     , "pass - pass on healing or poisoning a player."

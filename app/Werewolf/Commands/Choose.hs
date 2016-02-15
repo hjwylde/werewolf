@@ -22,38 +22,32 @@ import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
-import           Data.List
-import           Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text (Text)
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine
+import Game.Werewolf.Engine   hiding (isWildChildsTurn)
+import Game.Werewolf.Game
 import Game.Werewolf.Response
-import Game.Werewolf.Role
 
 -- | Options.
 data Options = Options
-    { argAllegiance :: Text
+    { arg :: Text
     } deriving (Eq, Show)
 
 -- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options allegianceName) = do
+handle callerName (Options arg) = do
     unlessM doesGameExist $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
 
-    let result = runExcept $ do
-            allegiance  <- maybe (throwError [allegianceDoesNotExistMessage callerName allegianceName]) return (findByName allegianceName)
-            let command = chooseCommand callerName allegiance
+    let command = (if isWildChildsTurn game
+            then choosePlayerCommand
+            else chooseAllegianceCommand
+            ) callerName arg
 
-            runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game
-
-    case result of
+    case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game, messages)  -> writeGame game >> exitWith success { messages = messages }
-
-findByName :: Text -> Maybe Allegiance
-findByName name = find ((name ==) . T.toLower . T.pack . show) allAllegiances

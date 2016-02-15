@@ -26,6 +26,7 @@ The current implemented roles are:
 * Simple Villager.
 * Simple Werewolf.
 * Villager-Villager.
+* Wild-child.
 * Witch.
 * Wolf-hound.
 
