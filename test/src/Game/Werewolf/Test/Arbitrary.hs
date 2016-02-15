@@ -24,8 +24,8 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
 
     -- ** Command
-    arbitraryCommand, arbitraryChooseCommand, arbitraryDevourVoteCommand, arbitraryHealCommand,
-    arbitraryLynchVoteCommand, arbitraryPassCommand, arbitraryPoisonCommand,
+    arbitraryCommand, arbitraryChooseCommand, arbitraryVoteDevourCommand, arbitraryHealCommand,
+    arbitraryVoteLynchCommand, arbitraryPassCommand, arbitraryPoisonCommand,
     arbitraryProtectCommand, arbitraryQuitCommand, arbitrarySeeCommand,
     runArbitraryCommands,
 
@@ -262,8 +262,8 @@ arbitraryCommand game = case game ^. stage of
     Sunrise         -> return $ Blind noopCommand
     Sunset          -> return $ Blind noopCommand
     SeersTurn       -> arbitrarySeeCommand game
-    VillagesTurn    -> arbitraryLynchVoteCommand game
-    WerewolvesTurn  -> arbitraryDevourVoteCommand game
+    VillagesTurn    -> arbitraryVoteLynchCommand game
+    WerewolvesTurn  -> arbitraryVoteDevourCommand game
     WitchsTurn      -> oneof [
         arbitraryHealCommand game,
         arbitraryPassCommand game,
@@ -277,26 +277,6 @@ arbitraryChooseCommand game = do
     allegiance      <- elements [Villagers, Werewolves]
 
     return . Blind $ chooseCommand (wolfHound ^. name) (allegiance)
-
-arbitraryDevourVoteCommand :: Game -> Gen (Blind Command)
-arbitraryDevourVoteCommand game = do
-    let applicableCallers   = filterWerewolves $ getPendingVoters game
-    target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
-
-    if null applicableCallers
-        then return $ Blind noopCommand
-        else elements applicableCallers >>= \caller ->
-            return . Blind $ devourVoteCommand (caller ^. name) (target ^. name)
-
-arbitraryLynchVoteCommand :: Game -> Gen (Blind Command)
-arbitraryLynchVoteCommand game = do
-    let applicableCallers   = getPendingVoters game
-    target                  <- arbitraryPlayer game
-
-    if null applicableCallers
-        then return $ Blind noopCommand
-        else elements applicableCallers >>= \caller ->
-            return . Blind $ lynchVoteCommand (caller ^. name) (target ^. name)
 
 arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do
@@ -348,6 +328,26 @@ arbitrarySeeCommand game = do
     return $ if isJust (game ^. see)
         then Blind noopCommand
         else Blind $ seeCommand (seer ^. name) (target ^. name)
+
+arbitraryVoteDevourCommand :: Game -> Gen (Blind Command)
+arbitraryVoteDevourCommand game = do
+    let applicableCallers   = filterWerewolves $ getPendingVoters game
+    target                  <- suchThat (arbitraryPlayer game) $ not . isWerewolf
+
+    if null applicableCallers
+        then return $ Blind noopCommand
+        else elements applicableCallers >>= \caller ->
+            return . Blind $ voteDevourCommand (caller ^. name) (target ^. name)
+
+arbitraryVoteLynchCommand :: Game -> Gen (Blind Command)
+arbitraryVoteLynchCommand game = do
+    let applicableCallers   = getPendingVoters game
+    target                  <- arbitraryPlayer game
+
+    if null applicableCallers
+        then return $ Blind noopCommand
+        else elements applicableCallers >>= \caller ->
+            return . Blind $ voteLynchCommand (caller ^. name) (target ^. name)
 
 runArbitraryCommands :: Int -> Game -> Gen Game
 runArbitraryCommands n = iterateM n $ \game -> do

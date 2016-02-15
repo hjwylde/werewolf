@@ -19,8 +19,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    chooseCommand, devourVoteCommand, healCommand, lynchVoteCommand, noopCommand, passCommand,
-    pingCommand, poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
+    chooseCommand, healCommand, noopCommand, passCommand, pingCommand, poisonCommand,
+    protectCommand, quitCommand, seeCommand, statusCommand, voteDevourCommand, voteLynchCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -58,21 +58,6 @@ chooseCommand callerName allegiance' = Command $ do
             Villagers   -> simpleVillagerRole
             Werewolves  -> simpleWerewolfRole
 
-devourVoteCommand :: Text -> Text -> Command
-devourVoteCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
-    validatePlayer callerName targetName
-    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
-
-    votes %= Map.insert callerName targetName
-
-    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterWerewolves
-
-    tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
-
 healCommand :: Text -> Command
 healCommand callerName = Command $ do
     validatePlayer callerName callerName
@@ -83,15 +68,6 @@ healCommand callerName = Command $ do
 
     heal        .= True
     healUsed    .= True
-
-lynchVoteCommand :: Text -> Text -> Command
-lynchVoteCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    unlessM isVillagesTurn                          $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
-    validatePlayer callerName targetName
-
-    votes %= Map.insert callerName targetName
 
 noopCommand :: Command
 noopCommand = Command $ return ()
@@ -236,6 +212,30 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
             rolesInGameMessage (Just callerName) $ map (view role) players,
             playersInGameMessage callerName players
             ]
+
+voteDevourCommand :: Text -> Text -> Command
+voteDevourCommand callerName targetName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
+    validatePlayer callerName targetName
+    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
+
+    votes %= Map.insert callerName targetName
+
+    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterWerewolves
+
+    tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
+
+voteLynchCommand :: Text -> Text -> Command
+voteLynchCommand callerName targetName = Command $ do
+    validatePlayer callerName callerName
+    unlessM isVillagesTurn                          $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
+    validatePlayer callerName targetName
+
+    votes %= Map.insert callerName targetName
 
 validatePlayer :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
 validatePlayer callerName name = do

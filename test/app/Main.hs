@@ -37,17 +37,6 @@ allCommandTests =
     , testProperty "choose command errors when caller not wolf-hound"   prop_chooseCommandErrorsWhenCallerNotWolfHound
     , testProperty "choose command sets caller's role"                  prop_chooseCommandSetsCallersRole
 
-    , testProperty "devour vote command errors when game is over"           prop_devourVoteCommandErrorsWhenGameIsOver
-    , testProperty "devour vote command errors when caller does not exist"  prop_devourVoteCommandErrorsWhenCallerDoesNotExist
-    , testProperty "devour vote command errors when target does not exist"  prop_devourVoteCommandErrorsWhenTargetDoesNotExist
-    , testProperty "devour vote command errors when caller is dead"         prop_devourVoteCommandErrorsWhenCallerIsDead
-    , testProperty "devour vote command errors when target is dead"         prop_devourVoteCommandErrorsWhenTargetIsDead
-    , testProperty "devour vote command errors when not werewolves turn"    prop_devourVoteCommandErrorsWhenNotWerewolvesTurn
-    , testProperty "devour vote command errors when caller not werewolf"    prop_devourVoteCommandErrorsWhenCallerNotWerewolf
-    , testProperty "devour vote command errors when caller has voted"       prop_devourVoteCommandErrorsWhenCallerHasVoted
-    , testProperty "devour vote command errors when target werewolf"        prop_devourVoteCommandErrorsWhenTargetWerewolf
-    , testProperty "devour vote command updates votes"                      prop_devourVoteCommandUpdatesVotes
-
     , testProperty "heal command errors when game is over"          prop_healCommandErrorsWhenGameIsOver
     , testProperty "heal command errors when caller does not exist" prop_healCommandErrorsWhenCallerDoesNotExist
     , testProperty "heal command errors when caller is dead"        prop_healCommandErrorsWhenCallerIsDead
@@ -57,15 +46,6 @@ allCommandTests =
     , testProperty "heal command errors when caller not witch"      prop_healCommandErrorsWhenCallerNotWitch
     , testProperty "heal command sets heal"                         prop_healCommandSetsHeal
     , testProperty "heal command sets heal used"                    prop_healCommandSetsHealUsed
-
-    , testProperty "lynch vote command errors when game is over"            prop_lynchVoteCommandErrorsWhenGameIsOver
-    , testProperty "lynch vote command errors when caller does not exist"   prop_lynchVoteCommandErrorsWhenCallerDoesNotExist
-    , testProperty "lynch vote command errors when target does not exist"   prop_lynchVoteCommandErrorsWhenTargetDoesNotExist
-    , testProperty "lynch vote command errors when caller is dead"          prop_lynchVoteCommandErrorsWhenCallerIsDead
-    , testProperty "lynch vote command errors when target is dead"          prop_lynchVoteCommandErrorsWhenTargetIsDead
-    , testProperty "lynch vote command errors when not villages turn"       prop_lynchVoteCommandErrorsWhenNotVillagesTurn
-    , testProperty "lynch vote command errors when caller has voted"        prop_lynchVoteCommandErrorsWhenCallerHasVoted
-    , testProperty "lynch vote command updates votes"                       prop_lynchVoteCommandUpdatesVotes
 
     , testProperty "pass command errors when game is over"          prop_passCommandErrorsWhenGameIsOver
     , testProperty "pass command errors when caller does not exist" prop_passCommandErrorsWhenCallerDoesNotExist
@@ -120,6 +100,26 @@ allCommandTests =
     , testProperty "see command errors when not seer's turn"        prop_seeCommandErrorsWhenNotSeersTurn
     , testProperty "see command errors when caller not seer"        prop_seeCommandErrorsWhenCallerNotSeer
     , testProperty "see command sets see"                           prop_seeCommandSetsSee
+
+    , testProperty "vote devour command errors when game is over"           prop_voteDevourCommandErrorsWhenGameIsOver
+    , testProperty "vote devour command errors when caller does not exist"  prop_voteDevourCommandErrorsWhenCallerDoesNotExist
+    , testProperty "vote devour command errors when target does not exist"  prop_voteDevourCommandErrorsWhenTargetDoesNotExist
+    , testProperty "vote devour command errors when caller is dead"         prop_voteDevourCommandErrorsWhenCallerIsDead
+    , testProperty "vote devour command errors when target is dead"         prop_voteDevourCommandErrorsWhenTargetIsDead
+    , testProperty "vote devour command errors when not werewolves turn"    prop_voteDevourCommandErrorsWhenNotWerewolvesTurn
+    , testProperty "vote devour command errors when caller not werewolf"    prop_voteDevourCommandErrorsWhenCallerNotWerewolf
+    , testProperty "vote devour command errors when caller has voted"       prop_voteDevourCommandErrorsWhenCallerHasVoted
+    , testProperty "vote devour command errors when target werewolf"        prop_voteDevourCommandErrorsWhenTargetWerewolf
+    , testProperty "vote devour command updates votes"                      prop_voteDevourCommandUpdatesVotes
+
+    , testProperty "vote lynch command errors when game is over"            prop_voteLynchCommandErrorsWhenGameIsOver
+    , testProperty "vote lynch command errors when caller does not exist"   prop_voteLynchCommandErrorsWhenCallerDoesNotExist
+    , testProperty "vote lynch command errors when target does not exist"   prop_voteLynchCommandErrorsWhenTargetDoesNotExist
+    , testProperty "vote lynch command errors when caller is dead"          prop_voteLynchCommandErrorsWhenCallerIsDead
+    , testProperty "vote lynch command errors when target is dead"          prop_voteLynchCommandErrorsWhenTargetIsDead
+    , testProperty "vote lynch command errors when not villages turn"       prop_voteLynchCommandErrorsWhenNotVillagesTurn
+    , testProperty "vote lynch command errors when caller has voted"        prop_voteLynchCommandErrorsWhenCallerHasVoted
+    , testProperty "vote lynch command updates votes"                       prop_voteLynchCommandUpdatesVotes
     ]
 
 allEngineTests :: [TestTree]
