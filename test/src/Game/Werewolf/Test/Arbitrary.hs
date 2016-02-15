@@ -17,7 +17,7 @@ module Game.Werewolf.Test.Arbitrary (
     GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..), GameAtWitchsTurn(..),
     GameAtWolfHoundsTurn(..),
     GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
-    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPoison(..),
+    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPass(..), GameWithPoison(..),
     GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
     GameWithRoleModelAtVillagesTurn(..), GameWithSee(..),
 
@@ -216,6 +216,17 @@ instance Arbitrary GameWithOneAllegianceAlive where
         let game'       = foldr killPlayer game (map (view name) players')
 
         return $ GameWithOneAllegianceAlive game'
+
+newtype GameWithPass = GameWithPass Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithPass where
+    arbitrary = do
+        game            <- arbitrary
+        let game'       = game & stage .~ WitchsTurn
+        (Blind command) <- arbitraryPassCommand game'
+
+        return $ GameWithPass (run_ (apply command) game')
 
 newtype GameWithPoison = GameWithPoison Game
     deriving (Eq, Show)

@@ -112,7 +112,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             advanceStage
 
-    Sunrise -> advanceStage
+    Sunrise -> do
+        round += 1
+
+        advanceStage
 
     Sunset -> do
         whenJustM (use roleModel) $ \roleModelsName -> do
@@ -193,8 +196,6 @@ advanceStage = do
     let nextStage = if length (nub $ map (view $ role . allegiance) alivePlayers) <= 1
         then GameOver
         else head $ filter (stageAvailable game) (drop1 $ dropWhile (stage' /=) stageCycle)
-
-    when (nextStage == head stageCycle) $ round += 1
 
     stage   .= nextStage
     passes  .= []

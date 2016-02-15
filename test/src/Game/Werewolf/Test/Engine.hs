@@ -61,10 +61,11 @@ allEngineTests =
     , testProperty "check seer's turn resets sees"                      prop_checkSeersTurnResetsSee
     , testProperty "check seer's turn does nothing unless seen"         prop_checkSeersTurnDoesNothingUnlessSeen
 
+    , testProperty "check sunrise increments round" prop_checkSunriseIncrementsRound
+
     , testProperty "check sunset sets wild-child's allegiance when role model dead" prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead
 
     , testProperty "check villages' turn advances to seer's turn"                           prop_checkVillagesTurnAdvancesToSeersTurn
-    , testProperty "check villages' turn increments round"                                  prop_checkVillagesTurnIncrementsRound
     , testProperty "check villages' turn lynches one player when consensus"                 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus
     , testProperty "check villages' turn lynches no one when conflicted and no scapegoats"  prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats
     , testProperty "check villages' turn lynches scapegoat when conflicted"                 prop_checkVillagesTurnLynchesScapegoatWhenConflicted
@@ -197,6 +198,10 @@ prop_checkSeersTurnDoesNothingUnlessSeen :: GameAtSeersTurn -> Bool
 prop_checkSeersTurnDoesNothingUnlessSeen (GameAtSeersTurn game) =
     isSeersTurn $ run_ checkStage game
 
+prop_checkSunriseIncrementsRound :: GameWithPass -> Property
+prop_checkSunriseIncrementsRound (GameWithPass game) =
+    run_ checkStage game ^. round === game ^. round + 1
+
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Bool
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let roleModelsName  = fromJust $ game ^. roleModel
@@ -208,10 +213,6 @@ prop_checkVillagesTurnAdvancesToSeersTurn :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
     isAlive (findByRole_ seerRole $ run_ checkStage game ^. players)
     ==> isSeersTurn $ run_ checkStage game
-
-prop_checkVillagesTurnIncrementsRound :: GameWithLynchVotes -> Property
-prop_checkVillagesTurnIncrementsRound (GameWithLynchVotes game) =
-    run_ checkStage game ^. round === game ^. round + 1
 
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus (GameWithLynchVotes game) =

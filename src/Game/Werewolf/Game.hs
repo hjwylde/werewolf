@@ -151,7 +151,8 @@ allStages =
 
 stageCycle :: [Stage]
 stageCycle = cycle
-    [ Sunset
+    [ VillagesTurn
+    , Sunset
     , SeersTurn
     , WildChildsTurn
     , DefendersTurn
@@ -159,7 +160,6 @@ stageCycle = cycle
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise
-    , VillagesTurn
     ]
 
 stageAvailable :: Game -> Stage -> Bool
@@ -168,7 +168,9 @@ stageAvailable game DefendersTurn   = any isDefender (filterAlive $ game ^. play
 stageAvailable game SeersTurn       = any isSeer (filterAlive $ game ^. players)
 stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
-stageAvailable _ VillagesTurn       = True
+stageAvailable game VillagesTurn    =
+    any isAngel (filterAlive $ game ^. players)
+    || not (isFirstRound game)
 stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
 stageAvailable game WildChildsTurn  =
     any isWildChild (filterAlive $ game ^. players)
