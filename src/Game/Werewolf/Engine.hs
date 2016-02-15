@@ -115,6 +115,9 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
+        whenJustM (findPlayerByRole angelRole) $ \angel ->
+            when (isAlive angel) $ setPlayerRole (angel ^. name) simpleVillagerRole
+
         advanceStage
 
     Sunset -> do

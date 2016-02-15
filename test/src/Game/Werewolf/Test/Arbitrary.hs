@@ -13,11 +13,11 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Game
     NewGame(..),
-    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtSeersTurn(..), GameAtVillagesTurn(..),
-    GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..), GameAtWitchsTurn(..),
-    GameAtWolfHoundsTurn(..),
+    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtSeersTurn(..), GameAtSunrise(..),
+    GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..),
+    GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
     GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
-    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPass(..), GameWithPoison(..),
+    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPoison(..),
     GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
     GameWithRoleModelAtVillagesTurn(..), GameWithSee(..),
 
@@ -110,6 +110,15 @@ instance Arbitrary GameAtSeersTurn where
         game <- arbitrary
 
         return $ GameAtSeersTurn (game & stage .~ SeersTurn)
+
+newtype GameAtSunrise = GameAtSunrise Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtSunrise where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtSunrise (game & stage .~ Sunrise)
 
 newtype GameAtVillagesTurn = GameAtVillagesTurn Game
     deriving (Eq, Show)

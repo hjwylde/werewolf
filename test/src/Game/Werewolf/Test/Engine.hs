@@ -61,7 +61,8 @@ allEngineTests =
     , testProperty "check seer's turn resets sees"                      prop_checkSeersTurnResetsSee
     , testProperty "check seer's turn does nothing unless seen"         prop_checkSeersTurnDoesNothingUnlessSeen
 
-    , testProperty "check sunrise increments round" prop_checkSunriseIncrementsRound
+    , testProperty "check sunrise increments round"     prop_checkSunriseIncrementsRound
+    , testProperty "check sunrise sets angel's role"    prop_checkSunriseSetsAngelsRole
 
     , testProperty "check sunset sets wild-child's allegiance when role model dead" prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead
 
@@ -198,9 +199,16 @@ prop_checkSeersTurnDoesNothingUnlessSeen :: GameAtSeersTurn -> Bool
 prop_checkSeersTurnDoesNothingUnlessSeen (GameAtSeersTurn game) =
     isSeersTurn $ run_ checkStage game
 
-prop_checkSunriseIncrementsRound :: GameWithPass -> Property
-prop_checkSunriseIncrementsRound (GameWithPass game) =
+prop_checkSunriseIncrementsRound :: GameAtSunrise -> Property
+prop_checkSunriseIncrementsRound (GameAtSunrise game) =
     run_ checkStage game ^. round === game ^. round + 1
+
+prop_checkSunriseSetsAngelsRole :: GameAtSunrise -> Property
+prop_checkSunriseSetsAngelsRole (GameAtSunrise game) = do
+    let angel = findByRole_ angelRole (game ^. players)
+    let game' = run_ checkStage game
+
+    findByName_ (angel ^. name) (game' ^. players) ^. role === simpleVillagerRole
 
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Bool
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
