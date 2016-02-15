@@ -165,6 +165,7 @@ quitCommand callerName = Command $ do
     tell [playerQuitMessage caller]
 
     passes %= delete callerName
+    when (isAngel caller)       $ setPlayerRole callerName simpleVillagerRole
     when (isDefender caller)    $ do
         protect         .= Nothing
         priorProtect    .= Nothing

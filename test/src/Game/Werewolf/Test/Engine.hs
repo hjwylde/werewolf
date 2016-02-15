@@ -203,12 +203,12 @@ prop_checkSunriseIncrementsRound :: GameAtSunrise -> Property
 prop_checkSunriseIncrementsRound (GameAtSunrise game) =
     run_ checkStage game ^. round === game ^. round + 1
 
-prop_checkSunriseSetsAngelsRole :: GameAtSunrise -> Property
+prop_checkSunriseSetsAngelsRole :: GameAtSunrise -> Bool
 prop_checkSunriseSetsAngelsRole (GameAtSunrise game) = do
     let angel = findByRole_ angelRole (game ^. players)
     let game' = run_ checkStage game
 
-    findByName_ (angel ^. name) (game' ^. players) ^. role === simpleVillagerRole
+    isSimpleVillager $ findByName_ (angel ^. name) (game' ^. players)
 
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Bool
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do

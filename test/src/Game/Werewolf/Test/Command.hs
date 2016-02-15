@@ -106,6 +106,7 @@ allCommandTests =
     , testProperty "quit command clears player's devour vote"                   prop_quitCommandClearsPlayersDevourVote
     , testProperty "quit command clears player's lynch vote"                    prop_quitCommandClearsPlayersLynchVote
     , testProperty "quit command clears role model when caller is wild-child"   prop_quitCommandClearsRoleModelWhenCallerIsWildChild
+    , testProperty "quit command sets angel's role when caller is angel"         prop_quitCommandSetsAngelsRoleWhenCallerIsAngel
 
     , testProperty "see command errors when game is over"           prop_seeCommandErrorsWhenGameIsOver
     , testProperty "see command errors when caller does not exist"  prop_seeCommandErrorsWhenCallerDoesNotExist
@@ -595,6 +596,13 @@ prop_quitCommandClearsRoleModelWhenCallerIsWildChild (GameWithRoleModel game) = 
     let command     = quitCommand (wildChild ^. name)
 
     isNothing $ run_ (apply command) game ^. roleModel
+
+prop_quitCommandSetsAngelsRoleWhenCallerIsAngel :: Game -> Bool
+prop_quitCommandSetsAngelsRoleWhenCallerIsAngel game = do
+    let angel   = findByRole_ angelRole (game ^. players)
+    let command = quitCommand (angel ^. name)
+
+    isSimpleVillager $ findByName_ (angel ^. name) (run_ (apply command) game ^. players)
 
 prop_seeCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_seeCommandErrorsWhenGameIsOver (GameAtGameOver game) =
