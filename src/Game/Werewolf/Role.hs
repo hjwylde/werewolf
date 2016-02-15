@@ -19,7 +19,7 @@ module Game.Werewolf.Role (
     -- ** Instances
     allRoles, restrictedRoles,
     defenderRole, scapegoatRole, seerRole, simpleVillagerRole, simpleWerewolfRole,
-    villagerVillagerRole, witchRole, wolfHoundRole,
+    villagerVillagerRole, wildChildRole, witchRole, wolfHoundRole,
 
     -- * Allegiance
     Allegiance(..),
@@ -60,6 +60,7 @@ allRoles =
     , simpleVillagerRole
     , simpleWerewolfRole
     , villagerVillagerRole
+    , wildChildRole
     , witchRole
     , wolfHoundRole
     ]
@@ -141,6 +142,30 @@ villagerVillagerRole = Role
         , "and will make their word decisive in crucial moments."
         ]
     , _advice       = "You'll make friends quickly, but be wary about whom you trust."
+    }
+
+wildChildRole :: Role
+wildChildRole = Role
+    { _name         = "Wild-child"
+    , _allegiance   = Villagers
+    , _description  = T.unwords
+        [ "Abandoned in the woods by his parents at a young age, he was raised by wolves."
+        , "As soon as he learned how to walk on all fours,"
+        , "the Wild-child began to wander around Miller's Hollow."
+        , "One day, fascinated by an inhabitant of the village who was walking upright"
+        , "with grace and presence, he made them his secret role model."
+        , "He then decided to integrate himself into the community of Miller's Hollow and entered,"
+        , "worried, in the village."
+        , "The community was moved by his frailty, adopted him, and welcomed him in their fold."
+        , "What will become of him: honest Villager or terrible Werewolf?"
+        , "For all of his life,"
+        , "the heart of the Wild-child will swing between these two alternatives."
+        , "May his model confirm him in his newfound humanity."
+        ]
+    , _advice       = T.unwords
+        [ "Nothing is keeping you from taking part in the elimination of your role model,"
+        , "if you so wish..."
+        ]
     }
 
 witchRole :: Role
