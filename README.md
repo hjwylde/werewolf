@@ -20,17 +20,29 @@ For the Werewolves: devour all of the Villagers.
 
 #### Roles
 
-The current implemented roles are:
+The implemented roles are split into four categories.
+
+**The Ambiguous:**
+
+* Wild-child.
+* Wolf-hound.
+
+**The Loners:**
+
 * Angel.
+
+**The Villagers:**
+
 * Defender.
 * Scapegoat.
 * Seer.
 * Simple Villager.
-* Simple Werewolf.
 * Villager-Villager.
-* Wild-child.
 * Witch.
-* Wolf-hound.
+
+**The Werewolves:**
+
+* Simple Werewolf.
 
 ### Installing
 
@@ -58,6 +70,7 @@ This section covers how a chat client interacts with the werewolf game engine.
 
 All werewolf commands are designed to be run by a user from the chat client.
 E.g., to start a game:
+
 ```bash
 > werewolf --caller @foo start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
@@ -81,6 +94,7 @@ The `to` header on a message may either be `null`---for a public message---or ha
     recipient.
 
 It's the Seer's turn now.
+
 ```bash
 > werewolf --caller @qux see @grault
 {"ok":true,"messages":[
@@ -92,6 +106,7 @@ It's the Seer's turn now.
 ```
 
 Let's have the Werewolves, _@foo_ and _@baz_, vote to devour a Villager.
+
 ```bash
 > werewolf --caller @foo vote @bar
 {"ok":true,"messages":[
@@ -108,6 +123,7 @@ Let's have the Werewolves, _@foo_ and _@baz_, vote to devour a Villager.
 ```
 
 Too bad for _@bar_. Maybe the village can get some vengeance...
+
 ```bash
 > werewolf --caller @qux vote @foo
 {"ok":true,"messages":[]}

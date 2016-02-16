@@ -16,7 +16,6 @@ module Werewolf.Commands.Interpret (
 
 import Data.Text (Text)
 
--- | Options.
 data Options = Options
     { args :: [Text]
     } deriving (Eq, Show)

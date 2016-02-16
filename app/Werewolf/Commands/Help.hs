@@ -28,16 +28,13 @@ import qualified Data.Text as T
 import Game.Werewolf.Response
 import Game.Werewolf.Role     as Role
 
--- | Options.
 data Options = Options
     { argCommand :: Maybe Command
     } deriving (Eq, Show)
 
--- | Command.
 data Command = Commands | Description | Rules | Roles
     deriving (Eq, Show)
 
--- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options (Just Commands)) = exitWith success
     { messages = map (privateMessage callerName) commandsMessages
@@ -132,7 +129,7 @@ rulesMessages = map (T.intercalate "\n")
       , "10. The village votes to lynch a suspect."
       , T.unwords
         [ "The game is over when only Villagers or Werewolves are left alive,"
-        , "or one of the loners completes their own objective."
+        , "or one of the Loners completes their own objective."
         ]
       ]
     ]

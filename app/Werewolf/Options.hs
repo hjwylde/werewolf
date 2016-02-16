@@ -36,13 +36,11 @@ import qualified Werewolf.Version            as This
 
 import Options.Applicative
 
--- | Options.
 data Options = Options
     { optCaller  :: Text
     , argCommand :: Command
     } deriving (Eq, Show)
 
--- | Command.
 data Command
     = Choose Choose.Options
     | End

@@ -28,12 +28,10 @@ import Game.Werewolf.Command
 import Game.Werewolf.Engine
 import Game.Werewolf.Response
 
--- | Options.
 data Options = Options
     { argTarget :: Text
     } deriving (Eq, Show)
 
--- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options targetName) = do
     unlessM doesGameExist $ exitWith failure

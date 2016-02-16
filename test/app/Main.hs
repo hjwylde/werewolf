@@ -8,6 +8,7 @@ Maintainer  : public@hjwylde.com
 {-# OPTIONS_HADDOCK hide, prune #-}
 
 module Main (
+    -- * Main
     main
 ) where
 

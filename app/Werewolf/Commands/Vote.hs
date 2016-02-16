@@ -29,12 +29,10 @@ import Game.Werewolf.Engine   hiding (isWerewolvesTurn)
 import Game.Werewolf.Game
 import Game.Werewolf.Response
 
--- | Options.
 data Options = Options
     { argTarget :: Text
     } deriving (Eq, Show)
 
--- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options targetName) = do
     unlessM doesGameExist $ exitWith failure
