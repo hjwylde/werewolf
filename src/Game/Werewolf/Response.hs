@@ -58,7 +58,7 @@ module Game.Werewolf.Response (
 
     -- ** Villages' turn messages
     playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
-    scapegoatLynchedMessage, playerHasAlreadyVotedMessage,
+    scapegoatLynchedMessage, villageIdiotLynchedMessage, playerHasAlreadyVotedMessage,
 
     -- ** Werewolves' turn messages
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
@@ -492,6 +492,13 @@ scapegoatLynchedMessage name = publicMessage $ T.unwords
     [ "The townsfolk squabble over whom to tie up. Just as they are about to call it a day"
     , "they notice that", name, "has been acting awfully suspicious."
     , "Not wanting to take any chances,", name, "is promptly tied to a pyre and burned alive."
+    ]
+
+villageIdiotLynchedMessage :: Text -> Message
+villageIdiotLynchedMessage name = publicMessage $ T.unwords
+    [ "Just as the townsfolk tie", name, "up to the pyre, a voice in the crowd yells out."
+    , "\"We can't burn", name, "! He's that oaf, you know, John's boy!\""
+    , "The Village Idiot is quickly untied and apologised to."
     ]
 
 playerHasAlreadyVotedMessage :: Text -> Message

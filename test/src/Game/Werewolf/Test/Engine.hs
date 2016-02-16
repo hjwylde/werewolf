@@ -68,6 +68,7 @@ allEngineTests =
 
     , testProperty "check villages' turn advances to seer's turn"                           prop_checkVillagesTurnAdvancesToSeersTurn
     , testProperty "check villages' turn lynches one player when consensus"                 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus
+    , testProperty "check villages' turn lynches no one when target is village idiot"       prop_checkVillagesTurnLynchesNoOneWhenTargetIsVillageIdiot
     , testProperty "check villages' turn lynches no one when conflicted and no scapegoats"  prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats
     , testProperty "check villages' turn lynches scapegoat when conflicted"                 prop_checkVillagesTurnLynchesScapegoatWhenConflicted
     , testProperty "check villages' turn resets votes"                                      prop_checkVillagesTurnResetsVotes
@@ -217,11 +218,12 @@ prop_checkSunriseSetsAngelsRole (GameAtSunrise game) = do
 
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
-    let roleModelsName  = fromJust $ game ^. roleModel
-    let game'           = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) roleModelsName)) game (game ^. players)
+    let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
-    not (isAngel $ findByName_ roleModelsName (game' ^. players))
+    not (isAngel roleModel' || isVillageIdiot roleModel')
         ==> isWerewolf $ findByRole_ wildChildRole (run_ checkStage game' ^. players)
+    where
+        roleModel' = findByName_ (fromJust $ game ^. roleModel) (game ^. players)
 
 prop_checkVillagesTurnAdvancesToSeersTurn :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
@@ -232,7 +234,18 @@ prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus (GameWithLynchVotes game) =
     length (getVoteResult game) == 1
+    && not (isVillageIdiot target)
     ==> length (filterDead $ run_ checkStage game ^. players) == 1
+    where
+        target = head $ getVoteResult game
+
+prop_checkVillagesTurnLynchesNoOneWhenTargetIsVillageIdiot :: GameAtVillagesTurn -> Bool
+prop_checkVillagesTurnLynchesNoOneWhenTargetIsVillageIdiot (GameAtVillagesTurn game) = do
+    let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (villageIdiot ^. name))) game (game ^. players)
+
+    null . filterDead $ run_ checkStage game' ^. players
+    where
+        villageIdiot = findByRole_ villageIdiotRole (game ^. players)
 
 -- TODO (hjw): tidy this test
 prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property

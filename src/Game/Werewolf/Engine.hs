@@ -145,9 +145,9 @@ checkStage' = use stage >>= \stage' -> case stage' of
             tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes')
 
             getVoteResult >>= \votees -> case votees of
-                [votee]   -> do
-                    killPlayer $ votee ^. name
-                    tell [playerLynchedMessage votee]
+                [votee]   -> if isVillageIdiot votee
+                    then tell [villageIdiotLynchedMessage $ votee ^. name]
+                    else killPlayer (votee ^. name) >> tell [playerLynchedMessage votee]
                 _               ->
                     findPlayerByRole scapegoatRole >>= \mScapegoat -> case mScapegoat of
                         Just scapegoat  -> killPlayer (scapegoat ^. name) >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
