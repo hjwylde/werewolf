@@ -14,7 +14,7 @@ Game and stage data structures.
 module Game.Werewolf.Game (
     -- * Game
     Game, stage, round, players, events, passes, heal, healUsed, poison, poisonUsed, priorProtect,
-    protect, roleModel, see, votes,
+    protect, roleModel, see, villageIdiotRevealed, votes,
     newGame,
 
     -- ** Manipulations
@@ -54,20 +54,21 @@ import Game.Werewolf.Role   hiding (name)
 import Prelude hiding (round)
 
 data Game = Game
-    { _stage        :: Stage
-    , _round        :: Int
-    , _players      :: [Player]
-    , _events       :: [Event]
-    , _passes       :: [Text]
-    , _heal         :: Bool
-    , _healUsed     :: Bool
-    , _poison       :: Maybe Text
-    , _poisonUsed   :: Bool
-    , _priorProtect :: Maybe Text
-    , _protect      :: Maybe Text
-    , _roleModel    :: Maybe Text
-    , _see          :: Maybe Text
-    , _votes        :: Map Text Text
+    { _stage                :: Stage
+    , _round                :: Int
+    , _players              :: [Player]
+    , _events               :: [Event]
+    , _passes               :: [Text]
+    , _heal                 :: Bool
+    , _healUsed             :: Bool
+    , _poison               :: Maybe Text
+    , _poisonUsed           :: Bool
+    , _priorProtect         :: Maybe Text
+    , _protect              :: Maybe Text
+    , _roleModel            :: Maybe Text
+    , _see                  :: Maybe Text
+    , _villageIdiotRevealed :: Bool
+    , _votes                :: Map Text Text
     } deriving (Eq, Read, Show)
 
 data Stage  = GameOver | DefendersTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
@@ -85,20 +86,21 @@ newGame :: [Player] -> Game
 newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
     where
         game = Game
-            { _stage        = Sunset
-            , _round        = 0
-            , _players      = players
-            , _events       = []
-            , _passes       = []
-            , _heal         = False
-            , _healUsed     = False
-            , _poison       = Nothing
-            , _poisonUsed   = False
-            , _priorProtect = Nothing
-            , _protect      = Nothing
-            , _roleModel    = Nothing
-            , _see          = Nothing
-            , _votes        = Map.empty
+            { _stage                = Sunset
+            , _round                = 0
+            , _players              = players
+            , _events               = []
+            , _passes               = []
+            , _heal                 = False
+            , _healUsed             = False
+            , _poison               = Nothing
+            , _poisonUsed           = False
+            , _priorProtect         = Nothing
+            , _protect              = Nothing
+            , _roleModel            = Nothing
+            , _see                  = Nothing
+            , _villageIdiotRevealed = False
+            , _votes                = Map.empty
             }
 
 killPlayer :: Text -> Game -> Game

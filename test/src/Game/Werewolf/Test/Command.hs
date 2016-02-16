@@ -127,14 +127,16 @@ allCommandTests =
     , testProperty "vote devour command errors when target werewolf"        prop_voteDevourCommandErrorsWhenTargetWerewolf
     , testProperty "vote devour command updates votes"                      prop_voteDevourCommandUpdatesVotes
 
-    , testProperty "vote lynch command errors when game is over"            prop_voteLynchCommandErrorsWhenGameIsOver
-    , testProperty "vote lynch command errors when caller does not exist"   prop_voteLynchCommandErrorsWhenCallerDoesNotExist
-    , testProperty "vote lynch command errors when target does not exist"   prop_voteLynchCommandErrorsWhenTargetDoesNotExist
-    , testProperty "vote lynch command errors when caller is dead"          prop_voteLynchCommandErrorsWhenCallerIsDead
-    , testProperty "vote lynch command errors when target is dead"          prop_voteLynchCommandErrorsWhenTargetIsDead
-    , testProperty "vote lynch command errors when not villages turn"       prop_voteLynchCommandErrorsWhenNotVillagesTurn
-    , testProperty "vote lynch command errors when caller has voted"        prop_voteLynchCommandErrorsWhenCallerHasVoted
-    , testProperty "vote lynch command updates votes"                       prop_voteLynchCommandUpdatesVotes
+    , testProperty "vote lynch command errors when game is over"                    prop_voteLynchCommandErrorsWhenGameIsOver
+    , testProperty "vote lynch command errors when caller does not exist"           prop_voteLynchCommandErrorsWhenCallerDoesNotExist
+    , testProperty "vote lynch command errors when target does not exist"           prop_voteLynchCommandErrorsWhenTargetDoesNotExist
+    , testProperty "vote lynch command errors when caller is dead"                  prop_voteLynchCommandErrorsWhenCallerIsDead
+    , testProperty "vote lynch command errors when target is dead"                  prop_voteLynchCommandErrorsWhenTargetIsDead
+    , testProperty "vote lynch command errors when not villages turn"               prop_voteLynchCommandErrorsWhenNotVillagesTurn
+    , testProperty "vote lynch command errors when caller has voted"                prop_voteLynchCommandErrorsWhenCallerHasVoted
+    , testProperty "vote lynch command errors when caller is known village idiot"   prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot
+    , testProperty "vote lynch command errors when target is known village idiot"   prop_voteLynchCommandErrorsWhenTargetIsKnownVillageIdiot
+    , testProperty "vote lynch command updates votes"                               prop_voteLynchCommandUpdatesVotes
     ]
 
 prop_chooseAllegianceCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -776,6 +778,24 @@ prop_voteLynchCommandErrorsWhenCallerHasVoted (GameWithLynchVotes game) =
         let command = voteLynchCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
+
+prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot :: GameWithVillageIdiotRevealedAtVillagesTurn -> Property
+prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot (GameWithVillageIdiotRevealedAtVillagesTurn game) =
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = voteLynchCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
+    where
+        caller = findByRole_ villageIdiotRole (game ^. players)
+
+prop_voteLynchCommandErrorsWhenTargetIsKnownVillageIdiot :: GameWithVillageIdiotRevealedAtVillagesTurn -> Property
+prop_voteLynchCommandErrorsWhenTargetIsKnownVillageIdiot (GameWithVillageIdiotRevealedAtVillagesTurn game) =
+    forAll (arbitraryPlayer game) $ \caller -> do
+        let command = voteLynchCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
+    where
+        target = findByRole_ villageIdiotRole (game ^. players)
 
 prop_voteLynchCommandUpdatesVotes :: GameAtVillagesTurn -> Property
 prop_voteLynchCommandUpdatesVotes (GameAtVillagesTurn game) =

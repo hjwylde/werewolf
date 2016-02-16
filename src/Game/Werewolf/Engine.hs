@@ -44,7 +44,8 @@ module Game.Werewolf.Engine (
     createPlayers,
 
     -- ** Queries
-    doesPlayerExist, isPlayerDefender, isPlayerSeer, isPlayerWildChild, isPlayerWitch,
+    doesPlayerExist,
+    isPlayerDefender, isPlayerSeer, isPlayerVillageIdiot, isPlayerWildChild, isPlayerWitch,
     isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
@@ -138,7 +139,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     VillagesTurn -> do
-        playersCount    <- uses players (length . filterAlive)
+        alivePlayers    <- uses players filterAlive
+        playersCount    <- ifM (use villageIdiotRevealed)
+            (return . length $ filter (not . isVillageIdiot) alivePlayers)
+            (return $ length alivePlayers)
         votes'          <- use votes
 
         when (playersCount == Map.size votes') $ do
@@ -146,7 +150,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             getVoteResult >>= \votees -> case votees of
                 [votee]   -> if isVillageIdiot votee
-                    then tell [villageIdiotLynchedMessage $ votee ^. name]
+                    then villageIdiotRevealed .= True >> tell [villageIdiotLynchedMessage $ votee ^. name]
                     else killPlayer (votee ^. name) >> tell [playerLynchedMessage votee]
                 _               ->
                     findPlayerByRole scapegoatRole >>= \mScapegoat -> case mScapegoat of
@@ -349,6 +353,9 @@ isPlayerDefender name = isDefender <$> findPlayerByName_ name
 
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name = isSeer <$> findPlayerByName_ name
+
+isPlayerVillageIdiot :: MonadState Game m => Text -> m Bool
+isPlayerVillageIdiot name = isVillageIdiot <$> findPlayerByName_ name
 
 isPlayerWildChild :: MonadState Game m => Text -> m Bool
 isPlayerWildChild name = isWildChild <$> findPlayerByName_ name
