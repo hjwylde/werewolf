@@ -11,7 +11,7 @@ Maintainer  : public@hjwylde.com
 
 module Main (
     -- * Main
-    main, handle,
+    main,
 ) where
 
 import           Data.Text (Text)

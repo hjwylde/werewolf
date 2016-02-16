@@ -25,7 +25,6 @@ import Game.Werewolf.Command
 import Game.Werewolf.Engine
 import Game.Werewolf.Response
 
--- | Handle.
 handle :: MonadIO m => Text -> m ()
 handle callerName = do
     unlessM doesGameExist $ exitWith failure

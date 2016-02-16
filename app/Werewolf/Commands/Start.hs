@@ -32,13 +32,11 @@ import Game.Werewolf.Game
 import Game.Werewolf.Response
 import Game.Werewolf.Role
 
--- | Options.
 data Options = Options
     { optExtraRoleNames :: [Text]
     , argPlayers        :: [Text]
     } deriving (Eq, Show)
 
--- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options extraRoleNames playerNames) = do
     whenM (doesGameExist &&^ fmap (not . isGameOver) readGame) $ exitWith failure

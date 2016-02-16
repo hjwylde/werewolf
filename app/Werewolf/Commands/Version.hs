@@ -22,6 +22,5 @@ import Game.Werewolf.Response
 
 import Werewolf.Version
 
--- | Handle.
 handle :: MonadIO m => Text -> m ()
 handle callerName = exitWith success { messages = [engineVersionMessage callerName version] }

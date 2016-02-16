@@ -28,16 +28,13 @@ import qualified Data.Text as T
 import Game.Werewolf.Response
 import Game.Werewolf.Role     as Role
 
--- | Options.
 data Options = Options
     { argCommand :: Maybe Command
     } deriving (Eq, Show)
 
--- | Command.
 data Command = Commands | Description | Rules | Roles
     deriving (Eq, Show)
 
--- | Handle.
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options (Just Commands)) = exitWith success
     { messages = map (privateMessage callerName) commandsMessages
