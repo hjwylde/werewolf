@@ -114,6 +114,7 @@ allEngineTests =
     , testProperty "start game errors when more than 1 defender"            prop_startGameErrorsWhenMoreThan1Defender
     , testProperty "start game errors when more than 1 scapegoat"           prop_startGameErrorsWhenMoreThan1Scapegoat
     , testProperty "start game errors when more than 1 seer"                prop_startGameErrorsWhenMoreThan1Seer
+    , testProperty "start game errors when more than 1 village idiot"       prop_startGameErrorsWhenMoreThan1VillageIdiot
     , testProperty "start game errors when more than 1 villager-villager"   prop_startGameErrorsWhenMoreThan1VillagerVillager
     , testProperty "start game errors when more than 1 wild-child"          prop_startGameErrorsWhenMoreThan1WildChild
     , testProperty "start game errors when more than 1 witch"               prop_startGameErrorsWhenMoreThan1Witch
@@ -447,6 +448,11 @@ prop_startGameErrorsWhenMoreThan1Scapegoat players =
 prop_startGameErrorsWhenMoreThan1Seer :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Seer players =
     length (filter isSeer players) > 1
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
+
+prop_startGameErrorsWhenMoreThan1VillageIdiot :: [Player] -> Property
+prop_startGameErrorsWhenMoreThan1VillageIdiot players =
+    length (filter isVillageIdiot players) > 1
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1VillagerVillager :: [Player] -> Property

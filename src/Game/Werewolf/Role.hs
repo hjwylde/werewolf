@@ -37,7 +37,8 @@ module Game.Werewolf.Role (
 
     -- *** The Villagers
     -- | The Villagers must lynch all of the Werewolves.
-    defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villagerVillagerRole, witchRole,
+    defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villageIdiotRole,
+    villagerVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | The Werewolves must devour all of the Villagers.
@@ -83,6 +84,7 @@ allRoles =
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
+    , villageIdiotRole
     , simpleWerewolfRole
     , villagerVillagerRole
     , wildChildRole
@@ -114,7 +116,6 @@ allAllegiances = [Angel, Villagers, Werewolves]
 --   On the first night, the Wild-child may choose a player to become his role model. If during the
 --   game the chosen player is eliminated, the Wild-child becomes a Werewolf. He will then wake up
 --   the next night with his peers and will devour with them each night until the end of the game.
---
 --   However for as long as the Wild-child's role model is alive, he remains a Villager.
 wildChildRole :: Role
 wildChildRole = Role
@@ -250,6 +251,27 @@ simpleVillagerRole = Role
         ]
     , _advice       =
         "Bluffing can be a good technique, but you had better be convincing about what you say."
+    }
+
+-- | /What is a village without an idiot? He does pretty much nothing important, but he's so/
+--   /charming that no one would want to hurt him./
+--
+--   If the village votes against the Village Idiot, his identity is revealed. At that moment the
+--   Villagers understand their mistake and immediately let him be.
+--
+--   The Village Idiot continues to play but may no longer vote, as what would the vote of an idiot
+--   be worth?
+villageIdiotRole :: Role
+villageIdiotRole = Role
+    { _name         = "Village Idiot"
+    , _allegiance   = Villagers
+    , _description  = T.unwords
+        [ "What is a village without an idiot?"
+        , "He does pretty much nothing important,"
+        , "but he's so charming that no one would want to hurt him."
+        ]
+    , _advice       =
+        "Hah! As if advice would do you any good..."
     }
 
 -- | /This person has a soul as clear and transparent as the water from a mountain stream. They/

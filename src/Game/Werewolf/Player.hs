@@ -32,7 +32,7 @@ module Game.Werewolf.Player (
 
     -- ** Queries
     doesPlayerExist,
-    isAngel, isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf,
+    isAngel, isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf, isVillageIdiot,
     isVillagerVillager, isWildChild, isWitch, isWolfHound,
     isVillager, isWerewolf,
     isAlive, isDead,
@@ -137,6 +137,10 @@ isSimpleVillager player = player ^. role == simpleVillagerRole
 -- | @isSimpleWerewolf player = player ^. role == 'simpleWerewolfRole'@
 isSimpleWerewolf :: Player -> Bool
 isSimpleWerewolf player = player ^. role == simpleWerewolfRole
+
+-- | @isVillageIdiot player = player ^. role == 'villageIdiotRole'@
+isVillageIdiot :: Player -> Bool
+isVillageIdiot player = player ^. role == villageIdiotRole
 
 -- | @isVillagerVillager player = player ^. role == 'villagerVillagerRole'@
 isVillagerVillager :: Player -> Bool
