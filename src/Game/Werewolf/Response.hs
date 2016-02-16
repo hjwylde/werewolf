@@ -6,7 +6,13 @@ Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Response and message data structures.
+A response is used as a return result of calling the @werewolf@ binary. Each response has a list of
+associated messages. As such, this module defines these two data structures and a suite of messages
+used throughout the werewolf game.
+
+@werewolf@ was designed to be ambivalent to the calling chat client. The response-message structure
+reflects this by staying away from anything that could be construed as client-specific. This
+includes features such as emoji support.
 -}
 
 {-# LANGUAGE CPP               #-}
@@ -31,7 +37,9 @@ module Game.Werewolf.Response (
     noGameRunningMessage, gameAlreadyRunningMessage, engineVersionMessage,
 
     -- ** Generic messages
-    newGameMessages, stageMessages, gameOverMessages, playerQuitMessage,
+    newGameMessages, stageMessages, gameOverMessages, playerQuitMessage, gameIsOverMessage,
+    playerDoesNotExistMessage, playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
+    playerIsDeadMessage, targetIsDeadMessage, roleDoesNotExistMessage,
 
     -- ** Ping messages
     pingPlayerMessage, pingRoleMessage,
@@ -42,41 +50,30 @@ module Game.Werewolf.Response (
     -- ** Angel's turn messages
     angelJoinedVillagersMessage,
 
+    -- ** Defender's turn messages
+    playerCannotProtectSamePlayerTwiceInARowMessage,
+
     -- ** Seer's turn messages
     playerSeenMessage,
 
     -- ** Villages' turn messages
     playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
-    scapegoatLynchedMessage,
+    scapegoatLynchedMessage, playerHasAlreadyVotedMessage,
 
     -- ** Werewolves' turn messages
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
 
     -- ** Wild-child's turn messages
-    playerJoinedPackMessage, wildChildJoinedPackMessages,
+    playerJoinedPackMessage, wildChildJoinedPackMessages, playerCannotChooseSelfMessage,
 
     -- ** Witch's turn messages
-    playerPoisonedMessage,
-
-    -- ** Generic error messages
-    gameIsOverMessage, playerDoesNotExistMessage, playerCannotDoThatMessage,
-    playerCannotDoThatRightNowMessage, playerIsDeadMessage, roleDoesNotExistMessage,
-    allegianceDoesNotExistMessage,
-
-    -- ** Defender's turn error messages
-    playerCannotProtectSamePlayerTwiceInARowMessage,
-
-    -- ** Voting turn error messages
-    playerHasAlreadyVotedMessage, targetIsDeadMessage,
+    playerPoisonedMessage, playerHasAlreadyHealedMessage, playerHasAlreadyPoisonedMessage,
 
     -- ** Werewolves' turn error messages
     playerCannotDevourAnotherWerewolfMessage,
 
-    -- ** Wild-child's turn error messages
-    playerCannotChooseSelfMessage,
-
-    -- ** Witch's turn error messages
-    playerHasAlreadyHealedMessage, playerHasAlreadyPoisonedMessage,
+    -- ** Wolf-hound's turn messages
+    allegianceDoesNotExistMessage,
 ) where
 
 import Control.Lens
@@ -102,9 +99,14 @@ import           GHC.Generics
 
 import qualified System.Exit as Exit
 
+-- | When a user sends a command to the @werewolf@ binary, a response is always returned.
+--
+--   The chat client interface should then relay any @messages@ from the response. Whether or not
+--   the command was valid (indicated by the @ok@ flag) is often irrelevant as the returned
+--   @messages@ will include errors to the user.
 data Response = Response
-    { ok       :: Bool
-    , messages :: [Message]
+    { ok       :: Bool      -- ^ Boolean flag to indicate success.
+    , messages :: [Message] -- ^ List of messages.
     } deriving (Eq, Generic, Show)
 
 instance FromJSON Response
@@ -115,18 +117,26 @@ instance ToJSON Response where
     toEncoding  = genericToEncoding defaultOptions
 #endif
 
+-- | A successful, empty response.
 success :: Response
 success = Response True []
 
+-- | An unsuccessful, empty response.
 failure :: Response
 failure = Response False []
 
+-- | Exits fast with the given response. The response is encoded as JSON, printed to @stdout@ and
+--   then the program is exited with @0@ (success).
+--
+--   The program always exits with success even if the response was a failure one. This is to
+--   distinguish between bad calls to the binary and bad commands to the werewolf engine.
 exitWith :: MonadIO m => Response -> m ()
 exitWith response = liftIO $ T.putStrLn (T.decodeUtf8 $ encode response) >> Exit.exitSuccess
 
 data Message = Message
-    { to      :: Maybe Text
-    , message :: Text
+    { to      :: Maybe Text -- ^ The message recipient: 'Nothing' for a public message,
+                            --   'Just' for a private message.
+    , message :: Text       -- ^ The message text.
     } deriving (Eq, Generic, Show)
 
 instance FromJSON Message
@@ -137,12 +147,19 @@ instance ToJSON Message where
     toEncoding  = genericToEncoding defaultOptions
 #endif
 
+-- | Creates a public message with the given text.
 publicMessage :: Text -> Message
 publicMessage = Message Nothing
 
+-- | @privateMessage to message@
+--
+--   Creates a private message to @to@ with the given text.
 privateMessage :: Text -> Text -> Message
 privateMessage to = Message (Just to)
 
+-- | @groupmessages tos message@
+--
+--   Creates multiple private messages (1 to each recipient) with the given text.
 groupMessages :: [Text] -> Text -> [Message]
 groupMessages tos message = map (`privateMessage` message) tos
 
@@ -339,6 +356,29 @@ playerLostMessage to = privateMessage to "Feck, you lost this time round..."
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
 
+gameIsOverMessage :: Text -> Message
+gameIsOverMessage to = privateMessage to "The game is over!"
+
+playerDoesNotExistMessage :: Text -> Text -> Message
+playerDoesNotExistMessage to name = privateMessage to $ T.unwords
+    [ "Player", name, "does not exist."
+    ]
+
+playerCannotDoThatMessage :: Text -> Message
+playerCannotDoThatMessage to = privateMessage to "You cannot do that!"
+
+playerCannotDoThatRightNowMessage :: Text -> Message
+playerCannotDoThatRightNowMessage to = privateMessage to "You cannot do that right now!"
+
+playerIsDeadMessage :: Text -> Message
+playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
+
+targetIsDeadMessage :: Text -> Text -> Message
+targetIsDeadMessage to targetName = privateMessage to $ T.unwords [targetName, "is already dead!"]
+
+roleDoesNotExistMessage :: Text -> Text -> Message
+roleDoesNotExistMessage to name = privateMessage to $ T.unwords ["Role", name, "does not exist."]
+
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to "Waiting on you..."
 
@@ -405,6 +445,10 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
     , "Now he is stuck here, doomed forever to live out a mortal life as a Simple Villager."
     ]
 
+playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
+playerCannotProtectSamePlayerTwiceInARowMessage to =
+    privateMessage to "You cannot protect the same player twice in a row!"
+
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
     [ targetName, " is aligned with the ", T.pack $ show allegiance', "."
@@ -450,6 +494,9 @@ scapegoatLynchedMessage name = publicMessage $ T.unwords
     , "Not wanting to take any chances,", name, "is promptly tied to a pyre and burned alive."
     ]
 
+playerHasAlreadyVotedMessage :: Text -> Message
+playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
+
 playerMadeDevourVoteMessage :: Text -> Text -> Text -> Message
 playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat
     [ voterName, " voted to devour ", targetName, "."
@@ -487,6 +534,9 @@ wildChildJoinedPackMessages tos wildChildsName = groupMessages tos $ T.unwords
     , "Without his role model nothing is holding back his true, wolfish, nature."
     ]
 
+playerCannotChooseSelfMessage :: Text -> Message
+playerCannotChooseSelfMessage to = privateMessage to "You cannot choose yourself!"
+
 playerPoisonedMessage :: Player -> Message
 playerPoisonedMessage player = publicMessage $ T.unwords
     [ "Upon further discovery, it looks like the Witch struck in the night."
@@ -494,55 +544,20 @@ playerPoisonedMessage player = publicMessage $ T.unwords
     , "is lying in their bed, poisoned, drooling over the side."
     ]
 
-gameIsOverMessage :: Text -> Message
-gameIsOverMessage to = privateMessage to "The game is over!"
-
-playerDoesNotExistMessage :: Text -> Text -> Message
-playerDoesNotExistMessage to name = privateMessage to $ T.unwords
-    [ "Player", name, "does not exist."
-    ]
-
-playerCannotDoThatMessage :: Text -> Message
-playerCannotDoThatMessage to = privateMessage to "You cannot do that!"
-
-playerCannotDoThatRightNowMessage :: Text -> Message
-playerCannotDoThatRightNowMessage to = privateMessage to "You cannot do that right now!"
-
-playerIsDeadMessage :: Text -> Message
-playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
-
-roleDoesNotExistMessage :: Text -> Text -> Message
-roleDoesNotExistMessage to name = privateMessage to $ T.unwords ["Role", name, "does not exist."]
-
-allegianceDoesNotExistMessage :: Text -> Text -> Message
-allegianceDoesNotExistMessage to name = privateMessage to $ T.unwords
-    [ "Allegiance", name, "does not exist."
-    ]
-
-playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
-playerCannotProtectSamePlayerTwiceInARowMessage to =
-    privateMessage to "You cannot protect the same player twice in a row!"
-
-playerHasAlreadyVotedMessage :: Text -> Message
-playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
-
-targetIsDeadMessage :: Text -> Text -> Message
-targetIsDeadMessage to targetName = privateMessage to $ T.unwords
-    [ targetName, "is already dead!"
-    ]
-
-playerCannotDevourAnotherWerewolfMessage :: Text -> Message
-playerCannotDevourAnotherWerewolfMessage to =
-    privateMessage to "You cannot devour another Werewolf!"
-
-playerCannotChooseSelfMessage :: Text -> Message
-playerCannotChooseSelfMessage to = privateMessage to "You cannot choose yourself!"
-
 playerHasAlreadyHealedMessage :: Text -> Message
 playerHasAlreadyHealedMessage to = privateMessage to "You've already healed someone!"
 
 playerHasAlreadyPoisonedMessage :: Text -> Message
 playerHasAlreadyPoisonedMessage to = privateMessage to "You've already poisoned someone!"
+
+playerCannotDevourAnotherWerewolfMessage :: Text -> Message
+playerCannotDevourAnotherWerewolfMessage to =
+    privateMessage to "You cannot devour another Werewolf!"
+
+allegianceDoesNotExistMessage :: Text -> Text -> Message
+allegianceDoesNotExistMessage to name = privateMessage to $ T.unwords
+    [ "Allegiance", name, "does not exist."
+    ]
 
 article :: Role -> Text
 article role
