@@ -18,7 +18,7 @@ module Game.Werewolf.Role (
 
     -- ** Instances
     allRoles, restrictedRoles,
-    defenderRole, scapegoatRole, seerRole, simpleVillagerRole, simpleWerewolfRole,
+    angelRole, defenderRole, scapegoatRole, seerRole, simpleVillagerRole, simpleWerewolfRole,
     villagerVillagerRole, wildChildRole, witchRole, wolfHoundRole,
 
     -- * Allegiance
@@ -44,7 +44,7 @@ data Role = Role
     , _advice      :: Text
     } deriving (Read, Show)
 
-data Allegiance = Villagers | Werewolves
+data Allegiance = Angel | Villagers | Werewolves
     deriving (Eq, Read, Show)
 
 makeLenses ''Role
@@ -54,7 +54,8 @@ instance Eq Role where
 
 allRoles :: [Role]
 allRoles =
-    [ defenderRole
+    [ angelRole
+    , defenderRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
@@ -67,6 +68,22 @@ allRoles =
 
 restrictedRoles :: [Role]
 restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
+
+angelRole :: Role
+angelRole = Role
+    { _name         = "Angel"
+    , _allegiance   = Angel
+    , _description  = T.unwords
+        [ "The muddy life of a village infested with evil creatures repulses him;"
+        , "he wishes to believe he's the victim of a terrible nightmare,"
+        , "in order to finally wake up in his comfortable bed."
+        ]
+    , _advice       = T.unwords
+        [ "It's going to take all your guile and wits to con the village into eliminating you."
+        , "Pretending to be a Werewolf is one tactic, but if it doesn't work then you may have just"
+        , "dug yourself a hole for the rest of the game..."
+        ]
+    }
 
 defenderRole :: Role
 defenderRole = Role
@@ -199,4 +216,4 @@ wolfHoundRole = Role
     }
 
 allAllegiances :: [Allegiance]
-allAllegiances = [Villagers, Werewolves]
+allAllegiances = [Angel, Villagers, Werewolves]

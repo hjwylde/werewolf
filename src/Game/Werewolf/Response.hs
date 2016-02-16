@@ -37,7 +37,10 @@ module Game.Werewolf.Response (
     pingPlayerMessage, pingRoleMessage,
 
     -- ** Status messages
-    currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
+    currentStageMessages, playersInGameMessage, waitingOnMessage,
+
+    -- ** Angel's turn messages
+    angelJoinedVillagersMessage,
 
     -- ** Seer's turn messages
     playerSeenMessage,
@@ -154,7 +157,7 @@ engineVersionMessage to version = privateMessage to $ T.unwords ["Version", T.pa
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
-    [ [newPlayersInGameMessage players', rolesInGameMessage Nothing $ map (view role) players']
+    [ [newPlayersInGameMessage players', rolesInGameMessage $ map (view role) players']
     , map newPlayerMessage players'
     , villagerVillagerMessages
     , stageMessages game
@@ -197,7 +200,9 @@ stageMessages game = case game ^. stage of
     SeersTurn       -> seersTurnMessages seersName
     Sunrise         -> [sunriseMessage]
     Sunset          -> [nightFallsMessage]
-    VillagesTurn    -> villagesTurnMessages
+    VillagesTurn    -> if isFirstRound game
+        then firstVillagesTurnMessages
+        else villagesTurnMessages
     WerewolvesTurn  -> if isFirstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
@@ -230,10 +235,19 @@ sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens thei
 nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the village is asleep."
 
+firstVillagesTurnMessages :: [Message]
+firstVillagesTurnMessages =
+    ( publicMessage $ T.unwords
+        [ "Alas, again I regrettably yield advice: an angelic menace walks among you."
+        , "Do not cast your votes lightly,"
+        , "for he will relish in this opportunity to be free from his terrible nightmare."
+        ]
+    ) : villagesTurnMessages
+
 villagesTurnMessages :: [Message]
 villagesTurnMessages =
     [ publicMessage "As the village gathers in the square the town clerk calls for a vote."
-    , publicMessage "Whom would you like to vote to lynch?"
+    , publicMessage "Whom would you like to `vote` to lynch?"
     ]
 
 firstWerewolvesTurnMessages :: [Text] -> [Message]
@@ -294,15 +308,26 @@ wolfHoundsTurnMessages to =
     ]
 
 gameOverMessages :: Game -> [Message]
-gameOverMessages game = case aliveAllegiances of
-    [allegiance']    -> concat
-        [ [publicMessage $ T.unwords ["The game is over! The", T.pack $ show allegiance', "have won."]]
-        , map (playerWonMessage . view name) (filter ((allegiance' ==) . view (role . allegiance)) players')
-        , map (playerLostMessage . view name) (filter ((allegiance' /=) . view (role . allegiance)) players')
-        ]
-    _               -> publicMessage "The game is over! Everyone died...":map (playerLostMessage . view name) players'
+gameOverMessages game
+    | any isAngel (filterDead $ game ^. players)    =
+        concat
+            [ [publicMessage "You should have heeded my warning, for now the Angel has been set free!"]
+            , [publicMessage "The game is over! The Angel has won."]
+            , [playerWonMessage $ angel ^. name]
+            , map (playerLostMessage . view name) (players' \\ [angel])
+            ]
+    | length aliveAllegiances == 1                  = do
+        let allegiance' = head aliveAllegiances
+
+        concat
+            [ [publicMessage $ T.unwords ["The game is over! The", T.pack $ show allegiance', "have won."]]
+            , map (playerWonMessage . view name) (filter ((allegiance' ==) . view (role . allegiance)) players')
+            , map (playerLostMessage . view name) (filter ((allegiance' /=) . view (role . allegiance)) players')
+            ]
+    | otherwise                                     = publicMessage "The game is over! Everyone died...":map (playerLostMessage . view name) players'
     where
         players'            = game ^. players
+        angel               = findByRole_ angelRole players'
         aliveAllegiances    = nub $ map (view $ role . allegiance) (filterAlive players')
 
 playerWonMessage :: Text -> Message
@@ -340,8 +365,8 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn WitchsTurn     = "Witch's"
         showTurn WolfHoundsTurn = "Wolf-hound's"
 
-rolesInGameMessage :: Maybe Text -> [Role] -> Message
-rolesInGameMessage mTo roles = Message mTo $ T.concat
+rolesInGameMessage :: [Role] -> Message
+rolesInGameMessage roles = publicMessage $ T.concat
     [ "The roles in play are "
     , T.intercalate ", " $ map (\(role, count) ->
         T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
@@ -371,6 +396,14 @@ waitingOnMessage mTo players = Message mTo $ T.concat
     ]
     where
         playerNames = map (view name) players
+
+angelJoinedVillagersMessage :: Message
+angelJoinedVillagersMessage = publicMessage $ T.unwords
+    [ "You hear the Angel wrought with anger off in the distance."
+    , "He failed to attract the discriminatory vote of the village"
+    , "or the devouring vindictiveness of the lycanthropes."
+    , "Now he is stuck here, doomed forever to live out a mortal life as a Simple Villager."
+    ]
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat

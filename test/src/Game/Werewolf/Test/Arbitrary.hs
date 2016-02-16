@@ -13,13 +13,14 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Game
     NewGame(..),
-    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtSeersTurn(..), GameAtVillagesTurn(..),
-    GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..), GameAtWitchsTurn(..),
-    GameAtWolfHoundsTurn(..),
+    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtSeersTurn(..), GameAtSunrise(..),
+    GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..),
+    GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
+    GameOnSecondRound(..),
     GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
     GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPoison(..),
     GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
-    GameWithRoleModelAtVillagesTurn(..), GameWithSee(..),
+    GameWithRoleModelAtVillagesTurn(..), GameWithSee(..), GameWithZeroAllegiancesAlive(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -50,6 +51,8 @@ import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Role      hiding (name)
 import Game.Werewolf.Test.Util
+
+import Prelude hiding (round)
 
 import Test.QuickCheck
 
@@ -111,6 +114,15 @@ instance Arbitrary GameAtSeersTurn where
 
         return $ GameAtSeersTurn (game & stage .~ SeersTurn)
 
+newtype GameAtSunrise = GameAtSunrise Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtSunrise where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtSunrise (game & stage .~ Sunrise)
+
 newtype GameAtVillagesTurn = GameAtVillagesTurn Game
     deriving (Eq, Show)
 
@@ -155,6 +167,15 @@ instance Arbitrary GameAtWolfHoundsTurn where
         game <- arbitrary
 
         return $ GameAtWolfHoundsTurn (game & stage .~ WolfHoundsTurn)
+
+newtype GameOnSecondRound = GameOnSecondRound Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameOnSecondRound where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameOnSecondRound (game & round .~ 1)
 
 newtype GameWithDeadPlayers = GameWithDeadPlayers Game
     deriving (Eq, Show)
@@ -216,6 +237,17 @@ instance Arbitrary GameWithOneAllegianceAlive where
         let game'       = foldr killPlayer game (map (view name) players')
 
         return $ GameWithOneAllegianceAlive game'
+
+newtype GameWithPass = GameWithPass Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithPass where
+    arbitrary = do
+        game            <- arbitrary
+        let game'       = game & stage .~ WitchsTurn
+        (Blind command) <- arbitraryPassCommand game'
+
+        return $ GameWithPass (run_ (apply command) game')
 
 newtype GameWithPoison = GameWithPoison Game
     deriving (Eq, Show)
@@ -290,6 +322,16 @@ instance Arbitrary GameWithSee where
         (Blind command) <- arbitrarySeeCommand game'
 
         return $ GameWithSee (run_ (apply command) game')
+
+newtype GameWithZeroAllegiancesAlive = GameWithZeroAllegiancesAlive Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithZeroAllegiancesAlive where
+    arbitrary = do
+        game        <- arbitrary
+        let game'   = foldr killPlayer game (map (view name) (game ^. players))
+
+        return $ GameWithZeroAllegiancesAlive game'
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do

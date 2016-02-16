@@ -106,6 +106,7 @@ allCommandTests =
     , testProperty "quit command clears player's devour vote"                   prop_quitCommandClearsPlayersDevourVote
     , testProperty "quit command clears player's lynch vote"                    prop_quitCommandClearsPlayersLynchVote
     , testProperty "quit command clears role model when caller is wild-child"   prop_quitCommandClearsRoleModelWhenCallerIsWildChild
+    , testProperty "quit command sets angel's role when caller is angel"         prop_quitCommandSetsAngelsRoleWhenCallerIsAngel
 
     , testProperty "see command errors when game is over"           prop_seeCommandErrorsWhenGameIsOver
     , testProperty "see command errors when caller does not exist"  prop_seeCommandErrorsWhenCallerDoesNotExist
@@ -176,17 +177,20 @@ prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist (GameAtWolfHoundsTu
     allegiance `notElem` ["Villagers", "Werewolves"]
         ==> verbose_runCommandErrors game command
 
-prop_chooseAllegianceCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_chooseAllegianceCommandSetsCallersRole (GameAtWolfHoundsTurn game) allegiance' = do
-    let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
-    let command     = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance')
-    let game'       = run_ (apply command) game
+prop_chooseAllegianceCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Property
+prop_chooseAllegianceCommandSetsCallersRole (GameAtWolfHoundsTurn game) = do
+    let wolfHound = findByRole_ wolfHoundRole (game ^. players)
 
-    findByName_ (wolfHound ^. name) (game' ^. players) ^. role === role'
+    forAll (elements [Villagers, Werewolves]) $ \allegiance' -> do
+        let command = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance')
+        let game'   = run_ (apply command) game
+
+        findByName_ (wolfHound ^. name) (game' ^. players) ^. role === roleForAllegiance allegiance'
     where
-        role' = case allegiance' of
+        roleForAllegiance allegiance = case allegiance of
             Villagers   -> simpleVillagerRole
             Werewolves  -> simpleWerewolfRole
+            _           -> undefined
 
 prop_choosePlayerCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_choosePlayerCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -592,6 +596,13 @@ prop_quitCommandClearsRoleModelWhenCallerIsWildChild (GameWithRoleModel game) = 
     let command     = quitCommand (wildChild ^. name)
 
     isNothing $ run_ (apply command) game ^. roleModel
+
+prop_quitCommandSetsAngelsRoleWhenCallerIsAngel :: Game -> Bool
+prop_quitCommandSetsAngelsRoleWhenCallerIsAngel game = do
+    let angel   = findByRole_ angelRole (game ^. players)
+    let command = quitCommand (angel ^. name)
+
+    isSimpleVillager $ findByName_ (angel ^. name) (run_ (apply command) game ^. players)
 
 prop_seeCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_seeCommandErrorsWhenGameIsOver (GameAtGameOver game) =

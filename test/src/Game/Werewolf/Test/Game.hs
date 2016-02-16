@@ -28,23 +28,31 @@ import Test.Tasty.QuickCheck
 
 allGameTests :: [TestTree]
 allGameTests =
-    [ testProperty "new game starts with sunset stage"      prop_newGameStartsWithSunsetStage
-    , testProperty "new game starts on first round"         prop_newGameStartsOnFirstRound
-    , testProperty "new game starts with events empty"      prop_newGameStartsWithEventsEmpty
-    , testProperty "new game starts with passes empty"      prop_newGameStartsWithPassesEmpty
-    , testProperty "new game starts with no heal"           prop_newGameStartsWithNoHeal
-    , testProperty "new game starts with no heal used"      prop_newGameStartsWithNoHealUsed
-    , testProperty "new game starts with no poison"         prop_newGameStartsWithNoPoison
-    , testProperty "new game starts with no poison used"    prop_newGameStartsWithNoPoisonUsed
-    , testProperty "new game starts with no prior protect"  prop_newGameStartsWithNoPriorProtect
-    , testProperty "new game starts with no protect"        prop_newGameStartsWithNoProtect
-    , testProperty "new game starts with no see"            prop_newGameStartsWithNoSee
-    , testProperty "new game starts with votes empty"       prop_newGameStartsWithVotesEmpty
-    , testProperty "new game uses given players"            prop_newGameUsesGivenPlayers
+    [ testProperty "new game starts at village's turn when angel in play"   prop_newGameStartsAtVillagesTurnWhenAngelInPlay
+    , testProperty "new game starts at sunset when no angel in play"        prop_newGameStartsAtSunsetWhenNoAngelInPlay
+    , testProperty "new game starts on first round"                         prop_newGameStartsOnFirstRound
+    , testProperty "new game starts with events empty"                      prop_newGameStartsWithEventsEmpty
+    , testProperty "new game starts with passes empty"                      prop_newGameStartsWithPassesEmpty
+    , testProperty "new game starts with no heal"                           prop_newGameStartsWithNoHeal
+    , testProperty "new game starts with no heal used"                      prop_newGameStartsWithNoHealUsed
+    , testProperty "new game starts with no poison"                         prop_newGameStartsWithNoPoison
+    , testProperty "new game starts with no poison used"                    prop_newGameStartsWithNoPoisonUsed
+    , testProperty "new game starts with no prior protect"                  prop_newGameStartsWithNoPriorProtect
+    , testProperty "new game starts with no protect"                        prop_newGameStartsWithNoProtect
+    , testProperty "new game starts with no see"                            prop_newGameStartsWithNoSee
+    , testProperty "new game starts with votes empty"                       prop_newGameStartsWithVotesEmpty
+    , testProperty "new game uses given players"                            prop_newGameUsesGivenPlayers
     ]
 
-prop_newGameStartsWithSunsetStage :: [Player] -> Bool
-prop_newGameStartsWithSunsetStage players = isSunset (newGame players)
+prop_newGameStartsAtVillagesTurnWhenAngelInPlay :: [Player] -> Property
+prop_newGameStartsAtVillagesTurnWhenAngelInPlay players =
+    any isAngel players
+    ==> isVillagesTurn (newGame players)
+
+prop_newGameStartsAtSunsetWhenNoAngelInPlay :: [Player] -> Property
+prop_newGameStartsAtSunsetWhenNoAngelInPlay players =
+    none isAngel players
+    ==> isSunset (newGame players)
 
 prop_newGameStartsOnFirstRound :: [Player] -> Bool
 prop_newGameStartsOnFirstRound players = isFirstRound $ newGame players

@@ -61,10 +61,12 @@ allEngineTests =
     , testProperty "check seer's turn resets sees"                      prop_checkSeersTurnResetsSee
     , testProperty "check seer's turn does nothing unless seen"         prop_checkSeersTurnDoesNothingUnlessSeen
 
+    , testProperty "check sunrise increments round"     prop_checkSunriseIncrementsRound
+    , testProperty "check sunrise sets angel's role"    prop_checkSunriseSetsAngelsRole
+
     , testProperty "check sunset sets wild-child's allegiance when role model dead" prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead
 
     , testProperty "check villages' turn advances to seer's turn"                           prop_checkVillagesTurnAdvancesToSeersTurn
-    , testProperty "check villages' turn increments round"                                  prop_checkVillagesTurnIncrementsRound
     , testProperty "check villages' turn lynches one player when consensus"                 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus
     , testProperty "check villages' turn lynches no one when conflicted and no scapegoats"  prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats
     , testProperty "check villages' turn lynches scapegoat when conflicted"                 prop_checkVillagesTurnLynchesScapegoatWhenConflicted
@@ -98,14 +100,17 @@ allEngineTests =
     , testProperty "check wolf-hound's turn advances when no wolf-hound"    prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
     , testProperty "check wolf-hound's turn does nothing unless chosen"     prop_checkWolfHoundsTurnDoesNothingUnlessChosen
 
-    , testProperty "check game over advances stage" prop_checkGameOverAdvancesStage
+    , testProperty "check game over advances stage when zero allegiances alive" prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive
+    , testProperty "check game over advances stage when one allegiance alive" prop_checkGameOverAdvancesStageWhenOneAllegianceAlive
     -- TODO (hjw): pending
     --, testProperty "check game over does nothing when at least two allegiances alive"   prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive
+    , testProperty "check game over advances stage when second round and angel dead" prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead
 
     , testProperty "start game uses given players"                          prop_startGameUsesGivenPlayers
     , testProperty "start game errors unless unique player names"           prop_startGameErrorsUnlessUniquePlayerNames
     , testProperty "start game errors when less than 7 players"             prop_startGameErrorsWhenLessThan7Players
     , testProperty "start game errors when more than 24 players"            prop_startGameErrorsWhenMoreThan24Players
+    , testProperty "start game errors when more than 1 angel"               prop_startGameErrorsWhenMoreThan1Angel
     , testProperty "start game errors when more than 1 defender"            prop_startGameErrorsWhenMoreThan1Defender
     , testProperty "start game errors when more than 1 scapegoat"           prop_startGameErrorsWhenMoreThan1Scapegoat
     , testProperty "start game errors when more than 1 seer"                prop_startGameErrorsWhenMoreThan1Seer
@@ -130,9 +135,10 @@ prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithRoleModel game) =
         defendersName   = findByRole_ defenderRole (game ^. players) ^. name
         game'           = killPlayer defendersName game
 
-prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Bool
+prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Property
 prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
-    isWildChildsTurn game' || isDefendersTurn game'
+    isAlive (findByRole_ angelRole $ run_ checkStage game' ^. players)
+    ==> isWildChildsTurn game' || isDefendersTurn game'
     where
         seersName   = findByRole_ seerRole (game ^. players) ^. name
         game'       = run_ (apply (quitCommand seersName) >> checkStage) game
@@ -144,9 +150,10 @@ prop_checkStageSkipsWildChildsTurnWhenNoWildChild (GameWithSee game) =
         wildChildsName  = findByRole_ wildChildRole (game ^. players) ^. name
         game'           = killPlayer wildChildsName game
 
-prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Bool
+prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
-    isVillagesTurn $ run_ checkStage game'
+    isNothing (findByRole angelRole $ run_ checkStage game' ^. players)
+    ==> isVillagesTurn $ run_ checkStage game'
     where
         witchsName  = findByRole_ witchRole (game ^. players) ^. name
         game'       = killPlayer witchsName game
@@ -196,21 +203,30 @@ prop_checkSeersTurnDoesNothingUnlessSeen :: GameAtSeersTurn -> Bool
 prop_checkSeersTurnDoesNothingUnlessSeen (GameAtSeersTurn game) =
     isSeersTurn $ run_ checkStage game
 
-prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Bool
+prop_checkSunriseIncrementsRound :: GameAtSunrise -> Property
+prop_checkSunriseIncrementsRound (GameAtSunrise game) =
+    run_ checkStage game ^. round === game ^. round + 1
+
+prop_checkSunriseSetsAngelsRole :: GameAtSunrise -> Bool
+prop_checkSunriseSetsAngelsRole (GameAtSunrise game) = do
+    let angel = findByRole_ angelRole (game ^. players)
+    let game' = run_ checkStage game
+
+    isSimpleVillager $ findByName_ (angel ^. name) (game' ^. players)
+
+prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let roleModelsName  = fromJust $ game ^. roleModel
     let game'           = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) roleModelsName)) game (game ^. players)
 
-    isWerewolf $ findByRole_ wildChildRole (run_ checkStage game' ^. players)
+    not (isAngel $ findByName_ roleModelsName (game' ^. players))
+        ==> isWerewolf $ findByRole_ wildChildRole (run_ checkStage game' ^. players)
 
 prop_checkVillagesTurnAdvancesToSeersTurn :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
     isAlive (findByRole_ seerRole $ run_ checkStage game ^. players)
+    && isAlive (findByRole_ angelRole $ run_ checkStage game ^. players)
     ==> isSeersTurn $ run_ checkStage game
-
-prop_checkVillagesTurnIncrementsRound :: GameWithLynchVotes -> Property
-prop_checkVillagesTurnIncrementsRound (GameWithLynchVotes game) =
-    run_ checkStage game ^. round === game ^. round + 1
 
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus (GameWithLynchVotes game) =
@@ -366,8 +382,12 @@ prop_checkWolfHoundsTurnDoesNothingUnlessChosen :: GameAtWolfHoundsTurn -> Bool
 prop_checkWolfHoundsTurnDoesNothingUnlessChosen (GameAtWolfHoundsTurn game) =
     isWolfHoundsTurn $ run_ checkStage game
 
-prop_checkGameOverAdvancesStage :: GameWithOneAllegianceAlive -> Property
-prop_checkGameOverAdvancesStage (GameWithOneAllegianceAlive game) =
+prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive :: GameWithZeroAllegiancesAlive -> Bool
+prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive (GameWithZeroAllegiancesAlive game) =
+    isGameOver $ run_ checkGameOver game
+
+prop_checkGameOverAdvancesStageWhenOneAllegianceAlive :: GameWithOneAllegianceAlive -> Property
+prop_checkGameOverAdvancesStageWhenOneAllegianceAlive (GameWithOneAllegianceAlive game) =
     forAll (sublistOf . filterAlive $ game ^. players) $ \players' -> do
         let game' = foldr killPlayer game (map (view name) players')
 
@@ -378,6 +398,13 @@ prop_checkGameOverAdvancesStage (GameWithOneAllegianceAlive game) =
 --prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive (GameWithDeadPlayers game) =
 --    length (nub . map (view $ role . allegiance) . filterAlive $ game ^. players) > 1
 --    ==> not . isGameOver $ run_ checkGameOver game
+
+prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead :: GameOnSecondRound -> Bool
+prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead (GameOnSecondRound game) = do
+    let angel = findByRole_ angelRole (game ^. players)
+    let game' = killPlayer (angel ^. name) game
+
+    isGameOver $ run_ checkGameOver game'
 
 prop_startGameUsesGivenPlayers :: Property
 prop_startGameUsesGivenPlayers =
@@ -401,6 +428,11 @@ prop_startGameErrorsWhenMoreThan24Players =
     forAll (resize 30 $ listOf arbitrary) $ \players ->
         length players > 24
         ==> isLeft . runExcept . runWriterT $ startGame "" players
+
+prop_startGameErrorsWhenMoreThan1Angel :: [Player] -> Property
+prop_startGameErrorsWhenMoreThan1Angel players =
+    length (filter isAngel players) > 1
+    ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1Defender :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1Defender players =

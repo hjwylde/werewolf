@@ -165,6 +165,7 @@ quitCommand callerName = Command $ do
     tell [playerQuitMessage caller]
 
     passes %= delete callerName
+    when (isAngel caller)       $ setPlayerRole callerName simpleVillagerRole
     when (isDefender caller)    $ do
         protect         .= Nothing
         priorProtect    .= Nothing
@@ -210,10 +211,7 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell $ standardStatusMessages stage' (game ^. players)
     where
         standardStatusMessages stage players =
-            currentStageMessages callerName stage ++ [
-            rolesInGameMessage (Just callerName) $ map (view role) players,
-            playersInGameMessage callerName players
-            ]
+            currentStageMessages callerName stage ++ [playersInGameMessage callerName players]
 
 voteDevourCommand :: Text -> Text -> Command
 voteDevourCommand callerName targetName = Command $ do
