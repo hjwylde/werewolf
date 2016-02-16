@@ -132,7 +132,7 @@ rulesMessages = map (T.intercalate "\n")
       , "10. The village votes to lynch a suspect."
       , T.unwords
         [ "The game is over when only Villagers or Werewolves are left alive,"
-        , "or one of the loners completes their own objective."
+        , "or one of the Loners completes their own objective."
         ]
       ]
     ]

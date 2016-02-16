@@ -11,7 +11,6 @@ Haskell constant of the binary version.
 
 module Werewolf.Version (
     -- * Version
-    -- | The binary version.
     version,
 ) where
 
