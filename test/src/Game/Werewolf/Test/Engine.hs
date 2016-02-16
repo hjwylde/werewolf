@@ -135,9 +135,10 @@ prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithRoleModel game) =
         defendersName   = findByRole_ defenderRole (game ^. players) ^. name
         game'           = killPlayer defendersName game
 
-prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Bool
+prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Property
 prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
-    isWildChildsTurn game' || isDefendersTurn game'
+    isAlive (findByRole_ angelRole $ run_ checkStage game' ^. players)
+    ==> isWildChildsTurn game' || isDefendersTurn game'
     where
         seersName   = findByRole_ seerRole (game ^. players) ^. name
         game'       = run_ (apply (quitCommand seersName) >> checkStage) game
@@ -149,9 +150,10 @@ prop_checkStageSkipsWildChildsTurnWhenNoWildChild (GameWithSee game) =
         wildChildsName  = findByRole_ wildChildRole (game ^. players) ^. name
         game'           = killPlayer wildChildsName game
 
-prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Bool
+prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
-    isVillagesTurn $ run_ checkStage game'
+    isNothing (findByRole angelRole $ run_ checkStage game' ^. players)
+    ==> isVillagesTurn $ run_ checkStage game'
     where
         witchsName  = findByRole_ witchRole (game ^. players) ^. name
         game'       = killPlayer witchsName game
@@ -212,16 +214,18 @@ prop_checkSunriseSetsAngelsRole (GameAtSunrise game) = do
 
     isSimpleVillager $ findByName_ (angel ^. name) (game' ^. players)
 
-prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Bool
+prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let roleModelsName  = fromJust $ game ^. roleModel
     let game'           = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) roleModelsName)) game (game ^. players)
 
-    isWerewolf $ findByRole_ wildChildRole (run_ checkStage game' ^. players)
+    not (isAngel $ findByName_ roleModelsName (game' ^. players))
+        ==> isWerewolf $ findByRole_ wildChildRole (run_ checkStage game' ^. players)
 
 prop_checkVillagesTurnAdvancesToSeersTurn :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnAdvancesToSeersTurn (GameWithLynchVotes game) =
     isAlive (findByRole_ seerRole $ run_ checkStage game ^. players)
+    && isAlive (findByRole_ angelRole $ run_ checkStage game ^. players)
     ==> isSeersTurn $ run_ checkStage game
 
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: GameWithLynchVotes -> Property

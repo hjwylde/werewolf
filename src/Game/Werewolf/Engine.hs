@@ -199,7 +199,7 @@ advanceStage = do
     stage'              <- use stage
     aliveAllegiances    <- uses players (nub . map (view $ role . allegiance) . filterAlive)
 
-    let nextStage = if length aliveAllegiances <= 1 && any isAngel (filterDead $ game ^. players)
+    let nextStage = if length aliveAllegiances <= 1 || any isAngel (filterDead $ game ^. players)
         then GameOver
         else head $ filter (stageAvailable game) (drop1 $ dropWhile (stage' /=) stageCycle)
 
