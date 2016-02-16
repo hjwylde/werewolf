@@ -116,7 +116,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
         round += 1
 
         whenJustM (findPlayerByRole angelRole) $ \angel ->
-            when (isAlive angel) $ setPlayerRole (angel ^. name) simpleVillagerRole
+            when (isAlive angel) $ do
+                tell [angelJoinedVillagersMessage]
+
+                setPlayerRole (angel ^. name) simpleVillagerRole
 
         advanceStage
 

@@ -130,8 +130,10 @@ rulesMessages = map (T.intercalate "\n")
       , "8. The Witch wakes up and may heal the victim and/or poison someone."
       , "9. The village wakes up and find the victim."
       , "10. The village votes to lynch a suspect."
-      , "The game is over when only Villagers or Werewolves are left alive."
-      , "Or, when the Angel is in play, the game ends if the Angel is killed within the first night."
+      , T.unwords
+        [ "The game is over when only Villagers or Werewolves are left alive,"
+        , "or one of the loners completes their own objective."
+        ]
       ]
     ]
 
