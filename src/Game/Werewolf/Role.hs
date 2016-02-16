@@ -1,12 +1,10 @@
 {-|
 Module      : Game.Werewolf.Role
-Description : Role data structures.
+Description : Simplistic role data structure and instances.
 
 Copyright   : (c) Henry J. Wylde, 2015
 License     : BSD3
 Maintainer  : public@hjwylde.com
-
-Role data structures.
 
 The roles are split into four categories:
 
