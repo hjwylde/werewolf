@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed the Defender being unable to protect himself.
+
 #### v0.4.5.0
 
 *Minor*

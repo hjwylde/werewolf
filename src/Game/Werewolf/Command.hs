@@ -147,7 +147,6 @@ protectCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     unlessM (isPlayerDefender callerName)   $ throwError [playerCannotDoThatMessage callerName]
     unlessM isDefendersTurn                 $ throwError [playerCannotDoThatRightNowMessage callerName]
-    when (callerName == targetName)         $ throwError [playerCannotProtectSelfMessage callerName]
     validatePlayer callerName targetName
     whenJustM (use priorProtect) $ \priorName ->
         when (targetName == priorName) $ throwError [playerCannotProtectSamePlayerTwiceInARowMessage callerName]

@@ -91,7 +91,7 @@ defenderRole = Role
     , _allegiance   = Villagers
     , _description  = T.unwords
         [ "A knight living in Miller's Hollow."
-        , "The Defender can save the Villagers (bar himself!) from the bite of the Werewolves."
+        , "The Defender can save the Villagers from the bite of the Werewolves."
         ]
     , _advice       =
         "Be careful when you choose to protect someone, you cannot protect them 2 nights in a row."

@@ -88,7 +88,6 @@ allCommandTests =
     , testProperty "protect command errors when target is dead"             prop_protectCommandErrorsWhenTargetIsDead
     , testProperty "protect command errors when not defender's turn"        prop_protectCommandErrorsWhenNotDefendersTurn
     , testProperty "protect command errors when caller not defender"        prop_protectCommandErrorsWhenCallerNotDefender
-    , testProperty "protect command errors when target is caller"           prop_protectCommandErrorsWhenTargetIsCaller
     , testProperty "protect command errors when target is prior protect"    prop_protectCommandErrorsWhenTargetIsPriorProtect
     , testProperty "protect command sets prior protect"                     prop_protectCommandSetsPriorProtect
     , testProperty "protect command sets protect"                           prop_protectCommandSetsProtect
@@ -482,13 +481,6 @@ prop_protectCommandErrorsWhenCallerNotDefender (GameAtDefendersTurn game) =
         let command = protectCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
-
-prop_protectCommandErrorsWhenTargetIsCaller :: GameAtDefendersTurn -> Property
-prop_protectCommandErrorsWhenTargetIsCaller (GameAtDefendersTurn game) = do
-    let defender    = findByRole_ defenderRole (game ^. players)
-    let command     = protectCommand (defender ^. name) (defender ^. name)
-
-    verbose_runCommandErrors game command
 
 prop_protectCommandErrorsWhenTargetIsPriorProtect :: GameWithProtect -> Property
 prop_protectCommandErrorsWhenTargetIsPriorProtect (GameWithProtect game) = do

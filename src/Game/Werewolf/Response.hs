@@ -64,7 +64,7 @@ module Game.Werewolf.Response (
     allegianceDoesNotExistMessage,
 
     -- ** Defender's turn error messages
-    playerCannotProtectSelfMessage, playerCannotProtectSamePlayerTwiceInARowMessage,
+    playerCannotProtectSamePlayerTwiceInARowMessage,
 
     -- ** Voting turn error messages
     playerHasAlreadyVotedMessage, targetIsDeadMessage,
@@ -518,9 +518,6 @@ allegianceDoesNotExistMessage :: Text -> Text -> Message
 allegianceDoesNotExistMessage to name = privateMessage to $ T.unwords
     [ "Allegiance", name, "does not exist."
     ]
-
-playerCannotProtectSelfMessage :: Text -> Message
-playerCannotProtectSelfMessage to = privateMessage to "You cannot protect yourself!"
 
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
 playerCannotProtectSamePlayerTwiceInARowMessage to =
