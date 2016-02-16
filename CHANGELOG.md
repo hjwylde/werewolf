@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added the Village Idiot role. ([#41](https://github.com/hjwylde/werewolf/issues/41))
+
 *Revisions*
 
 * Fixed the Defender being unable to protect himself.

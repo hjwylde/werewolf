@@ -58,7 +58,8 @@ module Game.Werewolf.Response (
 
     -- ** Villages' turn messages
     playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
-    scapegoatLynchedMessage, playerHasAlreadyVotedMessage,
+    scapegoatLynchedMessage, villageIdiotLynchedMessage, playerHasAlreadyVotedMessage,
+    playerCannotLynchVillageIdiotMessage,
 
     -- ** Werewolves' turn messages
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
@@ -494,8 +495,19 @@ scapegoatLynchedMessage name = publicMessage $ T.unwords
     , "Not wanting to take any chances,", name, "is promptly tied to a pyre and burned alive."
     ]
 
+villageIdiotLynchedMessage :: Text -> Message
+villageIdiotLynchedMessage name = publicMessage $ T.concat
+    [ "Just as the townsfolk tie", name, "up to the pyre, a voice in the crowd yells out."
+    , " \"We can't burn ", name, "! He's that oaf, you know, John's boy!\""
+    , " The Village Idiot is quickly untied and apologised to."
+    ]
+
 playerHasAlreadyVotedMessage :: Text -> Message
 playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
+
+playerCannotLynchVillageIdiotMessage :: Text -> Message
+playerCannotLynchVillageIdiotMessage to =
+    privateMessage to "You cannot lynch the Village Idiot!"
 
 playerMadeDevourVoteMessage :: Text -> Text -> Text -> Message
 playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat

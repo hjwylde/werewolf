@@ -18,9 +18,9 @@ module Game.Werewolf.Test.Arbitrary (
     GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
     GameOnSecondRound(..),
     GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
-    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPoison(..),
-    GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
-    GameWithRoleModelAtVillagesTurn(..), GameWithSee(..), GameWithZeroAllegiancesAlive(..),
+    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPoison(..), GameWithProtect(..),
+    GameWithProtectAndDevourVotes(..), GameWithRoleModel(..), GameWithRoleModelAtVillagesTurn(..),
+    GameWithSee(..), GameWithVillageIdiotRevealedAtVillagesTurn(..), GameWithZeroAllegiancesAlive(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -322,6 +322,24 @@ instance Arbitrary GameWithSee where
         (Blind command) <- arbitrarySeeCommand game'
 
         return $ GameWithSee (run_ (apply command) game')
+
+newtype GameWithVillageIdiotRevealed = GameWithVillageIdiotRevealed Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithVillageIdiotRevealed where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameWithVillageIdiotRevealed (game & villageIdiotRevealed .~ True)
+
+newtype GameWithVillageIdiotRevealedAtVillagesTurn = GameWithVillageIdiotRevealedAtVillagesTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithVillageIdiotRevealedAtVillagesTurn where
+    arbitrary = do
+        (GameWithVillageIdiotRevealed game) <- arbitrary
+
+        return $ GameWithVillageIdiotRevealedAtVillagesTurn (game & stage .~ VillagesTurn)
 
 newtype GameWithZeroAllegiancesAlive = GameWithZeroAllegiancesAlive Game
     deriving (Eq, Show)

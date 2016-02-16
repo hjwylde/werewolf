@@ -37,6 +37,7 @@ The implemented roles are split into four categories.
 * Scapegoat.
 * Seer.
 * Simple Villager.
+* Village Idiot.
 * Villager-Villager.
 * Witch.
 
