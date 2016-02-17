@@ -7,6 +7,7 @@
 * Added the Village Idiot role. ([#41](https://github.com/hjwylde/werewolf/issues/41))
 * Added the Scapegoat's ability to choose whom may vote on the next day when he is blamed. ([#62](https://github.com/hjwylde/werewolf/issues/62))
 * Added in balance concept for roles to help balance role selection. ([#81](https://github.com/hjwylde/werewolf/issues/81))
+* Added `--random-extra-roles` option to `start`. ([#30](https://github.com/hjwylde/werewolf/issues/30))
 
 *Revisions*
 
