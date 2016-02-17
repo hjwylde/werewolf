@@ -148,7 +148,7 @@ see = See . See.Options <$> playerArgument
 
 start :: Parser Command
 start = fmap Start $ Start.Options
-    <$> fmap (T.splitOn "," . T.pack) (strOption $ mconcat
+    <$> fmap (filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
         [ long "extra-roles", metavar "ROLE,..."
         , value []
         , help "Specify the extra roles to include"

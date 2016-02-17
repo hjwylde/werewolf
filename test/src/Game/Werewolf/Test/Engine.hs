@@ -555,4 +555,4 @@ prop_randomiseRolesProportionsAllegiances extraRoles n = monadicIO $ do
 
     let werewolvesCount = length . elemIndices Role.Werewolves $ map (view allegiance) roles
 
-    return $ werewolvesCount == n `quot` 6 + 1
+    return $ werewolvesCount == n `quot` 5 + 1

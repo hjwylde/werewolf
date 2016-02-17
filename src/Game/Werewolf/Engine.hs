@@ -399,7 +399,17 @@ isPlayerDead name = isDead <$> findPlayerByName_ name
 randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
 randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ simpleVillagerRoles ++ simpleWerewolfRoles
     where
-        extraWerewolfRoles = filter ((Role.Werewolves ==) . view allegiance) extraRoles
+        goal                    = 2
+        m                       = max (n - length extraRoles) 0
+        startingBalance         = foldl (+) 0 (map (view balance) extraRoles)
+        simpleWerewolfBalance   = simpleWerewolfRole ^. balance
 
-        simpleWerewolfRoles = replicate (n `quot` 6 + 1 - length extraWerewolfRoles) simpleWerewolfRole
-        simpleVillagerRoles = replicate (n - length extraRoles - length simpleWerewolfRoles) simpleVillagerRole
+        -- Little magic here to calculate how many Werewolves and Villagers we want.
+        -- Essentially we get a 1:4 ratio of Werewolves to Villagers.
+        simpleWerewolvesCount   = (goal - m - startingBalance) `div` (simpleWerewolfBalance - 1) + 1
+        simpleVillagersCount    = m - simpleWerewolvesCount
+
+        -- N.B., if extraRoles is quite unbalanced then one list will be empty while the other will
+        -- be full. This then leaves it up to the magic of shuffle to try rebalance the roles.
+        simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole
+        simpleVillagerRoles = replicate simpleVillagersCount simpleVillagerRole
