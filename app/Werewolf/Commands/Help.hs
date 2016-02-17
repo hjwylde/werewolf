@@ -69,6 +69,7 @@ commandsMessages =
     , "see PLAYER - see a player's allegiance."
     , "start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER... - starts a new game with the given players and extra roles. A game requires at least 7 players."
     , "status - gets the status of the current game."
+    , "version - show this engine's version."
     , "vote PLAYER - vote against a player."
     ]
 
