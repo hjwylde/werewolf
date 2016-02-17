@@ -26,9 +26,9 @@ module Game.Werewolf.Engine (
     findPlayerByName_, findPlayerByRole_,
 
     -- ** Queries
-    isGameOver, isDefendersTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
-    isWitchsTurn, isWolfHoundsTurn,
-    getPlayerVote, getPendingVoters, getVoteResult,
+    isGameOver, isDefendersTurn, isScapegoatsTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
+    isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
+    getPlayerVote, getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Reading and writing
     defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
@@ -45,8 +45,8 @@ module Game.Werewolf.Engine (
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDefender, isPlayerSeer, isPlayerVillageIdiot, isPlayerWildChild, isPlayerWitch,
-    isPlayerWolfHound,
+    isPlayerDefender, isPlayerScapegoat, isPlayerSeer, isPlayerVillageIdiot, isPlayerWildChild,
+    isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 
@@ -66,11 +66,12 @@ import qualified Data.Map        as Map
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (getDevourEvent, getPassers, getPendingVoters,
-                                         getPlayerVote, getVoteResult, isDefendersTurn, isGameOver,
-                                         isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                         isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
-                                         killPlayer, setPlayerAllegiance, setPlayerRole)
+import           Game.Werewolf.Game     hiding (getAllowedVoters, getDevourEvent, getPassers,
+                                         getPendingVoters, getPlayerVote, getVoteResult,
+                                         isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn,
+                                         isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
+                                         isWitchsTurn, isWolfHoundsTurn, killPlayer,
+                                         setPlayerAllegiance, setPlayerRole)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
@@ -101,6 +102,12 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         whenJustM (use protect) $ const advanceStage
 
+    ScapegoatsTurn -> unlessM (use scapegoatBlamed) $ do
+        allowedVoters' <- use allowedVoters
+        tell [scapegoatChoseAllowedVotersMessage allowedVoters']
+
+        advanceStage
+
     SeersTurn -> do
         seer <- findPlayerByRole_ seerRole
 
@@ -116,11 +123,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
-        whenJustM (findPlayerByRole angelRole) $ \angel ->
-            when (isAlive angel) $ do
-                tell [angelJoinedVillagersMessage]
+        whenJustM (findAlivePlayerByRole angelRole) $ \angel -> do
+            tell [angelJoinedVillagersMessage]
 
-                setPlayerRole (angel ^. name) simpleVillagerRole
+            setPlayerRole (angel ^. name) simpleVillagerRole
 
         advanceStage
 
@@ -138,41 +144,24 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
-    VillagesTurn -> do
-        alivePlayers    <- uses players filterAlive
-        playersCount    <- ifM (use villageIdiotRevealed)
-            (return . length $ filter (not . isVillageIdiot) alivePlayers)
-            (return $ length alivePlayers)
-        votes'          <- use votes
+    VillagesTurn -> whenM (null <$> liftM2 intersect getAllowedVoters getPendingVoters) $ do
+        tell . map (uncurry playerMadeLynchVoteMessage) =<< uses votes Map.toList
 
-        when (playersCount == Map.size votes') $ do
-            tell $ map (uncurry playerMadeLynchVoteMessage) (Map.toList votes')
+        getVoteResult >>= lynchVotees
 
-            getVoteResult >>= \votees -> case votees of
-                [votee]   -> if isVillageIdiot votee
-                    then villageIdiotRevealed .= True >> tell [villageIdiotLynchedMessage $ votee ^. name]
-                    else killPlayer (votee ^. name) >> tell [playerLynchedMessage votee]
-                _               ->
-                    findPlayerByRole scapegoatRole >>= \mScapegoat -> case mScapegoat of
-                        Just scapegoat  -> killPlayer (scapegoat ^. name) >> tell [scapegoatLynchedMessage (scapegoat ^. name)]
-                        _               -> tell [noPlayerLynchedMessage]
+        allowedVoters'  <- ifM (use villageIdiotRevealed)
+            (uses players (filter $ not . isVillageIdiot))
+            (use players)
+        allowedVoters   .= map (view name) (filterAlive allowedVoters')
 
-            advanceStage
+        advanceStage
 
-    WerewolvesTurn -> do
-        aliveWerewolves <- uses players (filterAlive . filterWerewolves)
+    WerewolvesTurn -> whenM (null . filterWerewolves <$> getPendingVoters) $ do
+        getVoteResult >>= devourVotees
 
-        whenM (uses votes $ (length aliveWerewolves ==) . Map.size) $ do
-            getVoteResult >>= \votees -> case votees of
-                [target]    ->
-                    ifM (uses protect $ maybe False (== target ^. name))
-                        (events %= cons NoDevourEvent)
-                        (events %= cons (DevourEvent $ target ^. name))
-                _           -> events %= cons NoDevourEvent
+        protect .= Nothing
 
-            protect .= Nothing
-
-            advanceStage
+        advanceStage
 
     WildChildsTurn -> do
         whenM (isDead <$> findPlayerByRole_ wildChildRole) advanceStage
@@ -196,6 +185,29 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (any isWitch <$> getPassers)      advanceStage
 
     WolfHoundsTurn -> unlessM (uses players (any isWolfHound . filterAlive)) advanceStage
+
+lynchVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
+lynchVotees [votee]
+    | isVillageIdiot votee  = do
+        villageIdiotRevealed .= True
+
+        tell [villageIdiotLynchedMessage $ votee ^. name]
+    | otherwise             = do
+        killPlayer (votee ^. name)
+        tell [playerLynchedMessage votee]
+lynchVotees _       = findAlivePlayerByRole scapegoatRole >>= \mScapegoat -> case mScapegoat of
+    Just scapegoat  -> do
+        scapegoatBlamed .= True
+
+        killPlayer (scapegoat ^. name)
+        tell [scapegoatLynchedMessage (scapegoat ^. name)]
+    _               -> tell [noPlayerLynchedMessage]
+
+devourVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
+devourVotees [votee]    = ifM (uses protect $ maybe False (== votee ^. name))
+    (events %= cons NoDevourEvent)
+    (events %= cons (DevourEvent $ votee ^. name))
+devourVotees _          = events %= cons NoDevourEvent
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
@@ -279,14 +291,17 @@ setPlayerAllegiance name allegiance = modify $ Game.setPlayerAllegiance name all
 findPlayerByName_ :: MonadState Game m => Text -> m Player
 findPlayerByName_ name = uses players $ findByName_ name
 
-findPlayerByRole :: MonadState Game m => Role -> m (Maybe Player)
-findPlayerByRole role = uses players $ findByRole role
-
 findPlayerByRole_ :: MonadState Game m => Role -> m Player
 findPlayerByRole_ role = uses players $ findByRole_ role
 
+findAlivePlayerByRole :: MonadState Game m => Role -> m (Maybe Player)
+findAlivePlayerByRole role = uses players $ findByRole role . filterAlive
+
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = gets Game.isDefendersTurn
+
+isScapegoatsTurn :: MonadState Game m => m Bool
+isScapegoatsTurn = gets Game.isScapegoatsTurn
 
 isSeersTurn :: MonadState Game m => m Bool
 isSeersTurn = gets Game.isSeersTurn
@@ -314,6 +329,9 @@ getPassers = gets Game.getPassers
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = gets $ Game.getPlayerVote playerName
+
+getAllowedVoters :: MonadState Game m => m [Player]
+getAllowedVoters = gets Game.getAllowedVoters
 
 getPendingVoters :: MonadState Game m => m [Player]
 getPendingVoters = gets Game.getPendingVoters
@@ -350,6 +368,9 @@ doesPlayerExist name = uses players $ Player.doesPlayerExist name
 
 isPlayerDefender :: MonadState Game m => Text -> m Bool
 isPlayerDefender name = isDefender <$> findPlayerByName_ name
+
+isPlayerScapegoat :: MonadState Game m => Text -> m Bool
+isPlayerScapegoat name = isScapegoat <$> findPlayerByName_ name
 
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name = isSeer <$> findPlayerByName_ name

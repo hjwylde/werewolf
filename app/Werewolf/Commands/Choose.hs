@@ -9,6 +9,8 @@ Maintainer  : public@hjwylde.com
 Options and handler for the choose subcommand.
 -}
 
+{-# LANGUAGE OverloadedStrings #-}
+
 module Werewolf.Commands.Choose (
     -- * Options
     Options(..),
@@ -17,12 +19,14 @@ module Werewolf.Commands.Choose (
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
-import Data.Text (Text)
+import           Data.Text (Text)
+import qualified Data.Text as T
 
 import Game.Werewolf.Command
 import Game.Werewolf.Engine   hiding (isWildChildsTurn)
@@ -41,10 +45,12 @@ handle callerName (Options arg) = do
 
     game <- readGame
 
-    let command = (if isWildChildsTurn game
-            then choosePlayerCommand
-            else chooseAllegianceCommand
-            ) callerName arg
+    let command = case game ^. stage of
+            ScapegoatsTurn  -> choosePlayersCommand callerName (T.splitOn "," arg)
+            WildChildsTurn  -> choosePlayerCommand callerName arg
+            WolfHoundsTurn  -> chooseAllegianceCommand callerName arg
+            -- TODO (hjw): throw an error
+            _               -> undefined
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

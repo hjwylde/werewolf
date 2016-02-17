@@ -22,6 +22,7 @@ import           Data.Text         (Text)
 import qualified Data.Text         as T
 
 import Game.Werewolf.Command
+import Game.Werewolf.Engine         (checkStage)
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Role           hiding (name)
@@ -50,6 +51,15 @@ allCommandTests =
     , testProperty "choose player command errors when not wild-child's turn"    prop_choosePlayerCommandErrorsWhenNotWildChildsTurn
     , testProperty "choose player command errors when caller not wild-child"    prop_choosePlayerCommandErrorsWhenCallerNotWildChild
     , testProperty "choose player command sets role model"                      prop_choosePlayerCommandSetsRoleModel
+
+    , testProperty "choose players command errors when game is over"                prop_choosePlayersCommandErrorsWhenGameIsOver
+    , testProperty "choose players command errors when caller does not exist"       prop_choosePlayersCommandErrorsWhenCallerDoesNotExist
+    , testProperty "choose players command errors when any target does not exist"   prop_choosePlayersCommandErrorsWhenAnyTargetDoesNotExist
+    , testProperty "choose players command errors when any target is dead"          prop_choosePlayersCommandErrorsWhenAnyTargetIsDead
+    , testProperty "choose players command errors when not scapegoat's turn"        prop_choosePlayersCommandErrorsWhenNotScapegoatsTurn
+    , testProperty "choose players command errors when caller not scapegoat"        prop_choosePlayersCommandErrorsWhenCallerNotScapegoat
+    , testProperty "choose players command sets allowed voters"                     prop_choosePlayersCommandSetsAllowedVoters
+    , testProperty "choose players command resets scapegoat blamed"                 prop_choosePlayersCommandResetsScapegoatBlamed
 
     , testProperty "heal command errors when game is over"          prop_healCommandErrorsWhenGameIsOver
     , testProperty "heal command errors when caller does not exist" prop_healCommandErrorsWhenCallerDoesNotExist
@@ -105,7 +115,7 @@ allCommandTests =
     , testProperty "quit command clears player's devour vote"                   prop_quitCommandClearsPlayersDevourVote
     , testProperty "quit command clears player's lynch vote"                    prop_quitCommandClearsPlayersLynchVote
     , testProperty "quit command clears role model when caller is wild-child"   prop_quitCommandClearsRoleModelWhenCallerIsWildChild
-    , testProperty "quit command sets angel's role when caller is angel"         prop_quitCommandSetsAngelsRoleWhenCallerIsAngel
+    , testProperty "quit command sets angel's role when caller is angel"        prop_quitCommandSetsAngelsRoleWhenCallerIsAngel
 
     , testProperty "see command errors when game is over"           prop_seeCommandErrorsWhenGameIsOver
     , testProperty "see command errors when caller does not exist"  prop_seeCommandErrorsWhenCallerDoesNotExist
@@ -134,6 +144,7 @@ allCommandTests =
     , testProperty "vote lynch command errors when target is dead"                  prop_voteLynchCommandErrorsWhenTargetIsDead
     , testProperty "vote lynch command errors when not villages turn"               prop_voteLynchCommandErrorsWhenNotVillagesTurn
     , testProperty "vote lynch command errors when caller has voted"                prop_voteLynchCommandErrorsWhenCallerHasVoted
+    , testProperty "vote lynch command errors when caller is not in allowed voters" prop_voteLynchCommandErrorsWhenCallerIsNotInAllowedVoters
     , testProperty "vote lynch command errors when caller is known village idiot"   prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot
     , testProperty "vote lynch command errors when target is known village idiot"   prop_voteLynchCommandErrorsWhenTargetIsKnownVillageIdiot
     , testProperty "vote lynch command updates votes"                               prop_voteLynchCommandUpdatesVotes
@@ -255,13 +266,72 @@ prop_choosePlayerCommandErrorsWhenCallerNotWildChild (GameAtWildChildsTurn game)
 
 prop_choosePlayerCommandSetsRoleModel :: GameAtWildChildsTurn -> Property
 prop_choosePlayerCommandSetsRoleModel (GameAtWildChildsTurn game) = do
-    let wildChild   = findByRole_ wildChildRole (game ^. players)
+    let wildChild = findByRole_ wildChildRole (game ^. players)
 
     forAll (suchThat (arbitraryPlayer game) (not . isWildChild)) $ \target -> do
         let command = choosePlayerCommand (wildChild ^. name) (target ^. name)
         let game'   = run_ (apply command) game
 
         fromJust (game' ^. roleModel) === target ^. name
+
+prop_choosePlayersCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
+prop_choosePlayersCommandErrorsWhenGameIsOver (GameAtGameOver game) =
+    forAll (arbitraryChoosePlayersCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_choosePlayersCommandErrorsWhenCallerDoesNotExist :: GameAtScapegoatsTurn -> Player -> Property
+prop_choosePlayersCommandErrorsWhenCallerDoesNotExist (GameAtScapegoatsTurn game) caller =
+    forAll (NonEmpty <$> sublistOf (filterAlive $ game ^. players)) $ \(NonEmpty targets) -> do
+        let command = choosePlayersCommand (caller ^. name) (map (view name) targets)
+
+        not (doesPlayerExist (caller ^. name) (game ^. players))
+            ==> verbose_runCommandErrors game command
+
+prop_choosePlayersCommandErrorsWhenAnyTargetDoesNotExist :: GameAtScapegoatsTurn -> Player -> Property
+prop_choosePlayersCommandErrorsWhenAnyTargetDoesNotExist (GameAtScapegoatsTurn game) target = do
+    let scapegoat   = findByRole_ scapegoatRole (game ^. players)
+    let command     = choosePlayersCommand (scapegoat ^. name) [target ^. name]
+
+    not (doesPlayerExist (target ^. name) (game ^. players))
+        ==> verbose_runCommandErrors game command
+
+prop_choosePlayersCommandErrorsWhenAnyTargetIsDead :: GameAtScapegoatsTurn -> Property
+prop_choosePlayersCommandErrorsWhenAnyTargetIsDead (GameAtScapegoatsTurn game) = do
+    let scapegoat = findByRole_ scapegoatRole (game ^. players)
+
+    forAll (NonEmpty <$> sublistOf (filterAlive $ game ^. players)) $ \(NonEmpty targets) ->
+        forAll (elements targets) $ \target -> do
+            let game'   = killPlayer (target ^. name) game
+            let command = choosePlayersCommand (scapegoat ^. name) (map (view name) targets)
+
+            verbose_runCommandErrors game' command
+
+prop_choosePlayersCommandErrorsWhenNotScapegoatsTurn :: Game -> Property
+prop_choosePlayersCommandErrorsWhenNotScapegoatsTurn game =
+    not (isScapegoatsTurn game)
+    ==> forAll (arbitraryChoosePlayersCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_choosePlayersCommandErrorsWhenCallerNotScapegoat :: GameAtScapegoatsTurn -> Property
+prop_choosePlayersCommandErrorsWhenCallerNotScapegoat (GameAtScapegoatsTurn game) =
+    forAll (suchThat (arbitraryPlayer game) (not . isScapegoat)) $ \caller ->
+    forAll (NonEmpty <$> sublistOf (filterAlive $ game ^. players)) $ \(NonEmpty targets) -> do
+        let command = choosePlayersCommand (caller ^. name) (map (view name) targets)
+
+        verbose_runCommandErrors game command
+
+prop_choosePlayersCommandSetsAllowedVoters :: GameAtScapegoatsTurn -> Property
+prop_choosePlayersCommandSetsAllowedVoters (GameAtScapegoatsTurn game) = do
+    let scapegoat = findByRole_ scapegoatRole (game ^. players)
+
+    forAll (NonEmpty <$> sublistOf (filterAlive $ game ^. players)) $ \(NonEmpty targets) -> do
+        let command = choosePlayersCommand (scapegoat ^. name) (map (view name) targets)
+        let game'   = run_ (apply command) game
+
+        game' ^. allowedVoters === map (view name) targets
+
+prop_choosePlayersCommandResetsScapegoatBlamed :: GameAtScapegoatsTurn -> Property
+prop_choosePlayersCommandResetsScapegoatBlamed (GameAtScapegoatsTurn game) = do
+    forAll (arbitraryChoosePlayersCommand game) $ \(Blind command) ->
+        not $ run_ (apply command) game ^. scapegoatBlamed
 
 prop_healCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_healCommandErrorsWhenGameIsOver (GameAtGameOver game) = do
@@ -778,6 +848,16 @@ prop_voteLynchCommandErrorsWhenCallerHasVoted (GameWithLynchVotes game) =
         let command = voteLynchCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
+
+prop_voteLynchCommandErrorsWhenCallerIsNotInAllowedVoters :: GameWithAllowedVoters -> Property
+prop_voteLynchCommandErrorsWhenCallerIsNotInAllowedVoters (GameWithAllowedVoters game) =
+    forAll (suchThat (arbitraryPlayer game') (`notElem` getAllowedVoters game')) $ \caller ->
+    forAll (arbitraryPlayer game') $ \target -> do
+        let command = voteLynchCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game' command
+    where
+        game' = run_ checkStage game
 
 prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot :: GameWithVillageIdiotRevealedAtVillagesTurn -> Property
 prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot (GameWithVillageIdiotRevealedAtVillagesTurn game) =

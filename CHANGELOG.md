@@ -5,6 +5,7 @@
 *Minor*
 
 * Added the Village Idiot role. ([#41](https://github.com/hjwylde/werewolf/issues/41))
+* Added the Scapegoat's ability to choose whom may vote on the next day when he is blamed. ([#62](https://github.com/hjwylde/werewolf/issues/62))
 
 *Revisions*
 

@@ -19,10 +19,9 @@ module Werewolf.Options (
     werewolfPrefs, werewolfInfo, werewolf,
 ) where
 
-import           Data.List.Extra
-import           Data.Text       (Text)
-import qualified Data.Text       as T
-import           Data.Version    (showVersion)
+import           Data.Text    (Text)
+import qualified Data.Text    as T
+import           Data.Version (showVersion)
 
 import qualified Werewolf.Commands.Choose    as Choose
 import qualified Werewolf.Commands.Help      as Help
@@ -89,7 +88,7 @@ werewolf = Options
         , help "Specify the calling player's name"
         ])
     <*> subparser (mconcat
-        [ command "choose"      $ info (helper <*> choose)      (fullDesc <> progDesc "Choose an allegiance")
+        [ command "choose"      $ info (helper <*> choose)      (fullDesc <> progDesc "Choose an allegiance or player(s)")
         , command "end"         $ info (helper <*> end)         (fullDesc <> progDesc "End the current game")
         , command "heal"        $ info (helper <*> heal)        (fullDesc <> progDesc "Heal the devoured player")
         , command "help"        $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents")
@@ -107,7 +106,7 @@ werewolf = Options
         ])
 
 choose :: Parser Command
-choose = Choose . Choose.Options . T.pack <$> strArgument (metavar "ALLEGIANCE")
+choose = Choose . Choose.Options . T.pack <$> strArgument (metavar "ALLEGIANCE|PLAYER[,...]")
 
 end :: Parser Command
 end = pure End
@@ -149,7 +148,7 @@ see = See . See.Options <$> playerArgument
 
 start :: Parser Command
 start = fmap Start $ Start.Options
-    <$> fmap (map T.pack . wordsBy (',' ==)) (strOption $ mconcat
+    <$> fmap (T.splitOn "," . T.pack) (strOption $ mconcat
         [ long "extra-roles", metavar "ROLE,..."
         , value []
         , help "Specify the extra roles to include"

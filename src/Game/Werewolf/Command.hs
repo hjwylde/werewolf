@@ -19,8 +19,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    chooseAllegianceCommand, choosePlayerCommand, healCommand, noopCommand, passCommand,
-    pingCommand, poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
+    chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, healCommand, noopCommand,
+    passCommand, pingCommand, poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
     voteDevourCommand, voteLynchCommand,
 ) where
 
@@ -37,8 +37,9 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import           Game.Werewolf.Engine
-import           Game.Werewolf.Game     hiding (getDevourEvent, getPendingVoters, getPlayerVote,
-                                         isDefendersTurn, isGameOver, isSeersTurn, isVillagesTurn,
+import           Game.Werewolf.Game     hiding (getAllowedVoters, getDevourEvent, getPendingVoters,
+                                         getPlayerVote, isDefendersTurn, isGameOver,
+                                         isScapegoatsTurn, isSeersTurn, isVillagesTurn,
                                          isWerewolvesTurn, isWildChildsTurn, isWitchsTurn,
                                          isWolfHoundsTurn, killPlayer, setPlayerRole)
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
@@ -72,6 +73,21 @@ choosePlayerCommand callerName targetName = Command $ do
 
     roleModel .= Just targetName
 
+choosePlayersCommand :: Text -> [Text] -> Command
+choosePlayersCommand callerName targetNames = Command $ do
+    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
+    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
+    unlessM (isPlayerScapegoat callerName)  $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isScapegoatsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
+    when (null targetNames)                 $ throwError [playerMustChooseAtLeastOneTargetMessage callerName]
+    when (callerName `elem` targetNames)    $ throwError [playerCannotChooseSelfMessage callerName]
+    forM_ targetNames $ validatePlayer callerName
+    whenM (use villageIdiotRevealed &&^ anyM isPlayerVillageIdiot targetNames) $
+        throwError [playerCannotChooseVillageIdiotMessage callerName]
+
+    allowedVoters   .= targetNames
+    scapegoatBlamed .= False
+
 healCommand :: Text -> Command
 healCommand callerName = Command $ do
     validateWitchsCommand callerName
@@ -98,6 +114,11 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingRoleMessage $ defender ^. role . Role.name]
         tell [pingPlayerMessage $ defender ^. name]
+    ScapegoatsTurn  -> do
+        scapegoat <- findPlayerByRole_ scapegoatRole
+
+        tell [pingRoleMessage $ scapegoat ^. role . Role.name]
+        tell [pingPlayerMessage $ scapegoat ^. name]
     SeersTurn       -> do
         seer <- findPlayerByRole_ seerRole
 
@@ -106,10 +127,11 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
+        allowedVoters <- getAllowedVoters
         pendingVoters <- getPendingVoters
 
-        tell [waitingOnMessage Nothing pendingVoters]
-        tell $ map (pingPlayerMessage . view name) pendingVoters
+        tell [waitingOnMessage Nothing $ allowedVoters `intersect` pendingVoters]
+        tell $ map (pingPlayerMessage . view name) (allowedVoters `intersect` pendingVoters)
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
@@ -193,10 +215,11 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     Sunset          -> return ()
     VillagesTurn    -> do
         game            <- get
+        allowedVoters   <- getAllowedVoters
         pendingVoters   <- getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
-        tell [waitingOnMessage (Just callerName) pendingVoters]
+        tell [waitingOnMessage (Just callerName) (allowedVoters `intersect` pendingVoters)]
     WerewolvesTurn  -> do
         game            <- get
         pendingVoters   <- filterWerewolves <$> getPendingVoters
@@ -230,7 +253,7 @@ voteDevourCommand callerName targetName = Command $ do
 voteLynchCommand :: Text -> Text -> Command
 voteLynchCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    whenM (use villageIdiotRevealed &&^ isPlayerVillageIdiot callerName)    $ throwError [playerCannotDoThatMessage callerName]
+    whenM (uses allowedVoters (callerName `notElem`))                       $ throwError [playerCannotDoThatMessage callerName]
     unlessM isVillagesTurn                                                  $ throwError [playerCannotDoThatRightNowMessage callerName]
     whenJustM (getPlayerVote callerName) . const                            $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName

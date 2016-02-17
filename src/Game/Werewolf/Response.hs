@@ -53,6 +53,10 @@ module Game.Werewolf.Response (
     -- ** Defender's turn messages
     playerCannotProtectSamePlayerTwiceInARowMessage,
 
+    -- ** Scapegoat's turn messages
+    scapegoatChoseAllowedVotersMessage, playerMustChooseAtLeastOneTargetMessage,
+    playerCannotChooseVillageIdiotMessage,
+
     -- ** Seer's turn messages
     playerSeenMessage,
 
@@ -215,6 +219,7 @@ stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
     GameOver        -> []
     DefendersTurn   -> defendersTurnMessages defendersName
+    ScapegoatsTurn  -> scapegoatsTurnMessages scapegoatsName
     SeersTurn       -> seersTurnMessages seersName
     Sunrise         -> [sunriseMessage]
     Sunset          -> [nightFallsMessage]
@@ -230,6 +235,7 @@ stageMessages game = case game ^. stage of
     where
         players'            = game ^. players
         defendersName       = findByRole_ defenderRole players' ^. name
+        scapegoatsName      = findByRole_ scapegoatRole players' ^. name
         seersName           = findByRole_ seerRole players' ^. name
         aliveWerewolfNames  = map (view name) . filterAlive $ filterWerewolves players'
         wildChildsName      = findByRole_ wildChildRole players' ^. name
@@ -239,6 +245,12 @@ defendersTurnMessages :: Text -> [Message]
 defendersTurnMessages to =
     [ publicMessage "The Defender wakes up."
     , privateMessage to "Whom would you like to `protect`?"
+    ]
+
+scapegoatsTurnMessages :: Text -> [Message]
+scapegoatsTurnMessages scapegoatsName =
+    [ publicMessage "Just before he burns to a complete crisp, he cries out a dying wish."
+    , publicMessage $ T.concat [scapegoatsName, ", whom do you `choose` to vote on the next day?"]
     ]
 
 seersTurnMessages :: Text -> [Message]
@@ -397,6 +409,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn :: Stage -> Text
         showTurn DefendersTurn  = "Defender's"
         showTurn GameOver       = undefined
+        showTurn ScapegoatsTurn = "Scapegoat's"
         showTurn SeersTurn      = "Seer's"
         showTurn Sunrise        = undefined
         showTurn Sunset         = undefined
@@ -450,6 +463,20 @@ playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
 playerCannotProtectSamePlayerTwiceInARowMessage to =
     privateMessage to "You cannot protect the same player twice in a row!"
 
+scapegoatChoseAllowedVotersMessage :: [Text] -> Message
+scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
+    [ "On the next day only", T.intercalate ", " allowedVoters, "shall be allowed to vote."
+    , "The town crier, realising how foolish it was to kill him, grants him this wish."
+    ]
+
+playerMustChooseAtLeastOneTargetMessage :: Text -> Message
+playerMustChooseAtLeastOneTargetMessage to =
+    privateMessage to "You must choose at least 1 target!"
+
+playerCannotChooseVillageIdiotMessage :: Text -> Message
+playerCannotChooseVillageIdiotMessage to =
+    privateMessage to "You cannot choose the Village Idiot!"
+
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
     [ targetName, " is aligned with the ", T.pack $ show allegiance', "."
@@ -485,7 +512,7 @@ playerLynchedMessage player
 noPlayerLynchedMessage :: Message
 noPlayerLynchedMessage = publicMessage $ T.unwords
     [ "Daylight is wasted as the townsfolk squabble over whom to tie up."
-    , "Looks like no one is being burned this day."
+    , "Looks like no-one is being burned this day."
     ]
 
 scapegoatLynchedMessage :: Text -> Message
