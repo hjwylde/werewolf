@@ -37,6 +37,8 @@ import Game.Werewolf.Role
 
 import System.Random.Shuffle
 
+import Werewolf.Messages
+
 data Options = Options
     { optExtraRoles :: ExtraRoles
     , argPlayers    :: [Text]

@@ -29,6 +29,8 @@ import Game.Werewolf.Engine   hiding (isWerewolvesTurn)
 import Game.Werewolf.Game
 import Game.Werewolf.Response
 
+import Werewolf.Messages
+
 data Options = Options
     { argTarget :: Text
     } deriving (Eq, Show)

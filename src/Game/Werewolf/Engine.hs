@@ -73,6 +73,7 @@ import           Game.Werewolf.Game     hiding (getAllowedVoters, getDevourEvent
                                          isWitchsTurn, isWolfHoundsTurn, killPlayer,
                                          setPlayerAllegiance, setPlayerRole)
 import qualified Game.Werewolf.Game     as Game
+import           Game.Werewolf.Messages
 import           Game.Werewolf.Player   hiding (doesPlayerExist)
 import qualified Game.Werewolf.Player   as Player
 import           Game.Werewolf.Response

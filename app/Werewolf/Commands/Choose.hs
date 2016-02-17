@@ -33,6 +33,8 @@ import Game.Werewolf.Engine   hiding (isWildChildsTurn)
 import Game.Werewolf.Game
 import Game.Werewolf.Response
 
+import Werewolf.Messages
+
 data Options = Options
     { arg :: Text
     } deriving (Eq, Show)

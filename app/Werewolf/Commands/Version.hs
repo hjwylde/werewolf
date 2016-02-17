@@ -20,6 +20,7 @@ import Data.Text (Text)
 
 import Game.Werewolf.Response
 
+import Werewolf.Messages
 import Werewolf.Version
 
 handle :: MonadIO m => Text -> m ()

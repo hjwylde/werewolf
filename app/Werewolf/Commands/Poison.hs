@@ -28,6 +28,8 @@ import Game.Werewolf.Command
 import Game.Werewolf.Engine
 import Game.Werewolf.Response
 
+import Werewolf.Messages
+
 data Options = Options
     { argTarget :: Text
     } deriving (Eq, Show)
