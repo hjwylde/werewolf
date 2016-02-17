@@ -22,6 +22,7 @@ module Game.Werewolf.Game (
 
     -- ** Queries
     isFirstRound,
+    doesPlayerExist,
     getPassers, getPlayerVote, getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- * Stage
@@ -48,7 +49,7 @@ import qualified Data.Map        as Map
 import           Data.Maybe
 import           Data.Text       (Text)
 
-import Game.Werewolf.Player
+import Game.Werewolf.Internal.Player
 import Game.Werewolf.Role   hiding (name)
 
 import Prelude hiding (round)
@@ -118,6 +119,9 @@ setPlayerAllegiance name' allegiance' game = game & players %~ map (\player -> i
 
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0
+
+doesPlayerExist :: Text -> Game -> Bool
+doesPlayerExist name = isJust . findByName name . view players
 
 getPassers :: Game -> [Player]
 getPassers game = map (`findByName_` players') passes'

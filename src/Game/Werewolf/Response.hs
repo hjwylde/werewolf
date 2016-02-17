@@ -81,6 +81,10 @@ failure = Response False []
 exitWith :: MonadIO m => Response -> m ()
 exitWith response = liftIO $ T.putStrLn (T.decodeUtf8 $ encode response) >> Exit.exitSuccess
 
+-- | A message may be either public or private, indicated by it's @to@ field.
+--
+--   Each message contains a single text field. This field is permitted to contain special
+--   characters such as new lines and tabs.
 data Message = Message
     { to      :: Maybe Text -- ^ The message recipient: 'Nothing' for a public message,
                             --   'Just' for a private message.
@@ -105,7 +109,7 @@ publicMessage = Message Nothing
 privateMessage :: Text -> Text -> Message
 privateMessage to = Message (Just to)
 
--- | @groupmessages tos message@
+-- | @groupMessages tos message@
 --
 --   Creates multiple private messages (1 to each recipient) with the given text.
 groupMessages :: [Text] -> Text -> [Message]

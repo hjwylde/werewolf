@@ -68,14 +68,13 @@ import qualified Data.Text       as T
 
 import           Game.Werewolf.Game     hiding (getAllowedVoters, getDevourEvent, getPassers,
                                          getPendingVoters, getPlayerVote, getVoteResult,
-                                         isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn,
+                                         isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, doesPlayerExist,
                                          isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
                                          isWitchsTurn, isWolfHoundsTurn, killPlayer,
                                          setPlayerAllegiance, setPlayerRole)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Messages
-import           Game.Werewolf.Player   hiding (doesPlayerExist)
-import qualified Game.Werewolf.Player   as Player
+import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Response
 import           Game.Werewolf.Role     hiding (name)
 import qualified Game.Werewolf.Role     as Role
@@ -365,7 +364,7 @@ createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
 createPlayers playerNames extraRoles = zipWith newPlayer playerNames <$> randomiseRoles extraRoles (length playerNames)
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
-doesPlayerExist name = uses players $ Player.doesPlayerExist name
+doesPlayerExist name = gets $ Game.doesPlayerExist name
 
 isPlayerDefender :: MonadState Game m => Text -> m Bool
 isPlayerDefender name = isDefender <$> findPlayerByName_ name

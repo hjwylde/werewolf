@@ -1,5 +1,5 @@
 {-|
-Module      : Game.Werewolf.Player
+Module      : Game.Werewolf.Internal.Player
 Description : Simplistic player data structure with functions for searching, filtering and querying
               lists of players.
 Copyright   : (c) Henry J. Wylde, 2016
@@ -14,7 +14,7 @@ attributes.
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Game.Werewolf.Player (
+module Game.Werewolf.Internal.Player (
     -- * Player
     Player, name, role, state,
 
@@ -31,7 +31,6 @@ module Game.Werewolf.Player (
     filterAlive, filterDead,
 
     -- ** Queries
-    doesPlayerExist,
     isAngel, isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf, isVillageIdiot,
     isVillagerVillager, isWildChild, isWitch, isWolfHound,
     isVillager, isWerewolf,
@@ -109,10 +108,6 @@ filterAlive = filter isAlive
 -- | @filterDead = filter isDead@
 filterDead :: [Player] -> [Player]
 filterDead = filter isDead
-
--- | @doesPlayerExist name = isJust . findByName name@
-doesPlayerExist :: Text -> [Player] -> Bool
-doesPlayerExist name = isJust . findByName name
 
 -- | @isAngel player = player ^. role == 'angelRole'@
 isAngel :: Player -> Bool

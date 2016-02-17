@@ -16,32 +16,26 @@ module Werewolf.Commands.End (
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Extra
 import Control.Monad.IO.Class
 
-import           Data.Maybe
 import           Data.Text  (Text)
 import qualified Data.Text  as T
 
-import Game.Werewolf.Engine
+import Game.Werewolf.Engine hiding (doesPlayerExist)
 import Game.Werewolf.Game
-import Game.Werewolf.Player
 import Game.Werewolf.Response
 
 import Werewolf.Messages
 
 handle :: MonadIO m => Text -> m ()
 handle callerName = do
-    unlessM doesGameExist $ exitWith failure
-        { messages = [noGameRunningMessage callerName]
-        }
+    unlessM doesGameExist $ exitWith failure { messages = [noGameRunningMessage callerName] }
 
     game <- readGame
 
-    when (isNothing $ findByName callerName (game ^. players)) $ exitWith failure
-        { messages = [playerCannotDoThatMessage callerName]
-        }
+    unless (doesPlayerExist callerName game) $
+        exitWith failure { messages = [playerCannotDoThatMessage callerName] }
 
     deleteGame
 

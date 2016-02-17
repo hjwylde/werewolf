@@ -15,7 +15,6 @@ module Main (
 import Game.Werewolf.Test.Command
 import Game.Werewolf.Test.Engine
 import Game.Werewolf.Test.Game
-import Game.Werewolf.Test.Player
 
 import Test.Tasty
 
@@ -24,4 +23,4 @@ main = defaultMain =<< tests
 
 tests :: IO TestTree
 tests = return . testGroup "Tests" $ concat
-    [allCommandTests, allEngineTests, allGameTests, allPlayerTests]
+    [allCommandTests, allEngineTests, allGameTests]

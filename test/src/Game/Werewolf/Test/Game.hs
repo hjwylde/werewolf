@@ -18,7 +18,7 @@ import qualified Data.Map   as Map
 import           Data.Maybe
 
 import Game.Werewolf.Game
-import Game.Werewolf.Player
+import Game.Werewolf.Internal.Player
 import Game.Werewolf.Test.Arbitrary ()
 
 import Prelude hiding (round)

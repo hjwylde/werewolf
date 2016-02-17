@@ -24,7 +24,7 @@ import qualified Data.Text         as T
 import Game.Werewolf.Command
 import Game.Werewolf.Engine         (checkStage)
 import Game.Werewolf.Game
-import Game.Werewolf.Player
+import Game.Werewolf.Internal.Player
 import Game.Werewolf.Role           hiding (name)
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
@@ -158,7 +158,7 @@ prop_chooseAllegianceCommandErrorsWhenCallerDoesNotExist :: GameAtWolfHoundsTurn
 prop_chooseAllegianceCommandErrorsWhenCallerDoesNotExist (GameAtWolfHoundsTurn game) caller allegiance = do
     let command = chooseAllegianceCommand (caller ^. name) (T.pack $ show allegiance)
 
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
         ==> verbose_runCommandErrors game command
 
 prop_chooseAllegianceCommandErrorsWhenCallerIsDead :: GameAtWolfHoundsTurn -> Allegiance -> Property
@@ -213,7 +213,7 @@ prop_choosePlayerCommandErrorsWhenCallerDoesNotExist (GameAtWildChildsTurn game)
     forAll (arbitraryPlayer game) $ \target -> do
         let command = choosePlayerCommand (caller ^. name) (target ^. name)
 
-        not (doesPlayerExist (caller ^. name) (game ^. players))
+        not (doesPlayerExist (caller ^. name) game)
             ==> verbose_runCommandErrors game command
 
 prop_choosePlayerCommandErrorsWhenTargetDoesNotExist :: GameAtWildChildsTurn -> Player -> Property
@@ -221,7 +221,7 @@ prop_choosePlayerCommandErrorsWhenTargetDoesNotExist (GameAtWildChildsTurn game)
     let wildChild   = findByRole_ wildChildRole (game ^. players)
     let command     = choosePlayerCommand (wildChild ^. name) (target ^. name)
 
-    not (doesPlayerExist (target ^. name) (game ^. players))
+    not (doesPlayerExist (target ^. name) game)
         ==> verbose_runCommandErrors game command
 
 prop_choosePlayerCommandErrorsWhenCallerIsDead :: GameAtWildChildsTurn -> Property
@@ -283,7 +283,7 @@ prop_choosePlayersCommandErrorsWhenCallerDoesNotExist (GameAtScapegoatsTurn game
     forAll (NonEmpty <$> sublistOf (filterAlive $ game ^. players)) $ \(NonEmpty targets) -> do
         let command = choosePlayersCommand (caller ^. name) (map (view name) targets)
 
-        not (doesPlayerExist (caller ^. name) (game ^. players))
+        not (doesPlayerExist (caller ^. name) game)
             ==> verbose_runCommandErrors game command
 
 prop_choosePlayersCommandErrorsWhenAnyTargetDoesNotExist :: GameAtScapegoatsTurn -> Player -> Property
@@ -291,7 +291,7 @@ prop_choosePlayersCommandErrorsWhenAnyTargetDoesNotExist (GameAtScapegoatsTurn g
     let scapegoat   = findByRole_ scapegoatRole (game ^. players)
     let command     = choosePlayersCommand (scapegoat ^. name) [target ^. name]
 
-    not (doesPlayerExist (target ^. name) (game ^. players))
+    not (doesPlayerExist (target ^. name) game)
         ==> verbose_runCommandErrors game command
 
 prop_choosePlayersCommandErrorsWhenAnyTargetIsDead :: GameAtScapegoatsTurn -> Property
@@ -342,7 +342,7 @@ prop_healCommandErrorsWhenGameIsOver (GameAtGameOver game) = do
 
 prop_healCommandErrorsWhenCallerDoesNotExist :: GameWithDevourEvent -> Player -> Property
 prop_healCommandErrorsWhenCallerDoesNotExist (GameWithDevourEvent game) caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> verbose_runCommandErrors game (healCommand (caller ^. name))
 
 prop_healCommandErrorsWhenCallerIsDead :: GameWithDevourEvent -> Property
@@ -397,7 +397,7 @@ prop_passCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_passCommandErrorsWhenCallerDoesNotExist :: GameAtWitchsTurn -> Player -> Property
 prop_passCommandErrorsWhenCallerDoesNotExist (GameAtWitchsTurn game) caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> verbose_runCommandErrors game (passCommand (caller ^. name))
 
 prop_passCommandErrorsWhenCallerIsDead :: GameAtWitchsTurn -> Property
@@ -426,7 +426,7 @@ prop_poisonCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_poisonCommandErrorsWhenCallerDoesNotExist :: GameAtWitchsTurn -> Player -> Property
 prop_poisonCommandErrorsWhenCallerDoesNotExist (GameAtWitchsTurn game) caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \target -> do
         let command = poisonCommand (caller ^. name) (target ^. name)
 
@@ -437,7 +437,7 @@ prop_poisonCommandErrorsWhenTargetDoesNotExist (GameAtWitchsTurn game) target = 
     let witch   = findByRole_ witchRole (game ^. players)
     let command = poisonCommand (witch ^. name) (target ^. name)
 
-    not (doesPlayerExist (target ^. name) (game ^. players))
+    not (doesPlayerExist (target ^. name) game)
         ==> verbose_runCommandErrors game command
 
 prop_poisonCommandErrorsWhenCallerIsDead :: GameAtWitchsTurn -> Property
@@ -507,7 +507,7 @@ prop_protectCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_protectCommandErrorsWhenCallerDoesNotExist :: GameAtDefendersTurn -> Player -> Property
 prop_protectCommandErrorsWhenCallerDoesNotExist (GameAtDefendersTurn game) caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \target -> do
         let command = protectCommand (caller ^. name) (target ^. name)
 
@@ -518,7 +518,7 @@ prop_protectCommandErrorsWhenTargetDoesNotExist (GameAtDefendersTurn game) targe
     let defender    = findByRole_ defenderRole (game ^. players)
     let command     = protectCommand (defender ^. name) (target ^. name)
 
-    not (doesPlayerExist (target ^. name) (game ^. players))
+    not (doesPlayerExist (target ^. name) game)
         ==> verbose_runCommandErrors game command
 
 prop_protectCommandErrorsWhenCallerIsDead :: GameAtDefendersTurn -> Property
@@ -579,7 +579,7 @@ prop_quitCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_quitCommandErrorsWhenCallerDoesNotExist :: Game -> Player -> Property
 prop_quitCommandErrorsWhenCallerDoesNotExist game caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> verbose_runCommandErrors game (quitCommand $ caller ^. name)
 
 prop_quitCommandErrorsWhenCallerIsDead :: Game -> Property
@@ -674,7 +674,7 @@ prop_seeCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_seeCommandErrorsWhenCallerDoesNotExist :: GameAtSeersTurn -> Player -> Property
 prop_seeCommandErrorsWhenCallerDoesNotExist (GameAtSeersTurn game) caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \target -> do
         let command = seeCommand (caller ^. name) (target ^. name)
 
@@ -685,7 +685,7 @@ prop_seeCommandErrorsWhenTargetDoesNotExist (GameAtSeersTurn game) target = do
     let seer    = findByRole_ seerRole (game ^. players)
     let command = seeCommand (seer ^. name) (target ^. name)
 
-    not (doesPlayerExist (target ^. name) (game ^. players))
+    not (doesPlayerExist (target ^. name) game)
         ==> verbose_runCommandErrors game command
 
 prop_seeCommandErrorsWhenCallerIsDead :: GameAtSeersTurn -> Property
@@ -732,7 +732,7 @@ prop_voteDevourCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_voteDevourCommandErrorsWhenCallerDoesNotExist :: GameAtWerewolvesTurn -> Player -> Property
 prop_voteDevourCommandErrorsWhenCallerDoesNotExist (GameAtWerewolvesTurn game) caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \target -> do
         let command = voteDevourCommand (caller ^. name) (target ^. name)
 
@@ -740,7 +740,7 @@ prop_voteDevourCommandErrorsWhenCallerDoesNotExist (GameAtWerewolvesTurn game) c
 
 prop_voteDevourCommandErrorsWhenTargetDoesNotExist :: GameAtWerewolvesTurn -> Player -> Property
 prop_voteDevourCommandErrorsWhenTargetDoesNotExist (GameAtWerewolvesTurn game) target =
-    not (doesPlayerExist (target ^. name) (game ^. players))
+    not (doesPlayerExist (target ^. name) game)
     ==> forAll (arbitraryWerewolf game) $ \caller -> do
         let command = voteDevourCommand (caller ^. name) (target ^. name)
 
@@ -804,7 +804,7 @@ prop_voteLynchCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_voteLynchCommandErrorsWhenCallerDoesNotExist :: GameAtVillagesTurn -> Player -> Property
 prop_voteLynchCommandErrorsWhenCallerDoesNotExist (GameAtVillagesTurn game) caller =
-    not (doesPlayerExist (caller ^. name) (game ^. players))
+    not (doesPlayerExist (caller ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \target -> do
         let command = voteLynchCommand (caller ^. name) (target ^. name)
 
@@ -812,7 +812,7 @@ prop_voteLynchCommandErrorsWhenCallerDoesNotExist (GameAtVillagesTurn game) call
 
 prop_voteLynchCommandErrorsWhenTargetDoesNotExist :: GameAtVillagesTurn -> Player -> Property
 prop_voteLynchCommandErrorsWhenTargetDoesNotExist (GameAtVillagesTurn game) target =
-    not (doesPlayerExist (target ^. name) (game ^. players))
+    not (doesPlayerExist (target ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \caller -> do
         let command = voteLynchCommand (caller ^. name) (target ^. name)
 

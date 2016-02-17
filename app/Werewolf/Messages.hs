@@ -16,7 +16,8 @@ module Werewolf.Messages (
     engineVersionMessage,
 
     -- ** Error messages
-    noGameRunningMessage, gameAlreadyRunningMessage, roleDoesNotExistMessage, playerCannotDoThatMessage,
+    noGameRunningMessage, gameAlreadyRunningMessage, roleDoesNotExistMessage,
+    playerCannotDoThatMessage,
 ) where
 
 import           Data.Text    (Text)
@@ -26,7 +27,8 @@ import           Data.Version
 import Game.Werewolf.Response
 
 engineVersionMessage :: Text -> Version -> Message
-engineVersionMessage to version = privateMessage to $ T.unwords ["Version", T.pack $ showVersion version]
+engineVersionMessage to version =
+    privateMessage to $ T.unwords ["Version", T.pack $ showVersion version]
 
 noGameRunningMessage :: Text -> Message
 noGameRunningMessage to = privateMessage to "No game is running."

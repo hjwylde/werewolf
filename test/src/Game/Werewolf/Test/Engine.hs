@@ -30,7 +30,7 @@ import           Game.Werewolf.Engine         hiding (doesPlayerExist, getDevour
                                                isWerewolvesTurn, isWildChildsTurn, isWitchsTurn,
                                                isWolfHoundsTurn, killPlayer)
 import           Game.Werewolf.Game
-import           Game.Werewolf.Player
+import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Role           hiding (name)
 import qualified Game.Werewolf.Role           as Role
 import           Game.Werewolf.Test.Arbitrary
