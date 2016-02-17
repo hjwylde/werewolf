@@ -179,7 +179,8 @@ engineVersionMessage to version = privateMessage to $ T.unwords ["Version", T.pa
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
-    [ [newPlayersInGameMessage players', rolesInGameMessage $ map (view role) players']
+    [ [newPlayersInGameMessage players']
+    , [rolesInGameMessage $ map (view role) players']
     , map newPlayerMessage players'
     , villagerVillagerMessages
     , stageMessages game
@@ -425,10 +426,11 @@ rolesInGameMessage roles = publicMessage $ T.concat
     , T.intercalate ", " $ map (\(role, count) ->
         T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
         roleCounts
-    , "."
+    , " for a total balance of ", T.pack $ show totalBalance, "."
     ]
     where
-        roleCounts = map (\list -> (head list, length list)) (groupSortOn (view Role.name) roles)
+        roleCounts      = map (\list -> (head list, length list)) (groupSortOn (view Role.name) roles)
+        totalBalance    = foldl1 (+) (map (view balance) roles)
 
 playersInGameMessage :: Text -> [Player] -> Message
 playersInGameMessage to players = privateMessage to . T.intercalate "\n" $

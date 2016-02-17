@@ -19,7 +19,7 @@ The roles are split into four categories:
 
 module Game.Werewolf.Role (
     -- * Role
-    Role, name, allegiance, description, advice,
+    Role, name, allegiance, balance, description, advice,
 
     Allegiance(..),
 
@@ -58,11 +58,16 @@ import Prelude hiding (all)
 --   Most of the game logic behind a role is implemented in "Game.Werewolf.Command" and
 --   "Game.Werewolf.Engine".
 --
+--   The @balance@ attribute on a role indicates the allegiance it favours. For example, a Simple
+--   Werewolf has a balance of -4 while the Seer has a balance of 2. A balance of 0 means it favours
+--   neither allegiance.
+--
 --   N.B., role equality is defined on just the @name@ as a role's @allegiance@ may change
 --   throughout the game.
 data Role = Role
     { _name        :: Text
     , _allegiance  :: Allegiance
+    , _balance     :: Int
     , _description :: Text
     , _advice      :: Text
     } deriving (Read, Show)
@@ -121,6 +126,7 @@ wildChildRole :: Role
 wildChildRole = Role
     { _name         = "Wild-child"
     , _allegiance   = Villagers
+    , _balance      = -1
     , _description  = T.unwords
         [ "Abandoned in the woods by his parents at a young age, he was raised by wolves."
         , "As soon as he learned how to walk on all fours,"
@@ -152,6 +158,7 @@ wolfHoundRole :: Role
 wolfHoundRole = Role
     { _name         = "Wolf-hound"
     , _allegiance   = Villagers
+    , _balance      = -1
     , _description  = T.unwords
         [ "All dogs know in the depths of their soul that their ancestors were wolves"
         , "and that it's mankind who has kept them in the state of childishness and fear,"
@@ -175,6 +182,7 @@ angelRole :: Role
 angelRole = Role
     { _name         = "Angel"
     , _allegiance   = Angel
+    , _balance      = 0
     , _description  = T.unwords
         [ "The muddy life of a village infested with evil creatures repulses him;"
         , "he wishes to believe he's the victim of a terrible nightmare,"
@@ -195,6 +203,7 @@ defenderRole :: Role
 defenderRole = Role
     { _name         = "Defender"
     , _allegiance   = Villagers
+    , _balance      = 2
     , _description  =
         "This character can save the Villagers from the bite of the Werewolves."
     , _advice       = T.unwords
@@ -214,6 +223,7 @@ scapegoatRole :: Role
 scapegoatRole = Role
     { _name         = "Scapegoat"
     , _allegiance   = Villagers
+    , _balance      = 1
     , _description  = T.unwords
         [ "It's sad to say, but in Miller's Hollow, when something doesn't go right"
         , "it's always him who unjustly suffers the consequences."
@@ -235,6 +245,7 @@ seerRole :: Role
 seerRole = Role
     { _name         = "Seer"
     , _allegiance   = Villagers
+    , _balance      = 2
     , _description  = T.unwords
         [ "A fortunate teller by other names, with the ability to see into fellow"
         , "townsfolk and determine their allegiance."
@@ -252,6 +263,7 @@ simpleVillagerRole :: Role
 simpleVillagerRole = Role
     { _name         = "Simple Villager"
     , _allegiance   = Villagers
+    , _balance      = 1
     , _description  = T.unwords
         [ "A simple, ordinary townsperson in every way."
         , "Their only weapons are the ability to analyze behaviour to identify Werewolves,"
@@ -274,6 +286,7 @@ villageIdiotRole :: Role
 villageIdiotRole = Role
     { _name         = "Village Idiot"
     , _allegiance   = Villagers
+    , _balance      = 0
     , _description  = T.unwords
         [ "What is a village without an idiot?"
         , "He does pretty much nothing important,"
@@ -293,6 +306,7 @@ villagerVillagerRole :: Role
 villagerVillagerRole = Role
     { _name         = "Villager-Villager"
     , _allegiance   = Villagers
+    , _balance      = 2
     , _description  = T.unwords
         [ "This person has a soul as clear and transparent as the water from a mountain stream."
         , "They will deserve the attentive ear of their peers"
@@ -310,6 +324,7 @@ witchRole :: Role
 witchRole = Role
     { _name         = "Witch"
     , _allegiance   = Villagers
+    , _balance      = 3
     , _description  = T.unwords
         [ "She knows how to brew two extremely powerful potions:"
         , "a healing potion, to resurrect the player devoured by the Werewolves,"
@@ -329,6 +344,7 @@ simpleWerewolfRole :: Role
 simpleWerewolfRole = Role
     { _name         = "Simple Werewolf"
     , _allegiance   = Werewolves
+    , _balance      = -4
     , _description  = T.unwords
         [ "Each night they devour a Villager."
         , "During the day they try to hide their nocturnal identity to avoid mob justice."

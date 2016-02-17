@@ -44,7 +44,7 @@ handle callerName (Options (Just Description)) = exitWith success
     }
 handle callerName (Options (Just Roles)) = exitWith success
     { messages = map (\role -> privateMessage callerName $ T.intercalate "\n"
-        [ T.snoc (role ^. Role.name) ':'
+        [ T.concat [role ^. Role.name, " (", T.pack . show $ role ^. balance, "):"]
         , role ^. description
         , role ^. advice
         ]) allRoles
