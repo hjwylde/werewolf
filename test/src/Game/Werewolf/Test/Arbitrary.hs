@@ -13,14 +13,16 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Game
     NewGame(..),
-    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtSeersTurn(..), GameAtSunrise(..),
-    GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..),
+    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtScapegoatsTurn(..), GameAtSeersTurn(..),
+    GameAtSunrise(..), GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..),
     GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
     GameOnSecondRound(..),
-    GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
-    GameWithLynchVotes(..), GameWithOneAllegianceAlive(..), GameWithPoison(..), GameWithProtect(..),
+    GameWithAllowedVoters(..), GameWithDeadPlayers(..), GameWithDevourEvent(..),
+    GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
+    GameWithOneAllegianceAlive(..), GameWithPoison(..), GameWithProtect(..),
     GameWithProtectAndDevourVotes(..), GameWithRoleModel(..), GameWithRoleModelAtVillagesTurn(..),
-    GameWithSee(..), GameWithVillageIdiotRevealedAtVillagesTurn(..), GameWithZeroAllegiancesAlive(..),
+    GameWithScapegoatBlamed(..), GameWithSee(..), GameWithVillageIdiotRevealedAtVillagesTurn(..),
+    GameWithZeroAllegiancesAlive(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -29,9 +31,9 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Command
     arbitraryCommand, arbitraryChooseAllegianceCommand, arbitraryChoosePlayerCommand,
-    arbitraryHealCommand, arbitraryPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
-    arbitraryQuitCommand, arbitrarySeeCommand, arbitraryVoteDevourCommand,
-    arbitraryVoteLynchCommand,
+    arbitraryChoosePlayersCommand, arbitraryHealCommand, arbitraryPassCommand,
+    arbitraryPoisonCommand, arbitraryProtectCommand, arbitraryQuitCommand, arbitrarySeeCommand,
+    arbitraryVoteDevourCommand, arbitraryVoteLynchCommand,
     runArbitraryCommands,
 
     -- ** Player
@@ -105,6 +107,15 @@ instance Arbitrary GameAtGameOver where
 
         return $ GameAtGameOver (game & stage .~ GameOver)
 
+newtype GameAtScapegoatsTurn = GameAtScapegoatsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtScapegoatsTurn where
+    arbitrary = do
+        (GameWithScapegoatBlamed game) <- arbitrary
+
+        return $ GameAtScapegoatsTurn (run_ checkStage game)
+
 newtype GameAtSeersTurn = GameAtSeersTurn Game
     deriving (Eq, Show)
 
@@ -177,14 +188,24 @@ instance Arbitrary GameOnSecondRound where
 
         return $ GameOnSecondRound (game & round .~ 1)
 
+newtype GameWithAllowedVoters = GameWithAllowedVoters Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithAllowedVoters where
+    arbitrary = do
+        (GameAtScapegoatsTurn game) <- arbitrary
+        (Blind command)             <- arbitraryChoosePlayersCommand game
+
+        return $ GameWithAllowedVoters (run_ (apply command) game)
+
 newtype GameWithDeadPlayers = GameWithDeadPlayers Game
     deriving (Eq, Show)
 
 instance Arbitrary GameWithDeadPlayers where
     arbitrary = do
-        game        <- arbitrary
-        players'    <- sublistOf $ game ^. players
-        let game'   = foldr killPlayer game (map (view name) players')
+        game                <- arbitrary
+        (NonEmpty players') <- NonEmpty <$> sublistOf (game ^. players)
+        let game'           = foldr killPlayer game (map (view name) players')
 
         return $ GameWithDeadPlayers (run_ checkStage game')
 
@@ -312,6 +333,15 @@ instance Arbitrary GameWithRoleModelAtVillagesTurn where
 
         return $ GameWithRoleModelAtVillagesTurn (game & stage .~ VillagesTurn)
 
+newtype GameWithScapegoatBlamed = GameWithScapegoatBlamed Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithScapegoatBlamed where
+    arbitrary = do
+        (GameWithLynchVotes game) <- suchThat arbitrary $ \(GameWithLynchVotes game) -> length (getVoteResult game) > 1
+
+        return $ GameWithScapegoatBlamed game
+
 newtype GameWithSee = GameWithSee Game
     deriving (Eq, Show)
 
@@ -328,9 +358,11 @@ newtype GameWithVillageIdiotRevealed = GameWithVillageIdiotRevealed Game
 
 instance Arbitrary GameWithVillageIdiotRevealed where
     arbitrary = do
-        game <- arbitrary
+        game                <- arbitrary
+        let villageIdiot    = findByRole_ villageIdiotRole (game ^. players)
+        let game'           = game & villageIdiotRevealed .~ True & allowedVoters %~ delete (villageIdiot ^. name)
 
-        return $ GameWithVillageIdiotRevealed (game & villageIdiotRevealed .~ True)
+        return $ GameWithVillageIdiotRevealed game'
 
 newtype GameWithVillageIdiotRevealedAtVillagesTurn = GameWithVillageIdiotRevealedAtVillagesTurn Game
     deriving (Eq, Show)
@@ -367,6 +399,7 @@ arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
     GameOver        -> return $ Blind noopCommand
     DefendersTurn   -> arbitraryProtectCommand game
+    ScapegoatsTurn  -> arbitraryChoosePlayersCommand game
     Sunrise         -> return $ Blind noopCommand
     Sunset          -> return $ Blind noopCommand
     SeersTurn       -> arbitrarySeeCommand game
@@ -393,6 +426,13 @@ arbitraryChoosePlayerCommand game = do
     target          <- suchThat (arbitraryPlayer game) (wildChild /=)
 
     return . Blind $ choosePlayerCommand (wildChild ^. name) (target ^. name)
+
+arbitraryChoosePlayersCommand :: Game -> Gen (Blind Command)
+arbitraryChoosePlayersCommand game = do
+    let scapegoat       = findByRole_ scapegoatRole (game ^. players)
+    (NonEmpty players') <- NonEmpty <$> sublistOf (filterAlive $ game ^. players)
+
+    return . Blind $ choosePlayersCommand (scapegoat ^. name) (map (view name) players')
 
 arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do
@@ -457,7 +497,7 @@ arbitraryVoteDevourCommand game = do
 
 arbitraryVoteLynchCommand :: Game -> Gen (Blind Command)
 arbitraryVoteLynchCommand game = do
-    let applicableCallers   = getPendingVoters game
+    let applicableCallers   = getAllowedVoters game `intersect` getPendingVoters game
     target                  <- arbitraryPlayer game
 
     if null applicableCallers

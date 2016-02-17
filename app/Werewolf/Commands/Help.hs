@@ -58,7 +58,7 @@ handle callerName (Options Nothing) = exitWith success
 
 commandsMessages :: [Text]
 commandsMessages =
-    [ "choose (ALLEGIANCE|PLAYER) - choose an allegiance or player."
+    [ "choose (ALLEGIANCE|PLAYER[,...]) - choose an allegiance or player(s)."
     , "end - ends the current game."
     , "heal - heal the devoured player."
     , "pass - pass on healing or poisoning a player."
@@ -127,9 +127,10 @@ rulesMessages = map (T.intercalate "\n")
       , "8. The Witch wakes up and may heal the victim and/or poison someone."
       , "9. The village wakes up and find the victim."
       , "10. The village votes to lynch a suspect."
+      , "11. (When the Scapegoat is blamed) the Scapegot chooses whom may vote on the next day."
       , T.unwords
         [ "The game is over when only Villagers or Werewolves are left alive,"
-        , "or one of the Loners completes their own objective."
+        , "or when one of the Loners completes their own objective."
         ]
       ]
     ]

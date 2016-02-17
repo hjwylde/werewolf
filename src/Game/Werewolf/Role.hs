@@ -207,6 +207,9 @@ defenderRole = Role
 --   /unjustly suffers the consequences./
 --
 --   If the village's vote ends in a tie, it's the Scapegoat who is eliminated instead of no-one.
+--
+--   In this event, the Scapegoat has one last task to complete: he must choose whom is permitted to
+--   vote or not on the next day.
 scapegoatRole :: Role
 scapegoatRole = Role
     { _name         = "Scapegoat"
@@ -215,7 +218,13 @@ scapegoatRole = Role
         [ "It's sad to say, but in Miller's Hollow, when something doesn't go right"
         , "it's always him who unjustly suffers the consequences."
         ]
-    , _advice       = "Cross your fingers that the votes don't end up tied."
+    , _advice       = T.unwords
+        [ "Cross your fingers that the votes don't end up tied."
+        , "If you do so happen to be that unlucky,"
+        , "then be wary of whom you allow to vote on the next day."
+        , "If you choose only one player and the Werewolves devour them in the night,"
+        , "then there will be no village vote."
+        ]
     }
 
 -- | /A fortunate teller by other names, with the ability to see into fellow townsfolk and/
