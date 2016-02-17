@@ -24,14 +24,20 @@ The implemented roles are split into four categories.
 
 **The Ambiguous:**
 
+The Ambiguous may change allegiance during the game.
+
 * Wild-child.
 * Wolf-hound.
 
 **The Loners:**
 
+The Loners have their own win condition.
+
 * Angel.
 
 **The Villagers:**
+
+The Villagers must lynch all of the Werewolves.
 
 * Defender.
 * Scapegoat.
@@ -42,6 +48,8 @@ The implemented roles are split into four categories.
 * Witch.
 
 **The Werewolves:**
+
+The Werewolves must devour all of the Villagers.
 
 * Simple Werewolf.
 
@@ -76,12 +84,12 @@ E.g., to start a game:
 > werewolf --caller @foo start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
     {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
-    {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4), Simple Werewolf (2)."},
-    {"to":"@foo","message":"You're a Simple Werewolf, along with @baz.\nA shapeshifting townsperson that, at night, hunts the residents of Millers Hollow."},
+    {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4), Simple Werewolf (2) for a total balance of -2."},
+    {"to":"@foo","message":"You're a Simple Villager.\nA simple, ordinary townsperson in every way. Their only weapons are the ability to analyze behaviour to identify Werewolves, and the strength of their conviction to prevent the execution of the innocents like themselves."},
     ...,
     {"to":null,"message":"Night falls, the village is asleep."},
     {"to":null,"message":"The Seer wakes up."},
-    {"to":"@qux","message":"Whose allegiance would you like to see?"}
+    {"to":"@corge","message":"Whose allegiance would you like to `see`?"}
     ]}
 ```
 
@@ -97,47 +105,49 @@ The `to` header on a message may either be `null`---for a public message---or ha
 It's the Seer's turn now.
 
 ```bash
-> werewolf --caller @qux see @grault
+> werewolf --caller @corge see @grault
 {"ok":true,"messages":[
-    {"to":"@qux","message":"@grault is aligned with the Villagers."},
+    {"to":"@corge","message":"@grault is aligned with the Werewolves."},
+    {"to":"@quux","message":"You feel restless, like an old curse is keeping you from sleep. It seems you're not the only one... @grault are also emerging from their homes."},
+    {"to":"@grault","message":"You feel restless, like an old curse is keeping you from sleep.  It seems you're not the only one... @quux are also emerging from their homes."},
     {"to":null,"message":"The Werewolves wake up, recognise one another and choose a new victim."},
-    {"to":"@foo","message":"Whom would you like to devour?"},
-    {"to":"@baz","message":"Whom would you like to devour?"}
+    {"to":"@quux","message":"Whom would you like to `vote` to devour?"},
+    {"to":"@grault","message":"Whom would you like to `vote` to devour?"}
     ]}
 ```
 
-Let's have the Werewolves, _@foo_ and _@baz_, vote to devour a Villager.
+Let's have the Werewolves, _@quux_ and _@grault_, vote to devour a Villager.
 
 ```bash
-> werewolf --caller @foo vote @bar
+> werewolf --caller @quux vote @foo
 {"ok":true,"messages":[
-    {"to":"@baz","message":"@foo voted to devour @bar."}
+    {"to":"@grault","message":"@quux voted to devour @foo."}
     ]}
-> werewolf --caller @baz vote @bar
+> werewolf --caller @grault vote @foo
 {"ok":true,"messages":[
-    {"to":"@foo","message":"@baz voted to devour @bar."},
+    {"to":"@quux","message":"@grault voted to devour @foo."},
     {"to":null,"message":"The sun rises. Everybody wakes up and opens their eyes..."},
-    {"to":null,"message":"As you open them you notice a door broken down and @bar's guts half devoured and spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Simple Villager."},
-    {"to":null,"message":"As the village gathers in the town square the town clerk calls for a vote."},
-    {"to":null,"message":"Whom would you like to lynch?"}
+    {"to":null,"message":"As you open them you notice a door broken down and @foo's guts half devoured and spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Simple Villager."},
+    {"to":null,"message":"As the village gathers in the square the town clerk calls for a vote."},
+    {"to":null,"message":"Whom would you like to `vote` to lynch?"}
     ]}
 ```
 
-Too bad for _@bar_. Maybe the village can get some vengeance...
+Too bad for _@foo_. Maybe the village can get some vengeance...
 
 ```bash
-> werewolf --caller @qux vote @foo
+> werewolf --caller @corge vote @grault
 {"ok":true,"messages":[]}
 ```
 
 This time, even though the command was successful, there are no messages.
 
 ```bash
-> werewolf --caller @qux vote @foo
-{"ok":false,"messages":[{"to":["@qux"],"message":"You've already voted!"}]}
+> werewolf --caller @corge vote @grault
+{"ok":false,"messages":[{"to":["@corge"],"message":"You've already voted!"}]}
 ```
 
-Here the command was unsuccessful and an error message is sent to _@qux_.
+Here the command was unsuccessful and an error message is sent to _@corge_.
 Even though the command was unsuccessful, the chat client interface probably won't need to do
     anything special.
 Relaying the error message back to the user should suffice.

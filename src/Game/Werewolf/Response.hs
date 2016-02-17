@@ -430,7 +430,7 @@ rolesInGameMessage roles = publicMessage $ T.concat
     ]
     where
         roleCounts      = map (\list -> (head list, length list)) (groupSortOn (view Role.name) roles)
-        totalBalance    = foldl1 (+) (map (view balance) roles)
+        totalBalance    = sum $ map (view balance) roles
 
 playersInGameMessage :: Text -> [Player] -> Message
 playersInGameMessage to players = privateMessage to . T.intercalate "\n" $

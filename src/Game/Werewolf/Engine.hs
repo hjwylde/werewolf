@@ -401,7 +401,7 @@ randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ sim
     where
         goal                    = 2
         m                       = max (n - length extraRoles) 0
-        startingBalance         = foldl (+) 0 (map (view balance) extraRoles)
+        startingBalance         = sum (map (view balance) extraRoles)
         simpleWerewolfBalance   = simpleWerewolfRole ^. balance
 
         -- Little magic here to calculate how many Werewolves and Villagers we want.
