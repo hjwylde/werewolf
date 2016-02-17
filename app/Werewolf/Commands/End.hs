@@ -19,10 +19,10 @@ module Werewolf.Commands.End (
 import Control.Monad.Extra
 import Control.Monad.IO.Class
 
-import           Data.Text  (Text)
-import qualified Data.Text  as T
+import           Data.Text (Text)
+import qualified Data.Text as T
 
-import Game.Werewolf.Engine hiding (doesPlayerExist)
+import Game.Werewolf.Engine   hiding (doesPlayerExist)
 import Game.Werewolf.Game
 import Game.Werewolf.Response
 

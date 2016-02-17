@@ -50,7 +50,7 @@ import           Data.Maybe
 import           Data.Text       (Text)
 
 import Game.Werewolf.Internal.Player
-import Game.Werewolf.Role   hiding (name)
+import Game.Werewolf.Internal.Role   hiding (name)
 
 import Prelude hiding (round)
 

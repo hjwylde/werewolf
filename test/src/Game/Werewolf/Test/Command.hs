@@ -22,10 +22,10 @@ import           Data.Text         (Text)
 import qualified Data.Text         as T
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine         (checkStage)
+import Game.Werewolf.Engine          (checkStage)
 import Game.Werewolf.Game
 import Game.Werewolf.Internal.Player
-import Game.Werewolf.Role           hiding (name)
+import Game.Werewolf.Internal.Role   hiding (name)
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 

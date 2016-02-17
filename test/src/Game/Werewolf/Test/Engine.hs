@@ -24,15 +24,15 @@ import           Data.Maybe
 import           Data.Text         (Text)
 
 import           Game.Werewolf.Command
-import           Game.Werewolf.Engine         hiding (doesPlayerExist, getDevourEvent,
-                                               getVoteResult, isDefendersTurn, isGameOver,
-                                               isScapegoatsTurn, isSeersTurn, isVillagesTurn,
-                                               isWerewolvesTurn, isWildChildsTurn, isWitchsTurn,
-                                               isWolfHoundsTurn, killPlayer)
+import           Game.Werewolf.Engine          hiding (doesPlayerExist, getDevourEvent,
+                                                getVoteResult, isDefendersTurn, isGameOver,
+                                                isScapegoatsTurn, isSeersTurn, isVillagesTurn,
+                                                isWerewolvesTurn, isWildChildsTurn, isWitchsTurn,
+                                                isWolfHoundsTurn, killPlayer)
 import           Game.Werewolf.Game
 import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Role           hiding (name)
-import qualified Game.Werewolf.Role           as Role
+import           Game.Werewolf.Internal.Role   hiding (name)
+import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Test.Arbitrary
 import           Game.Werewolf.Test.Util
 

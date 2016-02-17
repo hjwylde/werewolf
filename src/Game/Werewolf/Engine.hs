@@ -66,18 +66,19 @@ import qualified Data.Map        as Map
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (getAllowedVoters, getDevourEvent, getPassers,
-                                         getPendingVoters, getPlayerVote, getVoteResult,
-                                         isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, doesPlayerExist,
-                                         isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
-                                         isWitchsTurn, isWolfHoundsTurn, killPlayer,
-                                         setPlayerAllegiance, setPlayerRole)
-import qualified Game.Werewolf.Game     as Game
-import           Game.Werewolf.Messages
+import           Game.Werewolf.Game            hiding (doesPlayerExist, getAllowedVoters,
+                                                getDevourEvent, getPassers, getPendingVoters,
+                                                getPlayerVote, getVoteResult, isDefendersTurn,
+                                                isGameOver, isScapegoatsTurn, isSeersTurn,
+                                                isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
+                                                isWitchsTurn, isWolfHoundsTurn, killPlayer,
+                                                setPlayerAllegiance, setPlayerRole)
+import qualified Game.Werewolf.Game            as Game
 import           Game.Werewolf.Internal.Player
+import           Game.Werewolf.Internal.Role   hiding (name)
+import qualified Game.Werewolf.Internal.Role   as Role
+import           Game.Werewolf.Messages
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name)
-import qualified Game.Werewolf.Role     as Role
 
 import Prelude hiding (round)
 

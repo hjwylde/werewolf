@@ -44,7 +44,7 @@ import Data.List
 import Data.Maybe
 import Data.Text     (Text)
 
-import Game.Werewolf.Role hiding (name)
+import Game.Werewolf.Internal.Role hiding (name)
 
 -- | A player has a @name@, @role@ and @state@. Any stateful information needed for a player's role
 --   is held on the 'Game' itself.

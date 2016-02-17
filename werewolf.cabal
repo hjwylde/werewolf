@@ -73,6 +73,7 @@ library
         Game.Werewolf.Engine,
         Game.Werewolf.Game,
         Game.Werewolf.Internal.Player,
+        Game.Werewolf.Internal.Role,
         Game.Werewolf.Response,
         Game.Werewolf.Role
     other-modules:

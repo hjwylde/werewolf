@@ -19,7 +19,7 @@ import           Data.Maybe
 
 import Game.Werewolf.Game
 import Game.Werewolf.Internal.Player
-import Game.Werewolf.Test.Arbitrary ()
+import Game.Werewolf.Test.Arbitrary  ()
 
 import Prelude hiding (round)
 

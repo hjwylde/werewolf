@@ -89,9 +89,9 @@ import qualified Data.Text       as T
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Internal.Player
+import           Game.Werewolf.Internal.Role   hiding (name)
+import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name)
-import qualified Game.Werewolf.Role     as Role
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
