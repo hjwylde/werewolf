@@ -46,7 +46,7 @@ handle callerName (Options arg) = do
     game <- readGame
 
     let command = case game ^. stage of
-            ScapegoatsTurn  -> choosePlayersCommand callerName (T.splitOn "," arg)
+            ScapegoatsTurn  -> choosePlayersCommand callerName (filter (/= T.empty) (T.splitOn "," arg))
             WildChildsTurn  -> choosePlayerCommand callerName arg
             WolfHoundsTurn  -> chooseAllegianceCommand callerName arg
             -- TODO (hjw): throw an error
