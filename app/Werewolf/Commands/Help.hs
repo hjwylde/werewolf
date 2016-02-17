@@ -58,7 +58,7 @@ handle callerName (Options Nothing) = exitWith success
 
 commandsMessages :: [Text]
 commandsMessages =
-    [ "choose (ALLEGIANCE|PLAYER[,...]) - choose an allegiance or player(s)."
+    [ "choose (ALLEGIANCE | PLAYER,...) - choose an allegiance or player(s)."
     , "end - ends the current game."
     , "heal - heal the devoured player."
     , "pass - pass on healing or poisoning a player."
@@ -67,7 +67,7 @@ commandsMessages =
     , "protect PLAYER - protect a player."
     , "quit - quit the current game."
     , "see PLAYER - see a player's allegiance."
-    , "start [--extra-roles ROLE,...] PLAYER... - starts a new game with the given players and extra roles. A game requires at least 7 players."
+    , "start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER... - starts a new game with the given players and extra roles. A game requires at least 7 players."
     , "status - gets the status of the current game."
     , "vote PLAYER - vote against a player."
     ]

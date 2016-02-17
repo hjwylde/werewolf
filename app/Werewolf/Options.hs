@@ -106,7 +106,7 @@ werewolf = Options
         ])
 
 choose :: Parser Command
-choose = Choose . Choose.Options . T.pack <$> strArgument (metavar "ALLEGIANCE|PLAYER[,...]")
+choose = Choose . Choose.Options . T.pack <$> strArgument (metavar "ALLEGIANCE | PLAYER,...")
 
 end :: Parser Command
 end = pure End
@@ -148,12 +148,19 @@ see = See . See.Options <$> playerArgument
 
 start :: Parser Command
 start = fmap Start $ Start.Options
-    <$> fmap (filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
-        [ long "extra-roles", metavar "ROLE,..."
-        , value []
-        , help "Specify the extra roles to include"
-        ])
-    <*> many (T.pack <$> strArgument (metavar "PLAYER..."))
+    <$> (extraRolesOption <|> randomExtraRolesOption)
+    <*> some (T.pack <$> strArgument (metavar "PLAYER..."))
+    where
+        extraRolesOption = fmap (Start.Use . filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
+            [ long "extra-roles", metavar "ROLE,..."
+            , value []
+            , help "Specify the extra roles to use"
+            ])
+
+        randomExtraRolesOption = flag Start.None Start.Random $ mconcat
+            [ long "random-extra-roles"
+            , help "Use random extra roles"
+            ]
 
 status :: Parser Command
 status = pure Status
