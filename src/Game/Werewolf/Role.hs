@@ -2,7 +2,7 @@
 Module      : Game.Werewolf.Role
 Description : Simplistic role data structure and instances.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 

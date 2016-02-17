@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Protect
 Description : Options and handler for the protect subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 

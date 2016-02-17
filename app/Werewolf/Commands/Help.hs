@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Help
 Description : Options and handler for the help subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 

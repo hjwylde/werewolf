@@ -2,7 +2,7 @@
 Module      : Game.Werewolf.Player
 Description : Simplistic player data structure with functions for searching, filtering and querying
               lists of players.
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 

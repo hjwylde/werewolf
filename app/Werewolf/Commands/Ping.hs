@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Ping
 Description : Handler for the ping subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 

@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Interpret
 Description : Options for the interpret subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
