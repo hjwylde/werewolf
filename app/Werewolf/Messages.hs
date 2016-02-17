@@ -24,7 +24,7 @@ import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version
 
-import Game.Werewolf.Response
+import Game.Werewolf
 
 engineVersionMessage :: Text -> Version -> Message
 engineVersionMessage to version =

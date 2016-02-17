@@ -30,10 +30,9 @@ import           Data.List
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf.Engine   hiding (isGameOver)
-import Game.Werewolf.Game
-import Game.Werewolf.Response
-import Game.Werewolf.Role
+import Game.Werewolf   hiding (isGameOver)
+import Game.Werewolf.Game (isGameOver)
+import Game.Werewolf.Role as Role
 
 import System.Random.Shuffle
 
@@ -81,4 +80,4 @@ useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByNa
     Nothing     -> throwError [roleDoesNotExistMessage callerName roleName]
 
 findByName :: Text -> Maybe Role
-findByName name' = find ((name' ==) . T.toLower . view name) allRoles
+findByName name' = find ((name' ==) . T.toLower . view Role.name) allRoles

@@ -28,10 +28,7 @@ import Control.Monad.Writer
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (isWildChildsTurn)
-import Game.Werewolf.Game
-import Game.Werewolf.Response
+import Game.Werewolf
 
 import Werewolf.Messages
 

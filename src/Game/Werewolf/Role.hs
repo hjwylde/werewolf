@@ -6,8 +6,8 @@ Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Role instances are defined in "Game.Werewolf.Internal.Role". This module just re-exports the methods
-relevant to the public interface.
+Role instances are defined in "Game.Werewolf.Internal.Role". This module just re-exports the
+functions relevant to the public interface.
 -}
 
 module Game.Werewolf.Role (

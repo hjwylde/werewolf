@@ -69,11 +69,13 @@ executable werewolf
 library
     hs-source-dirs: src/
     exposed-modules:
+        Game.Werewolf,
         Game.Werewolf.Command,
         Game.Werewolf.Engine,
         Game.Werewolf.Game,
         Game.Werewolf.Internal.Player,
         Game.Werewolf.Internal.Role,
+        Game.Werewolf.Player,
         Game.Werewolf.Response,
         Game.Werewolf.Role
     other-modules:

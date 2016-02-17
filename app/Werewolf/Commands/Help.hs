@@ -25,8 +25,8 @@ import Control.Monad.IO.Class
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf.Response
-import Game.Werewolf.Role     as Role
+import Game.Werewolf      hiding (Command)
+import Game.Werewolf.Role as Role
 
 data Options = Options
     { argCommand :: Maybe Command

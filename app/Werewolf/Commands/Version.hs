@@ -18,7 +18,7 @@ import Control.Monad.Except
 
 import Data.Text (Text)
 
-import Game.Werewolf.Response
+import Game.Werewolf
 
 import Werewolf.Messages
 import Werewolf.Version

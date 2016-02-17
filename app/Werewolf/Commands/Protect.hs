@@ -24,9 +24,7 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine
-import Game.Werewolf.Response
+import Game.Werewolf
 
 import Werewolf.Messages
 
