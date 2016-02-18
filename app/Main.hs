@@ -22,6 +22,7 @@ import Options.Applicative
 import System.Environment
 
 import qualified Werewolf.Commands.Choose    as Choose
+import qualified Werewolf.Commands.Circle    as Circle
 import qualified Werewolf.Commands.End       as End
 import qualified Werewolf.Commands.Heal      as Heal
 import qualified Werewolf.Commands.Help      as Help
@@ -55,6 +56,7 @@ interpret callerName args = do
 handle :: Options -> IO ()
 handle (Options callerName command) = case command of
     Choose options                      -> Choose.handle callerName options
+    Circle options                      -> Circle.handle callerName options
     End                                 -> End.handle callerName
     Heal                                -> Heal.handle callerName
     Help options                        -> Help.handle callerName options

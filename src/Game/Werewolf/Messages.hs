@@ -25,6 +25,9 @@ module Game.Werewolf.Messages (
     playerDoesNotExistMessage, playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
     playerIsDeadMessage, targetIsDeadMessage,
 
+    -- * Circle messages
+    circleMessage,
+
     -- * Ping messages
     pingPlayerMessage, pingRoleMessage,
 
@@ -304,6 +307,14 @@ playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
 
 targetIsDeadMessage :: Text -> Text -> Message
 targetIsDeadMessage to targetName = privateMessage to $ T.unwords [targetName, "is already dead!"]
+
+circleMessage :: Text -> [Player] -> Message
+circleMessage to players = privateMessage to $ T.concat
+    [ "The players are sitting in the following order:\n"
+    , T.intercalate " <-> " (map playerName (players ++ [head players]))
+    ]
+    where
+        playerName player = T.concat [player ^. name, if isDead player then " (dead)" else ""]
 
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to "Waiting on you..."
