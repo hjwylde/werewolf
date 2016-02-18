@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.6.0
+
 *Minor*
 
 * Added the Village Idiot role. ([#41](https://github.com/hjwylde/werewolf/issues/41))
