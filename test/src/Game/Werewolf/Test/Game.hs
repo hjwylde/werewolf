@@ -1,6 +1,6 @@
 {-|
 Module      : Game.Werewolf.Test.Game
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
@@ -17,9 +17,9 @@ import Control.Lens
 import qualified Data.Map   as Map
 import           Data.Maybe
 
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Test.Arbitrary ()
+import Game.Werewolf.Internal.Game
+import Game.Werewolf.Internal.Player
+import Game.Werewolf.Test.Arbitrary  ()
 
 import Prelude hiding (round)
 

@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.See
 Description : Options and handler for the see subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -24,9 +24,9 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine
-import Game.Werewolf.Response
+import Game.Werewolf
+
+import Werewolf.Messages
 
 data Options = Options
     { argTarget :: Text

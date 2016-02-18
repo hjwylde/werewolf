@@ -1,8 +1,8 @@
 {-|
 Module      : Game.Werewolf.Command
-Description : Command data structures.
+Description : Command data structure.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -37,15 +37,17 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import           Game.Werewolf.Engine
-import           Game.Werewolf.Game     hiding (getAllowedVoters, getDevourEvent, getPendingVoters,
-                                         getPlayerVote, isDefendersTurn, isGameOver,
-                                         isScapegoatsTurn, isSeersTurn, isVillagesTurn,
-                                         isWerewolvesTurn, isWildChildsTurn, isWitchsTurn,
-                                         isWolfHoundsTurn, killPlayer, setPlayerRole)
-import           Game.Werewolf.Player   hiding (doesPlayerExist)
+import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
+                                                getDevourEvent, getPendingVoters, getPlayerVote,
+                                                isDefendersTurn, isGameOver, isScapegoatsTurn,
+                                                isSeersTurn, isVillagesTurn, isWerewolvesTurn,
+                                                isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
+                                                killPlayer, setPlayerRole)
+import           Game.Werewolf.Internal.Player
+import           Game.Werewolf.Internal.Role   hiding (name)
+import qualified Game.Werewolf.Internal.Role   as Role
+import           Game.Werewolf.Messages
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name)
-import qualified Game.Werewolf.Role     as Role
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 

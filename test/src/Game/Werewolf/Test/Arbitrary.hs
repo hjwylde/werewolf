@@ -1,6 +1,6 @@
 {-|
 Module      : Game.Werewolf.Test.Arbitrary
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
@@ -48,10 +48,10 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine    (checkStage)
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Role      hiding (name)
+import Game.Werewolf.Engine          (checkStage)
+import Game.Werewolf.Internal.Game
+import Game.Werewolf.Internal.Player
+import Game.Werewolf.Internal.Role   hiding (name)
 import Game.Werewolf.Test.Util
 
 import Prelude hiding (round)

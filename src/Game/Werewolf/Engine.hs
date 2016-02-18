@@ -2,7 +2,7 @@
 Module      : Game.Werewolf.Engine
 Description : Engine functions.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -51,7 +51,7 @@ module Game.Werewolf.Engine (
     isPlayerAlive, isPlayerDead,
 
     -- * Role
-    randomiseRoles,
+    padRoles,
 ) where
 
 import Control.Lens         hiding (cons, snoc)
@@ -66,18 +66,19 @@ import qualified Data.Map        as Map
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (getAllowedVoters, getDevourEvent, getPassers,
-                                         getPendingVoters, getPlayerVote, getVoteResult,
-                                         isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn,
-                                         isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
-                                         isWitchsTurn, isWolfHoundsTurn, killPlayer,
-                                         setPlayerAllegiance, setPlayerRole)
-import qualified Game.Werewolf.Game     as Game
-import           Game.Werewolf.Player   hiding (doesPlayerExist)
-import qualified Game.Werewolf.Player   as Player
+import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
+                                                getDevourEvent, getPassers, getPendingVoters,
+                                                getPlayerVote, getVoteResult, isDefendersTurn,
+                                                isGameOver, isScapegoatsTurn, isSeersTurn,
+                                                isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
+                                                isWitchsTurn, isWolfHoundsTurn, killPlayer,
+                                                setPlayerAllegiance, setPlayerRole)
+import qualified Game.Werewolf.Internal.Game   as Game
+import           Game.Werewolf.Internal.Player
+import           Game.Werewolf.Internal.Role   hiding (name)
+import qualified Game.Werewolf.Internal.Role   as Role
+import           Game.Werewolf.Messages
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name)
-import qualified Game.Werewolf.Role     as Role
 
 import Prelude hiding (round)
 
@@ -361,10 +362,10 @@ getDevourEvent :: MonadState Game m => m (Maybe Event)
 getDevourEvent = gets Game.getDevourEvent
 
 createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
-createPlayers playerNames extraRoles = zipWith newPlayer playerNames <$> randomiseRoles extraRoles (length playerNames)
+createPlayers playerNames roles = liftIO $ zipWith newPlayer playerNames <$> evalRandIO (shuffleM roles)
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
-doesPlayerExist name = uses players $ Player.doesPlayerExist name
+doesPlayerExist name = gets $ Game.doesPlayerExist name
 
 isPlayerDefender :: MonadState Game m => Text -> m Bool
 isPlayerDefender name = isDefender <$> findPlayerByName_ name
@@ -396,12 +397,12 @@ isPlayerAlive name = isAlive <$> findPlayerByName_ name
 isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = isDead <$> findPlayerByName_ name
 
-randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
-randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ simpleVillagerRoles ++ simpleWerewolfRoles
+padRoles :: [Role] -> Int -> [Role]
+padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
     where
         goal                    = 2
-        m                       = max (n - length extraRoles) 0
-        startingBalance         = sum (map (view balance) extraRoles)
+        m                       = max (n - length roles) 0
+        startingBalance         = sum (map (view balance) roles)
         simpleWerewolfBalance   = simpleWerewolfRole ^. balance
 
         -- Little magic here to calculate how many Werewolves and Villagers we want.
@@ -409,7 +410,6 @@ randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ sim
         simpleWerewolvesCount   = (goal - m - startingBalance) `div` (simpleWerewolfBalance - 1) + 1
         simpleVillagersCount    = m - simpleWerewolvesCount
 
-        -- N.B., if extraRoles is quite unbalanced then one list will be empty while the other will
-        -- be full. This then leaves it up to the magic of shuffle to try rebalance the roles.
-        simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole
+        -- N.B., if roles is quite unbalanced then one list will be empty.
         simpleVillagerRoles = replicate simpleVillagersCount simpleVillagerRole
+        simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole

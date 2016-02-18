@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Vote
 Description : Options and handler for the vote subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -17,6 +17,7 @@ module Werewolf.Commands.Vote (
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -24,10 +25,9 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (isWerewolvesTurn)
-import Game.Werewolf.Game
-import Game.Werewolf.Response
+import Game.Werewolf
+
+import Werewolf.Messages
 
 data Options = Options
     { argTarget :: Text
@@ -41,10 +41,11 @@ handle callerName (Options targetName) = do
 
     game <- readGame
 
-    let command = (if isWerewolvesTurn game
-            then voteDevourCommand
-            else voteLynchCommand
-            ) callerName targetName
+    let command = case game ^. stage of
+            VillagesTurn    -> voteLynchCommand callerName targetName
+            WerewolvesTurn  -> voteDevourCommand callerName targetName
+            -- TODO (hjw): throw an error
+            _               -> undefined
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

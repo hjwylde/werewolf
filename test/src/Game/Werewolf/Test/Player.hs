@@ -16,9 +16,9 @@ import Control.Lens
 
 import Data.Text
 
-import Game.Werewolf.Player
+import Game.Werewolf.Internal.Player
 import Game.Werewolf.Role
-import Game.Werewolf.Test.Arbitrary ()
+import Game.Werewolf.Test.Arbitrary  ()
 
 import Test.Tasty
 import Test.Tasty.QuickCheck

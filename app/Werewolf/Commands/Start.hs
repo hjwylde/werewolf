@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Start
 Description : Options and handler for the start subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -30,12 +30,12 @@ import           Data.List
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf.Engine   hiding (isGameOver)
-import Game.Werewolf.Game
-import Game.Werewolf.Response
-import Game.Werewolf.Role
+import Game.Werewolf
+import Game.Werewolf.Role as Role
 
 import System.Random.Shuffle
+
+import Werewolf.Messages
 
 data Options = Options
     { optExtraRoles :: ExtraRoles
@@ -57,7 +57,7 @@ handle callerName (Options extraRoles playerNames) = do
             Random          -> randomExtraRoles $ length playerNames
             Use roleNames   -> useExtraRoles callerName roleNames
 
-        players <- createPlayers (callerName:playerNames) extraRoles'
+        players <- createPlayers (callerName:playerNames) (padRoles extraRoles' (length playerNames + 1))
 
         runWriterT $ startGame callerName players >>= execStateT checkStage
 
@@ -79,4 +79,4 @@ useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByNa
     Nothing     -> throwError [roleDoesNotExistMessage callerName roleName]
 
 findByName :: Text -> Maybe Role
-findByName name' = find ((name' ==) . T.toLower . view name) allRoles
+findByName name' = find ((name' ==) . T.toLower . view Role.name) allRoles

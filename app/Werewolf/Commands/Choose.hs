@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Choose
 Description : Options and handler for the choose subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -28,10 +28,9 @@ import Control.Monad.Writer
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (isWildChildsTurn)
-import Game.Werewolf.Game
-import Game.Werewolf.Response
+import Game.Werewolf
+
+import Werewolf.Messages
 
 data Options = Options
     { arg :: Text

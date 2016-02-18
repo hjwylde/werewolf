@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Help
 Description : Options and handler for the help subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -25,8 +25,8 @@ import Control.Monad.IO.Class
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf.Response
-import Game.Werewolf.Role     as Role
+import Game.Werewolf      hiding (Command)
+import Game.Werewolf.Role as Role
 
 data Options = Options
     { argCommand :: Maybe Command

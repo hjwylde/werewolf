@@ -2,7 +2,7 @@
 Module      : Werewolf.Commands.Version
 Description : Handler for the version subcommand.
 
-Copyright   : (c) Henry J. Wylde, 2015
+Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
@@ -18,8 +18,9 @@ import Control.Monad.Except
 
 import Data.Text (Text)
 
-import Game.Werewolf.Response
+import Game.Werewolf
 
+import Werewolf.Messages
 import Werewolf.Version
 
 handle :: MonadIO m => Text -> m ()
