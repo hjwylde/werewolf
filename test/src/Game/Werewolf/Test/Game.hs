@@ -17,7 +17,7 @@ import Control.Lens
 import qualified Data.Map   as Map
 import           Data.Maybe
 
-import Game.Werewolf.Game
+import Game.Werewolf.Internal.Game
 import Game.Werewolf.Internal.Player
 import Game.Werewolf.Test.Arbitrary  ()
 

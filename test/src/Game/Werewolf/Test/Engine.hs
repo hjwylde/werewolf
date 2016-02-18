@@ -29,7 +29,7 @@ import           Game.Werewolf.Engine          hiding (doesPlayerExist, getDevou
                                                 isScapegoatsTurn, isSeersTurn, isVillagesTurn,
                                                 isWerewolvesTurn, isWildChildsTurn, isWitchsTurn,
                                                 isWolfHoundsTurn, killPlayer)
-import           Game.Werewolf.Game
+import           Game.Werewolf.Internal.Game
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role

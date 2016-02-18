@@ -1,6 +1,6 @@
 {-|
 Module      : Game.Werewolf.Command
-Description : Command data structures.
+Description : Command data structure.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
@@ -37,7 +37,7 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import           Game.Werewolf.Engine
-import           Game.Werewolf.Game            hiding (doesPlayerExist, getAllowedVoters,
+import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
                                                 getDevourEvent, getPendingVoters, getPlayerVote,
                                                 isDefendersTurn, isGameOver, isScapegoatsTurn,
                                                 isSeersTurn, isVillagesTurn, isWerewolvesTurn,

@@ -22,8 +22,7 @@ import Control.Monad.IO.Class
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf      hiding (doesPlayerExist)
-import Game.Werewolf.Game (doesPlayerExist)
+import Game.Werewolf
 
 import Werewolf.Messages
 

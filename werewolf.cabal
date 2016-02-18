@@ -73,6 +73,7 @@ library
         Game.Werewolf.Command,
         Game.Werewolf.Engine,
         Game.Werewolf.Game,
+        Game.Werewolf.Internal.Game,
         Game.Werewolf.Internal.Player,
         Game.Werewolf.Internal.Role,
         Game.Werewolf.Player,
@@ -114,6 +115,7 @@ test-suite werewolf-test
         Game.Werewolf.Test.Command
         Game.Werewolf.Test.Engine
         Game.Werewolf.Test.Game
+        Game.Werewolf.Test.Player
         Game.Werewolf.Test.Util
 
     default-language: Haskell2010

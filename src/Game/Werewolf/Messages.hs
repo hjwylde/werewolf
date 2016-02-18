@@ -87,7 +87,7 @@ import           Data.Maybe
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Game
+import           Game.Werewolf.Internal.Game
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role

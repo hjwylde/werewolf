@@ -30,8 +30,7 @@ import           Data.List
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf   hiding (isGameOver)
-import Game.Werewolf.Game (isGameOver)
+import Game.Werewolf
 import Game.Werewolf.Role as Role
 
 import System.Random.Shuffle
