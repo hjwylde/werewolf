@@ -37,6 +37,9 @@ module Game.Werewolf.Messages (
     -- * Angel's turn messages
     angelJoinedVillagersMessage,
 
+    -- * Bear Tamer's turn messages
+    ursusGruntsMessage,
+
     -- * Defender's turn messages
 
     -- ** Error messages
@@ -142,6 +145,7 @@ stageMessages game = case game ^. stage of
     SeersTurn       -> seersTurnMessages seersName
     Sunrise         -> [sunriseMessage]
     Sunset          -> [nightFallsMessage]
+    UrsussGrunt     -> []
     VillagesTurn    -> if isFirstRound game
         then firstVillagesTurnMessages
         else villagesTurnMessages
@@ -326,6 +330,7 @@ currentStageMessages :: Text -> Stage -> [Message]
 currentStageMessages to GameOver    = [gameIsOverMessage to]
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
+currentStageMessages _ UrsussGrunt  = []
 currentStageMessages to turn        = [privateMessage to $ T.concat
     [ "It's currently the ", showTurn turn, " turn."
     ]]
@@ -337,6 +342,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn SeersTurn      = "Seer's"
         showTurn Sunrise        = undefined
         showTurn Sunset         = undefined
+        showTurn UrsussGrunt    = undefined
         showTurn VillagesTurn   = "Village's"
         showTurn WerewolvesTurn = "Werewolves'"
         showTurn WildChildsTurn = "Wild-child's"
@@ -381,6 +387,12 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
     , "He failed to attract the discriminatory vote of the village"
     , "or the devouring vindictiveness of the lycanthropes."
     , "Now he is stuck here, doomed forever to live out a mortal life as a Simple Villager."
+    ]
+
+ursusGruntsMessage :: Message
+ursusGruntsMessage = publicMessage $ T.unwords
+    [ "Ursus wakes from his slumber, disturbed and on edge."
+    , "He loudly grunts as if he smells danger."
     ]
 
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message

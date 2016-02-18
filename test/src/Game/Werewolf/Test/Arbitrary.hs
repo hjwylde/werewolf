@@ -400,9 +400,10 @@ arbitraryCommand game = case game ^. stage of
     GameOver        -> return $ Blind noopCommand
     DefendersTurn   -> arbitraryProtectCommand game
     ScapegoatsTurn  -> arbitraryChoosePlayersCommand game
+    SeersTurn       -> arbitrarySeeCommand game
     Sunrise         -> return $ Blind noopCommand
     Sunset          -> return $ Blind noopCommand
-    SeersTurn       -> arbitrarySeeCommand game
+    UrsussGrunt     -> return $ Blind noopCommand
     VillagesTurn    -> arbitraryVoteLynchCommand game
     WerewolvesTurn  -> arbitraryVoteDevourCommand game
     WildChildsTurn  -> arbitraryChoosePlayerCommand game

@@ -134,6 +134,7 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         tell [pingPlayerMessage $ seer ^. name]
     Sunrise         -> return ()
     Sunset          -> return ()
+    UrsussGrunt     -> return ()
     VillagesTurn    -> do
         allowedVoters <- getAllowedVoters
         pendingVoters <- getPendingVoters
