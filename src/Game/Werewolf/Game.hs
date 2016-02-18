@@ -20,9 +20,9 @@ module Game.Werewolf.Game (
     Event(..),
 
     -- ** Queries
-    doesPlayerExist,
     isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
     isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
+    doesPlayerExist,
 ) where
 
 import Game.Werewolf.Internal.Game
