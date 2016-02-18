@@ -39,6 +39,7 @@ The Loners have their own win condition.
 
 The Villagers must lynch all of the Werewolves.
 
+* Bear Tamer.
 * Defender.
 * Scapegoat.
 * Seer.

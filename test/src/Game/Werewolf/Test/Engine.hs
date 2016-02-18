@@ -113,19 +113,11 @@ allEngineTests =
     --, testProperty "check game over does nothing when at least two allegiances alive"   prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive
     , testProperty "check game over advances stage when second round and angel dead" prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead
 
-    , testProperty "start game uses given players"                          prop_startGameUsesGivenPlayers
-    , testProperty "start game errors unless unique player names"           prop_startGameErrorsUnlessUniquePlayerNames
-    , testProperty "start game errors when less than 7 players"             prop_startGameErrorsWhenLessThan7Players
-    , testProperty "start game errors when more than 24 players"            prop_startGameErrorsWhenMoreThan24Players
-    , testProperty "start game errors when more than 1 angel"               prop_startGameErrorsWhenMoreThan1Angel
-    , testProperty "start game errors when more than 1 defender"            prop_startGameErrorsWhenMoreThan1Defender
-    , testProperty "start game errors when more than 1 scapegoat"           prop_startGameErrorsWhenMoreThan1Scapegoat
-    , testProperty "start game errors when more than 1 seer"                prop_startGameErrorsWhenMoreThan1Seer
-    , testProperty "start game errors when more than 1 village idiot"       prop_startGameErrorsWhenMoreThan1VillageIdiot
-    , testProperty "start game errors when more than 1 villager-villager"   prop_startGameErrorsWhenMoreThan1VillagerVillager
-    , testProperty "start game errors when more than 1 wild-child"          prop_startGameErrorsWhenMoreThan1WildChild
-    , testProperty "start game errors when more than 1 witch"               prop_startGameErrorsWhenMoreThan1Witch
-    , testProperty "start game errors when more than 1 wolf-hound"          prop_startGameErrorsWhenMoreThan1WolfHound
+    , testProperty "start game uses given players"                              prop_startGameUsesGivenPlayers
+    , testProperty "start game errors unless unique player names"               prop_startGameErrorsUnlessUniquePlayerNames
+    , testProperty "start game errors when less than 7 players"                 prop_startGameErrorsWhenLessThan7Players
+    , testProperty "start game errors when more than 24 players"                prop_startGameErrorsWhenMoreThan24Players
+    , testProperty "start game errors when more than 1 of a restricted role"    prop_startGameErrorsWhenMoreThan1OfARestrictedRole
 
     , testProperty "create players uses given player names" prop_createPlayersUsesGivenPlayerNames
     , testProperty "create players uses given roles"        prop_createPlayersUsesGivenRoles
@@ -474,49 +466,9 @@ prop_startGameErrorsWhenMoreThan24Players =
         length players > 24
         ==> isLeft . runExcept . runWriterT $ startGame "" players
 
-prop_startGameErrorsWhenMoreThan1Angel :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1Angel players =
-    length (filter isAngel players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1Defender :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1Defender players =
-    length (filter isDefender players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1Scapegoat :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1Scapegoat players =
-    length (filter isScapegoat players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1Seer :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1Seer players =
-    length (filter isSeer players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1VillageIdiot :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1VillageIdiot players =
-    length (filter isVillageIdiot players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1VillagerVillager :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1VillagerVillager players =
-    length (filter isVillagerVillager players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1WildChild :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1WildChild players =
-    length (filter isWildChild players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1Witch :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1Witch players =
-    length (filter isWitch players) > 1
-    ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan1WolfHound :: [Player] -> Property
-prop_startGameErrorsWhenMoreThan1WolfHound players =
-    length (filter isWolfHound players) > 1
+prop_startGameErrorsWhenMoreThan1OfARestrictedRole :: [Player] -> Property
+prop_startGameErrorsWhenMoreThan1OfARestrictedRole players =
+    any (\role -> length (filterByRole role players) > 1) restrictedRoles
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property

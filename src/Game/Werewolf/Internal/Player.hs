@@ -31,8 +31,8 @@ module Game.Werewolf.Internal.Player (
     filterAlive, filterDead,
 
     -- ** Queries
-    isAngel, isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf, isVillageIdiot,
-    isVillagerVillager, isWildChild, isWitch, isWolfHound,
+    isAngel, isBearTamer, isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf,
+    isVillageIdiot, isVillagerVillager, isWildChild, isWitch, isWolfHound,
     isVillager, isWerewolf,
     isAlive, isDead,
 ) where
@@ -112,6 +112,10 @@ filterDead = filter isDead
 -- | @isAngel player = player ^. role == 'angelRole'@
 isAngel :: Player -> Bool
 isAngel player = player ^. role == angelRole
+
+-- | @isBearTamer player = player ^. role == 'bearTamerRole'@
+isBearTamer :: Player -> Bool
+isBearTamer player = player ^. role == bearTamerRole
 
 -- | @isDefender player = player ^. role == 'defenderRole'@
 isDefender :: Player -> Bool
