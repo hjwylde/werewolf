@@ -7,8 +7,7 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 
 A response is used as a return result of calling the @werewolf@ binary. Each response has a list of
-associated messages. As such, this module defines these two data structures. For a suite of messages
-used throughout the game, see "Game.Werewolf.Messages".
+associated messages.
 
 @werewolf@ was designed to be ambivalent to the calling chat client. The response-message structure
 reflects this by staying away from anything that could be construed as client-specific. This

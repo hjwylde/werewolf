@@ -57,7 +57,7 @@ handle callerName (Options extraRoles playerNames) = do
             Random          -> randomExtraRoles $ length playerNames
             Use roleNames   -> useExtraRoles callerName roleNames
 
-        players <- createPlayers (callerName:playerNames) extraRoles'
+        players <- createPlayers (callerName:playerNames) (padRoles extraRoles' (length playerNames + 1))
 
         runWriterT $ startGame callerName players >>= execStateT checkStage
 

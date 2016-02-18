@@ -131,9 +131,9 @@ allEngineTests =
     , testProperty "create players uses given roles"        prop_createPlayersUsesGivenRoles
     , testProperty "create players creates alive players"   prop_createPlayersCreatesAlivePlayers
 
-    , testProperty "randomise roles returns n roles"            prop_randomiseRolesReturnsNRoles
-    , testProperty "randomise roles uses given roles"           prop_randomiseRolesUsesGivenRoles
-    , testProperty "randomise roles proportions allegiances"    prop_randomiseRolesProportionsAllegiances
+    , testProperty "pad roles returns n roles"          prop_padRolesReturnsNRoles
+    , testProperty "pad roles uses given roles"         prop_padRolesUsesGivenRoles
+    , testProperty "pad roles proportions allegiances"  prop_padRolesProportionsAllegiances
     ]
 
 prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithRoleModel -> Bool
@@ -521,38 +521,39 @@ prop_startGameErrorsWhenMoreThan1WolfHound players =
 
 prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property
 prop_createPlayersUsesGivenPlayerNames playerNames extraRoles = monadicIO $ do
-    players <- createPlayers playerNames extraRoles
+    players <- createPlayers playerNames (padRoles extraRoles (length playerNames))
 
     return $ playerNames == map (view name) players
 
 prop_createPlayersUsesGivenRoles :: [Text] -> [Role] -> Property
 prop_createPlayersUsesGivenRoles playerNames extraRoles = monadicIO $ do
-    players <- createPlayers playerNames extraRoles
+    let roles = padRoles extraRoles (length playerNames)
 
-    return $ extraRoles `isSubsequenceOf` map (view role) players
+    players <- createPlayers playerNames roles
+
+    return $ roles == map (view role) players
 
 prop_createPlayersCreatesAlivePlayers :: [Text] -> [Role] -> Property
 prop_createPlayersCreatesAlivePlayers playerNames extraRoles = monadicIO $ do
-    players <- createPlayers playerNames extraRoles
+    players <- createPlayers playerNames (padRoles extraRoles (length playerNames))
 
     return $ all isAlive players
 
-prop_randomiseRolesReturnsNRoles :: [Role] -> Int -> Property
-prop_randomiseRolesReturnsNRoles extraRoles n = monadicIO $ do
-    roles <- randomiseRoles extraRoles n
+prop_padRolesReturnsNRoles :: [Role] -> Int -> Property
+prop_padRolesReturnsNRoles extraRoles n = monadicIO $ do
+    let roles = padRoles extraRoles n
 
     return $ length roles == n
 
-prop_randomiseRolesUsesGivenRoles :: [Role] -> Int -> Property
-prop_randomiseRolesUsesGivenRoles extraRoles n = monadicIO $ do
-    roles <- randomiseRoles extraRoles n
+prop_padRolesUsesGivenRoles :: [Role] -> Int -> Property
+prop_padRolesUsesGivenRoles extraRoles n = monadicIO $ do
+    let roles = padRoles extraRoles n
 
     return $ extraRoles `isSubsequenceOf` roles
 
-prop_randomiseRolesProportionsAllegiances :: [Role] -> Int -> Property
-prop_randomiseRolesProportionsAllegiances extraRoles n = monadicIO $ do
-    roles <- randomiseRoles extraRoles n
-
+prop_padRolesProportionsAllegiances :: [Role] -> Int -> Property
+prop_padRolesProportionsAllegiances extraRoles n = monadicIO $ do
+    let roles           = padRoles extraRoles n
     let werewolvesCount = length . elemIndices Role.Werewolves $ map (view allegiance) roles
 
     return $ werewolvesCount == n `quot` 5 + 1

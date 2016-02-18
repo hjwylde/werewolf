@@ -51,7 +51,7 @@ module Game.Werewolf.Engine (
     isPlayerAlive, isPlayerDead,
 
     -- * Role
-    randomiseRoles,
+    padRoles,
 ) where
 
 import Control.Lens         hiding (cons, snoc)
@@ -362,7 +362,7 @@ getDevourEvent :: MonadState Game m => m (Maybe Event)
 getDevourEvent = gets Game.getDevourEvent
 
 createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
-createPlayers playerNames extraRoles = zipWith newPlayer playerNames <$> randomiseRoles extraRoles (length playerNames)
+createPlayers playerNames roles = liftIO $ zipWith newPlayer playerNames <$> evalRandIO (shuffleM roles)
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = gets $ Game.doesPlayerExist name
@@ -397,12 +397,12 @@ isPlayerAlive name = isAlive <$> findPlayerByName_ name
 isPlayerDead :: MonadState Game m => Text -> m Bool
 isPlayerDead name = isDead <$> findPlayerByName_ name
 
-randomiseRoles :: MonadIO m => [Role] -> Int -> m [Role]
-randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ simpleVillagerRoles ++ simpleWerewolfRoles
+padRoles :: [Role] -> Int -> [Role]
+padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
     where
         goal                    = 2
-        m                       = max (n - length extraRoles) 0
-        startingBalance         = sum (map (view balance) extraRoles)
+        m                       = max (n - length roles) 0
+        startingBalance         = sum (map (view balance) roles)
         simpleWerewolfBalance   = simpleWerewolfRole ^. balance
 
         -- Little magic here to calculate how many Werewolves and Villagers we want.
@@ -410,7 +410,6 @@ randomiseRoles extraRoles n = liftIO . evalRandIO . shuffleM $ extraRoles ++ sim
         simpleWerewolvesCount   = (goal - m - startingBalance) `div` (simpleWerewolfBalance - 1) + 1
         simpleVillagersCount    = m - simpleWerewolvesCount
 
-        -- N.B., if extraRoles is quite unbalanced then one list will be empty while the other will
-        -- be full. This then leaves it up to the magic of shuffle to try rebalance the roles.
-        simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole
+        -- N.B., if roles is quite unbalanced then one list will be empty.
         simpleVillagerRoles = replicate simpleVillagersCount simpleVillagerRole
+        simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole
