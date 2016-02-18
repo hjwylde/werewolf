@@ -11,7 +11,7 @@ Re-exports all of the public modules under /Game.Werewolf/.
 Where clashes are found between "Game.Werewolf.Game" and "Game.Werewolf.Engine", the
 "Game.Werewolf.Game" functions are preferred.
 
-Likewise, where clases are found between "Game.Werewolf.Player" and "Game.Werewolf.Role", the
+Likewise, where clashes are found between "Game.Werewolf.Player" and "Game.Werewolf.Role", the
 "Game.Werewolf.Player" functions are preferred.
 -}
 

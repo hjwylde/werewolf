@@ -145,6 +145,14 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
+    UrsussGrunt -> do
+        bearTamer   <- findPlayerByRole_ bearTamerRole
+        players'    <- cons bearTamer <$> gets (getAdjacentAlivePlayers $ bearTamer ^. name)
+
+        when (any isWerewolf players') $ tell [ursusGruntsMessage]
+
+        advanceStage
+
     VillagesTurn -> whenM (null <$> liftM2 intersect getAllowedVoters getPendingVoters) $ do
         tell . map (uncurry playerMadeLynchVoteMessage) =<< uses votes Map.toList
 

@@ -29,6 +29,7 @@ executable werewolf
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
         Werewolf.Commands.Choose,
+        Werewolf.Commands.Circle,
         Werewolf.Commands.End,
         Werewolf.Commands.Heal,
         Werewolf.Commands.Help,

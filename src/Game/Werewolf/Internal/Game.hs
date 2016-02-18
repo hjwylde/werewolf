@@ -30,12 +30,15 @@ module Game.Werewolf.Internal.Game (
     -- ** Manipulations
     killPlayer, setPlayerRole, setPlayerAllegiance,
 
+    -- ** Searches
+    getAdjacentAlivePlayers, getDevourEvent, getPassers, getPlayerVote, getAllowedVoters,
+    getPendingVoters, getVoteResult,
+
     -- ** Queries
     isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
     isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     isFirstRound,
     doesPlayerExist,
-    getDevourEvent, getPassers, getPlayerVote, getAllowedVoters, getPendingVoters, getVoteResult,
 ) where
 
 import Control.Lens
@@ -100,7 +103,8 @@ data Game = Game
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
 data Stage  = GameOver | DefendersTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
-            | VillagesTurn | WerewolvesTurn | WildChildsTurn | WitchsTurn | WolfHoundsTurn
+            | UrsussGrunt | VillagesTurn | WerewolvesTurn | WildChildsTurn | WitchsTurn
+            | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
 -- | Events occur /after/ a stage is advanced. This is automatically handled in
@@ -130,6 +134,7 @@ allStages =
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise
+    , UrsussGrunt
     , GameOver
     ]
 
@@ -149,6 +154,7 @@ stageAvailable game ScapegoatsTurn  = game ^. scapegoatBlamed
 stageAvailable game SeersTurn       = any isSeer (filterAlive $ game ^. players)
 stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
+stageAvailable game UrsussGrunt     = any isBearTamer (filterAlive $ game ^. players)
 stageAvailable game VillagesTurn    =
     (any isAngel (filterAlive $ game ^. players)
     || not (isFirstRound game))
@@ -203,6 +209,53 @@ setPlayerRole name' role' game = game & players %~ map (\player -> if player ^. 
 setPlayerAllegiance :: Text -> Allegiance -> Game -> Game
 setPlayerAllegiance name' allegiance' game = game & players %~ map (\player -> if player ^. name == name' then player & role . allegiance .~ allegiance' else player)
 
+getAdjacentAlivePlayers :: Text -> Game -> [Player]
+getAdjacentAlivePlayers name' game = adjacentAlivePlayers
+    where
+        players'    = filterAlive $ game ^. players
+        index       = fromJust $ findIndex ((name' ==) . view name) players'
+
+        adjacentAlivePlayers
+            | index == 0    = last players' : take 2 players'
+            | otherwise     = take 3 $ drop (index - 1) (cycle players')
+
+-- | Gets all the @passes@ in a game (which is names only) and maps them to their player.
+getPassers :: Game -> [Player]
+getPassers game = map (`findByName_` players') passes'
+    where
+        players'    = game ^. players
+        passes'     = game ^. passes
+
+-- | Gets a player's vote.
+getPlayerVote :: Text -> Game -> Maybe Text
+getPlayerVote playerName game = game ^. votes . at playerName
+
+-- | Gets all the @allowedVoters@ in a game (which is names only) and maps them to their player.
+getAllowedVoters :: Game -> [Player]
+getAllowedVoters game = map (`findByName_` players') (game ^. allowedVoters)
+    where
+        players' = game ^. players
+
+-- | Gets all alive players that have yet to vote.
+getPendingVoters :: Game -> [Player]
+getPendingVoters game = filter (flip Map.notMember votes' . view name) alivePlayers
+    where
+        votes'          = game ^. votes
+        alivePlayers    = filterAlive $ game ^. players
+
+-- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
+--   on whether the votes were in conflict.
+getVoteResult :: Game -> [Player]
+getVoteResult game = map (`findByName_` players') result
+    where
+        players'    = game ^. players
+        votees      = Map.elems $ game ^. votes
+        result      = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
+
+-- | Gets the devour event if it exists.
+getDevourEvent :: Game -> Maybe Event
+getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]
+
 -- | @isDefendersTurn game = game ^. stage == DefendersTurn@
 isDefendersTurn :: Game -> Bool
 isDefendersTurn game = game ^. stage == DefendersTurn
@@ -254,40 +307,3 @@ isFirstRound game = game ^. round == 0
 -- | Queries whether the player is in the game.
 doesPlayerExist :: Text -> Game -> Bool
 doesPlayerExist name = isJust . findByName name . view players
-
--- | Gets all the @passes@ in a game (which is names only) and maps them to their player.
-getPassers :: Game -> [Player]
-getPassers game = map (`findByName_` players') passes'
-    where
-        players'    = game ^. players
-        passes'     = game ^. passes
-
--- | Gets a player's vote.
-getPlayerVote :: Text -> Game -> Maybe Text
-getPlayerVote playerName game = game ^. votes . at playerName
-
--- | Gets all the @allowedVoters@ in a game (which is names only) and maps them to their player.
-getAllowedVoters :: Game -> [Player]
-getAllowedVoters game = map (`findByName_` players') (game ^. allowedVoters)
-    where
-        players' = game ^. players
-
--- | Gets all alive players that have yet to vote.
-getPendingVoters :: Game -> [Player]
-getPendingVoters game = filter (flip Map.notMember votes' . view name) alivePlayers
-    where
-        votes'          = game ^. votes
-        alivePlayers    = filterAlive $ game ^. players
-
--- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
---   on whether the votes were in conflict.
-getVoteResult :: Game -> [Player]
-getVoteResult game = map (`findByName_` players') result
-    where
-        players'    = game ^. players
-        votees      = Map.elems $ game ^. votes
-        result      = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
-
--- | Gets the devour event if it exists.
-getDevourEvent :: Game -> Maybe Event
-getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]

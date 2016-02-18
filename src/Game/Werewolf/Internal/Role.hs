@@ -37,7 +37,7 @@ module Game.Werewolf.Internal.Role (
 
     -- *** The Villagers
     -- | The Villagers must lynch all of the Werewolves.
-    defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villageIdiotRole,
+    bearTamerRole, defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villageIdiotRole,
     villagerVillagerRole, witchRole,
 
     -- *** The Werewolves
@@ -85,6 +85,7 @@ instance Eq Role where
 allRoles :: [Role]
 allRoles =
     [ angelRole
+    , bearTamerRole
     , defenderRole
     , scapegoatRole
     , seerRole
@@ -193,6 +194,31 @@ angelRole = Role
         , "Pretending to be a Werewolf is one tactic, but if it doesn't work then you may have just"
         , "dug yourself a hole for the rest of the game..."
         ]
+    }
+
+-- | /Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of the/
+--   /"Three Road" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was that Titan,/
+--   /the Bear Tamer, would lead his companion in a ballet so gravious that we'd cry every summer/
+--   /in Miller's Hollow. Ursus even had the oh-so-previous ability to detect lycanthropes hidden/
+--   /near him./
+--
+--   Each morning, right after the revelation of any possible nocturnal victims, if at least one
+--   Werewolf is or ends up directly next to the Bear Tamer, then Ursus grunts to indicate danger to
+--   all of the other players.
+bearTamerRole :: Role
+bearTamerRole = Role
+    { _name         = "Bear Tamer"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = T.unwords
+        [ "Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones"
+        , "of the \"Three Road\" plaza, accompanied by the grunting of Ursus."
+        , "Ah! How long ago it was that Titan, the Bear Tamer, would lead his companion in a ballet"
+        , "so gravious that we'd cry every summer in Miller's Hollow."
+        , "Ursus even had the oh-so-previous ability to detect lycanthropes hidden near him."
+        ]
+    , _advice       =
+        "Aren't you lucky to have a companion with a strong nose. Just don't let him wander off!"
     }
 
 -- | /This character can save the Villagers from the bite of the Werewolves./

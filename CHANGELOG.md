@@ -9,6 +9,8 @@
 * Added in balance concept for roles to help balance role selection. ([#81](https://github.com/hjwylde/werewolf/issues/81))
 * Added `--random-extra-roles` option to `start`. ([#30](https://github.com/hjwylde/werewolf/issues/30))
 * Restructured library modules to only export relevant functions. ([#11](https://github.com/hjwylde/werewolf/issues/11))
+* Added the Bear Tamer role. ([#45](https://github.com/hjwylde/werewolf/issues/45))
+* Added a `circle` command. ([#45](https://github.com/hjwylde/werewolf/issues/45))
 
 *Revisions*
 

@@ -19,9 +19,9 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, healCommand, noopCommand,
-    passCommand, pingCommand, poisonCommand, protectCommand, quitCommand, seeCommand, statusCommand,
-    voteDevourCommand, voteLynchCommand,
+    chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand, healCommand,
+    noopCommand, passCommand, pingCommand, poisonCommand, protectCommand, quitCommand, seeCommand,
+    statusCommand, voteDevourCommand, voteLynchCommand,
 ) where
 
 import Control.Lens         hiding (only)
@@ -90,6 +90,12 @@ choosePlayersCommand callerName targetNames = Command $ do
     allowedVoters   .= targetNames
     scapegoatBlamed .= False
 
+circleCommand :: Text -> Bool -> Command
+circleCommand callerName includeDead = Command $ do
+        players' <- uses players (if includeDead then id else filterAlive)
+
+        tell [circleMessage callerName players']
+
 healCommand :: Text -> Command
 healCommand callerName = Command $ do
     validateWitchsCommand callerName
@@ -128,6 +134,7 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         tell [pingPlayerMessage $ seer ^. name]
     Sunrise         -> return ()
     Sunset          -> return ()
+    UrsussGrunt     -> return ()
     VillagesTurn    -> do
         allowedVoters <- getAllowedVoters
         pendingVoters <- getPendingVoters

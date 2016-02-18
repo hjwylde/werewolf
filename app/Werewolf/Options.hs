@@ -24,6 +24,7 @@ import qualified Data.Text    as T
 import           Data.Version (showVersion)
 
 import qualified Werewolf.Commands.Choose    as Choose
+import qualified Werewolf.Commands.Circle    as Circle
 import qualified Werewolf.Commands.Help      as Help
 import qualified Werewolf.Commands.Interpret as Interpret
 import qualified Werewolf.Commands.Poison    as Poison
@@ -42,6 +43,7 @@ data Options = Options
 
 data Command
     = Choose Choose.Options
+    | Circle Circle.Options
     | End
     | Heal
     | Help Help.Options
@@ -89,6 +91,7 @@ werewolf = Options
         ])
     <*> subparser (mconcat
         [ command "choose"      $ info (helper <*> choose)      (fullDesc <> progDesc "Choose an allegiance or player(s)")
+        , command "circle"      $ info (helper <*> circle)      (fullDesc <> progDesc "Get the game circle")
         , command "end"         $ info (helper <*> end)         (fullDesc <> progDesc "End the current game")
         , command "heal"        $ info (helper <*> heal)        (fullDesc <> progDesc "Heal the devoured player")
         , command "help"        $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents")
@@ -108,6 +111,13 @@ werewolf = Options
 choose :: Parser Command
 choose = Choose . Choose.Options . T.pack <$> strArgument (metavar "ALLEGIANCE | PLAYER,...")
 
+circle :: Parser Command
+circle = Circle . Circle.Options
+    <$> switch (mconcat
+        [ long "include-dead", short 'a'
+        , help "Include dead players"
+        ])
+
 end :: Parser Command
 end = pure End
 
@@ -124,9 +134,8 @@ help_ = Help . Help.Options
         ])
 
 interpret :: Parser Command
-interpret = Interpret . Interpret.Options <$> many (
-    T.pack <$> strArgument (metavar "-- COMMAND ARG...")
-    )
+interpret = Interpret . Interpret.Options
+    <$> many (T.pack <$> strArgument (metavar "-- COMMAND ARG..."))
 
 pass :: Parser Command
 pass = pure Pass
