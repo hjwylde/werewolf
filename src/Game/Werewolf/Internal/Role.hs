@@ -15,6 +15,7 @@ The roles are split into four categories:
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes        #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
 module Game.Werewolf.Internal.Role (
@@ -22,6 +23,10 @@ module Game.Werewolf.Internal.Role (
     Role, name, allegiance, balance, description, advice,
 
     Allegiance(..),
+
+    -- ** Prisms
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    angel, villager, werewolf,
 
     -- ** Instances
     allRoles, restrictedRoles,
@@ -43,6 +48,9 @@ module Game.Werewolf.Internal.Role (
     -- *** The Werewolves
     -- | The Werewolves must devour all of the Villagers.
     simpleWerewolfRole,
+
+    -- * Utility functions
+    is, filteredBy,
 ) where
 
 import Control.Lens
@@ -62,7 +70,7 @@ import Prelude hiding (all)
 --   Werewolf has a balance of -4 while the Seer has a balance of 2. A balance of 0 means it favours
 --   neither allegiance.
 --
---   N.B., role equality is defined on just the @name@ as a role's @allegiance@ may change
+--   N.B., role equality is defined on just the 'name' as a role's 'allegiance' may change
 --   throughout the game.
 data Role = Role
     { _name        :: Text
@@ -80,6 +88,22 @@ makeLenses ''Role
 
 instance Eq Role where
     (==) = (==) `on` view name
+
+-- | This 'Prism' provides the traversal of the 'Angel' allegiance in a 'Role'.
+angel :: Prism' Role Role
+angel = genericAllegiancePrism Angel
+
+-- | This 'Prism' provides the traversal of the 'Villagers' allegiance in a 'Role'.
+villager :: Prism' Role Role
+villager = genericAllegiancePrism Villagers
+
+-- | This 'Prism' provides the traversal of the 'Werewolves' allegiance in a 'Role'.
+werewolf :: Prism' Role Role
+werewolf = genericAllegiancePrism Werewolves
+
+genericAllegiancePrism :: Allegiance -> Prism' Role Role
+genericAllegiancePrism allegiance' = prism (set allegiance allegiance') $ \role ->
+    if role ^. allegiance == allegiance' then Right role else Left role
 
 -- | A list containing all the roles defined in this file.
 allRoles :: [Role]
@@ -100,7 +124,9 @@ allRoles =
 
 -- | A list containing roles that are restricted to a single instance per game.
 --
---   @restrictedRoles = allRoles \\\\ [simpleVillagerRole, simpleWerewolfRole]@
+--   @
+--   'restrictedRoles' = 'allRoles' \\\\ ['simpleVillagerRole', 'simpleWerewolfRole']
+--   @
 restrictedRoles :: [Role]
 restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 
@@ -378,3 +404,12 @@ simpleWerewolfRole = Role
     , _advice       =
         "Voting to lynch your partner can be a good way to deflect suspicion from yourself."
     }
+
+-- | The counter-part to 'isn't'.
+is :: APrism s t a b -> s -> Bool
+is prism = not . isn't prism
+
+-- | A companion to 'filtered' that, rather than using a predicate, filters on the given lens for
+-- matches.
+filteredBy :: Eq b => Lens' a b -> b -> Traversal' a a
+filteredBy lens value = filtered ((value ==) . view lens)

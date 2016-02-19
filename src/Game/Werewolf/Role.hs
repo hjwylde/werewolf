@@ -16,6 +16,10 @@ module Game.Werewolf.Role (
 
     Allegiance(..),
 
+    -- ** Prisms
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    angel, villager, werewolf,
+
     -- ** Instances
     allRoles, restrictedRoles,
 ) where

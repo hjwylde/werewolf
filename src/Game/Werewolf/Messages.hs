@@ -95,21 +95,21 @@ import qualified Data.Text       as T
 
 import           Game.Werewolf.Internal.Game
 import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
+import           Game.Werewolf.Internal.Role   hiding (name, werewolf)
 import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Response
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
     [ [newPlayersInGameMessage players']
-    , [rolesInGameMessage $ map (view role) players']
+    , [rolesInGameMessage $ players' ^.. roles]
     , map newPlayerMessage players'
     , villagerVillagerMessages
     , stageMessages game
     ]
     where
         players'                    = game ^. players
-        villagerVillagerMessages    = case findByRole villagerVillagerRole players' of
+        villagerVillagerMessages    = case players' ^? villagerVillagers of
             Just villagerVillager   -> [villagerVillagerMessage $ villagerVillager ^. name]
             _                       -> []
 
@@ -119,7 +119,7 @@ newPlayersInGameMessage players = publicMessage $ T.concat
     , T.intercalate ", " playerNames, "!"
     ]
     where
-        playerNames = map (view name) players
+        playerNames = players ^.. names
 
 newPlayerMessage :: Player -> Message
 newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
@@ -157,12 +157,12 @@ stageMessages game = case game ^. stage of
     WolfHoundsTurn  -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
-        defendersName       = findByRole_ defenderRole players' ^. name
-        scapegoatsName      = findByRole_ scapegoatRole players' ^. name
-        seersName           = findByRole_ seerRole players' ^. name
-        aliveWerewolfNames  = map (view name) . filterAlive $ filterWerewolves players'
-        wildChildsName      = findByRole_ wildChildRole players' ^. name
-        wolfHoundsName      = findByRole_ wolfHoundRole players' ^. name
+        defendersName       = players' ^?! defenders . name
+        scapegoatsName      = players' ^?! scapegoats . name
+        seersName           = players' ^?! seers . name
+        aliveWerewolfNames  = players' ^.. werewolves . alive . name
+        wildChildsName      = players' ^?! wildChildren . name
+        wolfHoundsName      = players' ^?! wolfHounds . name
 
 defendersTurnMessages :: Text -> [Message]
 defendersTurnMessages to =
@@ -189,13 +189,13 @@ nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the village is asleep."
 
 firstVillagesTurnMessages :: [Message]
-firstVillagesTurnMessages =
-    publicMessage (T.unwords
-        [ "Alas, again I regrettably yield advice: an angelic menace walks among you."
-        , "Do not cast your votes lightly,"
-        , "for he will relish in this opportunity to be free from his terrible nightmare."
-        ])
-    : villagesTurnMessages
+firstVillagesTurnMessages = angelInPlayMessage : villagesTurnMessages
+    where
+        angelInPlayMessage = publicMessage $ T.unwords
+            [ "Alas, again I regrettably yield advice: an angelic menace walks among you."
+            , "Do not cast your votes lightly,"
+            , "for he will relish in this opportunity to be free from his terrible nightmare."
+            ]
 
 villagesTurnMessages :: [Message]
 villagesTurnMessages =
@@ -236,7 +236,7 @@ witchsTurnMessages game = concat
     , [passMessage]
     ]
     where
-        witchsName      = findByRole_ witchRole (game ^. players) ^. name
+        witchsName      = game ^?! players . witches . name
         wakeUpMessage   = publicMessage "The Witch wakes up."
         passMessage     = privateMessage witchsName "Type `pass` to end your turn."
         devourMessages  = case getDevourEvent game of
@@ -261,26 +261,26 @@ wolfHoundsTurnMessages to =
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
-    | any isAngel (filterDead $ game ^. players)    =
+    | has (players . angels . dead) game    =
         concat
             [ [publicMessage "You should have heeded my warning, for now the Angel has been set free!"]
             , [publicMessage "The game is over! The Angel has won."]
             , [playerWonMessage $ angel ^. name]
-            , map (playerLostMessage . view name) (players' \\ [angel])
+            , map playerLostMessage $ (players' \\ [angel]) ^.. names
             ]
-    | length aliveAllegiances == 1                  = do
+    | length aliveAllegiances == 1          = do
         let allegiance' = head aliveAllegiances
 
         concat
             [ [publicMessage $ T.unwords ["The game is over! The", T.pack $ show allegiance', "have won."]]
-            , map (playerWonMessage . view name) (filter ((allegiance' ==) . view (role . allegiance)) players')
-            , map (playerLostMessage . view name) (filter ((allegiance' /=) . view (role . allegiance)) players')
+            , map playerWonMessage (players' ^.. traverse . filteredBy (role . allegiance) allegiance' . name)
+            , map playerLostMessage (players' ^.. traverse . filtered ((allegiance' /=) . view (role . allegiance)) . name)
             ]
-    | otherwise                                     = publicMessage "The game is over! Everyone died...":map (playerLostMessage . view name) players'
+    | otherwise                             = publicMessage "The game is over! Everyone died..." : map playerLostMessage (players' ^.. names)
     where
         players'            = game ^. players
-        angel               = findByRole_ angelRole players'
-        aliveAllegiances    = nub $ map (view $ role . allegiance) (filterAlive players')
+        angel               = players' ^?! angels
+        aliveAllegiances    = nub $ players' ^.. traverse . alive . role . allegiance
 
 playerWonMessage :: Text -> Message
 playerWonMessage to = privateMessage to "Victory! You won!"
@@ -289,16 +289,16 @@ playerLostMessage :: Text -> Message
 playerLostMessage to = privateMessage to "Feck, you lost this time round..."
 
 playerQuitMessage :: Player -> Message
-playerQuitMessage player =
-    publicMessage $ T.unwords [player ^. name, "the", player ^. role . Role.name, "has quit!"]
+playerQuitMessage player = publicMessage $ T.unwords [playerName, "the", playerRole, "has quit!"]
+    where
+        playerName = player ^. name
+        playerRole = player ^. role . Role.name
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to "The game is over!"
 
 playerDoesNotExistMessage :: Text -> Text -> Message
-playerDoesNotExistMessage to name = privateMessage to $ T.unwords
-    [ "Player", name, "does not exist."
-    ]
+playerDoesNotExistMessage to name = privateMessage to $ T.unwords ["Player", name, "does not exist."]
 
 playerCannotDoThatMessage :: Text -> Message
 playerCannotDoThatMessage to = privateMessage to "You cannot do that!"
@@ -318,7 +318,7 @@ circleMessage to players = privateMessage to $ T.concat
     , T.intercalate " <-> " (map playerName (players ++ [head players]))
     ]
     where
-        playerName player = T.concat [player ^. name, if isDead player then " (dead)" else ""]
+        playerName player = T.concat [player ^. name, if is dead player then " (dead)" else ""]
 
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to "Waiting on you..."
@@ -359,27 +359,28 @@ rolesInGameMessage roles = publicMessage $ T.concat
     ]
     where
         roleCounts      = map (head &&& length) (groupSortOn (view Role.name) roles)
-        totalBalance    = sum $ map (view balance) roles
+        totalBalance    = sumOf (traverse . balance) roles
 
 playersInGameMessage :: Text -> [Player] -> Message
 playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
-    alivePlayersText : if null $ filterDead players then [] else [deadPlayersText]
+    alivePlayersText : [deadPlayersText | any (is dead) players]
     where
         alivePlayersText = T.concat
             [ "The following players are still alive: "
-            , T.intercalate ", " (map (view name) $ filterAlive players), "."
+            , T.intercalate ", " (players ^.. traverse . alive . name), "."
             ]
         deadPlayersText = T.concat
             [ "The following players are dead: "
-            , T.intercalate ", " (map (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"]) $ filterDead players), "."
+            , T.intercalate ", " (map playerNameWithRole (players ^.. traverse . dead)), "."
             ]
+        playerNameWithRole player = T.concat [player ^. name, " (", player ^. role . Role.name, ")"]
 
 waitingOnMessage :: Maybe Text -> [Player] -> Message
 waitingOnMessage mTo players = Message mTo $ T.concat
     [ "Waiting on ", T.intercalate ", " playerNames, "..."
     ]
     where
-        playerNames = map (view name) players
+        playerNames = players ^.. names
 
 angelJoinedVillagersMessage :: Message
 angelJoinedVillagersMessage = publicMessage $ T.unwords
@@ -428,8 +429,8 @@ playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
-    | isWerewolf player
-        && not (isWildChild player) = publicMessage $ T.concat
+    | is werewolf player
+        && isn't wildChild player   = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight."
         , " As they scream their body starts to contort and writhe, transforming into "
         , article playerRole, " ", playerRole ^. Role.name, "."
@@ -469,8 +470,7 @@ playerHasAlreadyVotedMessage :: Text -> Message
 playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
 
 playerCannotLynchVillageIdiotMessage :: Text -> Message
-playerCannotLynchVillageIdiotMessage to =
-    privateMessage to "You cannot lynch the Village Idiot!"
+playerCannotLynchVillageIdiotMessage to = privateMessage to "You cannot lynch the Village Idiot!"
 
 playerMadeDevourVoteMessage :: Text -> Text -> Text -> Message
 playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat
@@ -518,9 +518,11 @@ playerCannotChooseSelfMessage to = privateMessage to "You cannot choose yourself
 playerPoisonedMessage :: Player -> Message
 playerPoisonedMessage player = publicMessage $ T.unwords
     [ "Upon further discovery, it looks like the Witch struck in the night."
-    , player ^. name, "the", player ^. role . Role.name
-    , "is lying in their bed, poisoned, drooling over the side."
+    , playerName, "the", playerRole, "is hanging over the side of their bed, poisoned."
     ]
+    where
+        playerName = player ^. name
+        playerRole = player ^. role . Role.name
 
 playerHasAlreadyHealedMessage :: Text -> Message
 playerHasAlreadyHealedMessage to = privateMessage to "You've already healed someone!"

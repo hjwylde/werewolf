@@ -49,12 +49,12 @@ allGameTests =
 
 prop_newGameStartsAtVillagesTurnWhenAngelInPlay :: [Player] -> Property
 prop_newGameStartsAtVillagesTurnWhenAngelInPlay players =
-    any isAngel players
+    has angels players
     ==> isVillagesTurn (newGame players)
 
 prop_newGameStartsAtSunsetWhenNoAngelInPlay :: [Player] -> Property
 prop_newGameStartsAtSunsetWhenNoAngelInPlay players =
-    none isAngel players
+    none (is angel) players
     ==> isSunset (newGame players)
 
 prop_newGameStartsOnFirstRound :: [Player] -> Bool
@@ -67,7 +67,7 @@ prop_newGameStartsWithPassesEmpty :: [Player] -> Bool
 prop_newGameStartsWithPassesEmpty players = null $ newGame players ^. passes
 
 prop_newGameStartsWithAllowedVotersFull :: [Player] -> Property
-prop_newGameStartsWithAllowedVotersFull players = newGame players ^. allowedVoters === map (view name) players
+prop_newGameStartsWithAllowedVotersFull players = newGame players ^. allowedVoters === players ^.. names
 
 prop_newGameStartsWithHealFalse :: [Player] -> Bool
 prop_newGameStartsWithHealFalse players = not $ newGame players ^. heal

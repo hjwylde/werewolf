@@ -44,7 +44,7 @@ import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllow
                                                 isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
                                                 killPlayer, setPlayerRole)
 import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
+import           Game.Werewolf.Internal.Role   hiding (angel, name)
 import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Messages
 import           Game.Werewolf.Response
@@ -92,7 +92,7 @@ choosePlayersCommand callerName targetNames = Command $ do
 
 circleCommand :: Text -> Bool -> Command
 circleCommand callerName includeDead = Command $ do
-        players' <- uses players (if includeDead then id else filterAlive)
+        players' <- gets $ toListOf (players . traverse . if includeDead then id else alive)
 
         tell [circleMessage callerName players']
 
@@ -140,12 +140,12 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         pendingVoters <- getPendingVoters
 
         tell [waitingOnMessage Nothing $ allowedVoters `intersect` pendingVoters]
-        tell $ map (pingPlayerMessage . view name) (allowedVoters `intersect` pendingVoters)
+        tell $ map pingPlayerMessage (allowedVoters `intersect` pendingVoters ^.. names)
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
         tell [pingRoleMessage "Werewolves"]
-        tell $ map (pingPlayerMessage . view name) (filterWerewolves pendingVoters)
+        tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
     WildChildsTurn  -> do
         wildChild <- findPlayerByRole_ wildChildRole
 
@@ -195,13 +195,13 @@ quitCommand callerName = Command $ do
     tell [playerQuitMessage caller]
 
     passes %= delete callerName
-    when (isAngel caller)       $ setPlayerRole callerName simpleVillagerRole
-    when (isDefender caller)    $ do
+    when (is angel caller)      $ setPlayerRole callerName simpleVillagerRole
+    when (is defender caller)   $ do
         protect         .= Nothing
         priorProtect    .= Nothing
-    when (isSeer caller)        $ see .= Nothing
-    when (isWildChild caller)   $ roleModel .= Nothing
-    when (isWitch caller)       $ do
+    when (is seer caller)       $ see .= Nothing
+    when (is wildChild caller)  $ roleModel .= Nothing
+    when (is witch caller)      $ do
         heal        .= False
         healUsed    .= False
         poison      .= Nothing
@@ -231,7 +231,7 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell [waitingOnMessage (Just callerName) (allowedVoters `intersect` pendingVoters)]
     WerewolvesTurn  -> do
         game            <- get
-        pendingVoters   <- filterWerewolves <$> getPendingVoters
+        pendingVoters   <- toListOf werewolves <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
         whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
@@ -255,7 +255,7 @@ voteDevourCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterWerewolves
+    aliveWerewolfNames <- gets $ toListOf (players . werewolves . alive . name)
 
     tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
 

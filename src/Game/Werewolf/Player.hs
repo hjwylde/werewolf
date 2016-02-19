@@ -14,6 +14,22 @@ module Game.Werewolf.Player (
     Player, name, role, state,
 
     State(..),
+
+    -- ** Prisms
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    angel, bearTamer, defender, scapegoat, seer, simpleVillager, simpleWerewolf, villageIdiot,
+    villagerVillager, wildChild, witch, wolfHound,
+    villager, werewolf,
+    alive, dead,
+
+    -- ** Traversals
+    -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
+    names, roles, states,
+
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    angels, bearTamers, defenders, scapegoats, seers, simpleVillagers, simpleWerewolves,
+    villageIdiots, villagerVillagers, wildChildren, witches, wolfHounds,
+    villagers, werewolves,
 ) where
 
 import Game.Werewolf.Internal.Player

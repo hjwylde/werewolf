@@ -31,7 +31,7 @@ import           Game.Werewolf.Engine          hiding (doesPlayerExist, getDevou
                                                 isWolfHoundsTurn, killPlayer)
 import           Game.Werewolf.Internal.Game
 import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
+import           Game.Werewolf.Internal.Role   hiding (angel, name, werewolf)
 import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Test.Arbitrary
 import           Game.Werewolf.Test.Util
@@ -132,7 +132,7 @@ prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithRoleModel -> Bool
 prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithRoleModel game) =
     isWolfHoundsTurn $ run_ checkStage game'
     where
-        defendersName   = findByRole_ defenderRole (game ^. players) ^. name
+        defendersName   = game ^?! players . defenders . name
         game'           = killPlayer defendersName game
 
 prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat :: GameAtScapegoatsTurn -> Bool
@@ -141,10 +141,10 @@ prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat (GameAtScapegoatsTurn game) =
 
 prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Property
 prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
-    isAlive (findByRole_ angelRole $ run_ checkStage game' ^. players)
+    has (players . angels . alive) (run_ checkStage game')
     ==> isScapegoatsTurn game' || isWildChildsTurn game' || isDefendersTurn game'
     where
-        seersName   = findByRole_ seerRole (game ^. players) ^. name
+        seersName   = game ^?! players . seers . name
         game'       = run_ (apply (quitCommand seersName) >> checkStage) game
 
 prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty :: GameAtWitchsTurn -> Property
@@ -158,22 +158,22 @@ prop_checkStageSkipsWildChildsTurnWhenNoWildChild :: GameWithSee -> Bool
 prop_checkStageSkipsWildChildsTurnWhenNoWildChild (GameWithSee game) =
     isDefendersTurn $ run_ checkStage game'
     where
-        wildChildsName  = findByRole_ wildChildRole (game ^. players) ^. name
+        wildChildsName  = game ^?! players . wildChildren . name
         game'           = killPlayer wildChildsName game
 
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
-    isNothing (findByRole angelRole $ run_ checkStage game' ^. players)
+    null (run_ checkStage game' ^.. players . angels)
     ==> isVillagesTurn $ run_ checkStage game'
     where
-        witchsName  = findByRole_ witchRole (game ^. players) ^. name
+        witchsName  = game ^?! players . witches . name
         game'       = killPlayer witchsName game
 
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound :: GameWithProtect -> Bool
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound (GameWithProtect game) =
     isWerewolvesTurn $ run_ checkStage game'
     where
-        wolfHoundsName  = findByRole_ wolfHoundRole (game ^. players) ^. name
+        wolfHoundsName  = game ^?! players . wolfHounds . name
         game'           = killPlayer wolfHoundsName game
 
 prop_checkStageDoesNothingWhenGameOver :: GameAtGameOver -> Property
@@ -186,7 +186,7 @@ prop_checkDefendersTurnAdvancesToWolfHoundsTurn (GameWithProtect game) =
 
 prop_checkDefendersTurnAdvancesWhenNoDefender :: GameAtDefendersTurn -> Bool
 prop_checkDefendersTurnAdvancesWhenNoDefender (GameAtDefendersTurn game) = do
-    let defender    = findByRole_ defenderRole (game ^. players)
+    let defender    = game ^?! players . defenders
     let command     = quitCommand $ defender ^. name
 
     not . isDefendersTurn $ run_ (apply command >> checkStage) game
@@ -209,7 +209,7 @@ prop_checkSeersTurnAdvancesToWildChildsTurn (GameWithSee game) =
 
 prop_checkSeersTurnAdvancesWhenNoSeer :: GameAtSeersTurn -> Bool
 prop_checkSeersTurnAdvancesWhenNoSeer (GameAtSeersTurn game) = do
-    let seer    = findByRole_ seerRole (game ^. players)
+    let seer    = game ^?! players . seers
     let command = quitCommand $ seer ^. name
 
     not . isSeersTurn $ run_ (apply command >> checkStage) game
@@ -228,19 +228,19 @@ prop_checkSunriseIncrementsRound (GameAtSunrise game) =
 
 prop_checkSunriseSetsAngelsRole :: GameAtSunrise -> Bool
 prop_checkSunriseSetsAngelsRole (GameAtSunrise game) = do
-    let angel = findByRole_ angelRole (game ^. players)
+    let angel = game ^?! players . angels
     let game' = run_ checkStage game
 
-    isSimpleVillager $ findByName_ (angel ^. name) (game' ^. players)
+    is simpleVillager $ game' ^?! players . traverse . filteredBy name (angel ^. name)
 
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
-    not (isAngel roleModel' || isVillageIdiot roleModel')
-        ==> isWerewolf $ findByRole_ wildChildRole (run_ checkStage game' ^. players)
+    isn't angel roleModel' && isn't villageIdiot roleModel'
+        ==> is werewolf $ run_ checkStage game' ^?! players . wildChildren
     where
-        roleModel' = findByName_ (fromJust $ game ^. roleModel) (game ^. players)
+        roleModel' = game ^?! players . traverse . filteredBy name (fromJust $ game ^. roleModel)
 
 prop_checkVillagesTurnAdvancesToScapegoatsTurn :: GameWithScapegoatBlamed -> Bool
 prop_checkVillagesTurnAdvancesToScapegoatsTurn (GameWithScapegoatBlamed game) =
@@ -249,8 +249,8 @@ prop_checkVillagesTurnAdvancesToScapegoatsTurn (GameWithScapegoatBlamed game) =
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnLynchesOnePlayerWhenConsensus (GameWithLynchVotes game) =
     length (getVoteResult game) == 1
-    && not (isVillageIdiot target)
-    ==> length (filterDead $ run_ checkStage game ^. players) == 1
+    && isn't villageIdiot target
+    ==> length (run_ checkStage game ^.. players . traverse . dead) == 1
     where
         target = head $ getVoteResult game
 
@@ -258,24 +258,24 @@ prop_checkVillagesTurnLynchesNoOneWhenTargetIsVillageIdiot :: GameAtVillagesTurn
 prop_checkVillagesTurnLynchesNoOneWhenTargetIsVillageIdiot (GameAtVillagesTurn game) = do
     let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (villageIdiot ^. name))) game (game ^. players)
 
-    null . filterDead $ run_ checkStage game' ^. players
+    none (is dead) (run_ checkStage game' ^. players)
     where
-        villageIdiot = findByRole_ villageIdiotRole (game ^. players)
+        villageIdiot = game ^?! players . villageIdiots
 
 -- TODO (hjw): tidy this test
 prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property
 prop_checkVillagesTurnLynchesNoOneWhenConflictedAndNoScapegoats game =
     forAll (runArbitraryCommands n game') $ \game'' ->
     length (getVoteResult game'') > 1
-    ==> length (filterDead $ run_ checkStage game'' ^. players) == length (filterDead $ game' ^. players)
+    ==> run_ checkStage game'' ^. players == game' ^. players
     where
-        scapegoatsName  = findByRole_ scapegoatRole (game ^. players) ^. name
+        scapegoatsName  = game ^?! players . scapegoats . name
         game'           = killPlayer scapegoatsName game & stage .~ VillagesTurn
         n               = length $ game' ^. players
 
 prop_checkVillagesTurnLynchesScapegoatWhenConflicted :: GameAtScapegoatsTurn -> Bool
 prop_checkVillagesTurnLynchesScapegoatWhenConflicted (GameAtScapegoatsTurn game) =
-    isDead . findByRole_ scapegoatRole $ run_ checkStage game ^. players
+    is dead $ run_ checkStage game ^?! players . scapegoats
 
 prop_checkVillagesTurnResetsVotes :: GameWithLynchVotes -> Bool
 prop_checkVillagesTurnResetsVotes (GameWithLynchVotes game) =
@@ -283,12 +283,12 @@ prop_checkVillagesTurnResetsVotes (GameWithLynchVotes game) =
 
 prop_checkVillagesTurnSetsAllowedVoters :: GameWithLynchVotes -> Property
 prop_checkVillagesTurnSetsAllowedVoters (GameWithLynchVotes game) =
-    game' ^. allowedVoters === map (view name) expectedAllowedVoters
+    game' ^. allowedVoters === expectedAllowedVoters ^.. names
     where
         game' = run_ checkStage game
         expectedAllowedVoters
-            | game' ^. villageIdiotRevealed = filter (not . isVillageIdiot) $ game' ^. players
-            | otherwise                     = filterAlive $ game' ^. players
+            | game' ^. villageIdiotRevealed = filter (isn't villageIdiot) $ game' ^. players
+            | otherwise                     = game' ^.. players . traverse . alive
 
 prop_checkVillagesTurnDoesNothingUnlessAllVoted :: GameAtVillagesTurn -> Property
 prop_checkVillagesTurnDoesNothingUnlessAllVoted (GameAtVillagesTurn game) =
@@ -339,7 +339,7 @@ prop_checkWerewolvesTurnDoesNothingUnlessAllVoted (GameAtWerewolvesTurn game) =
     forAll (runArbitraryCommands n game) $ \game' ->
     isWerewolvesTurn $ run_ checkStage game'
     where
-        n = length (filterWerewolves $ game ^. players) - 1
+        n = length (game ^.. players . werewolves) - 1
 
 prop_checkWildChildsTurnAdvancesToDefendersTurn :: GameAtWildChildsTurn -> Property
 prop_checkWildChildsTurnAdvancesToDefendersTurn (GameAtWildChildsTurn game) =
@@ -348,7 +348,7 @@ prop_checkWildChildsTurnAdvancesToDefendersTurn (GameAtWildChildsTurn game) =
 
 prop_checkWildChildsTurnAdvancesWhenNoWildChild :: GameAtWildChildsTurn -> Bool
 prop_checkWildChildsTurnAdvancesWhenNoWildChild (GameAtWildChildsTurn game) = do
-    let wildChild   = findByRole_ wildChildRole (game ^. players)
+    let wildChild   = game ^?! players . wildChildren
     let command     = quitCommand $ wildChild ^. name
 
     not . isWildChildsTurn $ run_ (apply command >> checkStage) game
@@ -364,7 +364,7 @@ prop_checkWitchsTurnAdvancesToVillagesTurn (GameAtWitchsTurn game) =
 
 prop_checkWitchsTurnAdvancesWhenNoWitch :: GameAtWitchsTurn -> Bool
 prop_checkWitchsTurnAdvancesWhenNoWitch (GameAtWitchsTurn game) = do
-    let witch   = findByRole_ witchRole (game ^. players)
+    let witch   = game ^?! players . witches
     let command = quitCommand $ witch ^. name
 
     not . isWitchsTurn $ run_ (apply command >> checkStage) game
@@ -372,17 +372,17 @@ prop_checkWitchsTurnAdvancesWhenNoWitch (GameAtWitchsTurn game) = do
 prop_checkWitchsTurnHealsDevoureeWhenHealed :: GameWithHeal -> Property
 prop_checkWitchsTurnHealsDevoureeWhenHealed (GameWithHeal game) =
     forAll (arbitraryPassCommand game) $ \(Blind command) ->
-    null . filterDead $ run_ (apply command >> checkStage) game ^. players
+    none (is dead) (run_ (apply command >> checkStage) game ^. players)
 
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned :: GameWithPoison -> Property
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned (GameWithPoison game) =
     forAll (arbitraryPassCommand game) $ \(Blind command) ->
-    length (filterDead $ run_ (apply command >> checkStage) game ^. players) == 1
+    length (run_ (apply command >> checkStage) game ^.. players . traverse . dead) == 1
 
 prop_checkWitchsTurnDoesNothingWhenPassed :: GameAtWitchsTurn -> Property
 prop_checkWitchsTurnDoesNothingWhenPassed (GameAtWitchsTurn game) =
     forAll (arbitraryPassCommand game) $ \(Blind command) ->
-    null . filterDead $ run_ (apply command >> checkStage) game ^. players
+    none (is dead) $ run_ (apply command >> checkStage) game ^. players
 
 prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed :: GameAtWitchsTurn -> Bool
 prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed (GameAtWitchsTurn game) =
@@ -410,7 +410,7 @@ prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn (GameAtWolfHoundsTurn game) =
 
 prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound :: GameAtWolfHoundsTurn -> Bool
 prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound (GameAtWolfHoundsTurn game) = do
-    let wolfHound   = findByRole_ wolfHoundRole (game ^. players)
+    let wolfHound   = game ^?! players . wolfHounds
     let command     = quitCommand $ wolfHound ^. name
 
     not . isWolfHoundsTurn $ run_ (apply command >> checkStage) game
@@ -425,8 +425,8 @@ prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive (GameWithZeroAllegiances
 
 prop_checkGameOverAdvancesStageWhenOneAllegianceAlive :: GameWithOneAllegianceAlive -> Property
 prop_checkGameOverAdvancesStageWhenOneAllegianceAlive (GameWithOneAllegianceAlive game) =
-    forAll (sublistOf . filterAlive $ game ^. players) $ \players' -> do
-        let game' = foldr killPlayer game (map (view name) players')
+    forAll (sublistOf $ game ^.. players . traverse . alive) $ \players' -> do
+        let game' = foldr killPlayer game (players' ^.. names)
 
         isGameOver $ run_ checkGameOver game'
 
@@ -438,7 +438,7 @@ prop_checkGameOverAdvancesStageWhenOneAllegianceAlive (GameWithOneAllegianceAliv
 
 prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead :: GameOnSecondRound -> Bool
 prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead (GameOnSecondRound game) = do
-    let angel = findByRole_ angelRole (game ^. players)
+    let angel = game ^?! players . angels
     let game' = killPlayer (angel ^. name) game
 
     isGameOver $ run_ checkGameOver game'
@@ -468,28 +468,28 @@ prop_startGameErrorsWhenMoreThan24Players =
 
 prop_startGameErrorsWhenMoreThan1OfARestrictedRole :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1OfARestrictedRole players =
-    any (\role -> length (filterByRole role players) > 1) restrictedRoles
+    any (\role' -> length (players ^.. traverse . filteredBy role role') > 1) restrictedRoles
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property
 prop_createPlayersUsesGivenPlayerNames playerNames extraRoles = monadicIO $ do
     players <- createPlayers playerNames (padRoles extraRoles (length playerNames))
 
-    return $ playerNames == map (view name) players
+    return $ playerNames == players ^.. names
 
 prop_createPlayersUsesGivenRoles :: [Text] -> [Role] -> Property
 prop_createPlayersUsesGivenRoles playerNames extraRoles = monadicIO $ do
-    let roles = padRoles extraRoles (length playerNames)
+    let roles' = padRoles extraRoles (length playerNames)
 
-    players <- createPlayers playerNames roles
+    players <- createPlayers playerNames roles'
 
-    return $ roles == map (view role) players
+    return $ roles' == players ^.. roles
 
 prop_createPlayersCreatesAlivePlayers :: [Text] -> [Role] -> Property
 prop_createPlayersCreatesAlivePlayers playerNames extraRoles = monadicIO $ do
     players <- createPlayers playerNames (padRoles extraRoles (length playerNames))
 
-    return $ all isAlive players
+    return $ all (is alive) players
 
 prop_padRolesReturnsNRoles :: [Role] -> Int -> Property
 prop_padRolesReturnsNRoles extraRoles n = monadicIO $ do
@@ -506,6 +506,6 @@ prop_padRolesUsesGivenRoles extraRoles n = monadicIO $ do
 prop_padRolesProportionsAllegiances :: [Role] -> Int -> Property
 prop_padRolesProportionsAllegiances extraRoles n = monadicIO $ do
     let roles           = padRoles extraRoles n
-    let werewolvesCount = length . elemIndices Role.Werewolves $ map (view allegiance) roles
+    let werewolvesCount = length . elemIndices Role.Werewolves $ roles ^.. traverse . allegiance
 
     return $ werewolvesCount == n `quot` 5 + 1
