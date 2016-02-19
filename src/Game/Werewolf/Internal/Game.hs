@@ -12,6 +12,7 @@ defines the game data structure and any fields required to keep track of the cur
 It also has a few additional functions for manipulating the game state.
 -}
 
+{-# LANGUAGE RankNTypes      #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Game.Werewolf.Internal.Game (
@@ -27,6 +28,11 @@ module Game.Werewolf.Internal.Game (
 
     newGame,
 
+    -- ** Prisms
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    defendersTurn, gameOver, scapegoatsTurn, seersTurn, sunrise, sunset, ursussGrunt, villagesTurn,
+    werewolvesTurn, wildChildsTurn, witchsTurn, wolfHoundsTurn,
+
     -- ** Manipulations
     killPlayer, setPlayerRole, setPlayerAllegiance,
 
@@ -35,8 +41,6 @@ module Game.Werewolf.Internal.Game (
     getPendingVoters, getVoteResult,
 
     -- ** Queries
-    isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
-    isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     isFirstRound,
     doesPlayerExist,
 ) where
@@ -193,6 +197,58 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _votes                = Map.empty
             }
 
+-- | This 'Prism' provides the traversal of a 'Game' at the 'DefendersTurn' stage.
+defendersTurn :: Prism' Game Game
+defendersTurn = genericStagePrism DefendersTurn
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'GameOver' stage.
+gameOver :: Prism' Game Game
+gameOver = genericStagePrism GameOver
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'ScapegoatsTurn' stage.
+scapegoatsTurn :: Prism' Game Game
+scapegoatsTurn = genericStagePrism ScapegoatsTurn
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'SeersTurn' stage.
+seersTurn :: Prism' Game Game
+seersTurn = genericStagePrism SeersTurn
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'Sunrise' stage.
+sunrise :: Prism' Game Game
+sunrise = genericStagePrism Sunrise
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'Sunset' stage.
+sunset :: Prism' Game Game
+sunset = genericStagePrism Sunset
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'UrsussGrunt' stage.
+ursussGrunt :: Prism' Game Game
+ursussGrunt = genericStagePrism UrsussGrunt
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'VillagesTurn' stage.
+villagesTurn :: Prism' Game Game
+villagesTurn = genericStagePrism VillagesTurn
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'WerewolvesTurn' stage.
+werewolvesTurn :: Prism' Game Game
+werewolvesTurn = genericStagePrism WerewolvesTurn
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'WildChildsTurn' stage.
+wildChildsTurn :: Prism' Game Game
+wildChildsTurn = genericStagePrism WildChildsTurn
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'WitchsTurn' stage.
+witchsTurn :: Prism' Game Game
+witchsTurn = genericStagePrism WitchsTurn
+
+-- | This 'Prism' provides the traversal of a 'Game' at the 'WolfHoundsTurn' stage.
+wolfHoundsTurn :: Prism' Game Game
+wolfHoundsTurn = genericStagePrism WolfHoundsTurn
+
+genericStagePrism :: Stage -> Prism' Game Game
+genericStagePrism stage' = prism (set stage stage') $ \game ->
+    if game ^. stage == stage' then Right game else Left game
+
 -- | Kills the given player! This function should be used carefully as it doesn't clear any state
 --   that the player's role may use. If you're after just removing a player from a game for a test,
 --   try using a 'Game.Werewolf.Command.quitCommand' instead.
@@ -251,50 +307,6 @@ getVoteResult game = map (\name' -> game ^?! players . traverse . filteredBy nam
 -- | Gets the devour event if it exists.
 getDevourEvent :: Game -> Maybe Event
 getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]
-
--- | @isDefendersTurn game = game ^. stage == DefendersTurn@
-isDefendersTurn :: Game -> Bool
-isDefendersTurn game = game ^. stage == DefendersTurn
-
--- | @isGameOver game = game ^. stage == GameOver@
-isGameOver :: Game -> Bool
-isGameOver game = game ^. stage == GameOver
-
--- | @isScapegoatsTurn game = game ^. stage == ScapegoatsTurn@
-isScapegoatsTurn :: Game -> Bool
-isScapegoatsTurn game = game ^. stage == ScapegoatsTurn
-
--- | @isSeersTurn game = game ^. stage == SeersTurn@
-isSeersTurn :: Game -> Bool
-isSeersTurn game = game ^. stage == SeersTurn
-
--- | @isSunrise game = game ^. stage == Sunrise@
-isSunrise :: Game -> Bool
-isSunrise game = game ^. stage == Sunrise
-
--- | @isSunset game = game ^. stage == Sunset@
-isSunset :: Game -> Bool
-isSunset game = game ^. stage == Sunset
-
--- | @isVillagesTurn game = game ^. stage == VillagesTurn@
-isVillagesTurn :: Game -> Bool
-isVillagesTurn game = game ^. stage == VillagesTurn
-
--- | @isWerewolvesTurn game = game ^. stage == WerewolvesTurn@
-isWerewolvesTurn :: Game -> Bool
-isWerewolvesTurn game = game ^. stage == WerewolvesTurn
-
--- | @isWildChildsTurn game = game ^. stage == WildChildsTurn@
-isWildChildsTurn :: Game -> Bool
-isWildChildsTurn game = game ^. stage == WildChildsTurn
-
--- | @isWitchsTurn game = game ^. stage == WitchsTurn@
-isWitchsTurn :: Game -> Bool
-isWitchsTurn game = game ^. stage == WitchsTurn
-
--- | @isWolfHoundsTurn game = game ^. stage == WolfHoundsTurn@
-isWolfHoundsTurn :: Game -> Bool
-isWolfHoundsTurn game = game ^. stage == WolfHoundsTurn
 
 -- | @isFirstRound game = game ^. round == 0@
 isFirstRound :: Game -> Bool

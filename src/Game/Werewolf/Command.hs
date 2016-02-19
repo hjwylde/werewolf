@@ -39,9 +39,6 @@ import qualified Data.Text  as T
 import           Game.Werewolf.Engine
 import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
                                                 getDevourEvent, getPendingVoters, getPlayerVote,
-                                                isDefendersTurn, isGameOver, isScapegoatsTurn,
-                                                isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                                isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
                                                 killPlayer, setPlayerRole)
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (angel, name)

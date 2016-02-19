@@ -19,9 +19,12 @@ module Game.Werewolf.Game (
 
     Event(..),
 
+    -- ** Prisms
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    defendersTurn, gameOver, scapegoatsTurn, seersTurn, sunrise, sunset, ursussGrunt, villagesTurn,
+    werewolvesTurn, wildChildsTurn, witchsTurn, wolfHoundsTurn,
+
     -- ** Queries
-    isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
-    isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     doesPlayerExist,
 ) where
 

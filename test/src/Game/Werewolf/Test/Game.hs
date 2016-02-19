@@ -50,12 +50,12 @@ allGameTests =
 prop_newGameStartsAtVillagesTurnWhenAngelInPlay :: [Player] -> Property
 prop_newGameStartsAtVillagesTurnWhenAngelInPlay players =
     has angels players
-    ==> isVillagesTurn (newGame players)
+    ==> is villagesTurn (newGame players)
 
 prop_newGameStartsAtSunsetWhenNoAngelInPlay :: [Player] -> Property
 prop_newGameStartsAtSunsetWhenNoAngelInPlay players =
     none (is angel) players
-    ==> isSunset (newGame players)
+    ==> is sunset (newGame players)
 
 prop_newGameStartsOnFirstRound :: [Player] -> Bool
 prop_newGameStartsOnFirstRound players = isFirstRound $ newGame players

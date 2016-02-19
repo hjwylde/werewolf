@@ -69,10 +69,7 @@ import qualified Data.Text       as T
 
 import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
                                                 getDevourEvent, getPassers, getPendingVoters,
-                                                getPlayerVote, getVoteResult, isDefendersTurn,
-                                                isGameOver, isScapegoatsTurn, isSeersTurn,
-                                                isVillagesTurn, isWerewolvesTurn, isWildChildsTurn,
-                                                isWitchsTurn, isWolfHoundsTurn, killPlayer,
+                                                getPlayerVote, getVoteResult, killPlayer,
                                                 setPlayerAllegiance, setPlayerRole)
 import qualified Game.Werewolf.Internal.Game   as Game
 import           Game.Werewolf.Internal.Player
@@ -244,9 +241,9 @@ checkEvents = do
     mapM_ applyEvent available
 
 eventAvailable :: MonadState Game m => Event -> m Bool
-eventAvailable (DevourEvent _)  = gets isSunrise
-eventAvailable NoDevourEvent    = gets isSunrise
-eventAvailable (PoisonEvent _)  = gets isSunrise
+eventAvailable (DevourEvent _)  = gets $ is sunrise
+eventAvailable NoDevourEvent    = gets $ is sunrise
+eventAvailable (PoisonEvent _)  = gets $ is sunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
@@ -307,31 +304,31 @@ findAlivePlayerByRole :: MonadState Game m => Role -> m (Maybe Player)
 findAlivePlayerByRole role' = preuse $ players . traverse . alive . filteredBy role role'
 
 isDefendersTurn :: MonadState Game m => m Bool
-isDefendersTurn = gets Game.isDefendersTurn
+isDefendersTurn = gets $ is defendersTurn
 
 isScapegoatsTurn :: MonadState Game m => m Bool
-isScapegoatsTurn = gets Game.isScapegoatsTurn
+isScapegoatsTurn = gets $ is scapegoatsTurn
 
 isSeersTurn :: MonadState Game m => m Bool
-isSeersTurn = gets Game.isSeersTurn
+isSeersTurn = gets $ is seersTurn
 
 isVillagesTurn :: MonadState Game m => m Bool
-isVillagesTurn = gets Game.isVillagesTurn
+isVillagesTurn = gets $ is villagesTurn
 
 isWerewolvesTurn :: MonadState Game m => m Bool
-isWerewolvesTurn = gets Game.isWerewolvesTurn
+isWerewolvesTurn = gets $ is werewolvesTurn
 
 isWildChildsTurn :: MonadState Game m => m Bool
-isWildChildsTurn = gets Game.isWildChildsTurn
+isWildChildsTurn = gets $ is wildChildsTurn
 
 isWitchsTurn :: MonadState Game m => m Bool
-isWitchsTurn = gets Game.isWitchsTurn
+isWitchsTurn = gets $ is witchsTurn
 
 isWolfHoundsTurn :: MonadState Game m => m Bool
-isWolfHoundsTurn = gets Game.isWolfHoundsTurn
+isWolfHoundsTurn = gets $ is wolfHoundsTurn
 
 isGameOver :: MonadState Game m => m Bool
-isGameOver = gets Game.isGameOver
+isGameOver = gets $ is gameOver
 
 getPassers :: MonadState Game m => m [Player]
 getPassers = gets Game.getPassers
