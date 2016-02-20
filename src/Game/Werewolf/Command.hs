@@ -37,9 +37,9 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import           Game.Werewolf.Engine
-import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
-                                                getDevourEvent, getPendingVoters, getPlayerVote,
-                                                killPlayer, setPlayerRole)
+import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getDevourEvent,
+                                                getPendingVoters, getPlayerVote, killPlayer,
+                                                setPlayerRole)
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (angel, name)
 import qualified Game.Werewolf.Internal.Role   as Role
@@ -133,11 +133,11 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
     Sunset          -> return ()
     UrsussGrunt     -> return ()
     VillagesTurn    -> do
-        allowedVoters <- getAllowedVoters
-        pendingVoters <- getPendingVoters
+        allowedVoterNames <- use allowedVoters
+        pendingVoterNames <- toListOf names <$> getPendingVoters
 
-        tell [waitingOnMessage Nothing $ allowedVoters `intersect` pendingVoters]
-        tell $ map pingPlayerMessage (allowedVoters `intersect` pendingVoters ^.. names)
+        tell [waitingOnMessage Nothing $ allowedVoterNames `intersect` pendingVoterNames]
+        tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
@@ -220,19 +220,19 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
-        game            <- get
-        allowedVoters   <- getAllowedVoters
-        pendingVoters   <- getPendingVoters
+        game                <- get
+        allowedVoterNames   <- use allowedVoters
+        pendingVoterNames   <- toListOf names <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
-        tell [waitingOnMessage (Just callerName) (allowedVoters `intersect` pendingVoters)]
+        tell [waitingOnMessage (Just callerName) (allowedVoterNames `intersect` pendingVoterNames)]
     WerewolvesTurn  -> do
-        game            <- get
-        pendingVoters   <- toListOf werewolves <$> getPendingVoters
+        game                <- get
+        pendingVoterNames   <- toListOf (werewolves . name) <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
         whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
-            tell [waitingOnMessage (Just callerName) pendingVoters]
+            tell [waitingOnMessage (Just callerName) pendingVoterNames]
     _               -> do
         game <- get
 

@@ -101,7 +101,7 @@ import           Game.Werewolf.Response
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
-    [ [newPlayersInGameMessage players']
+    [ [newPlayersInGameMessage $ players' ^.. names]
     , [rolesInGameMessage $ players' ^.. roles]
     , map newPlayerMessage players'
     , villagerVillagerMessages
@@ -113,13 +113,11 @@ newGameMessages game = concat
             Just villagerVillager   -> [villagerVillagerMessage $ villagerVillager ^. name]
             _                       -> []
 
-newPlayersInGameMessage :: [Player] -> Message
-newPlayersInGameMessage players = publicMessage $ T.concat
+newPlayersInGameMessage :: [Text] -> Message
+newPlayersInGameMessage playerNames = publicMessage $ T.concat
     [ "A new game of werewolf is starting with "
     , T.intercalate ", " playerNames, "!"
     ]
-    where
-        playerNames = players ^.. names
 
 newPlayerMessage :: Player -> Message
 newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
@@ -375,12 +373,10 @@ playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
             ]
         playerNameWithRole player = T.concat [player ^. name, " (", player ^. role . Role.name, ")"]
 
-waitingOnMessage :: Maybe Text -> [Player] -> Message
-waitingOnMessage mTo players = Message mTo $ T.concat
+waitingOnMessage :: Maybe Text -> [Text] -> Message
+waitingOnMessage mTo playerNames = Message mTo $ T.concat
     [ "Waiting on ", T.intercalate ", " playerNames, "..."
     ]
-    where
-        playerNames = players ^.. names
 
 angelJoinedVillagersMessage :: Message
 angelJoinedVillagersMessage = publicMessage $ T.unwords
