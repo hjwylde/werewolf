@@ -12,13 +12,11 @@ functions relevant to the public interface.
 
 module Game.Werewolf.Role (
     -- * Role
-    Role, name, allegiance, balance, description, advice,
+    Role,
+    name, allegiance, balance, description, advice,
 
     Allegiance(..),
-
-    -- ** Prisms
-    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    angel, villager, werewolf,
+    _Angel, _Villagers, _Werewolves,
 
     -- ** Instances
     allRoles, restrictedRoles,

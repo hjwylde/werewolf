@@ -25,11 +25,10 @@ import           Data.Text         (Text)
 
 import           Game.Werewolf.Command
 import           Game.Werewolf.Engine          hiding (doesPlayerExist, getDevourEvent,
-                                                getVoteResult,
-                                                killPlayer)
+                                                getVoteResult, killPlayer)
 import           Game.Werewolf.Internal.Game
 import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (angel, name, werewolf)
+import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Test.Arbitrary
 import           Game.Werewolf.Test.Util

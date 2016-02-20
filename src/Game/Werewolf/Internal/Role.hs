@@ -20,13 +20,11 @@ The roles are split into four categories:
 
 module Game.Werewolf.Internal.Role (
     -- * Role
-    Role, name, allegiance, balance, description, advice,
+    Role,
+    name, allegiance, balance, description, advice,
 
     Allegiance(..),
-
-    -- ** Prisms
-    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    angel, villager, werewolf,
+    _Angel, _Villagers, _Werewolves,
 
     -- ** Instances
     allRoles, restrictedRoles,
@@ -89,21 +87,7 @@ makeLenses ''Role
 instance Eq Role where
     (==) = (==) `on` view name
 
--- | This 'Prism' provides the traversal of the 'Angel' allegiance in a 'Role'.
-angel :: Prism' Role Role
-angel = genericAllegiancePrism Angel
-
--- | This 'Prism' provides the traversal of the 'Villagers' allegiance in a 'Role'.
-villager :: Prism' Role Role
-villager = genericAllegiancePrism Villagers
-
--- | This 'Prism' provides the traversal of the 'Werewolves' allegiance in a 'Role'.
-werewolf :: Prism' Role Role
-werewolf = genericAllegiancePrism Werewolves
-
-genericAllegiancePrism :: Allegiance -> Prism' Role Role
-genericAllegiancePrism allegiance' = prism (set allegiance allegiance') $ \role ->
-    if role ^. allegiance == allegiance' then Right role else Left role
+makePrisms ''Allegiance
 
 -- | A list containing all the roles defined in this file.
 allRoles :: [Role]

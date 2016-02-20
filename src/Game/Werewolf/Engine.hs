@@ -73,7 +73,7 @@ import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllow
                                                 setPlayerAllegiance, setPlayerRole)
 import qualified Game.Werewolf.Internal.Game   as Game
 import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name, villager, werewolf)
+import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Messages
 import           Game.Werewolf.Response

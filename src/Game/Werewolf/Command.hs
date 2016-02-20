@@ -41,7 +41,7 @@ import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getDevou
                                                 getPendingVoters, getPlayerVote, killPlayer,
                                                 setPlayerRole)
 import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (angel, name)
+import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role
 import           Game.Werewolf.Messages
 import           Game.Werewolf.Response

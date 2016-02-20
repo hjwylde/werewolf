@@ -49,7 +49,7 @@ import Control.Lens
 import Data.Function
 import Data.Text     (Text)
 
-import Game.Werewolf.Internal.Role hiding (angel, name, villager, werewolf)
+import Game.Werewolf.Internal.Role hiding (name)
 
 -- | A player has a 'name', 'role' and 'state'. Any stateful information needed for a player's role
 --   is held on the 'Game' itself.

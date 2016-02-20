@@ -31,4 +31,4 @@ import Game.Werewolf.Engine   hiding (doesPlayerExist, isDefendersTurn, isGameOv
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (angel, name, villager, werewolf)
+import Game.Werewolf.Role     hiding (name)
