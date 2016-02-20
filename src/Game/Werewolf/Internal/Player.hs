@@ -18,9 +18,11 @@ attributes.
 
 module Game.Werewolf.Internal.Player (
     -- * Player
-    Player, name, role, state,
+    Player,
+    name, role, state,
 
     State(..),
+    _Alive, _Dead,
 
     newPlayer,
 
@@ -70,6 +72,8 @@ makeLenses ''Player
 
 instance Eq Player where
     (==) = (==) `on` view name
+
+makePrisms ''State
 
 -- | Creates a new 'Alive' player.
 newPlayer :: Text -> Role -> Player

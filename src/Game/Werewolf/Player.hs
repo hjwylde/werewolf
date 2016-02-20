@@ -11,9 +11,11 @@ functions relevant to the public interface.
 
 module Game.Werewolf.Player (
     -- * Player
-    Player, name, role, state,
+    Player,
+    name, role, state,
 
     State(..),
+    _Alive, _Dead,
 
     -- ** Prisms
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
