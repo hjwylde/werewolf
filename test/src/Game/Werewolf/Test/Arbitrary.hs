@@ -437,11 +437,11 @@ arbitraryChoosePlayersCommand game = do
 
 arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do
-    let witch = game ^?! players . witches
+    let witchsName = game ^?! players . witches . name
 
-    return $ if game ^. healUsed
-        then Blind noopCommand
-        else seq (fromJust $ getDevourEvent game) (Blind $ healCommand (witch ^. name))
+    return . Blind $ if game ^. healUsed
+        then noopCommand
+        else healCommand witchsName
 
 arbitraryPassCommand :: Game -> Gen (Blind Command)
 arbitraryPassCommand game = do

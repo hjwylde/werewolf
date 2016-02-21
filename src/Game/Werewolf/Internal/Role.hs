@@ -58,8 +58,6 @@ import           Data.List
 import           Data.Text     (Text)
 import qualified Data.Text     as T
 
-import Prelude hiding (all)
-
 -- | Role definitions require only a few pieces of information.
 --   Most of the game logic behind a role is implemented in "Game.Werewolf.Command" and
 --   "Game.Werewolf.Engine".

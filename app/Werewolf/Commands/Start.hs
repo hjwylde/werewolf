@@ -9,7 +9,8 @@ Maintainer  : public@hjwylde.com
 Options and handler for the start subcommand.
 -}
 
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Werewolf.Commands.Start (
     -- * Options
@@ -21,8 +22,8 @@ module Werewolf.Commands.Start (
 
 import Control.Lens
 import Control.Monad.Except
-import Control.Monad.Random
 import Control.Monad.Extra
+import Control.Monad.Random
 import Control.Monad.State
 import Control.Monad.Writer
 
@@ -47,7 +48,7 @@ data ExtraRoles = None | Random | Use [Text]
 
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options extraRoles playerNames) = do
-    whenM (doesGameExist &&^ fmap (isn't gameOver) readGame) $ exitWith failure
+    whenM (doesGameExist &&^ (hasn't (stage . _GameOver) <$> readGame)) $ exitWith failure
         { messages = [gameAlreadyRunningMessage callerName]
         }
 

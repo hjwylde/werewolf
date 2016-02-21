@@ -171,7 +171,7 @@ prop_chooseAllegianceCommandErrorsWhenCallerIsDead (GameAtWolfHoundsTurn game) a
 
 prop_chooseAllegianceCommandErrorsWhenNotWolfHoundsTurn :: Game -> Property
 prop_chooseAllegianceCommandErrorsWhenNotWolfHoundsTurn game =
-    not (is wolfHoundsTurn game)
+    hasn't (stage . _WolfHoundsTurn) game
     ==> forAll (arbitraryChooseAllegianceCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_chooseAllegianceCommandErrorsWhenCallerNotWolfHound :: GameAtWolfHoundsTurn -> Allegiance -> Property
@@ -253,7 +253,7 @@ prop_choosePlayerCommandErrorsWhenTargetIsCaller (GameAtWildChildsTurn game) = d
 
 prop_choosePlayerCommandErrorsWhenNotWildChildsTurn :: Game -> Property
 prop_choosePlayerCommandErrorsWhenNotWildChildsTurn game =
-    not (is wildChildsTurn game)
+    hasn't (stage . _WildChildsTurn) game
     ==> forAll (arbitraryChoosePlayerCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_choosePlayerCommandErrorsWhenCallerNotWildChild :: GameAtWildChildsTurn -> Property
@@ -307,7 +307,7 @@ prop_choosePlayersCommandErrorsWhenAnyTargetIsDead (GameAtScapegoatsTurn game) =
 
 prop_choosePlayersCommandErrorsWhenNotScapegoatsTurn :: Game -> Property
 prop_choosePlayersCommandErrorsWhenNotScapegoatsTurn game =
-    not (is scapegoatsTurn game)
+    hasn't (stage . _ScapegoatsTurn) game
     ==> forAll (arbitraryChoosePlayersCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_choosePlayersCommandErrorsWhenCallerNotScapegoat :: GameAtScapegoatsTurn -> Property
@@ -365,7 +365,8 @@ prop_healCommandErrorsWhenNotWitchsTurn game = do
     let witch   = game ^?! players . witches
     let command = healCommand $ witch ^. name
 
-    not (is witchsTurn game) ==> verbose_runCommandErrors game command
+    hasn't (stage . _WitchsTurn) game
+        ==> verbose_runCommandErrors game command
 
 prop_healCommandErrorsWhenCallerHasHealed :: GameWithHeal -> Property
 prop_healCommandErrorsWhenCallerHasHealed (GameWithHeal game) = do
@@ -410,7 +411,7 @@ prop_passCommandErrorsWhenCallerIsDead (GameAtWitchsTurn game) =
 
 prop_passCommandErrorsWhenNotWitchsTurn :: Game -> Property
 prop_passCommandErrorsWhenNotWitchsTurn game =
-    not (is witchsTurn game)
+    hasn't (stage . _WitchsTurn) game
     ==> forAll (arbitraryPassCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_passCommandUpdatesPasses :: GameAtWitchsTurn -> Property
@@ -462,16 +463,15 @@ prop_poisonCommandErrorsWhenTargetIsDead (GameAtWitchsTurn game) = do
 
 prop_poisonCommandErrorsWhenTargetIsDevoured :: GameWithDevourEvent -> Property
 prop_poisonCommandErrorsWhenTargetIsDevoured (GameWithDevourEvent game) = do
-    let (DevourEvent targetName) = fromJust $ getDevourEvent game
-
-    let witch   = game ^?! players . witches
-    let command = poisonCommand (witch ^. name) targetName
+    let witchsName  = game ^?! players . witches . name
+    let targetName  = game ^?! events . traverse . _DevourEvent
+    let command     = poisonCommand witchsName targetName
 
     verbose_runCommandErrors game command
 
 prop_poisonCommandErrorsWhenNotWitchsTurn :: Game -> Property
 prop_poisonCommandErrorsWhenNotWitchsTurn game =
-    not (is witchsTurn game)
+    hasn't (stage . _WitchsTurn) game
     ==> forAll (arbitraryPoisonCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_poisonCommandErrorsWhenCallerHasPoisoned :: GameWithPoison -> Property
@@ -543,7 +543,7 @@ prop_protectCommandErrorsWhenTargetIsDead (GameAtDefendersTurn game) = do
 
 prop_protectCommandErrorsWhenNotDefendersTurn :: Game -> Property
 prop_protectCommandErrorsWhenNotDefendersTurn game =
-    not (is defendersTurn game)
+    hasn't (stage . _DefendersTurn) game
     ==> forAll (arbitraryProtectCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_protectCommandErrorsWhenCallerNotDefender :: GameAtDefendersTurn -> Property
@@ -592,7 +592,7 @@ prop_quitCommandErrorsWhenCallerIsDead game =
 
 prop_quitCommandKillsPlayer :: Game -> Property
 prop_quitCommandKillsPlayer game =
-    not (is gameOver game)
+    hasn't (stage . _GameOver) game
     ==> forAll (arbitraryQuitCommand game) $ \(Blind command) -> do
         let game' = run_ (apply command) game
 
@@ -711,7 +711,7 @@ prop_seeCommandErrorsWhenTargetIsDead (GameAtSeersTurn game) = do
 
 prop_seeCommandErrorsWhenNotSeersTurn :: Game -> Property
 prop_seeCommandErrorsWhenNotSeersTurn game =
-    not (is seersTurn game)
+    hasn't (stage . _SeersTurn) game
     ==> forAll (arbitrarySeeCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_seeCommandErrorsWhenCallerNotSeer :: GameAtSeersTurn -> Property
@@ -767,7 +767,7 @@ prop_voteDevourCommandErrorsWhenTargetIsDead (GameAtWerewolvesTurn game) =
 
 prop_voteDevourCommandErrorsWhenNotWerewolvesTurn :: Game -> Property
 prop_voteDevourCommandErrorsWhenNotWerewolvesTurn game =
-    not (is werewolvesTurn game)
+    hasn't (stage . _WerewolvesTurn) game
     ==> forAll (arbitraryVoteDevourCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_voteDevourCommandErrorsWhenCallerNotWerewolf :: GameAtWerewolvesTurn -> Property
@@ -839,7 +839,7 @@ prop_voteLynchCommandErrorsWhenTargetIsDead (GameAtVillagesTurn game) =
 
 prop_voteLynchCommandErrorsWhenNotVillagesTurn :: Game -> Property
 prop_voteLynchCommandErrorsWhenNotVillagesTurn game =
-    not (is villagesTurn game)
+    hasn't (stage . _VillagesTurn) game
     ==> forAll (arbitraryVoteLynchCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_voteLynchCommandErrorsWhenCallerHasVoted :: GameWithLynchVotes -> Property

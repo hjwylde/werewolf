@@ -89,7 +89,6 @@ import Control.Arrow
 import Control.Lens
 
 import           Data.List.Extra
-import           Data.Maybe
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
@@ -237,19 +236,19 @@ witchsTurnMessages game = concat
         witchsName      = game ^?! players . witches . name
         wakeUpMessage   = publicMessage "The Witch wakes up."
         passMessage     = privateMessage witchsName "Type `pass` to end your turn."
-        devourMessages  = case getDevourEvent game of
-            Just (DevourEvent targetName)   ->
+        devourMessages  = case game ^? events . traverse . _DevourEvent of
+            Just targetName ->
                 [ privateMessage witchsName $
                     T.unwords ["You see", targetName, "sprawled outside bleeding uncontrollably."]
                 ]
-            _                               -> []
+            _               -> []
         healMessages
             | not (game ^. healUsed)
-                && isJust (getDevourEvent game) = [privateMessage witchsName "Would you like to `heal` them?"]
-            | otherwise                         = []
+                && has (events . traverse . _DevourEvent) game  = [privateMessage witchsName "Would you like to `heal` them?"]
+            | otherwise                                         = []
         poisonMessages
-            | not (game ^. poisonUsed)          = [privateMessage witchsName "Would you like to `poison` anyone?"]
-            | otherwise                         = []
+            | not (game ^. poisonUsed) = [privateMessage witchsName "Would you like to `poison` anyone?"]
+            | otherwise                = []
 
 wolfHoundsTurnMessages :: Text -> [Message]
 wolfHoundsTurnMessages to =

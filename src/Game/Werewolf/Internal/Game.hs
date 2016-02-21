@@ -12,33 +12,32 @@ defines the game data structure and any fields required to keep track of the cur
 It also has a few additional functions for manipulating the game state.
 -}
 
-{-# LANGUAGE RankNTypes      #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Game.Werewolf.Internal.Game (
     -- * Game
-    Game, stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
+    Game,
+    stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
     priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
 
     Stage(..),
+    _DefendersTurn, _GameOver, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _UrsussGrunt,
+    _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn, _WolfHoundsTurn,
+
     allStages,
     stageCycle, stageAvailable,
 
     Event(..),
+    _DevourEvent, _NoDevourEvent, _PoisonEvent,
 
     newGame,
-
-    -- ** Prisms
-    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    defendersTurn, gameOver, scapegoatsTurn, seersTurn, sunrise, sunset, ursussGrunt, villagesTurn,
-    werewolvesTurn, wildChildsTurn, witchsTurn, wolfHoundsTurn,
 
     -- ** Manipulations
     killPlayer, setPlayerRole, setPlayerAllegiance,
 
     -- ** Searches
-    getAdjacentAlivePlayers, getDevourEvent, getPassers, getPlayerVote, getAllowedVoters,
-    getPendingVoters, getVoteResult,
+    getAdjacentAlivePlayers, getPassers, getPlayerVote, getAllowedVoters, getPendingVoters,
+    getVoteResult,
 
     -- ** Queries
     isFirstRound,
@@ -125,6 +124,10 @@ data Event  = DevourEvent Text  -- ^ Werewolves
 
 makeLenses ''Game
 
+makePrisms ''Stage
+
+makePrisms ''Event
+
 -- | All of the stages in the order that they should occur.
 allStages :: [Stage]
 allStages =
@@ -197,58 +200,6 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _votes                = Map.empty
             }
 
--- | This 'Prism' provides the traversal of a 'Game' at the 'DefendersTurn' stage.
-defendersTurn :: Prism' Game Game
-defendersTurn = genericStagePrism DefendersTurn
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'GameOver' stage.
-gameOver :: Prism' Game Game
-gameOver = genericStagePrism GameOver
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'ScapegoatsTurn' stage.
-scapegoatsTurn :: Prism' Game Game
-scapegoatsTurn = genericStagePrism ScapegoatsTurn
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'SeersTurn' stage.
-seersTurn :: Prism' Game Game
-seersTurn = genericStagePrism SeersTurn
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'Sunrise' stage.
-sunrise :: Prism' Game Game
-sunrise = genericStagePrism Sunrise
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'Sunset' stage.
-sunset :: Prism' Game Game
-sunset = genericStagePrism Sunset
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'UrsussGrunt' stage.
-ursussGrunt :: Prism' Game Game
-ursussGrunt = genericStagePrism UrsussGrunt
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'VillagesTurn' stage.
-villagesTurn :: Prism' Game Game
-villagesTurn = genericStagePrism VillagesTurn
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'WerewolvesTurn' stage.
-werewolvesTurn :: Prism' Game Game
-werewolvesTurn = genericStagePrism WerewolvesTurn
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'WildChildsTurn' stage.
-wildChildsTurn :: Prism' Game Game
-wildChildsTurn = genericStagePrism WildChildsTurn
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'WitchsTurn' stage.
-witchsTurn :: Prism' Game Game
-witchsTurn = genericStagePrism WitchsTurn
-
--- | This 'Prism' provides the traversal of a 'Game' at the 'WolfHoundsTurn' stage.
-wolfHoundsTurn :: Prism' Game Game
-wolfHoundsTurn = genericStagePrism WolfHoundsTurn
-
-genericStagePrism :: Stage -> Prism' Game Game
-genericStagePrism stage' = prism (set stage stage') $ \game ->
-    if game ^. stage == stage' then Right game else Left game
-
 -- | Kills the given player! This function should be used carefully as it doesn't clear any state
 --   that the player's role may use. If you're after just removing a player from a game for a test,
 --   try using a 'Game.Werewolf.Command.quitCommand' instead.
@@ -304,14 +255,10 @@ getVoteResult game = map (\name' -> game ^?! players . traverse . filteredBy nam
         votees = Map.elems $ game ^. votes
         result = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
 
--- | Gets the devour event if it exists.
-getDevourEvent :: Game -> Maybe Event
-getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]
-
 -- | @isFirstRound game = game ^. round == 0@
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0
 
 -- | Queries whether the player is in the game.
 doesPlayerExist :: Text -> Game -> Bool
-doesPlayerExist name = anyOf (players . names) (name ==)
+doesPlayerExist name = has (players . names . only name)

@@ -12,9 +12,10 @@ utility functions for searching, filtering and querying lists of players based o
 attributes.
 -}
 
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RankNTypes       #-}
-{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE TemplateHaskell       #-}
 
 module Game.Werewolf.Internal.Player (
     -- * Player

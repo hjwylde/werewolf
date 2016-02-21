@@ -54,7 +54,7 @@ module Game.Werewolf.Engine (
     padRoles,
 ) where
 
-import Control.Lens         hiding (cons, snoc)
+import Control.Lens         hiding (cons)
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Random
@@ -68,9 +68,9 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
-                                                getDevourEvent, getPassers, getPendingVoters,
-                                                getPlayerVote, getVoteResult, killPlayer,
-                                                setPlayerAllegiance, setPlayerRole)
+                                                getPassers, getPendingVoters, getPlayerVote,
+                                                getVoteResult, killPlayer, setPlayerAllegiance,
+                                                setPlayerRole)
 import qualified Game.Werewolf.Internal.Game   as Game
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
@@ -145,7 +145,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     UrsussGrunt -> do
         bearTamer   <- findPlayerByRole_ bearTamerRole
-        players'    <- cons bearTamer <$> gets (getAdjacentAlivePlayers $ bearTamer ^. name)
+        players'    <- gets $ getAdjacentAlivePlayers (bearTamer ^. name)
 
         when (has werewolves players') $ tell [ursusGruntsMessage]
 
@@ -241,9 +241,9 @@ checkEvents = do
     mapM_ applyEvent available
 
 eventAvailable :: MonadState Game m => Event -> m Bool
-eventAvailable (DevourEvent _)  = gets $ is sunrise
-eventAvailable NoDevourEvent    = gets $ is sunrise
-eventAvailable (PoisonEvent _)  = gets $ is sunrise
+eventAvailable (DevourEvent _)  = isSunrise
+eventAvailable NoDevourEvent    = isSunrise
+eventAvailable (PoisonEvent _)  = isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
@@ -304,31 +304,34 @@ findAlivePlayerByRole :: MonadState Game m => Role -> m (Maybe Player)
 findAlivePlayerByRole role' = preuse $ players . traverse . alive . filteredBy role role'
 
 isDefendersTurn :: MonadState Game m => m Bool
-isDefendersTurn = gets $ is defendersTurn
+isDefendersTurn = has (stage . _DefendersTurn) <$> get
 
 isScapegoatsTurn :: MonadState Game m => m Bool
-isScapegoatsTurn = gets $ is scapegoatsTurn
+isScapegoatsTurn = has (stage . _ScapegoatsTurn) <$> get
 
 isSeersTurn :: MonadState Game m => m Bool
-isSeersTurn = gets $ is seersTurn
+isSeersTurn = has (stage . _SeersTurn) <$> get
+
+isSunrise :: MonadState Game m => m Bool
+isSunrise = has (stage . _Sunrise) <$> get
 
 isVillagesTurn :: MonadState Game m => m Bool
-isVillagesTurn = gets $ is villagesTurn
+isVillagesTurn = has (stage . _VillagesTurn) <$> get
 
 isWerewolvesTurn :: MonadState Game m => m Bool
-isWerewolvesTurn = gets $ is werewolvesTurn
+isWerewolvesTurn = has (stage . _WerewolvesTurn) <$> get
 
 isWildChildsTurn :: MonadState Game m => m Bool
-isWildChildsTurn = gets $ is wildChildsTurn
+isWildChildsTurn = has (stage . _WildChildsTurn) <$> get
 
 isWitchsTurn :: MonadState Game m => m Bool
-isWitchsTurn = gets $ is witchsTurn
+isWitchsTurn = has (stage . _WitchsTurn) <$> get
 
 isWolfHoundsTurn :: MonadState Game m => m Bool
-isWolfHoundsTurn = gets $ is wolfHoundsTurn
+isWolfHoundsTurn = has (stage . _WolfHoundsTurn) <$> get
 
 isGameOver :: MonadState Game m => m Bool
-isGameOver = gets $ is gameOver
+isGameOver = has (stage . _GameOver) <$> get
 
 getPassers :: MonadState Game m => m [Player]
 getPassers = gets Game.getPassers
@@ -363,8 +366,8 @@ deleteGame = liftIO $ defaultFilePath >>= removeFile
 doesGameExist :: MonadIO m => m Bool
 doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
 
-getDevourEvent :: MonadState Game m => m (Maybe Event)
-getDevourEvent = gets Game.getDevourEvent
+getDevourEvent :: MonadState Game m => m (Maybe Text)
+getDevourEvent = gets (^? events . traverse . _DevourEvent)
 
 createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
 createPlayers playerNames roles = liftIO $ zipWith newPlayer playerNames <$> evalRandIO (shuffleM roles)

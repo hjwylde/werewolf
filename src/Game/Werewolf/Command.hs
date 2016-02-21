@@ -24,7 +24,7 @@ module Game.Werewolf.Command (
     statusCommand, voteDevourCommand, voteLynchCommand,
 ) where
 
-import Control.Lens         hiding (only)
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
@@ -37,9 +37,8 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import           Game.Werewolf.Engine
-import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getDevourEvent,
-                                                getPendingVoters, getPlayerVote, killPlayer,
-                                                setPlayerRole)
+import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getPendingVoters,
+                                                getPlayerVote, killPlayer, setPlayerRole)
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role
@@ -162,10 +161,9 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
 poisonCommand :: Text -> Text -> Command
 poisonCommand callerName targetName = Command $ do
     validateWitchsCommand callerName
-    whenM (use poisonUsed)              $ throwError [playerHasAlreadyPoisonedMessage callerName]
+    whenM (use poisonUsed)                                                          $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
-    whenJustM getDevourEvent            $ \(DevourEvent targetName') ->
-        when (targetName == targetName') $ throwError [playerCannotDoThatMessage callerName]
+    whenM (isJust <$> preuse (events . traverse . _DevourEvent . only targetName))  $ throwError [playerCannotDoThatMessage callerName]
 
     poison      .= Just targetName
     poisonUsed  .= True

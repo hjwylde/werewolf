@@ -14,8 +14,7 @@ module Game.Werewolf.Test.Game (
 
 import Control.Lens
 
-import qualified Data.Map   as Map
-import           Data.Maybe
+import Data.Maybe
 
 import Game.Werewolf.Internal.Game
 import Game.Werewolf.Internal.Player
@@ -50,21 +49,21 @@ allGameTests =
 prop_newGameStartsAtVillagesTurnWhenAngelInPlay :: [Player] -> Property
 prop_newGameStartsAtVillagesTurnWhenAngelInPlay players =
     has angels players
-    ==> is villagesTurn (newGame players)
+    ==> has (stage . _VillagesTurn) (newGame players)
 
 prop_newGameStartsAtSunsetWhenNoAngelInPlay :: [Player] -> Property
 prop_newGameStartsAtSunsetWhenNoAngelInPlay players =
-    none (is angel) players
-    ==> is sunset (newGame players)
+    hasn't angels players
+    ==> has (stage . _Sunset) (newGame players)
 
 prop_newGameStartsOnFirstRound :: [Player] -> Bool
 prop_newGameStartsOnFirstRound players = isFirstRound $ newGame players
 
 prop_newGameStartsWithEventsEmpty :: [Player] -> Bool
-prop_newGameStartsWithEventsEmpty players = null $ newGame players ^. events
+prop_newGameStartsWithEventsEmpty players = has (events . _Empty) (newGame players)
 
 prop_newGameStartsWithPassesEmpty :: [Player] -> Bool
-prop_newGameStartsWithPassesEmpty players = null $ newGame players ^. passes
+prop_newGameStartsWithPassesEmpty players = has (passes . _Empty) (newGame players)
 
 prop_newGameStartsWithAllowedVotersFull :: [Player] -> Property
 prop_newGameStartsWithAllowedVotersFull players = newGame players ^. allowedVoters === players ^.. names
@@ -98,7 +97,7 @@ prop_newGameStartsWithVillageIdiotRevealedFalse players =
     not $ newGame players ^. villageIdiotRevealed
 
 prop_newGameStartsWithVotesEmpty :: [Player] -> Bool
-prop_newGameStartsWithVotesEmpty players = Map.null $ newGame players ^. votes
+prop_newGameStartsWithVotesEmpty players = has (votes . _Empty) (newGame players)
 
 prop_newGameUsesGivenPlayers :: [Player] -> Bool
 prop_newGameUsesGivenPlayers players' = newGame players' ^. players == players'
