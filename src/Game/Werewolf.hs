@@ -25,9 +25,7 @@ module Game.Werewolf (
 ) where
 
 import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (doesPlayerExist, isDefendersTurn, isGameOver,
-                               isScapegoatsTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                               isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn)
+import Game.Werewolf.Engine   hiding (doesPlayerExist)
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response

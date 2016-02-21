@@ -306,21 +306,10 @@ newtype GameWithProtectAndDevourVotes = GameWithProtectAndDevourVotes Game
 
 instance Arbitrary GameWithProtectAndDevourVotes where
     arbitrary = do
-        (GameWithProtectAndWolfHoundChoice game)    <- arbitrary
-        let game'                                   = run_ checkStage game
-
-        GameWithProtectAndDevourVotes <$> runArbitraryCommands (length $ game' ^. players) game'
-
-newtype GameWithProtectAndWolfHoundChoice = GameWithProtectAndWolfHoundChoice Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameWithProtectAndWolfHoundChoice where
-    arbitrary = do
         (GameWithProtect game)  <- arbitrary
         let game'               = run_ checkStage game
-        (Blind command)         <- arbitraryChooseAllegianceCommand game'
 
-        return $ GameWithProtectAndWolfHoundChoice (run_ (apply command) game')
+        GameWithProtectAndDevourVotes <$> runArbitraryCommands (length $ game' ^. players) game'
 
 newtype GameWithRoleModel = GameWithRoleModel Game
     deriving (Eq, Show)

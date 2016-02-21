@@ -51,11 +51,11 @@ allEngineTests =
     , testProperty "check stage skips wolf-hound's turn when no wolf-hound"     prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound
     , testProperty "check stage does nothing when game over"                    prop_checkStageDoesNothingWhenGameOver
 
-    , testProperty "check defender's turn advances to wolf-hound's turn"    prop_checkDefendersTurnAdvancesToWolfHoundsTurn
+    , testProperty "check defender's turn advances to werewolves' turn"     prop_checkDefendersTurnAdvancesToWerewolvesTurn
     , testProperty "check defender's turn advances when no defender"        prop_checkDefendersTurnAdvancesWhenNoDefender
     , testProperty "check defender's turn does nothing unless protected"    prop_checkDefendersTurnDoesNothingUnlessProtected
 
-    , testProperty "check scapegoat's turn advances to seer's turn"             prop_checkScapegoatsTurnAdvancesToSeersTurn
+    , testProperty "check scapegoat's turn advances to wolf-hound's turn"       prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn
     , testProperty "check scapegoat's turn does nothing while scapegoat blamed" prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed
 
     , testProperty "check seer's turn advances to wild-child's turn"    prop_checkSeersTurnAdvancesToWildChildsTurn
@@ -100,7 +100,7 @@ allEngineTests =
     , testProperty "check witch's turn resets poison"                           prop_checkWitchsTurnResetsPoison
     , testProperty "check witch's turn clears passes"                           prop_checkWitchsTurnClearsPasses
 
-    , testProperty "check wolf-hound's turn advances to werewolves' turn"           prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn
+    , testProperty "check wolf-hound's turn advances to seer's turn"                prop_checkWolfHoundsTurnAdvancesToSeersTurn
     , testProperty "check wolf-hound's turn advances when no wolf-hound"            prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
     , testProperty "check wolf-hound's turn sets wolf-hound's allegiance"           prop_checkWolfHoundsTurnSetsWolfHoundsAllegiance
     , testProperty "check wolf-hound's turn does nothing unless allegiance chosen"  prop_checkWolfHoundsTurnDoesNothingUnlessAllegianceChosen
@@ -128,19 +128,21 @@ allEngineTests =
 
 prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithRoleModel -> Bool
 prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithRoleModel game) =
-    has (stage . _WolfHoundsTurn) (run_ checkStage game')
+    hasn't (stage . _DefendersTurn) game'
     where
         defendersName   = game ^?! players . defenders . name
-        game'           = killPlayer defendersName game
+        game'           = run_ (apply (quitCommand defendersName) >> checkStage) game
 
-prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat :: GameAtScapegoatsTurn -> Bool
-prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat (GameAtScapegoatsTurn game) =
-    has (stage . _ScapegoatsTurn) (run_ checkStage game)
+prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat :: GameWithLynchVotes -> Bool
+prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat (GameWithLynchVotes game) =
+    hasn't (stage . _ScapegoatsTurn) game'
+    where
+        scapegoatsName  = game ^?! players . scapegoats . name
+        game'           = run_ (apply (quitCommand scapegoatsName) >> checkStage) game
 
-prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Property
+prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithLynchVotes -> Bool
 prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
-    has (players . angels . alive) (run_ checkStage game')
-    ==> has (stage . _ScapegoatsTurn) game' || has (stage . _WildChildsTurn) game' || has (stage . _DefendersTurn) game'
+    hasn't (stage . _SeersTurn) game'
     where
         seersName   = game ^?! players . seers . name
         game'       = run_ (apply (quitCommand seersName) >> checkStage) game
@@ -148,39 +150,39 @@ prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithLynchVotes game) =
 prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty :: GameAtWitchsTurn -> Property
 prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty (GameAtWitchsTurn game) =
     forAll (arbitraryPassCommand game') $ \(Blind passCommand) -> do
-        has (stage . _SeersTurn) (run_ (apply passCommand >> checkStage) game')
+        hasn't (stage . _VillagesTurn) (run_ (apply passCommand >> checkStage) game')
     where
         game' = game & allowedVoters .~ []
 
 prop_checkStageSkipsWildChildsTurnWhenNoWildChild :: GameWithSee -> Bool
 prop_checkStageSkipsWildChildsTurnWhenNoWildChild (GameWithSee game) =
-    has (stage . _DefendersTurn) (run_ checkStage game')
+    hasn't (stage . _WildChildsTurn) game'
     where
         wildChildsName  = game ^?! players . wildChildren . name
-        game'           = killPlayer wildChildsName game
+        game'           = run_ (apply (quitCommand wildChildsName) >> checkStage) game
 
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
     null (run_ checkStage game' ^.. players . angels . dead)
-    ==> has (stage . _VillagesTurn) (run_ checkStage game')
+    ==> hasn't (stage . _WitchsTurn) game'
     where
         witchsName  = game ^?! players . witches . name
-        game'       = killPlayer witchsName game
+        game'       = run_ (apply (quitCommand witchsName) >> checkStage) game
 
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound :: GameWithProtect -> Bool
 prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound (GameWithProtect game) =
-    has (stage . _WerewolvesTurn) (run_ checkStage game')
+    hasn't (stage . _WolfHoundsTurn) game'
     where
         wolfHoundsName  = game ^?! players . wolfHounds . name
-        game'           = killPlayer wolfHoundsName game
+        game'           = run_ (apply (quitCommand wolfHoundsName) >> checkStage) game
 
 prop_checkStageDoesNothingWhenGameOver :: GameAtGameOver -> Property
 prop_checkStageDoesNothingWhenGameOver (GameAtGameOver game) =
     run_ checkStage game === game
 
-prop_checkDefendersTurnAdvancesToWolfHoundsTurn :: GameWithProtect -> Bool
-prop_checkDefendersTurnAdvancesToWolfHoundsTurn (GameWithProtect game) =
-    has (stage . _WolfHoundsTurn) (run_ checkStage game)
+prop_checkDefendersTurnAdvancesToWerewolvesTurn :: GameWithProtect -> Bool
+prop_checkDefendersTurnAdvancesToWerewolvesTurn (GameWithProtect game) =
+    has (stage . _WerewolvesTurn) (run_ checkStage game)
 
 prop_checkDefendersTurnAdvancesWhenNoDefender :: GameAtDefendersTurn -> Bool
 prop_checkDefendersTurnAdvancesWhenNoDefender (GameAtDefendersTurn game) = do
@@ -193,9 +195,9 @@ prop_checkDefendersTurnDoesNothingUnlessProtected :: GameAtDefendersTurn -> Bool
 prop_checkDefendersTurnDoesNothingUnlessProtected (GameAtDefendersTurn game) =
     has (stage . _DefendersTurn) (run_ checkStage game)
 
-prop_checkScapegoatsTurnAdvancesToSeersTurn :: GameWithAllowedVoters -> Bool
-prop_checkScapegoatsTurnAdvancesToSeersTurn (GameWithAllowedVoters game) =
-    has (stage . _SeersTurn) (run_ checkStage game)
+prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn :: GameWithAllowedVoters -> Bool
+prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn (GameWithAllowedVoters game) =
+    has (stage . _WolfHoundsTurn) (run_ checkStage game)
 
 prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed :: GameAtScapegoatsTurn -> Bool
 prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed (GameAtScapegoatsTurn game) =
@@ -400,10 +402,10 @@ prop_checkWitchsTurnClearsPasses (GameAtWitchsTurn game) =
     forAll (arbitraryPassCommand game) $ \(Blind command) ->
     null $ run_ (apply command >> checkStage) game ^. passes
 
-prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn :: GameAtWolfHoundsTurn -> Property
-prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn (GameAtWolfHoundsTurn game) =
+prop_checkWolfHoundsTurnAdvancesToSeersTurn :: GameAtWolfHoundsTurn -> Property
+prop_checkWolfHoundsTurnAdvancesToSeersTurn (GameAtWolfHoundsTurn game) =
     forAll (arbitraryChooseAllegianceCommand game) $ \(Blind command) ->
-    has (stage . _WerewolvesTurn) (run_ (apply command >> checkStage) game)
+    has (stage . _SeersTurn) (run_ (apply command >> checkStage) game)
 
 prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound :: GameAtWolfHoundsTurn -> Bool
 prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound (GameAtWolfHoundsTurn game) = do

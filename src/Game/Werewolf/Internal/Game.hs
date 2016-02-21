@@ -136,10 +136,10 @@ allStages =
     [ VillagesTurn
     , ScapegoatsTurn
     , Sunset
+    , WolfHoundsTurn
     , SeersTurn
     , WildChildsTurn
     , DefendersTurn
-    , WolfHoundsTurn
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise

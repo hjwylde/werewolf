@@ -10,6 +10,7 @@
 * Removed fudging of roles and replaced with fudging of allegiances.
 * Wolf-hound now has their allegiance hidden when they are lynched.
 * Fixed the grammar on the first Werewolves' turn messages.
+* Moved Wolf-hound's turn to before the Seer's so that the Seer may see his allegiance properly.
 
 #### v0.4.6.0
 
