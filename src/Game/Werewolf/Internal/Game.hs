@@ -16,14 +16,19 @@ It also has a few additional functions for manipulating the game state.
 
 module Game.Werewolf.Internal.Game (
     -- * Game
-    Game, stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
+    Game,
+    stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
     priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
 
     Stage(..),
+    _DefendersTurn, _GameOver, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _UrsussGrunt,
+    _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn, _WolfHoundsTurn,
+
     allStages,
     stageCycle, stageAvailable,
 
     Event(..),
+    _DevourEvent, _NoDevourEvent, _PoisonEvent,
 
     newGame,
 
@@ -31,12 +36,10 @@ module Game.Werewolf.Internal.Game (
     killPlayer, setPlayerRole, setPlayerAllegiance,
 
     -- ** Searches
-    getAdjacentAlivePlayers, getDevourEvent, getPassers, getPlayerVote, getAllowedVoters,
-    getPendingVoters, getVoteResult,
+    getAdjacentAlivePlayers, getPassers, getPlayerVote, getAllowedVoters, getPendingVoters,
+    getVoteResult,
 
     -- ** Queries
-    isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
-    isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     isFirstRound,
     doesPlayerExist,
 ) where
@@ -121,6 +124,10 @@ data Event  = DevourEvent Text  -- ^ Werewolves
 
 makeLenses ''Game
 
+makePrisms ''Stage
+
+makePrisms ''Event
+
 -- | All of the stages in the order that they should occur.
 allStages :: [Stage]
 allStages =
@@ -148,25 +155,25 @@ stageCycle = cycle allStages
 --   One of the most complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
 --   the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
-stageAvailable game DefendersTurn   = any isDefender (filterAlive $ game ^. players)
+stageAvailable game DefendersTurn   = has (players . defenders . alive) game
 stageAvailable _ GameOver           = False
 stageAvailable game ScapegoatsTurn  = game ^. scapegoatBlamed
-stageAvailable game SeersTurn       = any isSeer (filterAlive $ game ^. players)
+stageAvailable game SeersTurn       = has (players . seers . alive) game
 stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
-stageAvailable game UrsussGrunt     = any isBearTamer (filterAlive $ game ^. players)
+stageAvailable game UrsussGrunt     = has (players . bearTamers . alive) game
 stageAvailable game VillagesTurn    =
-    (any isAngel (filterAlive $ game ^. players)
+    (has (players . angels . alive) game
     || not (isFirstRound game))
-    && any isAlive (getAllowedVoters game)
-stageAvailable game WerewolvesTurn  = any isWerewolf (filterAlive $ game ^. players)
+    && any (is alive) (getAllowedVoters game)
+stageAvailable game WerewolvesTurn  = has (players . werewolves . alive) game
 stageAvailable game WildChildsTurn  =
-    any isWildChild (filterAlive $ game ^. players)
+    has (players . wildChildren . alive) game
     && isNothing (game ^. roleModel)
 stageAvailable game WitchsTurn      =
-    any isWitch (filterAlive $ game ^. players)
+    has (players . witches . alive) game
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
-stageAvailable game WolfHoundsTurn  = any isWolfHound (filterAlive $ game ^. players)
+stageAvailable game WolfHoundsTurn  = has (players . wolfHounds . alive) game
 
 -- | Creates a new game with the given players. No validations are performed here, those are left to
 --   'Game.Werewolf.Engine.startGame'.
@@ -179,7 +186,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _players              = players
             , _events               = []
             , _passes               = []
-            , _allowedVoters        = map (view name) players
+            , _allowedVoters        = players ^.. names
             , _heal                 = False
             , _healUsed             = False
             , _poison               = Nothing
@@ -197,23 +204,23 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
 --   that the player's role may use. If you're after just removing a player from a game for a test,
 --   try using a 'Game.Werewolf.Command.quitCommand' instead.
 killPlayer :: Text -> Game -> Game
-killPlayer name' game = game & players %~ map (\player -> if player ^. name == name' then player & state .~ Dead else player)
+killPlayer name' = players . traverse . filteredBy name name' . state .~ Dead
 
 -- | Fudges the player's role by completely setting it to something new. This function is useful for
 --   roles such as the Angel where they become something else given some trigger.
 setPlayerRole :: Text -> Role -> Game -> Game
-setPlayerRole name' role' game = game & players %~ map (\player -> if player ^. name == name' then player & role .~ role' else player)
+setPlayerRole name' role' = players . traverse . filteredBy name name' . role .~ role'
 
 -- | Fudges the player's allegiance. This function is useful for roles such as the Wild-child where
 --   they align themselves differently given some trigger.
 setPlayerAllegiance :: Text -> Allegiance -> Game -> Game
-setPlayerAllegiance name' allegiance' game = game & players %~ map (\player -> if player ^. name == name' then player & role . allegiance .~ allegiance' else player)
+setPlayerAllegiance name' allegiance' = players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
 
 getAdjacentAlivePlayers :: Text -> Game -> [Player]
 getAdjacentAlivePlayers name' game = adjacentAlivePlayers
     where
-        players'    = filterAlive $ game ^. players
-        index       = fromJust $ findIndex ((name' ==) . view name) players'
+        players'    = game ^.. players . traverse . alive
+        index       = fromJust $ elemIndex name' (players' ^.. names)
 
         adjacentAlivePlayers
             | index == 0    = last players' : take 2 players'
@@ -221,10 +228,8 @@ getAdjacentAlivePlayers name' game = adjacentAlivePlayers
 
 -- | Gets all the @passes@ in a game (which is names only) and maps them to their player.
 getPassers :: Game -> [Player]
-getPassers game = map (`findByName_` players') passes'
-    where
-        players'    = game ^. players
-        passes'     = game ^. passes
+getPassers game =
+    map (\name' -> game ^?! players . traverse . filteredBy name name') (game ^. passes)
 
 -- | Gets a player's vote.
 getPlayerVote :: Text -> Game -> Maybe Text
@@ -232,73 +237,23 @@ getPlayerVote playerName game = game ^. votes . at playerName
 
 -- | Gets all the @allowedVoters@ in a game (which is names only) and maps them to their player.
 getAllowedVoters :: Game -> [Player]
-getAllowedVoters game = map (`findByName_` players') (game ^. allowedVoters)
-    where
-        players' = game ^. players
+getAllowedVoters game =
+    map (\name' -> game ^?! players . traverse . filteredBy name name') (game ^. allowedVoters)
 
 -- | Gets all alive players that have yet to vote.
 getPendingVoters :: Game -> [Player]
 getPendingVoters game = filter (flip Map.notMember votes' . view name) alivePlayers
     where
         votes'          = game ^. votes
-        alivePlayers    = filterAlive $ game ^. players
+        alivePlayers    = game ^.. players . traverse . alive
 
 -- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
 --   on whether the votes were in conflict.
 getVoteResult :: Game -> [Player]
-getVoteResult game = map (`findByName_` players') result
+getVoteResult game = map (\name' -> game ^?! players . traverse . filteredBy name name') result
     where
-        players'    = game ^. players
-        votees      = Map.elems $ game ^. votes
-        result      = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
-
--- | Gets the devour event if it exists.
-getDevourEvent :: Game -> Maybe Event
-getDevourEvent game = listToMaybe [event | event@(DevourEvent _) <- game ^. events]
-
--- | @isDefendersTurn game = game ^. stage == DefendersTurn@
-isDefendersTurn :: Game -> Bool
-isDefendersTurn game = game ^. stage == DefendersTurn
-
--- | @isGameOver game = game ^. stage == GameOver@
-isGameOver :: Game -> Bool
-isGameOver game = game ^. stage == GameOver
-
--- | @isScapegoatsTurn game = game ^. stage == ScapegoatsTurn@
-isScapegoatsTurn :: Game -> Bool
-isScapegoatsTurn game = game ^. stage == ScapegoatsTurn
-
--- | @isSeersTurn game = game ^. stage == SeersTurn@
-isSeersTurn :: Game -> Bool
-isSeersTurn game = game ^. stage == SeersTurn
-
--- | @isSunrise game = game ^. stage == Sunrise@
-isSunrise :: Game -> Bool
-isSunrise game = game ^. stage == Sunrise
-
--- | @isSunset game = game ^. stage == Sunset@
-isSunset :: Game -> Bool
-isSunset game = game ^. stage == Sunset
-
--- | @isVillagesTurn game = game ^. stage == VillagesTurn@
-isVillagesTurn :: Game -> Bool
-isVillagesTurn game = game ^. stage == VillagesTurn
-
--- | @isWerewolvesTurn game = game ^. stage == WerewolvesTurn@
-isWerewolvesTurn :: Game -> Bool
-isWerewolvesTurn game = game ^. stage == WerewolvesTurn
-
--- | @isWildChildsTurn game = game ^. stage == WildChildsTurn@
-isWildChildsTurn :: Game -> Bool
-isWildChildsTurn game = game ^. stage == WildChildsTurn
-
--- | @isWitchsTurn game = game ^. stage == WitchsTurn@
-isWitchsTurn :: Game -> Bool
-isWitchsTurn game = game ^. stage == WitchsTurn
-
--- | @isWolfHoundsTurn game = game ^. stage == WolfHoundsTurn@
-isWolfHoundsTurn :: Game -> Bool
-isWolfHoundsTurn game = game ^. stage == WolfHoundsTurn
+        votees = Map.elems $ game ^. votes
+        result = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
 
 -- | @isFirstRound game = game ^. round == 0@
 isFirstRound :: Game -> Bool
@@ -306,4 +261,4 @@ isFirstRound game = game ^. round == 0
 
 -- | Queries whether the player is in the game.
 doesPlayerExist :: Text -> Game -> Bool
-doesPlayerExist name = isJust . findByName name . view players
+doesPlayerExist name = has (players . names . only name)

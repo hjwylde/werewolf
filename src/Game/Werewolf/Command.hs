@@ -24,7 +24,7 @@ module Game.Werewolf.Command (
     statusCommand, voteDevourCommand, voteLynchCommand,
 ) where
 
-import Control.Lens         hiding (only)
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
@@ -37,12 +37,8 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import           Game.Werewolf.Engine
-import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
-                                                getDevourEvent, getPendingVoters, getPlayerVote,
-                                                isDefendersTurn, isGameOver, isScapegoatsTurn,
-                                                isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-                                                isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
-                                                killPlayer, setPlayerRole)
+import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getPendingVoters,
+                                                getPlayerVote, killPlayer, setPlayerRole)
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role
@@ -92,7 +88,7 @@ choosePlayersCommand callerName targetNames = Command $ do
 
 circleCommand :: Text -> Bool -> Command
 circleCommand callerName includeDead = Command $ do
-        players' <- uses players (if includeDead then id else filterAlive)
+        players' <- gets $ toListOf (players . traverse . if includeDead then id else alive)
 
         tell [circleMessage callerName players']
 
@@ -136,16 +132,16 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
     Sunset          -> return ()
     UrsussGrunt     -> return ()
     VillagesTurn    -> do
-        allowedVoters <- getAllowedVoters
-        pendingVoters <- getPendingVoters
+        allowedVoterNames <- use allowedVoters
+        pendingVoterNames <- toListOf names <$> getPendingVoters
 
-        tell [waitingOnMessage Nothing $ allowedVoters `intersect` pendingVoters]
-        tell $ map (pingPlayerMessage . view name) (allowedVoters `intersect` pendingVoters)
+        tell [waitingOnMessage Nothing $ allowedVoterNames `intersect` pendingVoterNames]
+        tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
     WerewolvesTurn  -> do
         pendingVoters <- getPendingVoters
 
         tell [pingRoleMessage "Werewolves"]
-        tell $ map (pingPlayerMessage . view name) (filterWerewolves pendingVoters)
+        tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
     WildChildsTurn  -> do
         wildChild <- findPlayerByRole_ wildChildRole
 
@@ -165,10 +161,9 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
 poisonCommand :: Text -> Text -> Command
 poisonCommand callerName targetName = Command $ do
     validateWitchsCommand callerName
-    whenM (use poisonUsed)              $ throwError [playerHasAlreadyPoisonedMessage callerName]
+    whenM (use poisonUsed)                                                          $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
-    whenJustM getDevourEvent            $ \(DevourEvent targetName') ->
-        when (targetName == targetName') $ throwError [playerCannotDoThatMessage callerName]
+    whenM (isJust <$> preuse (events . traverse . _DevourEvent . only targetName))  $ throwError [playerCannotDoThatMessage callerName]
 
     poison      .= Just targetName
     poisonUsed  .= True
@@ -195,13 +190,13 @@ quitCommand callerName = Command $ do
     tell [playerQuitMessage caller]
 
     passes %= delete callerName
-    when (isAngel caller)       $ setPlayerRole callerName simpleVillagerRole
-    when (isDefender caller)    $ do
+    when (is angel caller)      $ setPlayerRole callerName simpleVillagerRole
+    when (is defender caller)   $ do
         protect         .= Nothing
         priorProtect    .= Nothing
-    when (isSeer caller)        $ see .= Nothing
-    when (isWildChild caller)   $ roleModel .= Nothing
-    when (isWitch caller)       $ do
+    when (is seer caller)       $ see .= Nothing
+    when (is wildChild caller)  $ roleModel .= Nothing
+    when (is witch caller)      $ do
         heal        .= False
         healUsed    .= False
         poison      .= Nothing
@@ -223,19 +218,19 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
-        game            <- get
-        allowedVoters   <- getAllowedVoters
-        pendingVoters   <- getPendingVoters
+        game                <- get
+        allowedVoterNames   <- use allowedVoters
+        pendingVoterNames   <- toListOf names <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
-        tell [waitingOnMessage (Just callerName) (allowedVoters `intersect` pendingVoters)]
+        tell [waitingOnMessage (Just callerName) (allowedVoterNames `intersect` pendingVoterNames)]
     WerewolvesTurn  -> do
-        game            <- get
-        pendingVoters   <- filterWerewolves <$> getPendingVoters
+        game                <- get
+        pendingVoterNames   <- toListOf (werewolves . name) <$> getPendingVoters
 
         tell $ standardStatusMessages stage' (game ^. players)
         whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
-            tell [waitingOnMessage (Just callerName) pendingVoters]
+            tell [waitingOnMessage (Just callerName) pendingVoterNames]
     _               -> do
         game <- get
 
@@ -255,7 +250,7 @@ voteDevourCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- uses players $ map (view name) . filterAlive . filterWerewolves
+    aliveWerewolfNames <- gets $ toListOf (players . werewolves . alive . name)
 
     tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
 

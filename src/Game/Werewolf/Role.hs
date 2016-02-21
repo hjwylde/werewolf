@@ -12,9 +12,11 @@ functions relevant to the public interface.
 
 module Game.Werewolf.Role (
     -- * Role
-    Role, name, allegiance, balance, description, advice,
+    Role,
+    name, allegiance, balance, description, advice,
 
     Allegiance(..),
+    _Angel, _Villagers, _Werewolves,
 
     -- ** Instances
     allRoles, restrictedRoles,

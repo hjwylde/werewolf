@@ -6,50 +6,58 @@ Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Players are quite simple in themselves. They have a @name@, @role@ and @state@. Any complex
+Players are quite simple in themselves. They have a 'name', 'role' and 'state'. Any complex
 behaviour is handled in "Game.Werewolf.Command" and "Game.Werewolf.Engine". This module provides
 utility functions for searching, filtering and querying lists of players based on these 3
 attributes.
 -}
 
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE TemplateHaskell       #-}
 
 module Game.Werewolf.Internal.Player (
     -- * Player
-    Player, name, role, state,
+    Player,
+    name, role, state,
 
     State(..),
+    _Alive, _Dead,
 
     newPlayer,
 
-    -- ** Searches
-    findByName, findByName_, findByRole, findByRole_,
+    -- ** Prisms
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    angel, bearTamer, defender, scapegoat, seer, simpleVillager, simpleWerewolf, villageIdiot,
+    villagerVillager, wildChild, witch, wolfHound,
+    villager, werewolf,
+    alive, dead,
 
-    -- ** Filters
-    filterByRole,
-    filterWerewolves,
-    filterAlive, filterDead,
+    -- ** Traversals
+    -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
+    names, roles, states,
 
-    -- ** Queries
-    isAngel, isBearTamer, isDefender, isScapegoat, isSeer, isSimpleVillager, isSimpleWerewolf,
-    isVillageIdiot, isVillagerVillager, isWildChild, isWitch, isWolfHound,
-    isVillager, isWerewolf,
-    isAlive, isDead,
+    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    angels, bearTamers, defenders, scapegoats, seers, simpleVillagers, simpleWerewolves,
+    villageIdiots, villagerVillagers, wildChildren, witches, wolfHounds,
+    villagers, werewolves,
+
+    -- * Utility functions
+    is, filteredBy,
 ) where
 
 import Control.Lens
 
 import Data.Function
-import Data.List
-import Data.Maybe
 import Data.Text     (Text)
 
 import Game.Werewolf.Internal.Role hiding (name)
 
--- | A player has a @name@, @role@ and @state@. Any stateful information needed for a player's role
+-- | A player has a 'name', 'role' and 'state'. Any stateful information needed for a player's role
 --   is held on the 'Game' itself.
 --
---   N.B., player equality is defined on just the @name@ as a player's @role@ may change throughout
+--   N.B., player equality is defined on just the 'name' as a player's 'role' may change throughout
 --   the game.
 data Player = Player
     { _name  :: Text
@@ -66,115 +74,220 @@ makeLenses ''Player
 instance Eq Player where
     (==) = (==) `on` view name
 
+makePrisms ''State
+
 -- | Creates a new 'Alive' player.
 newPlayer :: Text -> Role -> Player
 newPlayer name role = Player name role Alive
 
--- | Attempts to find the first player in the list with the given name.
-findByName :: Text -> [Player] -> Maybe Player
-findByName name' = find ((name' ==) . view name)
+-- | This 'Prism' provides the traversal of a 'Player' with an 'angelRole'.
+angel :: Prism' Player Player
+angel = genericRolePrism angelRole
 
--- | Finds the first player in the list with the given name.
+-- | This 'Prism' provides the traversal of a 'Player' with a 'bearTamerRole'.
+bearTamer :: Prism' Player Player
+bearTamer = genericRolePrism bearTamerRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'defenderRole'.
+defender :: Prism' Player Player
+defender = genericRolePrism defenderRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'scapegoatRole'.
+scapegoat :: Prism' Player Player
+scapegoat = genericRolePrism scapegoatRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'seerRole'.
+seer :: Prism' Player Player
+seer = genericRolePrism seerRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'simpleVillagerRole'.
+simpleVillager :: Prism' Player Player
+simpleVillager = genericRolePrism simpleVillagerRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'simpleWerewolfRole'.
+simpleWerewolf :: Prism' Player Player
+simpleWerewolf = genericRolePrism simpleWerewolfRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'villageIdiotRole'.
+villageIdiot :: Prism' Player Player
+villageIdiot = genericRolePrism villageIdiotRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'villagerVillagerRole'.
+villagerVillager :: Prism' Player Player
+villagerVillager = genericRolePrism villagerVillagerRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'wildChildRole'.
+wildChild :: Prism' Player Player
+wildChild = genericRolePrism wildChildRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'witchRole'.
+witch :: Prism' Player Player
+witch = genericRolePrism witchRole
+
+-- | This 'Prism' provides the traversal of a 'Player' with a 'wolfHoundRole'.
+wolfHound :: Prism' Player Player
+wolfHound = genericRolePrism wolfHoundRole
+
+genericRolePrism :: Role -> Prism' Player Player
+genericRolePrism role' = prism (set role role') $ \player ->
+    if player ^. role == role' then Right player else Left player
+
+-- | This 'Prism' provides the traversal of a 'Player' aligned with the 'Villagers'.
+villager :: Prism' Player Player
+villager = genericRoleAllegiancePrism Villagers
+
+-- | This 'Prism' provides the traversal of a 'Player' aligned with the 'Werewolves'.
+werewolf :: Prism' Player Player
+werewolf = genericRoleAllegiancePrism Werewolves
+
+genericRoleAllegiancePrism :: Allegiance -> Prism' Player Player
+genericRoleAllegiancePrism allegiance' = prism (set (role . allegiance) allegiance') $ \player ->
+    if player ^. role . allegiance == allegiance' then Right player else Left player
+
+-- | This 'Prism' provides the traversal of an 'Alive' state in a 'Player'.
+alive :: Prism' Player Player
+alive = genericStatePrism Alive
+
+-- | This 'Prism' provides the traversal of a 'Dead' state in a 'Player'.
+dead :: Prism' Player Player
+dead = genericStatePrism Dead
+
+genericStatePrism :: State -> Prism' Player Player
+genericStatePrism state' = prism (set state state') $ \player ->
+    if player ^. state == state' then Right player else Left player
+
+-- | This 'Traversal' provides the traversal of 'Player' names.
 --
---   @findByName_ name = fromJust . findByName name@
-findByName_ :: Text -> [Player] -> Player
-findByName_ name = fromJust . findByName name
+-- @
+-- 'names' = 'traverse' . 'name'
+-- @
+names :: Traversable t => Traversal' (t Player) Text
+names = traverse . name
 
--- | Attempts to find the first player in the list with the given role.
-findByRole :: Role -> [Player] -> Maybe Player
-findByRole role' = find ((role' ==) . view role)
-
--- | Finds the first player in the list with the given role.
+-- | This 'Traversal' provides the traversal of 'Player' roles.
 --
---   @findByRole_ role = fromJust . findByRole role@
-findByRole_ :: Role -> [Player] -> Player
-findByRole_ role = fromJust . findByRole role
+-- @
+-- 'roles' = 'traverse' . 'role'
+-- @
+roles :: Traversable t => Traversal' (t Player) Role
+roles = traverse . role
 
--- | Filters players by role.
-filterByRole :: Role -> [Player] -> [Player]
-filterByRole role' = filter ((role' ==) . view role)
-
--- | Filters players by allegiance, not role.
---   If you're after filtering by role, try @filterByRole simpleWerewolfRole@.
+-- | This 'Traversal' provides the traversal of 'Player' states.
 --
---   @filterWerewolves = filter isWerewolf@
-filterWerewolves :: [Player] -> [Player]
-filterWerewolves = filter isWerewolf
+-- @
+-- 'states' = 'traverse' . 'state'
+-- @
+states :: Traversable t => Traversal' (t Player) State
+states = traverse . state
 
--- | @filterAlive = filter isAlive@
-filterAlive :: [Player] -> [Player]
-filterAlive = filter isAlive
-
--- | @filterDead = filter isDead@
-filterDead :: [Player] -> [Player]
-filterDead = filter isDead
-
--- | @isAngel player = player ^. role == 'angelRole'@
-isAngel :: Player -> Bool
-isAngel player = player ^. role == angelRole
-
--- | @isBearTamer player = player ^. role == 'bearTamerRole'@
-isBearTamer :: Player -> Bool
-isBearTamer player = player ^. role == bearTamerRole
-
--- | @isDefender player = player ^. role == 'defenderRole'@
-isDefender :: Player -> Bool
-isDefender player = player ^. role == defenderRole
-
--- | @isScapegoat player = player ^. role == 'scapegoatRole'@
-isScapegoat :: Player -> Bool
-isScapegoat player = player ^. role == scapegoatRole
-
--- | @isSeer player = player ^. role == 'seerRole'@
-isSeer :: Player -> Bool
-isSeer player = player ^. role == seerRole
-
--- | @isSimpleVillager player = player ^. role == 'simpleVillagerRole'@
-isSimpleVillager :: Player -> Bool
-isSimpleVillager player = player ^. role == simpleVillagerRole
-
--- | @isSimpleWerewolf player = player ^. role == 'simpleWerewolfRole'@
-isSimpleWerewolf :: Player -> Bool
-isSimpleWerewolf player = player ^. role == simpleWerewolfRole
-
--- | @isVillageIdiot player = player ^. role == 'villageIdiotRole'@
-isVillageIdiot :: Player -> Bool
-isVillageIdiot player = player ^. role == villageIdiotRole
-
--- | @isVillagerVillager player = player ^. role == 'villagerVillagerRole'@
-isVillagerVillager :: Player -> Bool
-isVillagerVillager player = player ^. role == villagerVillagerRole
-
--- | @isWildChild player = player ^. role == 'wildChildRole'@
-isWildChild :: Player -> Bool
-isWildChild player = player ^. role == wildChildRole
-
--- | @isWitch player = player ^. role == 'witchRole'@
-isWitch :: Player -> Bool
-isWitch player = player ^. role == witchRole
-
--- | @isWolfHound player = player ^. role == 'wolfHoundRole'@
-isWolfHound :: Player -> Bool
-isWolfHound player = player ^. role == wolfHoundRole
-
--- | Queries a player's allegiance, not role.
---   If you're after querying their role, try 'isSimpleVillager'.
+-- | This 'Traversal' provides the traversal of 'angel' 'Player's.
 --
---   @isVillager player = player ^. role . allegiance == Villagers@
-isVillager :: Player -> Bool
-isVillager player = player ^. role . allegiance == Villagers
+-- @
+-- 'angels' = 'traverse' . 'angel'
+-- @
+angels :: Traversable t => Traversal' (t Player) Player
+angels = traverse . angel
 
--- | Queries a player's allegiance, not role.
---   If you're after querying their role, try 'isSimpleWerewolf'.
+-- | This 'Traversal' provides the traversal of 'bearTamer' 'Player's.
 --
---   @isWerewolf player = player ^. role . allegiance == Werewolves@
-isWerewolf :: Player -> Bool
-isWerewolf player = player ^. role . allegiance == Werewolves
+-- @
+-- 'bearTamers' = 'traverse' . 'bearTamer'
+-- @
+bearTamers :: Traversable t => Traversal' (t Player) Player
+bearTamers = traverse . bearTamer
 
--- | @isAlive player = player ^. state == Alive@
-isAlive :: Player -> Bool
-isAlive player = player ^. state == Alive
+-- | This 'Traversal' provides the traversal of 'defender' 'Player's.
+--
+-- @
+-- 'defenders' = 'traverse' . 'defender'
+-- @
+defenders :: Traversable t => Traversal' (t Player) Player
+defenders = traverse . defender
 
--- | @isDead player = player ^. state == Dead@
-isDead :: Player -> Bool
-isDead player = player ^. state == Dead
+-- | This 'Traversal' provides the traversal of 'scapegoat' 'Player's.
+--
+-- @
+-- 'scapegoats' = 'traverse' . 'scapegoat'
+-- @
+scapegoats :: Traversable t => Traversal' (t Player) Player
+scapegoats = traverse . scapegoat
+
+-- | This 'Traversal' provides the traversal of 'seer' 'Player's.
+--
+-- @
+-- 'seers' = 'traverse' . 'seer'
+-- @
+seers :: Traversable t => Traversal' (t Player) Player
+seers = traverse . seer
+
+-- | This 'Traversal' provides the traversal of 'simpleVillager' 'Player's.
+--
+-- @
+-- 'simpleVillagers' = 'traverse' . 'simpleVillager'
+-- @
+simpleVillagers :: Traversable t => Traversal' (t Player) Player
+simpleVillagers = traverse . simpleVillager
+
+-- | This 'Traversal' provides the traversal of 'simpleWerewolf' 'Player's.
+--
+-- @
+-- 'simpleWerewolves' = 'traverse' . 'simpleWerewolf'
+-- @
+simpleWerewolves :: Traversable t => Traversal' (t Player) Player
+simpleWerewolves = traverse . simpleWerewolf
+
+-- | This 'Traversal' provides the traversal of 'villageIdiot' 'Player's.
+--
+-- @
+-- 'villageIdiots' = 'traverse' . 'villageIdiot'
+-- @
+villageIdiots :: Traversable t => Traversal' (t Player) Player
+villageIdiots = traverse . villageIdiot
+
+-- | This 'Traversal' provides the traversal of 'villagerVillager' 'Player's.
+--
+-- @
+-- 'villagerVillagers' = 'traverse' . 'villagerVillager'
+-- @
+villagerVillagers :: Traversable t => Traversal' (t Player) Player
+villagerVillagers = traverse . villagerVillager
+
+-- | This 'Traversal' provides the traversal of 'wildChild' 'Player's.
+--
+-- @
+-- 'wildChildren' = 'traverse' . 'wildChild'
+-- @
+wildChildren :: Traversable t => Traversal' (t Player) Player
+wildChildren = traverse . wildChild
+
+-- | This 'Traversal' provides the traversal of 'witch' 'Player's.
+--
+-- @
+-- 'witches' = 'traverse' . 'witch'
+-- @
+witches :: Traversable t => Traversal' (t Player) Player
+witches = traverse . witch
+
+-- | This 'Traversal' provides the traversal of 'wolfHound' 'Player's.
+--
+-- @
+-- 'wolfHounds' = 'traverse' . 'wolfHound'
+-- @
+wolfHounds :: Traversable t => Traversal' (t Player) Player
+wolfHounds = traverse . wolfHound
+
+-- | This 'Traversal' provides the traversal of 'villager' 'Player's.
+--
+-- @
+-- 'villagers' = 'traverse' . 'villager'
+-- @
+villagers :: Traversable t => Traversal' (t Player) Player
+villagers = traverse . villager
+
+-- | This 'Traversal' provides the traversal of 'werewolf' 'Player's.
+--
+-- @
+-- 'werewolves' = 'traverse' . 'werewolf'
+-- @
+werewolves :: Traversable t => Traversal' (t Player) Player
+werewolves = traverse . werewolf

@@ -12,16 +12,18 @@ functions relevant to the public interface.
 
 module Game.Werewolf.Game (
     -- * Game
-    Game, stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
+    Game,
+    stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
     priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
 
     Stage(..),
+    _DefendersTurn, _GameOver, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _UrsussGrunt,
+    _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn, _WolfHoundsTurn,
 
     Event(..),
+    _DevourEvent, _NoDevourEvent, _PoisonEvent,
 
     -- ** Queries
-    isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isSunset, isVillagesTurn,
-    isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     doesPlayerExist,
 ) where
 
