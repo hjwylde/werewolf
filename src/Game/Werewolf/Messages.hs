@@ -202,14 +202,15 @@ villagesTurnMessages =
 
 firstWerewolvesTurnMessages :: [Text] -> [Message]
 firstWerewolvesTurnMessages tos =
-    map (\to -> privateMessage to $ packMessage to) tos
+    [privateMessage to $ packMessage to | length tos > 1, to <- tos]
     ++ werewolvesTurnMessages tos
     where
         packMessage werewolfName    = T.unwords
             [ "You feel restless, like an old curse is keeping you from sleep."
             , "It seems you're not the only one..."
             , packNames werewolfName
-            , "are also emerging from their homes."
+            , if length tos == 2 then "is" else "are", "also emerging from their"
+            , if length tos == 2 then "home." else "homes."
             ]
         packNames werewolfName      = T.intercalate ", " (tos \\ [werewolfName])
 

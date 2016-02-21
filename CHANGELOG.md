@@ -9,6 +9,7 @@
 * Added prisms and traversals to Role, Player & Game modules. ([#20](https://github.com/hjwylde/werewolf/issues/20))
 * Removed fudging of roles and replaced with fudging of allegiances.
 * Wolf-hound now has their allegiance hidden when they are lynched.
+* Fixed the grammar on the first Werewolves' turn messages.
 
 #### v0.4.6.0
 
