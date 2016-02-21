@@ -2,6 +2,11 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed balance calculation to ensure total balance is between -2 and 2.
+* Changed `--random-extra-roles` to have between `n / 3` and `n / 3 + 2` extra roles.
+
 #### v0.4.6.0
 
 *Minor*

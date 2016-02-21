@@ -67,7 +67,7 @@ handle callerName (Options extraRoles playerNames) = do
 
 randomExtraRoles :: MonadIO m => Int -> m [Role]
 randomExtraRoles n = liftIO . evalRandIO $ do
-    let minimum = n `div` 5 + 1
+    let minimum = n `div` 3
 
     count <- getRandomR (minimum, minimum + 2)
 

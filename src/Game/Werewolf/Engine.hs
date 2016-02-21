@@ -408,13 +408,13 @@ isPlayerDead name = isDead <$> findPlayerByName_ name
 padRoles :: [Role] -> Int -> [Role]
 padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
     where
-        goal                    = 2
+        goal                    = 3
         m                       = max (n - length roles) 0
         startingBalance         = sum (map (view balance) roles)
         simpleWerewolfBalance   = simpleWerewolfRole ^. balance
 
         -- Little magic here to calculate how many Werewolves and Villagers we want.
-        -- Essentially we get a 1:4 ratio of Werewolves to Villagers.
+        -- This tries to ensure that the balance of the game is between -2 and 2.
         simpleWerewolvesCount   = (goal - m - startingBalance) `div` (simpleWerewolfBalance - 1) + 1
         simpleVillagersCount    = m - simpleWerewolvesCount
 
