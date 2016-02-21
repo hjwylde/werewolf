@@ -66,7 +66,7 @@ instance Arbitrary Game where
         return $ game & stage .~ stage'
 
 instance Arbitrary Stage where
-    arbitrary = elements $ allStages \\ [GameOver, Sunrise, Sunset]
+    arbitrary = elements . nub $ allStages \\ [GameOver, Sunrise, Sunset]
 
 instance Arbitrary Player where
     arbitrary = newPlayer <$> arbitrary <*> arbitrary
@@ -254,8 +254,8 @@ instance Arbitrary GameWithOneAllegianceAlive where
     arbitrary = do
         game            <- arbitrary
         allegiance'     <- arbitrary
-        let players'    = filter ((allegiance' /=) . view (role . allegiance)) (game ^. players)
-        let game'       = foldr killPlayer game (players' ^.. names)
+        let players'    = game ^.. players . traverse . filteredBy (role . allegiance) allegiance'
+        let game'       = foldr killPlayer game ((game ^. players \\ players') ^.. names)
 
         return $ GameWithOneAllegianceAlive game'
 
@@ -338,7 +338,8 @@ newtype GameWithScapegoatBlamed = GameWithScapegoatBlamed Game
 
 instance Arbitrary GameWithScapegoatBlamed where
     arbitrary = do
-        (GameWithLynchVotes game) <- suchThat arbitrary $ \(GameWithLynchVotes game) -> length (getVoteResult game) > 1
+        (GameWithLynchVotes game) <- suchThat arbitrary $ \(GameWithLynchVotes game) ->
+            length (getVoteResult game) > 1
 
         return $ GameWithScapegoatBlamed game
 
@@ -358,9 +359,9 @@ newtype GameWithVillageIdiotRevealed = GameWithVillageIdiotRevealed Game
 
 instance Arbitrary GameWithVillageIdiotRevealed where
     arbitrary = do
-        game                <- arbitrary
-        let villageIdiot    = game ^?! players . villageIdiots
-        let game'           = game & villageIdiotRevealed .~ True & allowedVoters %~ delete (villageIdiot ^. name)
+        game                    <- arbitrary
+        let villageIdiotsName   = game ^?! players . villageIdiots . name
+        let game'               = game & villageIdiotRevealed .~ True & allowedVoters %~ delete villageIdiotsName
 
         return $ GameWithVillageIdiotRevealed game'
 
@@ -385,12 +386,12 @@ instance Arbitrary GameWithZeroAllegiancesAlive where
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
-    n <- choose (14, 24)
+    n       <- choose (14, 24)
     players <- nubOn (view name) <$> infiniteList
 
     let playersWithRestrictedRole = map (\role' -> players ^?! traverse . filteredBy role role') restrictedRoles
 
-    let simpleWerewolves'   = players ^.. taking (n `quot` 6 + 1) simpleWerewolves
+    let simpleWerewolves'   = players ^.. taking (n `quot` 5 + 1) simpleWerewolves
     let simpleVillagers'    = players ^.. taking (n - length restrictedRoles - length simpleWerewolves') simpleVillagers
 
     return $ playersWithRestrictedRole ++ simpleVillagers' ++ simpleWerewolves'
@@ -416,10 +417,10 @@ arbitraryCommand game = case game ^. stage of
 
 arbitraryChooseAllegianceCommand :: Game -> Gen (Blind Command)
 arbitraryChooseAllegianceCommand game = do
-    let wolfHound   = game ^?! players . wolfHounds
-    allegianceName  <- elements $ map (T.pack . show) [Villagers, Werewolves]
+    let wolfHoundsName  = game ^?! players . wolfHounds . name
+    allegianceName      <- elements $ map (T.pack . show) [Villagers, Werewolves]
 
-    return . Blind $ chooseAllegianceCommand (wolfHound ^. name) allegianceName
+    return . Blind $ chooseAllegianceCommand wolfHoundsName allegianceName
 
 arbitraryChoosePlayerCommand :: Game -> Gen (Blind Command)
 arbitraryChoosePlayerCommand game = do
@@ -430,10 +431,10 @@ arbitraryChoosePlayerCommand game = do
 
 arbitraryChoosePlayersCommand :: Game -> Gen (Blind Command)
 arbitraryChoosePlayersCommand game = do
-    let scapegoat       = game ^?! players . scapegoats
+    let scapegoatsName  = game ^?! players . scapegoats . name
     (NonEmpty players') <- NonEmpty <$> sublistOf (game ^.. players . traverse . alive)
 
-    return . Blind $ choosePlayersCommand (scapegoat ^. name) (players' ^.. names)
+    return . Blind $ choosePlayersCommand scapegoatsName (players' ^.. names)
 
 arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do
@@ -445,18 +446,18 @@ arbitraryHealCommand game = do
 
 arbitraryPassCommand :: Game -> Gen (Blind Command)
 arbitraryPassCommand game = do
-    let witch = game ^?! players . witches
+    let witchsName = game ^?! players . witches . name
 
-    return . Blind $ passCommand (witch ^. name)
+    return . Blind $ passCommand witchsName
 
 arbitraryPoisonCommand :: Game -> Gen (Blind Command)
 arbitraryPoisonCommand game = do
-    let witch   = game ^?! players . witches
-    target      <- arbitraryPlayer game
+    let witchsName  = game ^?! players . witches . name
+    target          <- arbitraryPlayer game
 
     return $ if isJust (game ^. poison)
         then Blind noopCommand
-        else Blind $ poisonCommand (witch ^. name) (target ^. name)
+        else Blind $ poisonCommand witchsName (target ^. name)
 
 arbitraryProtectCommand :: Game -> Gen (Blind Command)
 arbitraryProtectCommand game = do
@@ -470,41 +471,41 @@ arbitraryProtectCommand game = do
 
 arbitraryQuitCommand :: Game -> Gen (Blind Command)
 arbitraryQuitCommand game = do
-    let applicableCallers = game ^.. players . traverse . alive
+    let applicableCallerNames = game ^.. players . traverse . alive . name
 
-    if null applicableCallers
+    if null applicableCallerNames
         then return $ Blind noopCommand
-        else elements applicableCallers >>= \caller ->
-            return . Blind $ quitCommand (caller ^. name)
+        else elements applicableCallerNames >>= \callersName ->
+            return . Blind $ quitCommand callersName
 
 arbitrarySeeCommand :: Game -> Gen (Blind Command)
 arbitrarySeeCommand game = do
-    let seer    = game ^?! players . seers
-    target      <- arbitraryPlayer game
+    let seersName   = game ^?! players . seers . name
+    target          <- arbitraryPlayer game
 
     return $ if isJust (game ^. see)
         then Blind noopCommand
-        else Blind $ seeCommand (seer ^. name) (target ^. name)
+        else Blind $ seeCommand seersName (target ^. name)
 
 arbitraryVoteDevourCommand :: Game -> Gen (Blind Command)
 arbitraryVoteDevourCommand game = do
-    let applicableCallers   = getPendingVoters game ^.. werewolves
-    target                  <- suchThat (arbitraryPlayer game) $ isn't werewolf
+    let applicableCallerNames   = getPendingVoters game ^.. werewolves . name
+    target                      <- suchThat (arbitraryPlayer game) $ isn't werewolf
 
-    if null applicableCallers
+    if null applicableCallerNames
         then return $ Blind noopCommand
-        else elements applicableCallers >>= \caller ->
-            return . Blind $ voteDevourCommand (caller ^. name) (target ^. name)
+        else elements applicableCallerNames >>= \callerName ->
+            return . Blind $ voteDevourCommand callerName (target ^. name)
 
 arbitraryVoteLynchCommand :: Game -> Gen (Blind Command)
 arbitraryVoteLynchCommand game = do
-    let applicableCallers   = getAllowedVoters game `intersect` getPendingVoters game
-    target                  <- arbitraryPlayer game
+    let applicableCallerNames   = (game ^. allowedVoters) `intersect` (getPendingVoters game ^.. names)
+    target                      <- arbitraryPlayer game
 
-    if null applicableCallers
+    if null applicableCallerNames
         then return $ Blind noopCommand
-        else elements applicableCallers >>= \caller ->
-            return . Blind $ voteLynchCommand (caller ^. name) (target ^. name)
+        else elements applicableCallerNames >>= \callerName ->
+            return . Blind $ voteLynchCommand callerName (target ^. name)
 
 runArbitraryCommands :: Int -> Game -> Gen Game
 runArbitraryCommands n = iterateM n $ \game -> do
