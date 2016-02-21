@@ -38,7 +38,7 @@ import qualified Data.Text  as T
 
 import           Game.Werewolf.Engine
 import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getPendingVoters,
-                                                getPlayerVote, killPlayer, setPlayerRole)
+                                                getPlayerVote, killPlayer, setPlayerAllegiance)
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role
@@ -52,13 +52,13 @@ chooseAllegianceCommand callerName allegianceName = Command $ do
     validatePlayer callerName callerName
     unlessM (isPlayerWolfHound callerName)  $ throwError [playerCannotDoThatMessage callerName]
     unlessM isWolfHoundsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
-    when (isNothing mRole)                  $ throwError [allegianceDoesNotExistMessage callerName allegianceName]
+    when (isNothing mAllegiance)            $ throwError [allegianceDoesNotExistMessage callerName allegianceName]
 
-    setPlayerRole callerName (fromJust mRole)
+    allegianceChosen .= mAllegiance
     where
-        mRole = case T.toLower allegianceName of
-            "villagers"     -> Just simpleVillagerRole
-            "werewolves"    -> Just simpleWerewolfRole
+        mAllegiance = case T.toLower allegianceName of
+            "villagers"     -> Just Villagers
+            "werewolves"    -> Just Werewolves
             _               -> Nothing
 
 choosePlayerCommand :: Text -> Text -> Command
@@ -189,8 +189,10 @@ quitCommand callerName = Command $ do
     killPlayer callerName
     tell [playerQuitMessage caller]
 
-    passes %= delete callerName
-    when (is angel caller)      $ setPlayerRole callerName simpleVillagerRole
+    passes  %= delete callerName
+    votes   %= Map.delete callerName
+
+    when (is angel caller)      $ setPlayerAllegiance callerName Villagers
     when (is defender caller)   $ do
         protect         .= Nothing
         priorProtect    .= Nothing
@@ -201,7 +203,7 @@ quitCommand callerName = Command $ do
         healUsed    .= False
         poison      .= Nothing
         poisonUsed  .= False
-    votes %= Map.delete callerName
+    when (is wolfHound caller)  $ allegianceChosen .= Nothing
 
 seeCommand :: Text -> Text -> Command
 seeCommand callerName targetName = Command $ do

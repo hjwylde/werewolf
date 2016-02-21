@@ -17,8 +17,8 @@ It also has a few additional functions for manipulating the game state.
 module Game.Werewolf.Internal.Game (
     -- * Game
     Game,
-    stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
-    priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
+    stage, round, players, events, passes, allegianceChosen, allowedVoters, heal, healUsed, poison,
+    poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
 
     Stage(..),
     _DefendersTurn, _GameOver, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _UrsussGrunt,
@@ -33,7 +33,7 @@ module Game.Werewolf.Internal.Game (
     newGame,
 
     -- ** Manipulations
-    killPlayer, setPlayerRole, setPlayerAllegiance,
+    killPlayer, setPlayerAllegiance,
 
     -- ** Searches
     getAdjacentAlivePlayers, getPassers, getPlayerVote, getAllowedVoters, getPendingVoters,
@@ -42,6 +42,7 @@ module Game.Werewolf.Internal.Game (
     -- ** Queries
     isFirstRound,
     doesPlayerExist,
+    hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
 
 import Control.Lens
@@ -84,6 +85,7 @@ data Game = Game
     , _round                :: Int
     , _players              :: [Player]
     , _events               :: [Event]
+    , _allegianceChosen     :: Maybe Allegiance -- ^ Wolf-hound
     , _allowedVoters        :: [Text]           -- ^ Scapegoat
     , _heal                 :: Bool             -- ^ Witch
     , _healUsed             :: Bool             -- ^ Witch
@@ -186,6 +188,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _players              = players
             , _events               = []
             , _passes               = []
+            , _allegianceChosen     = Nothing
             , _allowedVoters        = players ^.. names
             , _heal                 = False
             , _healUsed             = False
@@ -205,11 +208,6 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
 --   try using a 'Game.Werewolf.Command.quitCommand' instead.
 killPlayer :: Text -> Game -> Game
 killPlayer name' = players . traverse . filteredBy name name' . state .~ Dead
-
--- | Fudges the player's role by completely setting it to something new. This function is useful for
---   roles such as the Angel where they become something else given some trigger.
-setPlayerRole :: Text -> Role -> Game -> Game
-setPlayerRole name' role' = players . traverse . filteredBy name name' . role .~ role'
 
 -- | Fudges the player's allegiance. This function is useful for roles such as the Wild-child where
 --   they align themselves differently given some trigger.
@@ -262,3 +260,23 @@ isFirstRound game = game ^. round == 0
 -- | Queries whether the player is in the game.
 doesPlayerExist :: Text -> Game -> Bool
 doesPlayerExist name = has (players . names . only name)
+
+-- | Queries whether the Angel has won. The Angel wins if they manage to get themselves killed on
+--   the first round.
+--
+--   N.B., we check that the Angel isn't a 'villager' as the Angel's role is altered if they don't
+--   win.
+hasAngelWon :: Game -> Bool
+hasAngelWon game = has (players . angels) game && is dead angel && isn't villager angel
+    where
+        angel = game ^?! players . angels
+
+-- | Queries whether the Villagers have won. The Villagers win if they are the only players
+--   surviving.
+hasVillagersWon :: Game -> Bool
+hasVillagersWon = allOf (players . traverse . alive) (is villager)
+
+-- | Queries whether the Werewolves have won. The Werewolves win if they are the only players
+--   surviving.
+hasWerewolvesWon :: Game -> Bool
+hasWerewolvesWon = allOf (players . traverse . alive) (is werewolf)

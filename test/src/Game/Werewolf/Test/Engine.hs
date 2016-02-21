@@ -25,7 +25,7 @@ import           Data.Text         (Text)
 
 import           Game.Werewolf.Command
 import           Game.Werewolf.Engine          hiding (doesPlayerExist, getDevourEvent,
-                                                getVoteResult, killPlayer)
+                                                getVoteResult, killPlayer, setPlayerAllegiance)
 import           Game.Werewolf.Internal.Game
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
@@ -63,8 +63,8 @@ allEngineTests =
     , testProperty "check seer's turn resets sees"                      prop_checkSeersTurnResetsSee
     , testProperty "check seer's turn does nothing unless seen"         prop_checkSeersTurnDoesNothingUnlessSeen
 
-    , testProperty "check sunrise increments round"     prop_checkSunriseIncrementsRound
-    , testProperty "check sunrise sets angel's role"    prop_checkSunriseSetsAngelsRole
+    , testProperty "check sunrise increments round"         prop_checkSunriseIncrementsRound
+    , testProperty "check sunrise sets angel's allegiance"  prop_checkSunriseSetsAngelsAllegiance
 
     , testProperty "check sunset sets wild-child's allegiance when role model dead" prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead
 
@@ -100,15 +100,16 @@ allEngineTests =
     , testProperty "check witch's turn resets poison"                           prop_checkWitchsTurnResetsPoison
     , testProperty "check witch's turn clears passes"                           prop_checkWitchsTurnClearsPasses
 
-    , testProperty "check wolf-hound's turn advances to werewolves' turn"   prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn
-    , testProperty "check wolf-hound's turn advances when no wolf-hound"    prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
-    , testProperty "check wolf-hound's turn does nothing unless chosen"     prop_checkWolfHoundsTurnDoesNothingUnlessChosen
+    , testProperty "check wolf-hound's turn advances to werewolves' turn"           prop_checkWolfHoundsTurnAdvancesToWerewolvesTurn
+    , testProperty "check wolf-hound's turn advances when no wolf-hound"            prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
+    , testProperty "check wolf-hound's turn sets wolf-hound's allegiance"           prop_checkWolfHoundsTurnSetsWolfHoundsAllegiance
+    , testProperty "check wolf-hound's turn does nothing unless allegiance chosen"  prop_checkWolfHoundsTurnDoesNothingUnlessAllegianceChosen
 
-    , testProperty "check game over advances stage when zero allegiances alive" prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive
-    , testProperty "check game over advances stage when one allegiance alive" prop_checkGameOverAdvancesStageWhenOneAllegianceAlive
+    , testProperty "check game over advances stage when one allegiance alive"                   prop_checkGameOverAdvancesStageWhenOneAllegianceAlive
     -- TODO (hjw): pending
     --, testProperty "check game over does nothing when at least two allegiances alive"   prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive
-    , testProperty "check game over advances stage when second round and angel dead" prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead
+    , testProperty "check game over advances stage when after first round and angel dead"       prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead
+    , testProperty "check game over does nothing when angel dead but aligned with villagers"    prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers
 
     , testProperty "start game uses given players"                              prop_startGameUsesGivenPlayers
     , testProperty "start game errors unless unique player names"               prop_startGameErrorsUnlessUniquePlayerNames
@@ -160,7 +161,7 @@ prop_checkStageSkipsWildChildsTurnWhenNoWildChild (GameWithSee game) =
 
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
-    null (run_ checkStage game' ^.. players . angels)
+    null (run_ checkStage game' ^.. players . angels . dead)
     ==> has (stage . _VillagesTurn) (run_ checkStage game')
     where
         witchsName  = game ^?! players . witches . name
@@ -223,12 +224,11 @@ prop_checkSunriseIncrementsRound :: GameAtSunrise -> Property
 prop_checkSunriseIncrementsRound (GameAtSunrise game) =
     run_ checkStage game ^. round === game ^. round + 1
 
-prop_checkSunriseSetsAngelsRole :: GameAtSunrise -> Bool
-prop_checkSunriseSetsAngelsRole (GameAtSunrise game) = do
-    let angel = game ^?! players . angels
+prop_checkSunriseSetsAngelsAllegiance :: GameAtSunrise -> Bool
+prop_checkSunriseSetsAngelsAllegiance (GameAtSunrise game) = do
     let game' = run_ checkStage game
 
-    is simpleVillager $ game' ^?! players . traverse . filteredBy name (angel ^. name)
+    is villager $ game' ^?! players . angels
 
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
@@ -412,13 +412,15 @@ prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound (GameAtWolfHoundsTurn game) = do
 
     hasn't (stage . _WolfHoundsTurn) (run_ (apply command >> checkStage) game)
 
-prop_checkWolfHoundsTurnDoesNothingUnlessChosen :: GameAtWolfHoundsTurn -> Bool
-prop_checkWolfHoundsTurnDoesNothingUnlessChosen (GameAtWolfHoundsTurn game) =
-    has (stage . _WolfHoundsTurn) (run_ checkStage game)
+prop_checkWolfHoundsTurnSetsWolfHoundsAllegiance :: GameWithAllegianceChosen -> Property
+prop_checkWolfHoundsTurnSetsWolfHoundsAllegiance (GameWithAllegianceChosen game) =
+    game' ^?! players . wolfHounds . role . allegiance === fromJust (game' ^. allegianceChosen)
+    where
+        game' = run_ checkStage game
 
-prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive :: GameWithZeroAllegiancesAlive -> Bool
-prop_checkGameOverAdvancesStageWhenZeroAllegiancesAlive (GameWithZeroAllegiancesAlive game) =
-    has (stage . _GameOver) $ run_ checkGameOver game
+prop_checkWolfHoundsTurnDoesNothingUnlessAllegianceChosen :: GameAtWolfHoundsTurn -> Bool
+prop_checkWolfHoundsTurnDoesNothingUnlessAllegianceChosen (GameAtWolfHoundsTurn game) =
+    has (stage . _WolfHoundsTurn) (run_ checkStage game)
 
 prop_checkGameOverAdvancesStageWhenOneAllegianceAlive :: GameWithOneAllegianceAlive -> Property
 prop_checkGameOverAdvancesStageWhenOneAllegianceAlive (GameWithOneAllegianceAlive game) =
@@ -433,12 +435,19 @@ prop_checkGameOverAdvancesStageWhenOneAllegianceAlive (GameWithOneAllegianceAliv
 --    length (nub . map (view $ role . allegiance) . filterAlive $ game ^. players) > 1
 --    ==> not . is gameOver $ run_ checkGameOver game
 
-prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead :: GameOnSecondRound -> Bool
-prop_checkGameOverAdvancesStageWhenSecondRoundAndAngelDead (GameOnSecondRound game) = do
-    let angel = game ^?! players . angels
-    let game' = killPlayer (angel ^. name) game
+prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead :: GameOnSecondRound -> Bool
+prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead (GameOnSecondRound game) = do
+    let angelsName  = game ^?! players . angels . name
+    let game'       = killPlayer angelsName game
 
     has (stage . _GameOver) $ run_ checkGameOver game'
+
+prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers :: GameOnSecondRound -> Bool
+prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers (GameOnSecondRound game) = do
+    let angelsName  = game ^?! players . angels . name
+    let game'       = killPlayer angelsName (setPlayerAllegiance angelsName Villagers game)
+
+    hasn't (stage . _GameOver) $ run_ checkGameOver game'
 
 prop_startGameUsesGivenPlayers :: Property
 prop_startGameUsesGivenPlayers =

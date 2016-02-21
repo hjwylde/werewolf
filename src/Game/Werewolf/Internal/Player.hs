@@ -57,8 +57,7 @@ import Game.Werewolf.Internal.Role hiding (name)
 -- | A player has a 'name', 'role' and 'state'. Any stateful information needed for a player's role
 --   is held on the 'Game' itself.
 --
---   N.B., player equality is defined on just the 'name' as a player's 'role' may change throughout
---   the game.
+--   N.B., player equality is defined on just the 'name'.
 data Player = Player
     { _name  :: Text
     , _role  :: Role

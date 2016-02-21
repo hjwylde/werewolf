@@ -20,7 +20,7 @@ module Game.Werewolf.Engine (
     -- * Game
 
     -- ** Manipulations
-    startGame, killPlayer, setPlayerRole,
+    startGame, killPlayer, setPlayerAllegiance,
 
     -- ** Searches
     findPlayerByName_, findPlayerByRole_,
@@ -28,6 +28,7 @@ module Game.Werewolf.Engine (
     -- ** Queries
     isGameOver, isDefendersTurn, isScapegoatsTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
     isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
+    hasAngelWon, hasVillagersWon, hasWerewolvesWon,
     getPlayerVote, getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Reading and writing
@@ -69,8 +70,8 @@ import qualified Data.Text       as T
 
 import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
                                                 getPassers, getPendingVoters, getPlayerVote,
-                                                getVoteResult, killPlayer, setPlayerAllegiance,
-                                                setPlayerRole)
+                                                getVoteResult, hasAngelWon, hasVillagersWon,
+                                                hasWerewolvesWon, killPlayer, setPlayerAllegiance)
 import qualified Game.Werewolf.Internal.Game   as Game
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
@@ -122,10 +123,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
-        whenJustM (findAlivePlayerByRole angelRole) $ \angel -> do
+        whenJustM (preuse $ players . angels . alive) $ \angel -> do
             tell [angelJoinedVillagersMessage]
 
-            setPlayerRole (angel ^. name) simpleVillagerRole
+            setPlayerAllegiance (angel ^. name) Villagers
 
         advanceStage
 
@@ -156,10 +157,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         getVoteResult >>= lynchVotees
 
-        allowedVoters'  <- ifM (use villageIdiotRevealed)
+        allVoters       <- ifM (use villageIdiotRevealed)
             (uses players $ filter (isn't villageIdiot))
             (use players)
-        allowedVoters   .= allowedVoters' ^.. traverse . alive . name
+        allowedVoters   .= allVoters ^.. traverse . alive . name
 
         advanceStage
 
@@ -191,7 +192,15 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (use healUsed &&^ use poisonUsed) advanceStage
         whenM (has witches <$> getPassers)      advanceStage
 
-    WolfHoundsTurn -> unlessM (uses players $ has (wolfHounds . alive)) advanceStage
+    WolfHoundsTurn -> do
+        whenM (is dead <$> findPlayerByRole_ wolfHoundRole) advanceStage
+
+        whenJustM (use allegianceChosen) $ \allegiance -> do
+            wolfHound <- findPlayerByRole_ wolfHoundRole
+
+            setPlayerAllegiance (wolfHound ^. name) allegiance
+
+            advanceStage
 
 lynchVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
 lynchVotees [votee]
@@ -202,7 +211,7 @@ lynchVotees [votee]
     | otherwise             = do
         killPlayer (votee ^. name)
         tell [playerLynchedMessage votee]
-lynchVotees _       = findAlivePlayerByRole scapegoatRole >>= \mScapegoat -> case mScapegoat of
+lynchVotees _       = preuse (players . scapegoats . alive) >>= \mScapegoat -> case mScapegoat of
     Just scapegoat  -> do
         scapegoatBlamed .= True
 
@@ -218,12 +227,10 @@ devourVotees _          = events %= cons NoDevourEvent
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
-    game                    <- get
-    let aliveAllegiances    = nub $ game ^.. players . traverse . alive . role . allegiance
-
-    let nextStage = if has (players . angels . dead) game || length aliveAllegiances <= 1
-        then GameOver
-        else head $ filter (stageAvailable game) (drop1 $ dropWhile (game ^. stage /=) stageCycle)
+    game        <- get
+    nextStage   <- ifM hasAnyoneWon
+        (return GameOver)
+        (return . head $ filter (stageAvailable game) (drop1 $ dropWhile (game ^. stage /=) stageCycle))
 
     stage   .= nextStage
     passes  .= []
@@ -259,14 +266,10 @@ applyEvent (PoisonEvent name)       = do
     tell [playerPoisonedMessage player]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkGameOver = do
-    game                    <- get
-    let aliveAllegiances    = nub $ game ^.. players . traverse . alive . role . allegiance
+checkGameOver = whenM hasAnyoneWon $ do
+    stage .= GameOver
 
-    when (has (players . angels . dead) game || length aliveAllegiances <= 1) $ do
-        stage .= GameOver
-
-        tell . gameOverMessages =<< get
+    tell . gameOverMessages =<< get
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
@@ -288,9 +291,6 @@ startGame callerName players = do
 killPlayer :: MonadState Game m => Text -> m ()
 killPlayer name = modify $ Game.killPlayer name
 
-setPlayerRole :: MonadState Game m => Text -> Role -> m ()
-setPlayerRole name role = modify $ Game.setPlayerRole name role
-
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
 setPlayerAllegiance name allegiance = modify $ Game.setPlayerAllegiance name allegiance
 
@@ -300,11 +300,11 @@ findPlayerByName_ name' = fromJust <$> preuse (players . traverse . filteredBy n
 findPlayerByRole_ :: MonadState Game m => Role -> m Player
 findPlayerByRole_ role' = fromJust <$> preuse (players . traverse . filteredBy role role')
 
-findAlivePlayerByRole :: MonadState Game m => Role -> m (Maybe Player)
-findAlivePlayerByRole role' = preuse $ players . traverse . alive . filteredBy role role'
-
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = has (stage . _DefendersTurn) <$> get
+
+isGameOver :: MonadState Game m => m Bool
+isGameOver = has (stage . _GameOver) <$> get
 
 isScapegoatsTurn :: MonadState Game m => m Bool
 isScapegoatsTurn = has (stage . _ScapegoatsTurn) <$> get
@@ -330,8 +330,17 @@ isWitchsTurn = has (stage . _WitchsTurn) <$> get
 isWolfHoundsTurn :: MonadState Game m => m Bool
 isWolfHoundsTurn = has (stage . _WolfHoundsTurn) <$> get
 
-isGameOver :: MonadState Game m => m Bool
-isGameOver = has (stage . _GameOver) <$> get
+hasAnyoneWon :: MonadState Game m => m Bool
+hasAnyoneWon = hasAngelWon ||^ hasVillagersWon ||^ hasWerewolvesWon
+
+hasAngelWon :: MonadState Game m => m Bool
+hasAngelWon = gets Game.hasAngelWon
+
+hasVillagersWon :: MonadState Game m => m Bool
+hasVillagersWon = gets Game.hasVillagersWon
+
+hasWerewolvesWon :: MonadState Game m => m Bool
+hasWerewolvesWon = gets Game.hasWerewolvesWon
 
 getPassers :: MonadState Game m => m [Player]
 getPassers = gets Game.getPassers

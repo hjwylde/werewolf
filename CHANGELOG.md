@@ -7,6 +7,8 @@
 * Fixed balance calculation to ensure total balance is between -2 and 2.
 * Changed `--random-extra-roles` to have between `n / 3` and `n / 3 + 2` extra roles.
 * Added prisms and traversals to Role, Player & Game modules. ([#20](https://github.com/hjwylde/werewolf/issues/20))
+* Removed fudging of roles and replaced with fudging of allegiances.
+* Wolf-hound now has their allegiance hidden when they are lynched.
 
 #### v0.4.6.0
 

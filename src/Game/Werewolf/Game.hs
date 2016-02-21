@@ -13,8 +13,8 @@ functions relevant to the public interface.
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, events, passes, allowedVoters, heal, healUsed, poison, poisonUsed,
-    priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
+    stage, round, players, events, passes, allegianceChosen, allowedVoters, heal, healUsed, poison,
+    poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
 
     Stage(..),
     _DefendersTurn, _GameOver, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _UrsussGrunt,

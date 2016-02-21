@@ -258,26 +258,35 @@ wolfHoundsTurnMessages to =
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
-    | has (players . angels . dead) game    =
-        concat
-            [ [publicMessage "You should have heeded my warning, for now the Angel has been set free!"]
-            , [publicMessage "The game is over! The Angel has won."]
-            , [playerWonMessage $ angel ^. name]
-            , map playerLostMessage $ (players' \\ [angel]) ^.. names
-            ]
-    | length aliveAllegiances == 1          = do
-        let allegiance' = head aliveAllegiances
-
-        concat
-            [ [publicMessage $ T.unwords ["The game is over! The", T.pack $ show allegiance', "have won."]]
-            , map playerWonMessage (players' ^.. traverse . filteredBy (role . allegiance) allegiance' . name)
-            , map playerLostMessage (players' ^.. traverse . filtered ((allegiance' /=) . view (role . allegiance)) . name)
-            ]
-    | otherwise                             = publicMessage "The game is over! Everyone died..." : map playerLostMessage (players' ^.. names)
+    | hasAngelWon game      = concat
+        [ [publicMessage "You should have heeded my warning, for now the Angel has been set free!"]
+        , [publicMessage "The game is over! The Angel has won."]
+        , playerWonMessages
+        , playerLostMessages
+        ]
+    | hasVillagersWon game  = concat
+        [ [publicMessage "The game is over! The Villagers have won."]
+        , playerWonMessages
+        , playerLostMessages
+        ]
+    | hasWerewolvesWon game = concat
+        [ [publicMessage "The game is over! The Werewolves have won."]
+        , playerWonMessages
+        , playerLostMessages
+        ]
+    | otherwise             = undefined
     where
-        players'            = game ^. players
-        angel               = players' ^?! angels
-        aliveAllegiances    = nub $ players' ^.. traverse . alive . role . allegiance
+        winningAllegiance
+            | hasAngelWon game      = Angel
+            | hasVillagersWon game  = Villagers
+            | hasWerewolvesWon game = Werewolves
+            | otherwise             = undefined
+
+        winningPlayerNames  = game ^.. players . traverse . filteredBy (role . allegiance) winningAllegiance . name
+        losingPlayerNames   = game ^.. players . names \\ winningPlayerNames
+
+        playerWonMessages   = map playerWonMessage winningPlayerNames
+        playerLostMessages  = map playerLostMessage losingPlayerNames
 
 playerWonMessage :: Text -> Message
 playerWonMessage to = privateMessage to "Victory! You won!"
@@ -382,7 +391,7 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
     [ "You hear the Angel wrought with anger off in the distance."
     , "He failed to attract the discriminatory vote of the village"
     , "or the devouring vindictiveness of the lycanthropes."
-    , "Now he is stuck here, doomed forever to live out a mortal life as a Simple Villager."
+    , "Now he is stuck here, doomed forever to live out a mortal life as a Villager."
     ]
 
 ursusGruntsMessage :: Message
@@ -424,14 +433,13 @@ playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
-    | is werewolf player
-        && isn't wildChild player   = publicMessage $ T.concat
+    | is simpleWerewolf player  = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight."
         , " As they scream their body starts to contort and writhe, transforming into "
         , article playerRole, " ", playerRole ^. Role.name, "."
         , " Thankfully they go limp before breaking free of their restraints."
         ]
-    | otherwise                     = publicMessage $ T.concat
+    | otherwise                 = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight."
         , " Eventually the screams start to die and with their last breath,"
         , " they reveal themselves as "

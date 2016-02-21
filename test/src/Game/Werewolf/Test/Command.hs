@@ -40,7 +40,7 @@ allCommandTests =
     , testProperty "choose allegiance command errors when not wolf-hound's turn"        prop_chooseAllegianceCommandErrorsWhenNotWolfHoundsTurn
     , testProperty "choose allegiance command errors when caller not wolf-hound"        prop_chooseAllegianceCommandErrorsWhenCallerNotWolfHound
     , testProperty "choose allegiance command errors when allegiance does not exist"    prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist
-    , testProperty "choose allegiance command sets caller's role"                       prop_chooseAllegianceCommandSetsCallersRole
+    , testProperty "choose allegiance command sets allegiance chosen"                   prop_chooseAllegianceCommandSetsAllegianceChosen
 
     , testProperty "choose player command errors when game is over"             prop_choosePlayerCommandErrorsWhenGameIsOver
     , testProperty "choose player command errors when caller does not exist"    prop_choosePlayerCommandErrorsWhenCallerDoesNotExist
@@ -102,20 +102,21 @@ allCommandTests =
     , testProperty "protect command sets prior protect"                     prop_protectCommandSetsPriorProtect
     , testProperty "protect command sets protect"                           prop_protectCommandSetsProtect
 
-    , testProperty "quit command errors when game is over"                      prop_quitCommandErrorsWhenGameIsOver
-    , testProperty "quit command errors when caller does not exist"             prop_quitCommandErrorsWhenCallerDoesNotExist
-    , testProperty "quit command errors when caller is dead"                    prop_quitCommandErrorsWhenCallerIsDead
-    , testProperty "quit command kills player"                                  prop_quitCommandKillsPlayer
-    , testProperty "quit command clears heal when caller is witch"              prop_quitCommandClearsHealWhenCallerIsWitch
-    , testProperty "quit command clears heal used when caller is witch"         prop_quitCommandClearsHealUsedWhenCallerIsWitch
-    , testProperty "quit command clears poison when caller is witch"            prop_quitCommandClearsPoisonWhenCallerIsWitch
-    , testProperty "quit command clears poison used when caller is witch"       prop_quitCommandClearsPoisonUsedWhenCallerIsWitch
-    , testProperty "quit command clears prior protect when caller is defender"  prop_quitCommandClearsPriorProtectWhenCallerIsDefender
-    , testProperty "quit command clears protect when caller is defender"        prop_quitCommandClearsProtectWhenCallerIsDefender
-    , testProperty "quit command clears player's devour vote"                   prop_quitCommandClearsPlayersDevourVote
-    , testProperty "quit command clears player's lynch vote"                    prop_quitCommandClearsPlayersLynchVote
-    , testProperty "quit command clears role model when caller is wild-child"   prop_quitCommandClearsRoleModelWhenCallerIsWildChild
-    , testProperty "quit command sets angel's role when caller is angel"        prop_quitCommandSetsAngelsRoleWhenCallerIsAngel
+    , testProperty "quit command errors when game is over"                              prop_quitCommandErrorsWhenGameIsOver
+    , testProperty "quit command errors when caller does not exist"                     prop_quitCommandErrorsWhenCallerDoesNotExist
+    , testProperty "quit command errors when caller is dead"                            prop_quitCommandErrorsWhenCallerIsDead
+    , testProperty "quit command kills player"                                          prop_quitCommandKillsPlayer
+    , testProperty "quit command clears allegiance chosen when caller is wolf-hound"    prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound
+    , testProperty "quit command clears heal when caller is witch"                      prop_quitCommandClearsHealWhenCallerIsWitch
+    , testProperty "quit command clears heal used when caller is witch"                 prop_quitCommandClearsHealUsedWhenCallerIsWitch
+    , testProperty "quit command clears poison when caller is witch"                    prop_quitCommandClearsPoisonWhenCallerIsWitch
+    , testProperty "quit command clears poison used when caller is witch"               prop_quitCommandClearsPoisonUsedWhenCallerIsWitch
+    , testProperty "quit command clears prior protect when caller is defender"          prop_quitCommandClearsPriorProtectWhenCallerIsDefender
+    , testProperty "quit command clears protect when caller is defender"                prop_quitCommandClearsProtectWhenCallerIsDefender
+    , testProperty "quit command clears player's devour vote"                           prop_quitCommandClearsPlayersDevourVote
+    , testProperty "quit command clears player's lynch vote"                            prop_quitCommandClearsPlayersLynchVote
+    , testProperty "quit command clears role model when caller is wild-child"           prop_quitCommandClearsRoleModelWhenCallerIsWildChild
+    , testProperty "quit command sets angel's allegiance when caller is angel"          prop_quitCommandSetsAngelsAllegianceWhenCallerIsAngel
 
     , testProperty "see command errors when game is over"           prop_seeCommandErrorsWhenGameIsOver
     , testProperty "see command errors when caller does not exist"  prop_seeCommandErrorsWhenCallerDoesNotExist
@@ -189,20 +190,15 @@ prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist (GameAtWolfHoundsTu
     allegiance `notElem` ["Villagers", "Werewolves"]
         ==> verbose_runCommandErrors game command
 
-prop_chooseAllegianceCommandSetsCallersRole :: GameAtWolfHoundsTurn -> Property
-prop_chooseAllegianceCommandSetsCallersRole (GameAtWolfHoundsTurn game) = do
-    let wolfHound = game ^?! players . wolfHounds
+prop_chooseAllegianceCommandSetsAllegianceChosen :: GameAtWolfHoundsTurn -> Property
+prop_chooseAllegianceCommandSetsAllegianceChosen (GameAtWolfHoundsTurn game) = do
+    let wolfHoundsName = game ^?! players . wolfHounds . name
 
     forAll (elements [Villagers, Werewolves]) $ \allegiance' -> do
-        let command = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance')
+        let command = chooseAllegianceCommand wolfHoundsName (T.pack $ show allegiance')
         let game'   = run_ (apply command) game
 
-        game' ^?! players . traverse . filteredBy name (wolfHound ^. name) . role === roleForAllegiance allegiance'
-    where
-        roleForAllegiance allegiance = case allegiance of
-            Villagers   -> simpleVillagerRole
-            Werewolves  -> simpleWerewolfRole
-            _           -> undefined
+        fromJust (game' ^. allegianceChosen) === allegiance'
 
 prop_choosePlayerCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_choosePlayerCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -598,6 +594,13 @@ prop_quitCommandKillsPlayer game =
 
         length (game' ^.. players . traverse . dead) == 1
 
+prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound :: GameWithAllegianceChosen -> Bool
+prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound (GameWithAllegianceChosen game) = do
+    let wolfHoundsName  = game ^?! players . wolfHounds . name
+    let command         = quitCommand wolfHoundsName
+
+    isNothing $ run_ (apply command) game ^. allegianceChosen
+
 prop_quitCommandClearsHealWhenCallerIsWitch :: GameWithHeal -> Bool
 prop_quitCommandClearsHealWhenCallerIsWitch (GameWithHeal game) = do
     let witch   = game ^?! players . witches
@@ -661,13 +664,13 @@ prop_quitCommandClearsRoleModelWhenCallerIsWildChild (GameWithRoleModel game) = 
 
     isNothing $ run_ (apply command) game ^. roleModel
 
-prop_quitCommandSetsAngelsRoleWhenCallerIsAngel :: Game -> Bool
-prop_quitCommandSetsAngelsRoleWhenCallerIsAngel game = do
-    let angel   = game ^?! players . angels
-    let command = quitCommand (angel ^. name)
-    let game'   = run_ (apply command) game
+prop_quitCommandSetsAngelsAllegianceWhenCallerIsAngel :: Game -> Bool
+prop_quitCommandSetsAngelsAllegianceWhenCallerIsAngel game = do
+    let angelsName  = game ^?! players . angels . name
+    let command     = quitCommand angelsName
+    let game'       = run_ (apply command) game
 
-    is simpleVillager $ game' ^?! players . traverse . filteredBy name (angel ^. name)
+    is villager $ game' ^?! players . angels
 
 prop_seeCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_seeCommandErrorsWhenGameIsOver (GameAtGameOver game) =

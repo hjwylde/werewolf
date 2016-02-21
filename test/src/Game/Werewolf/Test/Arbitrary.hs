@@ -17,12 +17,11 @@ module Game.Werewolf.Test.Arbitrary (
     GameAtSunrise(..), GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..),
     GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
     GameOnSecondRound(..),
-    GameWithAllowedVoters(..), GameWithDeadPlayers(..), GameWithDevourEvent(..),
-    GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
+    GameWithAllegianceChosen(..), GameWithAllowedVoters(..), GameWithDeadPlayers(..),
+    GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
     GameWithOneAllegianceAlive(..), GameWithPoison(..), GameWithProtect(..),
     GameWithProtectAndDevourVotes(..), GameWithRoleModel(..), GameWithRoleModelAtVillagesTurn(..),
     GameWithScapegoatBlamed(..), GameWithSee(..), GameWithVillageIdiotRevealedAtVillagesTurn(..),
-    GameWithZeroAllegiancesAlive(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -188,6 +187,16 @@ instance Arbitrary GameOnSecondRound where
 
         return $ GameOnSecondRound (game & round .~ 1)
 
+newtype GameWithAllegianceChosen = GameWithAllegianceChosen Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithAllegianceChosen where
+    arbitrary = do
+        (GameAtWolfHoundsTurn game) <- arbitrary
+        (Blind command)             <- arbitraryChooseAllegianceCommand game
+
+        return $ GameWithAllegianceChosen (run_ (apply command) game)
+
 newtype GameWithAllowedVoters = GameWithAllowedVoters Game
     deriving (Eq, Show)
 
@@ -253,9 +262,9 @@ newtype GameWithOneAllegianceAlive = GameWithOneAllegianceAlive Game
 instance Arbitrary GameWithOneAllegianceAlive where
     arbitrary = do
         game            <- arbitrary
-        allegiance'     <- arbitrary
-        let players'    = game ^.. players . traverse . filteredBy (role . allegiance) allegiance'
-        let game'       = foldr killPlayer game ((game ^. players \\ players') ^.. names)
+        allegiance'     <- elements [Villagers, Werewolves]
+        let playerNames = game ^.. players . traverse . filteredBy (role . allegiance) allegiance' . name
+        let game'       = foldr killPlayer game (game ^.. players . names \\ playerNames)
 
         return $ GameWithOneAllegianceAlive game'
 
@@ -373,16 +382,6 @@ instance Arbitrary GameWithVillageIdiotRevealedAtVillagesTurn where
         (GameWithVillageIdiotRevealed game) <- arbitrary
 
         return $ GameWithVillageIdiotRevealedAtVillagesTurn (game & stage .~ VillagesTurn)
-
-newtype GameWithZeroAllegiancesAlive = GameWithZeroAllegiancesAlive Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameWithZeroAllegiancesAlive where
-    arbitrary = do
-        game        <- arbitrary
-        let game'   = foldr killPlayer game (game ^.. players . names)
-
-        return $ GameWithZeroAllegiancesAlive game'
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
