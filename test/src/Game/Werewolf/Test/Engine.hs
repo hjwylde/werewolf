@@ -434,7 +434,7 @@ prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead (GameOnSecondRoun
 prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers :: GameOnSecondRound -> Bool
 prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers (GameOnSecondRound game) = do
     let angelsName  = game ^?! players . angels . name
-    let game'       = killPlayer angelsName (setPlayerAllegiance angelsName Villagers game)
+    let game'       = killPlayer angelsName game & players . traverse . filteredBy name angelsName . role . allegiance .~ Villagers
 
     hasn't (stage . _GameOver) $ run_ checkGameOver game'
 

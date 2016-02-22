@@ -33,16 +33,15 @@ module Game.Werewolf.Internal.Game (
     newGame,
 
     -- ** Manipulations
-    killPlayer, setPlayerAllegiance,
+    killPlayer,
 
     -- ** Searches
-    getAdjacentAlivePlayers, getPassers, getPlayerVote, getAllowedVoters, getPendingVoters,
-    getVoteResult,
+    getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
     isFirstRound,
     doesPlayerExist,
-    hasAngelWon, hasVillagersWon, hasWerewolvesWon,
+    hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
 
 import Control.Lens hiding (isn't)
@@ -165,8 +164,7 @@ stageAvailable _ Sunrise            = True
 stageAvailable _ Sunset             = True
 stageAvailable game UrsussGrunt     = has (players . bearTamers . alive) game
 stageAvailable game VillagesTurn    =
-    (has (players . angels . alive) game
-    || not (isFirstRound game))
+    (has (players . angels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)
 stageAvailable game WerewolvesTurn  = has (players . werewolves . alive) game
 stageAvailable game WildChildsTurn  =
@@ -209,30 +207,6 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
 killPlayer :: Text -> Game -> Game
 killPlayer name' = players . traverse . filteredBy name name' . state .~ Dead
 
--- | Fudges the player's allegiance. This function is useful for roles such as the Wild-child where
---   they align themselves differently given some trigger.
-setPlayerAllegiance :: Text -> Allegiance -> Game -> Game
-setPlayerAllegiance name' allegiance' = players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
-
-getAdjacentAlivePlayers :: Text -> Game -> [Player]
-getAdjacentAlivePlayers name' game = adjacentAlivePlayers
-    where
-        players'    = game ^.. players . traverse . alive
-        index       = fromJust $ elemIndex name' (players' ^.. names)
-
-        adjacentAlivePlayers
-            | index == 0    = last players' : take 2 players'
-            | otherwise     = take 3 $ drop (index - 1) (cycle players')
-
--- | Gets all the @passes@ in a game (which is names only) and maps them to their player.
-getPassers :: Game -> [Player]
-getPassers game =
-    map (\name' -> game ^?! players . traverse . filteredBy name name') (game ^. passes)
-
--- | Gets a player's vote.
-getPlayerVote :: Text -> Game -> Maybe Text
-getPlayerVote playerName game = game ^. votes . at playerName
-
 -- | Gets all the @allowedVoters@ in a game (which is names only) and maps them to their player.
 getAllowedVoters :: Game -> [Player]
 getAllowedVoters game =
@@ -240,10 +214,10 @@ getAllowedVoters game =
 
 -- | Gets all alive players that have yet to vote.
 getPendingVoters :: Game -> [Player]
-getPendingVoters game = filter (flip Map.notMember votes' . view name) alivePlayers
+getPendingVoters game =
+    game ^.. players . traverse . alive . filtered ((`Map.notMember` votes') . view name)
     where
-        votes'          = game ^. votes
-        alivePlayers    = game ^.. players . traverse . alive
+        votes' = game ^. votes
 
 -- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
 --   on whether the votes were in conflict.
@@ -251,7 +225,7 @@ getVoteResult :: Game -> [Player]
 getVoteResult game = map (\name' -> game ^?! players . traverse . filteredBy name name') result
     where
         votees = Map.elems $ game ^. votes
-        result = last $ groupSortOn (\votee -> length $ elemIndices votee votees) (nub votees)
+        result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)
 
 -- | @isFirstRound game = game ^. round == 0@
 isFirstRound :: Game -> Bool
@@ -259,7 +233,11 @@ isFirstRound game = game ^. round == 0
 
 -- | Queries whether the player is in the game.
 doesPlayerExist :: Text -> Game -> Bool
-doesPlayerExist name = has (players . names . only name)
+doesPlayerExist name = has $ players . names . only name
+
+-- | Queries whether anyone has won.
+hasAnyoneWon :: Game -> Bool
+hasAnyoneWon game = any ($ game) [hasAngelWon, hasVillagersWon, hasWerewolvesWon]
 
 -- | Queries whether the Angel has won. The Angel wins if they manage to get themselves killed on
 --   the first round.

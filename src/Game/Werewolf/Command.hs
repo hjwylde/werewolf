@@ -37,7 +37,7 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import           Game.Werewolf.Internal.Game     hiding (doesPlayerExist, getPendingVoters,
-                                                  getPlayerVote, killPlayer, setPlayerAllegiance)
+                                                  killPlayer)
 import           Game.Werewolf.Internal.Messages
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role     hiding (name)

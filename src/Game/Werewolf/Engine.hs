@@ -34,9 +34,8 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import           Game.Werewolf.Internal.Game     hiding (doesPlayerExist, getAllowedVoters,
-                                                  getPassers, getPendingVoters, getPlayerVote,
-                                                  getVoteResult, hasAngelWon, hasVillagersWon,
-                                                  hasWerewolvesWon, killPlayer, setPlayerAllegiance)
+                                                  getPendingVoters, getVoteResult, hasAngelWon,
+                                                  hasVillagersWon, hasWerewolvesWon, killPlayer)
 import           Game.Werewolf.Internal.Messages
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role     hiding (name)
@@ -107,7 +106,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     UrsussGrunt -> do
         bearTamer   <- findPlayerByRole_ bearTamerRole
-        players'    <- gets $ getAdjacentAlivePlayers (bearTamer ^. name)
+        players'    <- getAdjacentAlivePlayers (bearTamer ^. name)
 
         when (has werewolves players') $ tell [ursusGruntsMessage]
 

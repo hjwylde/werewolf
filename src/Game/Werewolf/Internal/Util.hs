@@ -19,7 +19,7 @@ module Game.Werewolf.Internal.Util (
     killPlayer, setPlayerAllegiance,
 
     -- ** Searches
-    findPlayerByName_, findPlayerByRole_,
+    findPlayerByName_, findPlayerByRole_, getAdjacentAlivePlayers,
 
     -- ** Queries
     isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isVillagesTurn,
@@ -46,13 +46,13 @@ import Control.Lens        hiding (cons)
 import Control.Monad.Extra
 import Control.Monad.State hiding (state)
 
+import Data.List
 import Data.Maybe
 import Data.Text  (Text)
 
 import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
-                                                getPassers, getPendingVoters, getPlayerVote,
-                                                getVoteResult, hasAngelWon, hasVillagersWon,
-                                                hasWerewolvesWon, killPlayer, setPlayerAllegiance)
+                                                getPendingVoters, getVoteResult, hasAngelWon,
+                                                hasVillagersWon, hasWerewolvesWon, killPlayer)
 import qualified Game.Werewolf.Internal.Game   as Game
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
@@ -62,14 +62,26 @@ import Prelude hiding (round)
 killPlayer :: MonadState Game m => Text -> m ()
 killPlayer name = modify $ Game.killPlayer name
 
+-- | Fudges the player's allegiance. This function is useful for roles such as the Wild-child where
+--   they align themselves differently given some trigger.
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
-setPlayerAllegiance name allegiance = modify $ Game.setPlayerAllegiance name allegiance
+setPlayerAllegiance name' allegiance' = modify $ players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
 
 findPlayerByName_ :: MonadState Game m => Text -> m Player
 findPlayerByName_ name' = fromJust <$> preuse (players . traverse . filteredBy name name')
 
 findPlayerByRole_ :: MonadState Game m => Role -> m Player
 findPlayerByRole_ role' = fromJust <$> preuse (players . traverse . filteredBy role role')
+
+getAdjacentAlivePlayers :: MonadState Game m => Text -> m [Player]
+getAdjacentAlivePlayers name' = do
+    alivePlayers    <- gets $ toListOf (players . traverse . alive)
+    let index       = fromJust $ elemIndex name' (alivePlayers ^.. names)
+
+    return $ adjacentElements index alivePlayers
+    where
+        adjacentElements 0 list     = last list : take 2 list
+        adjacentElements index list = take 3 $ drop (index - 1) (cycle list)
 
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = has (stage . _DefendersTurn) <$> get
@@ -102,7 +114,7 @@ isWolfHoundsTurn :: MonadState Game m => m Bool
 isWolfHoundsTurn = has (stage . _WolfHoundsTurn) <$> get
 
 hasAnyoneWon :: MonadState Game m => m Bool
-hasAnyoneWon = hasAngelWon ||^ hasVillagersWon ||^ hasWerewolvesWon
+hasAnyoneWon = gets Game.hasAnyoneWon
 
 hasAngelWon :: MonadState Game m => m Bool
 hasAngelWon = gets Game.hasAngelWon
@@ -114,10 +126,10 @@ hasWerewolvesWon :: MonadState Game m => m Bool
 hasWerewolvesWon = gets Game.hasWerewolvesWon
 
 getPassers :: MonadState Game m => m [Player]
-getPassers = gets Game.getPassers
+getPassers = gets $ \game -> map (\name' -> game ^?! players . traverse . filteredBy name name') (game ^. passes)
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
-getPlayerVote playerName = gets $ Game.getPlayerVote playerName
+getPlayerVote playerName = use $ votes . at playerName
 
 getAllowedVoters :: MonadState Game m => m [Player]
 getAllowedVoters = gets Game.getAllowedVoters
