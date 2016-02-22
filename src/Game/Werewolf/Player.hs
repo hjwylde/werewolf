@@ -7,9 +7,7 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 
 Players are quite simple in themselves. They have a 'name', 'role' and 'state'. Any complex
-behaviour is handled in "Game.Werewolf.Command" and "Game.Werewolf.Engine". This module provides
-utility functions for searching, filtering and querying lists of players based on these 3
-attributes.
+behaviour is handled in "Game.Werewolf.Command" and "Game.Werewolf.Engine".
 -}
 
 {-# LANGUAGE FlexibleContexts      #-}
@@ -52,8 +50,8 @@ import Data.Text     (Text)
 
 import Game.Werewolf.Role hiding (name)
 
--- | A player has a 'name', 'role' and 'state'. Any stateful information needed for a player's role
---   is held on the 'Game' itself.
+-- | A player has a 'name', 'role' and 'state'. Any stateful information needed for a player's
+-- @role@ is held on the 'Game' itself.
 --
 --   N.B., player equality is defined on just the 'name'.
 data Player = Player
@@ -62,7 +60,7 @@ data Player = Player
     , _state :: State
     } deriving (Read, Show)
 
--- | Surprise surprise, players may be dead or alive.
+-- | Surprise surprise, players may be 'Dead' or 'Alive'.
 data State = Alive | Dead
     deriving (Eq, Read, Show)
 

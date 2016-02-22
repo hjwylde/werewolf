@@ -6,7 +6,7 @@ Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-The roles are split into four categories:
+Roles are split into four categories:
 
 * The Ambiguous.
 * The Loners.
@@ -105,7 +105,7 @@ allRoles =
     , wolfHoundRole
     ]
 
--- | A list containing roles that are restricted to a single instance per game.
+-- | A list containing roles that are restricted to a single instance per 'Game'.
 --
 --   @
 --   'restrictedRoles' = 'allRoles' \\\\ ['simpleVillagerRole', 'simpleWerewolfRole']

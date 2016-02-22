@@ -7,9 +7,9 @@ Maintainer  : public@hjwylde.com
 
 A game is not quite as simple as players! Roughly speaking though, this engine is /stateful/. The
 game state only changes when a /command/ is issued (see "Game.Werewolf.Command"). Thus, this module
-defines the game data structure and any fields required to keep track of the current state.
+defines the 'Game' data structure and any fields required to keep track of the current state.
 
-It also has a few additional functions for manipulating the game state.
+It also has a few additional functions for manipulating and querying the game state.
 -}
 
 {-# LANGUAGE TemplateHaskell #-}
@@ -59,26 +59,26 @@ import Prelude hiding (round)
 
 -- | There are a few key pieces of information that a game always needs to hold. These are:
 --
---   * the @stage@,
---   * the @round@ number,
---   * the @players@ and
---   * the @events@.
+--   * the 'stage',
+--   * the 'round' number,
+--   * the 'players' and
+--   * the 'events'.
 --
 --   Any further fields on the game are specific to one or more roles (and their respective turns!).
---   Some of the additional fields are reset each round (e.g., the Seer's @see@) while others are
---   kept around for the whole game (e.g., the Wild-child's @roleModel@).
+--   Some of the additional fields are reset each round (e.g., the Seer's 'see') while others are
+--   kept around for the whole game (e.g., the Wild-child's 'roleModel').
 --
---   In order to advance a game's state, a 'Game.Werewolf.Command.Command' from a user needs to be received. Afterwards
---   the following steps should be performed:
+--   In order to advance a game's 'state', a 'Game.Werewolf.Command.Command' from a user needs to be
+--   received. Afterwards the following steps should be performed:
 --
 --   1. 'Game.Werewolf.Command.apply' the 'Game.Werewolf.Command.Command'.
 --   2. run 'Game.Werewolf.Engine.checkStage'.
 --   3. run 'Game.Werewolf.Engine.checkGameOver'.
 --
 --   'Game.Werewolf.Engine.checkStage' will perform any additional checks and manipulations to the
---   game state before advancing the game's @stage@. It also runs any relevant @events@.
+--   game state before advancing the game's 'stage'. It also runs any relevant 'events'.
 --   'Game.Werewolf.Engine.checkGameOver' will check to see if any of the win conditions are met and
---   if so, advance the game's @stage@ to 'GameOver'.
+--   if so, advance the game's 'stage' to 'GameOver'.
 data Game = Game
     { _stage                :: Stage
     , _round                :: Int
@@ -111,13 +111,13 @@ data Stage  = GameOver | DefendersTurn | ScapegoatsTurn | SeersTurn | Sunrise | 
             | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
--- | Events occur /after/ a stage is advanced. This is automatically handled in
+-- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
 --   'Game.Werewolf.Engine.checkStage', while an event's specific behaviour is defined by
 --   'Game.Werewolf.Engine.eventAvailable' and 'Game.Werewolf.Engine.applyEvent'.
 --
---   For the most part events are used to allow something to happen on a stage different to when it
---   was triggered. E.g., the devour event occurs after the village wakes up rather than when the
---   Werewolves' vote, this gives the Witch a chance to heal the victim.
+--   For the most part events are used to allow something to happen on a 'Stage' different to when
+--   it was triggered. E.g., the 'DeovurEvent' occurs after the village wakes up rather than when
+--   the Werewolves' vote, this gives the Witch a chance to heal the victim.
 data Event  = DevourEvent Text  -- ^ Werewolves
             | NoDevourEvent     -- ^ Defender, Werewolves and Witch
             | PoisonEvent Text  -- ^ Witch
@@ -129,7 +129,7 @@ makePrisms ''Stage
 
 makePrisms ''Event
 
--- | All of the stages in the order that they should occur.
+-- | All of the 'Stage's in the order that they should occur.
 allStages :: [Stage]
 allStages =
     [ VillagesTurn
@@ -146,11 +146,11 @@ allStages =
     , GameOver
     ]
 
--- | An infinite cycle of all stages in the order that they should occur.
+-- | An infinite cycle of all 'Stage's in the order that they should occur.
 stageCycle :: [Stage]
 stageCycle = cycle allStages
 
--- | Checks whether the stage is available for the given game. Most often this just involves
+-- | Checks whether the stage is available for the given 'Game'. Most often this just involves
 --   checking if there is an applicable role alive, but sometimes it is more complex.
 --
 --   One of the most complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
@@ -175,8 +175,8 @@ stageAvailable game WitchsTurn      =
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
 stageAvailable game WolfHoundsTurn  = has (players . wolfHounds . alive) game
 
--- | Creates a new game with the given players. No validations are performed here, those are left to
---   'Game.Werewolf.Engine.startGame'.
+-- | Creates a new 'Game' with the given players. No validations are performed here, those are left
+--   to 'Game.Werewolf.Engine.startGame'.
 newGame :: [Player] -> Game
 newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
     where
@@ -207,12 +207,12 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
 killPlayer :: Text -> Game -> Game
 killPlayer name' = players . traverse . filteredBy name name' . state .~ Dead
 
--- | Gets all the @allowedVoters@ in a game (which is names only) and maps them to their player.
+-- | Gets all the 'allowedVoters' in a game (which is names only) and maps them to their player.
 getAllowedVoters :: Game -> [Player]
 getAllowedVoters game =
     map (\name' -> game ^?! players . traverse . filteredBy name name') (game ^. allowedVoters)
 
--- | Gets all alive players that have yet to vote.
+-- | Gets all 'Alive' players that have yet to vote.
 getPendingVoters :: Game -> [Player]
 getPendingVoters game =
     game ^.. players . traverse . alive . filtered ((`Map.notMember` votes') . view name)
@@ -227,7 +227,7 @@ getVoteResult game = map (\name' -> game ^?! players . traverse . filteredBy nam
         votees = Map.elems $ game ^. votes
         result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)
 
--- | @isFirstRound game = game ^. round == 0@
+-- | @'isFirstRound' game = game ^. 'round' == 0@
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0
 
@@ -249,12 +249,12 @@ hasAngelWon game = has (players . angels) game && is dead angel && isn't village
     where
         angel = game ^?! players . angels
 
--- | Queries whether the Villagers have won. The Villagers win if they are the only players
+-- | Queries whether the 'Villagers' have won. The 'Villagers' win if they are the only players
 --   surviving.
 hasVillagersWon :: Game -> Bool
 hasVillagersWon = allOf (players . traverse . alive) (is villager)
 
--- | Queries whether the Werewolves have won. The Werewolves win if they are the only players
+-- | Queries whether the 'Werewolves' have won. The 'Werewolves' win if they are the only players
 --   surviving.
 hasWerewolvesWon :: Game -> Bool
 hasWerewolvesWon = allOf (players . traverse . alive) (is werewolf)
