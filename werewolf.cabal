@@ -81,7 +81,7 @@ library
         Game.Werewolf.Response,
         Game.Werewolf.Role
     other-modules:
-        Game.Werewolf.Messages
+        Game.Werewolf.Internal.Messages
 
     default-language: Haskell2010
     other-extensions:

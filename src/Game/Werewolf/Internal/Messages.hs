@@ -1,5 +1,5 @@
 {-|
-Module      : Game.Werewolf.Messages
+Module      : Game.Werewolf.Internal.Messages
 Description : Suite of messages used throughout the game.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -17,7 +17,7 @@ includes features such as emoji support.
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Game.Werewolf.Messages (
+module Game.Werewolf.Internal.Messages (
     -- * Generic messages
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage, gameIsOverMessage,
 

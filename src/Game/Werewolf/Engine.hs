@@ -76,7 +76,7 @@ import qualified Game.Werewolf.Internal.Game   as Game
 import           Game.Werewolf.Internal.Player
 import           Game.Werewolf.Internal.Role   hiding (name)
 import qualified Game.Werewolf.Internal.Role   as Role
-import           Game.Werewolf.Messages
+import           Game.Werewolf.Internal.Messages
 import           Game.Werewolf.Response
 
 import Prelude hiding (round)
