@@ -14,7 +14,7 @@ attributes.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE Rank2Types            #-}
 {-# LANGUAGE TemplateHaskell       #-}
 
 module Game.Werewolf.Player (

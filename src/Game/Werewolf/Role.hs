@@ -15,7 +15,7 @@ The roles are split into four categories:
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RankNTypes        #-}
+{-# LANGUAGE Rank2Types        #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
 module Game.Werewolf.Role (

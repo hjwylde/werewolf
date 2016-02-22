@@ -91,7 +91,7 @@ library
         FlexibleContexts,
         MultiParamTypeClasses,
         OverloadedStrings,
-        RankNTypes,
+        Rank2Types,
         TemplateHaskell
     build-depends:
         aeson >= 0.8 && < 0.11,

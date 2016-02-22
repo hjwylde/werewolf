@@ -11,6 +11,7 @@ Utility functions for woking in a ('MonadState' 'Game') environment.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE Rank2Types            #-}
 
 module Game.Werewolf.Util (
     -- * Game
@@ -19,18 +20,13 @@ module Game.Werewolf.Util (
     killPlayer, setPlayerAllegiance,
 
     -- ** Searches
-    findPlayerByName_, findPlayerByRole_, getAdjacentAlivePlayers,
+    findPlayerBy_, getAdjacentAlivePlayers, getPassers, getPlayerVote,
+    getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
     isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isVillagesTurn,
     isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
-    getPassers, getPlayerVote, getAllowedVoters, getPendingVoters, getVoteResult,
-
-    -- * Event
-
-    -- ** Queries
-    getDevourEvent,
 
     -- * Player
 
@@ -67,21 +63,33 @@ killPlayer name = modify $ Game.killPlayer name
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
 setPlayerAllegiance name' allegiance' = modify $ players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
 
-findPlayerByName_ :: MonadState Game m => Text -> m Player
-findPlayerByName_ name' = fromJust <$> preuse (players . traverse . filteredBy name name')
-
-findPlayerByRole_ :: MonadState Game m => Role -> m Player
-findPlayerByRole_ role' = fromJust <$> preuse (players . traverse . filteredBy role role')
+findPlayerBy_ :: (Eq a, MonadState Game m) => Lens' Player a -> a -> m Player
+findPlayerBy_ lens value = fromJust <$> preuse (players . traverse . filteredBy lens value)
 
 getAdjacentAlivePlayers :: MonadState Game m => Text -> m [Player]
 getAdjacentAlivePlayers name' = do
-    alivePlayers    <- gets $ toListOf (players . traverse . alive)
+    alivePlayers    <- toListOf (players . traverse . alive) <$> get
     let index       = fromJust $ elemIndex name' (alivePlayers ^.. names)
 
     return $ adjacentElements index alivePlayers
     where
         adjacentElements 0 list     = last list : take 2 list
         adjacentElements index list = take 3 $ drop (index - 1) (cycle list)
+
+getPassers :: MonadState Game m => m [Player]
+getPassers = mapM (findPlayerBy_ name) =<< use passes
+
+getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
+getPlayerVote playerName = use $ votes . at playerName
+
+getAllowedVoters :: MonadState Game m => m [Player]
+getAllowedVoters = gets Game.getAllowedVoters
+
+getPendingVoters :: MonadState Game m => m [Player]
+getPendingVoters = gets Game.getPendingVoters
+
+getVoteResult :: MonadState Game m => m [Player]
+getVoteResult = gets Game.getVoteResult
 
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = has (stage . _DefendersTurn) <$> get
@@ -125,53 +133,35 @@ hasVillagersWon = gets Game.hasVillagersWon
 hasWerewolvesWon :: MonadState Game m => m Bool
 hasWerewolvesWon = gets Game.hasWerewolvesWon
 
-getPassers :: MonadState Game m => m [Player]
-getPassers = gets $ \game -> map (\name' -> game ^?! players . traverse . filteredBy name name') (game ^. passes)
-
-getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
-getPlayerVote playerName = use $ votes . at playerName
-
-getAllowedVoters :: MonadState Game m => m [Player]
-getAllowedVoters = gets Game.getAllowedVoters
-
-getPendingVoters :: MonadState Game m => m [Player]
-getPendingVoters = gets Game.getPendingVoters
-
-getVoteResult :: MonadState Game m => m [Player]
-getVoteResult = gets Game.getVoteResult
-
-getDevourEvent :: MonadState Game m => m (Maybe Text)
-getDevourEvent = gets (^? events . traverse . _DevourEvent)
-
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = gets $ Game.doesPlayerExist name
 
 isPlayerDefender :: MonadState Game m => Text -> m Bool
-isPlayerDefender name = is defender <$> findPlayerByName_ name
+isPlayerDefender name' = is defender <$> findPlayerBy_ name name'
 
 isPlayerScapegoat :: MonadState Game m => Text -> m Bool
-isPlayerScapegoat name = is scapegoat <$> findPlayerByName_ name
+isPlayerScapegoat name' = is scapegoat <$> findPlayerBy_ name name'
 
 isPlayerSeer :: MonadState Game m => Text -> m Bool
-isPlayerSeer name = is seer <$> findPlayerByName_ name
+isPlayerSeer name' = is seer <$> findPlayerBy_ name name'
 
 isPlayerVillageIdiot :: MonadState Game m => Text -> m Bool
-isPlayerVillageIdiot name = is villageIdiot <$> findPlayerByName_ name
+isPlayerVillageIdiot name' = is villageIdiot <$> findPlayerBy_ name name'
 
 isPlayerWildChild :: MonadState Game m => Text -> m Bool
-isPlayerWildChild name = is wildChild <$> findPlayerByName_ name
+isPlayerWildChild name' = is wildChild <$> findPlayerBy_ name name'
 
 isPlayerWitch :: MonadState Game m => Text -> m Bool
-isPlayerWitch name = is witch <$> findPlayerByName_ name
+isPlayerWitch name' = is witch <$> findPlayerBy_ name name'
 
 isPlayerWolfHound :: MonadState Game m => Text -> m Bool
-isPlayerWolfHound name = is wolfHound <$> findPlayerByName_ name
+isPlayerWolfHound name' = is wolfHound <$> findPlayerBy_ name name'
 
 isPlayerWerewolf :: MonadState Game m => Text -> m Bool
-isPlayerWerewolf name = is werewolf <$> findPlayerByName_ name
+isPlayerWerewolf name' = is werewolf <$> findPlayerBy_ name name'
 
 isPlayerAlive :: MonadState Game m => Text -> m Bool
-isPlayerAlive name = is alive <$> findPlayerByName_ name
+isPlayerAlive name' = is alive <$> findPlayerBy_ name name'
 
 isPlayerDead :: MonadState Game m => Text -> m Bool
-isPlayerDead name = is dead <$> findPlayerByName_ name
+isPlayerDead name' = is dead <$> findPlayerBy_ name name'

@@ -58,9 +58,9 @@ checkStage' = use stage >>= \stage' -> case stage' of
     GameOver -> return ()
 
     DefendersTurn -> do
-        whenM (is dead <$> findPlayerByRole_ defenderRole) advanceStage
+        whenM (has (players . defenders . dead) <$> get) advanceStage
 
-        whenJustM (use protect) $ const advanceStage
+        whenM (isJust <$> use protect) advanceStage
 
     ScapegoatsTurn -> unlessM (use scapegoatBlamed) $ do
         allowedVoters' <- use allowedVoters
@@ -69,12 +69,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     SeersTurn -> do
-        seer <- findPlayerByRole_ seerRole
-
-        when (is dead seer) advanceStage
+        whenM (has (players . seers . dead) <$> get) advanceStage
 
         whenJustM (use see) $ \targetName -> do
-            target <- findPlayerByName_ targetName
+            seer    <- findPlayerBy_ role seerRole
+            target  <- findPlayerBy_ name targetName
 
             tell [playerSeenMessage (seer ^. name) target]
 
@@ -92,10 +91,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     Sunset -> do
         whenJustM (use roleModel) $ \roleModelsName -> do
-            wildChild <- findPlayerByRole_ wildChildRole
+            wildChild <- findPlayerBy_ role wildChildRole
 
             whenM (isPlayerDead roleModelsName &&^ return (is villager wildChild)) $ do
-                aliveWerewolfNames <- gets $ toListOf (players . werewolves . alive . name)
+                aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
                 setPlayerAllegiance (wildChild ^. name) Werewolves
 
@@ -105,7 +104,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     UrsussGrunt -> do
-        bearTamer   <- findPlayerByRole_ bearTamerRole
+        bearTamer   <- findPlayerBy_ role bearTamerRole
         players'    <- getAdjacentAlivePlayers (bearTamer ^. name)
 
         when (has werewolves players') $ tell [ursusGruntsMessage]
@@ -132,19 +131,19 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     WildChildsTurn -> do
-        whenM (is dead <$> findPlayerByRole_ wildChildRole) advanceStage
+        whenM (has (players . wildChildren . dead) <$> get) advanceStage
 
-        whenJustM (use roleModel) $ const advanceStage
+        whenM (isJust <$> use roleModel) advanceStage
 
     WitchsTurn -> do
-        whenM (is dead <$> findPlayerByRole_ witchRole) advanceStage
+        whenM (has (players . witches . dead) <$> get) advanceStage
 
         whenJustM (use poison) $ \targetName -> do
             events %= (++ [PoisonEvent targetName])
             poison .= Nothing
 
         whenM (use heal) $ do
-            devourEvent <- uses events $ \events -> head [event | event@(DevourEvent _) <- events]
+            devourEvent <- fromJust <$> preuse (events . traverse . filtered (is _DevourEvent))
 
             events  %= cons NoDevourEvent . delete devourEvent
             heal    .= False
@@ -153,10 +152,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (has witches <$> getPassers)      advanceStage
 
     WolfHoundsTurn -> do
-        whenM (is dead <$> findPlayerByRole_ wolfHoundRole) advanceStage
+        whenM (has (players . wolfHounds . dead) <$> get) advanceStage
 
         whenJustM (use allegianceChosen) $ \allegiance -> do
-            wolfHound <- findPlayerByRole_ wolfHoundRole
+            wolfHound <- findPlayerBy_ role wolfHoundRole
 
             setPlayerAllegiance (wolfHound ^. name) allegiance
 
@@ -214,22 +213,19 @@ eventAvailable (PoisonEvent _)  = isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
-    player <- findPlayerByName_ targetName
+    target <- findPlayerBy_ name targetName
 
     killPlayer targetName
-    tell [playerDevouredMessage player]
+    tell [playerDevouredMessage target]
 applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
-applyEvent (PoisonEvent name)       = do
-    player <- findPlayerByName_ name
+applyEvent (PoisonEvent targetName) = do
+    target <- findPlayerBy_ name targetName
 
-    killPlayer name
-    tell [playerPoisonedMessage player]
+    killPlayer targetName
+    tell [playerPoisonedMessage target]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkGameOver = whenM hasAnyoneWon $ do
-    stage .= GameOver
-
-    tell . gameOverMessages =<< get
+checkGameOver = whenM hasAnyoneWon $ stage .= GameOver >> get >>= tell . gameOverMessages
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
@@ -237,7 +233,7 @@ startGame callerName players = do
     when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage callerName "Cannot have more than 24 players."]
     forM_ restrictedRoles $ \role' ->
-        when (length (filter ((role' ==) . view role) players) > 1) $
+        when (length (players ^.. traverse . filteredBy role role') > 1) $
             throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role' ^. Role.name, "."]]
 
     let game = newGame players
