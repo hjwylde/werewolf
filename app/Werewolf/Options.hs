@@ -97,7 +97,7 @@ werewolf = Options
         , command "help"        $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents")
         , command "interpret"   $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command" <> noIntersperse)
         , command "pass"        $ info (helper <*> pass)        (fullDesc <> progDesc "Pass")
-        , command "ping"        $ info (helper <*> ping)        (fullDesc <> progDesc "Pings the status of the current game publicly")
+        , command "ping"        $ info (helper <*> ping)        (fullDesc <> progDesc "Ping the status of the current game publicly")
         , command "poison"      $ info (helper <*> poison)      (fullDesc <> progDesc "Poison a player")
         , command "protect"     $ info (helper <*> protect)     (fullDesc <> progDesc "Protect a player")
         , command "quit"        $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game")
