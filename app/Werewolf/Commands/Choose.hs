@@ -30,6 +30,7 @@ import qualified Data.Text as T
 
 import Game.Werewolf
 
+import Werewolf.Game
 import Werewolf.Messages
 
 data Options = Options

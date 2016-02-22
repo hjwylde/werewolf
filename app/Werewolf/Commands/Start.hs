@@ -36,6 +36,7 @@ import Game.Werewolf.Role as Role
 
 import System.Random.Shuffle
 
+import Werewolf.Game
 import Werewolf.Messages
 
 data Options = Options

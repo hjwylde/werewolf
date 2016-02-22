@@ -17,6 +17,8 @@ module Game.Werewolf.Player (
     State(..),
     _Alive, _Dead,
 
+    newPlayer,
+
     -- ** Prisms
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
     angel, bearTamer, defender, scapegoat, seer, simpleVillager, simpleWerewolf, villageIdiot,

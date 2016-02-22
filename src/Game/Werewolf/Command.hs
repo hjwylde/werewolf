@@ -36,13 +36,13 @@ import           Data.Maybe
 import           Data.Text  (Text)
 import qualified Data.Text  as T
 
-import           Game.Werewolf.Engine
-import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getPendingVoters,
-                                                getPlayerVote, killPlayer, setPlayerAllegiance)
-import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
-import qualified Game.Werewolf.Internal.Role   as Role
+import           Game.Werewolf.Internal.Game     hiding (doesPlayerExist, getPendingVoters,
+                                                  getPlayerVote, killPlayer, setPlayerAllegiance)
 import           Game.Werewolf.Internal.Messages
+import           Game.Werewolf.Internal.Player
+import           Game.Werewolf.Internal.Role     hiding (name)
+import qualified Game.Werewolf.Internal.Role     as Role
+import           Game.Werewolf.Internal.Util
 import           Game.Werewolf.Response
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }

@@ -21,22 +21,18 @@ import           Data.Either.Extra
 import           Data.List.Extra
 import qualified Data.Map          as Map
 import           Data.Maybe
-import           Data.Text         (Text)
 
-import           Game.Werewolf.Command
-import           Game.Werewolf.Engine          hiding (doesPlayerExist, getDevourEvent,
-                                                getVoteResult, killPlayer, setPlayerAllegiance)
-import           Game.Werewolf.Internal.Game
-import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
-import qualified Game.Werewolf.Internal.Role   as Role
-import           Game.Werewolf.Test.Arbitrary
-import           Game.Werewolf.Test.Util
+import Game.Werewolf.Command
+import Game.Werewolf.Engine
+import Game.Werewolf.Internal.Game
+import Game.Werewolf.Internal.Player
+import Game.Werewolf.Internal.Role   hiding (name)
+import Game.Werewolf.Test.Arbitrary
+import Game.Werewolf.Test.Util
 
 import Prelude hiding (round)
 
 import Test.QuickCheck
-import Test.QuickCheck.Monadic
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
@@ -116,14 +112,6 @@ allEngineTests =
     , testProperty "start game errors when less than 7 players"                 prop_startGameErrorsWhenLessThan7Players
     , testProperty "start game errors when more than 24 players"                prop_startGameErrorsWhenMoreThan24Players
     , testProperty "start game errors when more than 1 of a restricted role"    prop_startGameErrorsWhenMoreThan1OfARestrictedRole
-
-    , testProperty "create players uses given player names" prop_createPlayersUsesGivenPlayerNames
-    , testProperty "create players uses given roles"        prop_createPlayersUsesGivenRoles
-    , testProperty "create players creates alive players"   prop_createPlayersCreatesAlivePlayers
-
-    , testProperty "pad roles returns n roles"          prop_padRolesReturnsNRoles
-    , testProperty "pad roles uses given roles"         prop_padRolesUsesGivenRoles
-    , testProperty "pad roles proportions allegiances"  prop_padRolesProportionsAllegiances
     ]
 
 prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithRoleModel -> Bool
@@ -478,42 +466,3 @@ prop_startGameErrorsWhenMoreThan1OfARestrictedRole :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1OfARestrictedRole players =
     any (\role' -> length (players ^.. traverse . filteredBy role role') > 1) restrictedRoles
     ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_createPlayersUsesGivenPlayerNames :: [Text] -> [Role] -> Property
-prop_createPlayersUsesGivenPlayerNames playerNames extraRoles = monadicIO $ do
-    players <- createPlayers playerNames (padRoles extraRoles (length playerNames))
-
-    return $ playerNames == players ^.. names
-
-prop_createPlayersUsesGivenRoles :: [Text] -> [Role] -> Property
-prop_createPlayersUsesGivenRoles playerNames extraRoles = monadicIO $ do
-    let roles' = padRoles extraRoles (length playerNames)
-
-    players <- createPlayers playerNames roles'
-
-    return $ roles' == players ^.. roles
-
-prop_createPlayersCreatesAlivePlayers :: [Text] -> [Role] -> Property
-prop_createPlayersCreatesAlivePlayers playerNames extraRoles = monadicIO $ do
-    players <- createPlayers playerNames (padRoles extraRoles (length playerNames))
-
-    return $ all (is alive) players
-
-prop_padRolesReturnsNRoles :: [Role] -> Int -> Property
-prop_padRolesReturnsNRoles extraRoles n = monadicIO $ do
-    let roles = padRoles extraRoles n
-
-    return $ length roles == n
-
-prop_padRolesUsesGivenRoles :: [Role] -> Int -> Property
-prop_padRolesUsesGivenRoles extraRoles n = monadicIO $ do
-    let roles = padRoles extraRoles n
-
-    return $ extraRoles `isSubsequenceOf` roles
-
-prop_padRolesProportionsAllegiances :: [Role] -> Int -> Property
-prop_padRolesProportionsAllegiances extraRoles n = monadicIO $ do
-    let roles           = padRoles extraRoles n
-    let werewolvesCount = length . elemIndices Role.Werewolves $ roles ^.. traverse . allegiance
-
-    return $ werewolvesCount == n `quot` 5 + 1
