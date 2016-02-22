@@ -21,7 +21,7 @@ module Game.Werewolf.Engine (
     startGame,
 ) where
 
-import Control.Lens         hiding (cons)
+import Control.Lens         hiding (cons, isn't)
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State  hiding (state)

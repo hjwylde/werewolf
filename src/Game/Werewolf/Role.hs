@@ -44,7 +44,6 @@ module Game.Werewolf.Role (
     -- *** The Werewolves
     -- | The Werewolves must devour all of the Villagers.
     simpleWerewolfRole,
-
 ) where
 
 import Game.Werewolf.Internal.Role

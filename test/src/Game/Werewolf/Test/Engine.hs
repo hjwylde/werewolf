@@ -5,7 +5,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Game.Werewolf.Test.Engine (
@@ -13,7 +12,7 @@ module Game.Werewolf.Test.Engine (
     allEngineTests,
 ) where
 
-import Control.Lens         hiding (elements)
+import Control.Lens         hiding (elements, isn't)
 import Control.Monad.Except
 import Control.Monad.Writer
 

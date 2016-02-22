@@ -45,7 +45,7 @@ module Game.Werewolf.Internal.Game (
     hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
 
-import Control.Lens
+import Control.Lens hiding (isn't)
 
 import           Data.List.Extra
 import           Data.Map        (Map)

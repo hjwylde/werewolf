@@ -5,7 +5,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Game.Werewolf.Test.Command (
@@ -13,7 +12,7 @@ module Game.Werewolf.Test.Command (
     allCommandTests,
 ) where
 
-import Control.Lens hiding (elements)
+import Control.Lens hiding (elements, isn't)
 
 import           Data.Either.Extra
 import qualified Data.Map          as Map

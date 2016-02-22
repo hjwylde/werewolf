@@ -5,7 +5,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Game.Werewolf.Test.Arbitrary (
@@ -39,7 +38,7 @@ module Game.Werewolf.Test.Arbitrary (
     arbitraryPlayer, arbitraryWerewolf,
 ) where
 
-import Control.Lens hiding (elements)
+import Control.Lens hiding (elements, isn't)
 
 import           Data.List.Extra
 import           Data.Maybe

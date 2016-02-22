@@ -48,14 +48,15 @@ module Game.Werewolf.Internal.Role (
     simpleWerewolfRole,
 
     -- * Utility functions
-    is, filteredBy,
+    is, isn't, filteredBy,
 ) where
 
-import Control.Lens
+import Control.Lens hiding (isn't)
 
 import           Data.Function
 import           Data.List
 import           Data.Text     (Text)
+import Data.Monoid
 import qualified Data.Text     as T
 
 -- | Role definitions require only a few pieces of information.
@@ -387,9 +388,13 @@ simpleWerewolfRole = Role
         "Voting to lynch your partner can be a good way to deflect suspicion from yourself."
     }
 
--- | The counter-part to 'isn't'.
-is :: APrism s t a b -> s -> Bool
-is prism = not . isn't prism
+-- | The counter-part to 'isn't', but more general as it takes a 'Getting' instead.
+is :: Getting Any s a -> s -> Bool
+is query = has query
+
+-- | A re-write of 'Control.Lens.Prism.isn't' to be more general by taking a 'Getting' instead.
+isn't :: Getting All s a -> s -> Bool
+isn't query = hasn't query
 
 -- | A companion to 'filtered' that, rather than using a predicate, filters on the given lens for
 -- matches.

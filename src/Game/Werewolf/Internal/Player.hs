@@ -27,14 +27,11 @@ module Game.Werewolf.Internal.Player (
 
     newPlayer,
 
-    -- ** Prisms
-    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    -- ** Traversals
     angel, bearTamer, defender, scapegoat, seer, simpleVillager, simpleWerewolf, villageIdiot,
     villagerVillager, wildChild, witch, wolfHound,
     villager, werewolf,
-    alive, dead,
 
-    -- ** Traversals
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
@@ -42,12 +39,13 @@ module Game.Werewolf.Internal.Player (
     angels, bearTamers, defenders, scapegoats, seers, simpleVillagers, simpleWerewolves,
     villageIdiots, villagerVillagers, wildChildren, witches, wolfHounds,
     villagers, werewolves,
+    alive, dead,
 
     -- * Utility functions
-    is, filteredBy,
+    is, isn't, filteredBy,
 ) where
 
-import Control.Lens
+import Control.Lens hiding (isn't)
 
 import Data.Function
 import Data.Text     (Text)
@@ -79,81 +77,117 @@ makePrisms ''State
 newPlayer :: Text -> Role -> Player
 newPlayer name role = Player name role Alive
 
--- | This 'Prism' provides the traversal of a 'Player' with an 'angelRole'.
-angel :: Prism' Player Player
-angel = genericRolePrism angelRole
+-- | The traversal of 'Player's with an 'angelRole'.
+--
+-- @
+-- 'angel' = 'role' . 'only' 'angelRole'
+-- @
+angel :: Traversal' Player ()
+angel = role . only angelRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'bearTamerRole'.
-bearTamer :: Prism' Player Player
-bearTamer = genericRolePrism bearTamerRole
+-- | The traversal of 'Player's with a 'bearTamerRole'.
+--
+-- @
+-- 'bearTamer' = 'role' . 'only' 'bearTamerRole'
+-- @
+bearTamer :: Traversal' Player ()
+bearTamer = role . only bearTamerRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'defenderRole'.
-defender :: Prism' Player Player
-defender = genericRolePrism defenderRole
+-- | The traversal of 'Player's with a 'defenderRole'.
+--
+-- @
+-- 'defender' = 'role' . 'only' 'defenderRole'
+-- @
+defender :: Traversal' Player ()
+defender = role . only defenderRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'scapegoatRole'.
-scapegoat :: Prism' Player Player
-scapegoat = genericRolePrism scapegoatRole
+-- | The traversal of 'Player's with a 'scapegoatRole'.
+--
+-- @
+-- 'scapegoat' = 'role' . 'only' 'scapegoatRole'
+-- @
+scapegoat :: Traversal' Player ()
+scapegoat = role . only scapegoatRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'seerRole'.
-seer :: Prism' Player Player
-seer = genericRolePrism seerRole
+-- | The traversal of 'Player's with a 'seerRole'.
+--
+-- @
+-- 'seer' = 'role' . 'only' 'seerRole'
+-- @
+seer :: Traversal' Player ()
+seer = role . only seerRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'simpleVillagerRole'.
-simpleVillager :: Prism' Player Player
-simpleVillager = genericRolePrism simpleVillagerRole
+-- | The traversal of 'Player's with a 'simpleVillagerRole'.
+--
+-- @
+-- 'simpleVillager' = 'role' . 'only' 'simpleVillagerRole'
+-- @
+simpleVillager :: Traversal' Player ()
+simpleVillager = role . only simpleVillagerRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'simpleWerewolfRole'.
-simpleWerewolf :: Prism' Player Player
-simpleWerewolf = genericRolePrism simpleWerewolfRole
+-- | The traversal of 'Player's with a 'simpleWerewolfRole'.
+--
+-- @
+-- 'simpleWerewolf' = 'role' . 'only' 'simpleWerewolfRole'
+-- @
+simpleWerewolf :: Traversal' Player ()
+simpleWerewolf = role . only simpleWerewolfRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'villageIdiotRole'.
-villageIdiot :: Prism' Player Player
-villageIdiot = genericRolePrism villageIdiotRole
+-- | The traversal of 'Player's with a 'villageIdiotRole'.
+--
+-- @
+-- 'villageIdiot' = 'role' . 'only' 'villageIdiotRole'
+-- @
+villageIdiot :: Traversal' Player ()
+villageIdiot = role . only villageIdiotRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'villagerVillagerRole'.
-villagerVillager :: Prism' Player Player
-villagerVillager = genericRolePrism villagerVillagerRole
+-- | The traversal of 'Player's with a 'villagerVillagerRole'.
+--
+-- @
+-- 'villagerVillager' = 'role' . 'only' 'villagerVillagerRole'
+-- @
+villagerVillager :: Traversal' Player ()
+villagerVillager = role . only villagerVillagerRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'wildChildRole'.
-wildChild :: Prism' Player Player
-wildChild = genericRolePrism wildChildRole
+-- | The traversal of 'Player's with a 'wildChildRole'.
+--
+-- @
+-- 'wildChild' = 'role' . 'only' 'wildChildRole'
+-- @
+wildChild :: Traversal' Player ()
+wildChild = role . only wildChildRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'witchRole'.
-witch :: Prism' Player Player
-witch = genericRolePrism witchRole
+-- | The traversal of 'Player's with a 'witchRole'.
+--
+-- @
+-- 'witch' = 'role' . 'only' 'witchRole'
+-- @
+witch :: Traversal' Player ()
+witch = role . only witchRole
 
--- | This 'Prism' provides the traversal of a 'Player' with a 'wolfHoundRole'.
-wolfHound :: Prism' Player Player
-wolfHound = genericRolePrism wolfHoundRole
+-- | The traversal of 'Player's with a 'wolfHoundRole'.
+--
+-- @
+-- 'wolfHound' = 'role' . 'only' 'wolfHoundRole'
+-- @
+wolfHound :: Traversal' Player ()
+wolfHound = role . only wolfHoundRole
 
-genericRolePrism :: Role -> Prism' Player Player
-genericRolePrism role' = prism (set role role') $ \player ->
-    if player ^. role == role' then Right player else Left player
+-- | The traversal of 'Player's aligned with the 'Villagers'.
+--
+-- @
+-- 'villager' = 'role' . 'allegiance' . '_Villagers'
+-- @
+villager :: Traversal' Player ()
+villager = role . allegiance . _Villagers
 
--- | This 'Prism' provides the traversal of a 'Player' aligned with the 'Villagers'.
-villager :: Prism' Player Player
-villager = genericRoleAllegiancePrism Villagers
-
--- | This 'Prism' provides the traversal of a 'Player' aligned with the 'Werewolves'.
-werewolf :: Prism' Player Player
-werewolf = genericRoleAllegiancePrism Werewolves
-
-genericRoleAllegiancePrism :: Allegiance -> Prism' Player Player
-genericRoleAllegiancePrism allegiance' = prism (set (role . allegiance) allegiance') $ \player ->
-    if player ^. role . allegiance == allegiance' then Right player else Left player
-
--- | This 'Prism' provides the traversal of an 'Alive' state in a 'Player'.
-alive :: Prism' Player Player
-alive = genericStatePrism Alive
-
--- | This 'Prism' provides the traversal of a 'Dead' state in a 'Player'.
-dead :: Prism' Player Player
-dead = genericStatePrism Dead
-
-genericStatePrism :: State -> Prism' Player Player
-genericStatePrism state' = prism (set state state') $ \player ->
-    if player ^. state == state' then Right player else Left player
+-- | The traversal of 'Player's aligned with the 'Werewolves'.
+--
+-- @
+-- 'werewolf' = 'role' . 'allegiance' . '_Werewolves'
+-- @
+werewolf :: Traversal' Player ()
+werewolf = role . allegiance . _Werewolves
 
 -- | This 'Traversal' provides the traversal of 'Player' names.
 --
@@ -182,111 +216,127 @@ states = traverse . state
 -- | This 'Traversal' provides the traversal of 'angel' 'Player's.
 --
 -- @
--- 'angels' = 'traverse' . 'angel'
+-- 'angels' = 'traverse' . 'filtered' ('is' 'angel')
 -- @
 angels :: Traversable t => Traversal' (t Player) Player
-angels = traverse . angel
+angels = traverse . filtered (is angel)
 
 -- | This 'Traversal' provides the traversal of 'bearTamer' 'Player's.
 --
 -- @
--- 'bearTamers' = 'traverse' . 'bearTamer'
+-- 'bearTamers' = 'traverse' . 'filtered' ('is' 'bearTamer')
 -- @
 bearTamers :: Traversable t => Traversal' (t Player) Player
-bearTamers = traverse . bearTamer
+bearTamers = traverse . filtered (is bearTamer)
 
 -- | This 'Traversal' provides the traversal of 'defender' 'Player's.
 --
 -- @
--- 'defenders' = 'traverse' . 'defender'
+-- 'defenders' = 'traverse' . 'filtered' ('is' 'defender')
 -- @
 defenders :: Traversable t => Traversal' (t Player) Player
-defenders = traverse . defender
+defenders = traverse . filtered (is defender)
 
 -- | This 'Traversal' provides the traversal of 'scapegoat' 'Player's.
 --
 -- @
--- 'scapegoats' = 'traverse' . 'scapegoat'
+-- 'scapegoats' = 'traverse' . 'filtered' ('is' 'scapegoat')
 -- @
 scapegoats :: Traversable t => Traversal' (t Player) Player
-scapegoats = traverse . scapegoat
+scapegoats = traverse . filtered (is scapegoat)
 
 -- | This 'Traversal' provides the traversal of 'seer' 'Player's.
 --
 -- @
--- 'seers' = 'traverse' . 'seer'
+-- 'seers' = 'traverse' . 'filtered' ('is' 'seer')
 -- @
 seers :: Traversable t => Traversal' (t Player) Player
-seers = traverse . seer
+seers = traverse . filtered (is seer)
 
 -- | This 'Traversal' provides the traversal of 'simpleVillager' 'Player's.
 --
 -- @
--- 'simpleVillagers' = 'traverse' . 'simpleVillager'
+-- 'simpleVillagers' = 'traverse' . 'filtered' ('is' 'simpleVillager')
 -- @
 simpleVillagers :: Traversable t => Traversal' (t Player) Player
-simpleVillagers = traverse . simpleVillager
+simpleVillagers = traverse . filtered (is simpleVillager)
 
 -- | This 'Traversal' provides the traversal of 'simpleWerewolf' 'Player's.
 --
 -- @
--- 'simpleWerewolves' = 'traverse' . 'simpleWerewolf'
+-- 'simpleWerewolves' = 'traverse' . 'filtered' ('is' 'simpleWerewolf')
 -- @
 simpleWerewolves :: Traversable t => Traversal' (t Player) Player
-simpleWerewolves = traverse . simpleWerewolf
+simpleWerewolves = traverse . filtered (is simpleWerewolf)
 
 -- | This 'Traversal' provides the traversal of 'villageIdiot' 'Player's.
 --
 -- @
--- 'villageIdiots' = 'traverse' . 'villageIdiot'
+-- 'villageIdiots' = 'traverse' . 'filtered' ('is' 'villageIdiot')
 -- @
 villageIdiots :: Traversable t => Traversal' (t Player) Player
-villageIdiots = traverse . villageIdiot
+villageIdiots = traverse . filtered (is villageIdiot)
 
 -- | This 'Traversal' provides the traversal of 'villagerVillager' 'Player's.
 --
 -- @
--- 'villagerVillagers' = 'traverse' . 'villagerVillager'
+-- 'villagerVillagers' = 'traverse' . 'filtered' ('is' 'villagerVillager')
 -- @
 villagerVillagers :: Traversable t => Traversal' (t Player) Player
-villagerVillagers = traverse . villagerVillager
+villagerVillagers = traverse . filtered (is villagerVillager)
 
 -- | This 'Traversal' provides the traversal of 'wildChild' 'Player's.
 --
 -- @
--- 'wildChildren' = 'traverse' . 'wildChild'
+-- 'wildChildren' = 'traverse' . 'filtered' ('is' 'wildChild')
 -- @
 wildChildren :: Traversable t => Traversal' (t Player) Player
-wildChildren = traverse . wildChild
+wildChildren = traverse . filtered (is wildChild)
 
 -- | This 'Traversal' provides the traversal of 'witch' 'Player's.
 --
 -- @
--- 'witches' = 'traverse' . 'witch'
+-- 'witches' = 'traverse' . 'filtered' ('is' 'witch')
 -- @
 witches :: Traversable t => Traversal' (t Player) Player
-witches = traverse . witch
+witches = traverse . filtered (is witch)
 
 -- | This 'Traversal' provides the traversal of 'wolfHound' 'Player's.
 --
 -- @
--- 'wolfHounds' = 'traverse' . 'wolfHound'
+-- 'wolfHounds' = 'traverse' . 'filtered' ('is' 'wolfHound')
 -- @
 wolfHounds :: Traversable t => Traversal' (t Player) Player
-wolfHounds = traverse . wolfHound
+wolfHounds = traverse . filtered (is wolfHound)
 
 -- | This 'Traversal' provides the traversal of 'villager' 'Player's.
 --
 -- @
--- 'villagers' = 'traverse' . 'villager'
+-- 'villagers' = 'traverse' . 'filtered' ('is' 'villager')
 -- @
 villagers :: Traversable t => Traversal' (t Player) Player
-villagers = traverse . villager
+villagers = traverse . filtered (is villager)
 
 -- | This 'Traversal' provides the traversal of 'werewolf' 'Player's.
 --
 -- @
--- 'werewolves' = 'traverse' . 'werewolf'
+-- 'werewolves' = 'traverse' . 'filtered' ('is' 'werewolf')
 -- @
 werewolves :: Traversable t => Traversal' (t Player) Player
-werewolves = traverse . werewolf
+werewolves = traverse . filtered (is werewolf)
+
+-- | This 'Traversal' provides the traversal of 'Alive' 'Player's.
+--
+-- @
+-- 'alive' = 'filtered' ('has' $ 'state' . '_Alive')
+-- @
+alive :: Traversal' Player Player
+alive = filtered (has $ state . _Alive)
+
+-- | This 'Traversal' provides the traversal of 'Dead' 'Player's.
+--
+-- @
+-- 'dead' = 'filtered' ('has' $ 'state' . '_Dead')
+-- @
+dead :: Traversal' Player Player
+dead = filtered (has $ state . _Dead)
