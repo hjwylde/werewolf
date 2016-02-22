@@ -77,15 +77,12 @@ library
         Game.Werewolf.Command,
         Game.Werewolf.Engine,
         Game.Werewolf.Game,
-        Game.Werewolf.Internal.Game,
-        Game.Werewolf.Internal.Player,
-        Game.Werewolf.Internal.Role,
         Game.Werewolf.Player,
         Game.Werewolf.Response,
         Game.Werewolf.Role
     other-modules:
-        Game.Werewolf.Internal.Messages,
-        Game.Werewolf.Internal.Util
+        Game.Werewolf.Messages,
+        Game.Werewolf.Util
 
     default-language: Haskell2010
     other-extensions:

@@ -1,5 +1,5 @@
 {-|
-Module      : Game.Werewolf.Internal.Messages
+Module      : Game.Werewolf.Messages
 Description : Suite of messages used throughout the game.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -17,7 +17,7 @@ includes features such as emoji support.
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Game.Werewolf.Internal.Messages (
+module Game.Werewolf.Messages (
     -- * Generic messages
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage, gameIsOverMessage,
 
@@ -92,11 +92,11 @@ import           Data.List.Extra
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Internal.Game
-import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
-import qualified Game.Werewolf.Internal.Role   as Role
+import           Game.Werewolf.Game
+import           Game.Werewolf.Player
 import           Game.Werewolf.Response
+import           Game.Werewolf.Role     hiding (name)
+import qualified Game.Werewolf.Role     as Role
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat

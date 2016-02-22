@@ -1,5 +1,5 @@
 {-|
-Module      : Game.Werewolf.Internal.Util
+Module      : Game.Werewolf.Util
 Description : Utility functions for working in a ('MonadState' 'Game') environment.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -12,7 +12,7 @@ Utility functions for woking in a ('MonadState' 'Game') environment.
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Game.Werewolf.Internal.Util (
+module Game.Werewolf.Util (
     -- * Game
 
     -- ** Manipulations
@@ -50,12 +50,12 @@ import Data.List
 import Data.Maybe
 import Data.Text  (Text)
 
-import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
-                                                getPendingVoters, getVoteResult, hasAngelWon,
-                                                hasVillagersWon, hasWerewolvesWon, killPlayer)
-import qualified Game.Werewolf.Internal.Game   as Game
-import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
+import           Game.Werewolf.Game   hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
+                                       getVoteResult, hasAngelWon, hasAnyoneWon, hasVillagersWon,
+                                       hasWerewolvesWon, killPlayer)
+import qualified Game.Werewolf.Game   as Game
+import           Game.Werewolf.Player
+import           Game.Werewolf.Role   hiding (name)
 
 import Prelude hiding (round)
 

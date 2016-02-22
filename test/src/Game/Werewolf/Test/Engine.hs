@@ -23,9 +23,9 @@ import           Data.Maybe
 
 import Game.Werewolf.Command
 import Game.Werewolf.Engine
-import Game.Werewolf.Internal.Game
-import Game.Werewolf.Internal.Player
-import Game.Werewolf.Internal.Role   hiding (name)
+import Game.Werewolf.Game
+import Game.Werewolf.Player
+import Game.Werewolf.Role           hiding (name)
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
