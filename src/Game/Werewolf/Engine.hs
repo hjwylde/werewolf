@@ -18,47 +18,12 @@ module Game.Werewolf.Engine (
     checkStage, checkGameOver,
 
     -- * Game
-
-    -- ** Manipulations
-    startGame, killPlayer, setPlayerAllegiance,
-
-    -- ** Searches
-    findPlayerByName_, findPlayerByRole_,
-
-    -- ** Queries
-    isGameOver, isDefendersTurn, isScapegoatsTurn, isSeersTurn, isVillagesTurn, isWerewolvesTurn,
-    isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
-    hasAngelWon, hasVillagersWon, hasWerewolvesWon,
-    getPlayerVote, getAllowedVoters, getPendingVoters, getVoteResult,
-
-    -- ** Reading and writing
-    defaultFilePath, writeGame, readGame, deleteGame, doesGameExist,
-
-    -- * Event
-
-    -- ** Queries
-    getDevourEvent,
-
-    -- * Player
-
-    -- ** Manipulations
-    createPlayers,
-
-    -- ** Queries
-    doesPlayerExist,
-    isPlayerDefender, isPlayerScapegoat, isPlayerSeer, isPlayerVillageIdiot, isPlayerWildChild,
-    isPlayerWitch, isPlayerWolfHound,
-    isPlayerWerewolf,
-    isPlayerAlive, isPlayerDead,
-
-    -- * Role
-    padRoles,
+    startGame,
 ) where
 
-import Control.Lens         hiding (cons)
+import Control.Lens         hiding (cons, isn't)
 import Control.Monad.Except
 import Control.Monad.Extra
-import Control.Monad.Random
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
@@ -68,22 +33,17 @@ import           Data.Maybe
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getAllowedVoters,
-                                                getPassers, getPendingVoters, getPlayerVote,
-                                                getVoteResult, hasAngelWon, hasVillagersWon,
-                                                hasWerewolvesWon, killPlayer, setPlayerAllegiance)
-import qualified Game.Werewolf.Internal.Game   as Game
-import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
-import qualified Game.Werewolf.Internal.Role   as Role
+import           Game.Werewolf.Game     hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
+                                         getVoteResult, hasAngelWon, hasAnyoneWon, hasVillagersWon,
+                                         hasWerewolvesWon, killPlayer)
 import           Game.Werewolf.Messages
+import           Game.Werewolf.Player
 import           Game.Werewolf.Response
+import           Game.Werewolf.Role     hiding (name)
+import qualified Game.Werewolf.Role     as Role
+import           Game.Werewolf.Util
 
 import Prelude hiding (round)
-
-import System.Directory
-import System.FilePath
-import System.Random.Shuffle
 
 checkStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage = do
@@ -98,9 +58,9 @@ checkStage' = use stage >>= \stage' -> case stage' of
     GameOver -> return ()
 
     DefendersTurn -> do
-        whenM (is dead <$> findPlayerByRole_ defenderRole) advanceStage
+        whenM (has (players . defenders . dead) <$> get) advanceStage
 
-        whenJustM (use protect) $ const advanceStage
+        whenM (isJust <$> use protect) advanceStage
 
     ScapegoatsTurn -> unlessM (use scapegoatBlamed) $ do
         allowedVoters' <- use allowedVoters
@@ -109,12 +69,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     SeersTurn -> do
-        seer <- findPlayerByRole_ seerRole
-
-        when (is dead seer) advanceStage
+        whenM (has (players . seers . dead) <$> get) advanceStage
 
         whenJustM (use see) $ \targetName -> do
-            target <- findPlayerByName_ targetName
+            seer    <- findPlayerBy_ role seerRole
+            target  <- findPlayerBy_ name targetName
 
             tell [playerSeenMessage (seer ^. name) target]
 
@@ -132,10 +91,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     Sunset -> do
         whenJustM (use roleModel) $ \roleModelsName -> do
-            wildChild <- findPlayerByRole_ wildChildRole
+            wildChild <- findPlayerBy_ role wildChildRole
 
             whenM (isPlayerDead roleModelsName &&^ return (is villager wildChild)) $ do
-                aliveWerewolfNames <- gets $ toListOf (players . werewolves . alive . name)
+                aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
                 setPlayerAllegiance (wildChild ^. name) Werewolves
 
@@ -145,8 +104,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     UrsussGrunt -> do
-        bearTamer   <- findPlayerByRole_ bearTamerRole
-        players'    <- gets $ getAdjacentAlivePlayers (bearTamer ^. name)
+        bearTamer   <- findPlayerBy_ role bearTamerRole
+        players'    <- getAdjacentAlivePlayers (bearTamer ^. name)
 
         when (has werewolves players') $ tell [ursusGruntsMessage]
 
@@ -172,19 +131,19 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     WildChildsTurn -> do
-        whenM (is dead <$> findPlayerByRole_ wildChildRole) advanceStage
+        whenM (has (players . wildChildren . dead) <$> get) advanceStage
 
-        whenJustM (use roleModel) $ const advanceStage
+        whenM (isJust <$> use roleModel) advanceStage
 
     WitchsTurn -> do
-        whenM (is dead <$> findPlayerByRole_ witchRole) advanceStage
+        whenM (has (players . witches . dead) <$> get) advanceStage
 
         whenJustM (use poison) $ \targetName -> do
             events %= (++ [PoisonEvent targetName])
             poison .= Nothing
 
         whenM (use heal) $ do
-            devourEvent <- uses events $ \events -> head [event | event@(DevourEvent _) <- events]
+            devourEvent <- fromJust <$> preuse (events . traverse . filtered (is _DevourEvent))
 
             events  %= cons NoDevourEvent . delete devourEvent
             heal    .= False
@@ -193,10 +152,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (has witches <$> getPassers)      advanceStage
 
     WolfHoundsTurn -> do
-        whenM (is dead <$> findPlayerByRole_ wolfHoundRole) advanceStage
+        whenM (has (players . wolfHounds . dead) <$> get) advanceStage
 
         whenJustM (use allegianceChosen) $ \allegiance -> do
-            wolfHound <- findPlayerByRole_ wolfHoundRole
+            wolfHound <- findPlayerBy_ role wolfHoundRole
 
             setPlayerAllegiance (wolfHound ^. name) allegiance
 
@@ -254,22 +213,19 @@ eventAvailable (PoisonEvent _)  = isSunrise
 
 applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
 applyEvent (DevourEvent targetName) = do
-    player <- findPlayerByName_ targetName
+    target <- findPlayerBy_ name targetName
 
     killPlayer targetName
-    tell [playerDevouredMessage player]
+    tell [playerDevouredMessage target]
 applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
-applyEvent (PoisonEvent name)       = do
-    player <- findPlayerByName_ name
+applyEvent (PoisonEvent targetName) = do
+    target <- findPlayerBy_ name targetName
 
-    killPlayer name
-    tell [playerPoisonedMessage player]
+    killPlayer targetName
+    tell [playerPoisonedMessage target]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkGameOver = whenM hasAnyoneWon $ do
-    stage .= GameOver
-
-    tell . gameOverMessages =<< get
+checkGameOver = whenM hasAnyoneWon $ stage .= GameOver >> get >>= tell . gameOverMessages
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
@@ -277,7 +233,7 @@ startGame callerName players = do
     when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
     when (length players > 24)              $ throwError [privateMessage callerName "Cannot have more than 24 players."]
     forM_ restrictedRoles $ \role' ->
-        when (length (filter ((role' ==) . view role) players) > 1) $
+        when (length (players ^.. traverse . filteredBy role role') > 1) $
             throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role' ^. Role.name, "."]]
 
     let game = newGame players
@@ -287,146 +243,3 @@ startGame callerName players = do
     return game
     where
         playerNames = players ^.. names
-
-killPlayer :: MonadState Game m => Text -> m ()
-killPlayer name = modify $ Game.killPlayer name
-
-setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
-setPlayerAllegiance name allegiance = modify $ Game.setPlayerAllegiance name allegiance
-
-findPlayerByName_ :: MonadState Game m => Text -> m Player
-findPlayerByName_ name' = fromJust <$> preuse (players . traverse . filteredBy name name')
-
-findPlayerByRole_ :: MonadState Game m => Role -> m Player
-findPlayerByRole_ role' = fromJust <$> preuse (players . traverse . filteredBy role role')
-
-isDefendersTurn :: MonadState Game m => m Bool
-isDefendersTurn = has (stage . _DefendersTurn) <$> get
-
-isGameOver :: MonadState Game m => m Bool
-isGameOver = has (stage . _GameOver) <$> get
-
-isScapegoatsTurn :: MonadState Game m => m Bool
-isScapegoatsTurn = has (stage . _ScapegoatsTurn) <$> get
-
-isSeersTurn :: MonadState Game m => m Bool
-isSeersTurn = has (stage . _SeersTurn) <$> get
-
-isSunrise :: MonadState Game m => m Bool
-isSunrise = has (stage . _Sunrise) <$> get
-
-isVillagesTurn :: MonadState Game m => m Bool
-isVillagesTurn = has (stage . _VillagesTurn) <$> get
-
-isWerewolvesTurn :: MonadState Game m => m Bool
-isWerewolvesTurn = has (stage . _WerewolvesTurn) <$> get
-
-isWildChildsTurn :: MonadState Game m => m Bool
-isWildChildsTurn = has (stage . _WildChildsTurn) <$> get
-
-isWitchsTurn :: MonadState Game m => m Bool
-isWitchsTurn = has (stage . _WitchsTurn) <$> get
-
-isWolfHoundsTurn :: MonadState Game m => m Bool
-isWolfHoundsTurn = has (stage . _WolfHoundsTurn) <$> get
-
-hasAnyoneWon :: MonadState Game m => m Bool
-hasAnyoneWon = hasAngelWon ||^ hasVillagersWon ||^ hasWerewolvesWon
-
-hasAngelWon :: MonadState Game m => m Bool
-hasAngelWon = gets Game.hasAngelWon
-
-hasVillagersWon :: MonadState Game m => m Bool
-hasVillagersWon = gets Game.hasVillagersWon
-
-hasWerewolvesWon :: MonadState Game m => m Bool
-hasWerewolvesWon = gets Game.hasWerewolvesWon
-
-getPassers :: MonadState Game m => m [Player]
-getPassers = gets Game.getPassers
-
-getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
-getPlayerVote playerName = gets $ Game.getPlayerVote playerName
-
-getAllowedVoters :: MonadState Game m => m [Player]
-getAllowedVoters = gets Game.getAllowedVoters
-
-getPendingVoters :: MonadState Game m => m [Player]
-getPendingVoters = gets Game.getPendingVoters
-
-getVoteResult :: MonadState Game m => m [Player]
-getVoteResult = gets Game.getVoteResult
-
-defaultFilePath :: MonadIO m => m FilePath
-defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory
-
-defaultFileName :: FilePath
-defaultFileName = ".werewolf"
-
-readGame :: MonadIO m => m Game
-readGame = liftIO . fmap read $ defaultFilePath >>= readFile
-
-writeGame :: MonadIO m => Game -> m ()
-writeGame game = liftIO $ defaultFilePath >>= flip writeFile (show game)
-
-deleteGame :: MonadIO m => m ()
-deleteGame = liftIO $ defaultFilePath >>= removeFile
-
-doesGameExist :: MonadIO m => m Bool
-doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
-
-getDevourEvent :: MonadState Game m => m (Maybe Text)
-getDevourEvent = gets (^? events . traverse . _DevourEvent)
-
-createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
-createPlayers playerNames roles = liftIO $ zipWith newPlayer playerNames <$> evalRandIO (shuffleM roles)
-
-doesPlayerExist :: MonadState Game m => Text -> m Bool
-doesPlayerExist name = gets $ Game.doesPlayerExist name
-
-isPlayerDefender :: MonadState Game m => Text -> m Bool
-isPlayerDefender name = is defender <$> findPlayerByName_ name
-
-isPlayerScapegoat :: MonadState Game m => Text -> m Bool
-isPlayerScapegoat name = is scapegoat <$> findPlayerByName_ name
-
-isPlayerSeer :: MonadState Game m => Text -> m Bool
-isPlayerSeer name = is seer <$> findPlayerByName_ name
-
-isPlayerVillageIdiot :: MonadState Game m => Text -> m Bool
-isPlayerVillageIdiot name = is villageIdiot <$> findPlayerByName_ name
-
-isPlayerWildChild :: MonadState Game m => Text -> m Bool
-isPlayerWildChild name = is wildChild <$> findPlayerByName_ name
-
-isPlayerWitch :: MonadState Game m => Text -> m Bool
-isPlayerWitch name = is witch <$> findPlayerByName_ name
-
-isPlayerWolfHound :: MonadState Game m => Text -> m Bool
-isPlayerWolfHound name = is wolfHound <$> findPlayerByName_ name
-
-isPlayerWerewolf :: MonadState Game m => Text -> m Bool
-isPlayerWerewolf name = is werewolf <$> findPlayerByName_ name
-
-isPlayerAlive :: MonadState Game m => Text -> m Bool
-isPlayerAlive name = is alive <$> findPlayerByName_ name
-
-isPlayerDead :: MonadState Game m => Text -> m Bool
-isPlayerDead name = is dead <$> findPlayerByName_ name
-
-padRoles :: [Role] -> Int -> [Role]
-padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
-    where
-        goal                    = 3
-        m                       = max (n - length roles) 0
-        startingBalance         = sumOf (traverse . balance) roles
-        simpleWerewolfBalance   = simpleWerewolfRole ^. balance
-
-        -- Little magic here to calculate how many Werewolves and Villagers we want.
-        -- This tries to ensure that the balance of the game is between -2 and 2.
-        simpleWerewolvesCount   = (goal - m - startingBalance) `div` (simpleWerewolfBalance - 1) + 1
-        simpleVillagersCount    = m - simpleWerewolvesCount
-
-        -- N.B., if roles is quite unbalanced then one list will be empty.
-        simpleVillagerRoles = replicate simpleVillagersCount simpleVillagerRole
-        simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole

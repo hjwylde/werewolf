@@ -12,7 +12,7 @@ Command data structures.
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE Rank2Types            #-}
 
 module Game.Werewolf.Command (
     -- * Command
@@ -36,14 +36,13 @@ import           Data.Maybe
 import           Data.Text  (Text)
 import qualified Data.Text  as T
 
-import           Game.Werewolf.Engine
-import           Game.Werewolf.Internal.Game   hiding (doesPlayerExist, getPendingVoters,
-                                                getPlayerVote, killPlayer, setPlayerAllegiance)
-import           Game.Werewolf.Internal.Player
-import           Game.Werewolf.Internal.Role   hiding (name)
-import qualified Game.Werewolf.Internal.Role   as Role
+import           Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, killPlayer)
 import           Game.Werewolf.Messages
+import           Game.Werewolf.Player
 import           Game.Werewolf.Response
+import           Game.Werewolf.Role     hiding (name)
+import qualified Game.Werewolf.Role     as Role
+import           Game.Werewolf.Util
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
 
@@ -88,15 +87,15 @@ choosePlayersCommand callerName targetNames = Command $ do
 
 circleCommand :: Text -> Bool -> Command
 circleCommand callerName includeDead = Command $ do
-        players' <- gets $ toListOf (players . traverse . if includeDead then id else alive)
+        players' <- toListOf (players . traverse . if includeDead then id else alive) <$> get
 
         tell [circleMessage callerName players']
 
 healCommand :: Text -> Command
 healCommand callerName = Command $ do
     validateWitchsCommand callerName
-    whenM (use healUsed)                    $ throwError [playerHasAlreadyHealedMessage callerName]
-    whenM (isNothing <$> getDevourEvent)    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (use healUsed)                                        $ throwError [playerHasAlreadyHealedMessage callerName]
+    whenM (hasn't (events . traverse . _DevourEvent) <$> get)   $ throwError [playerCannotDoThatRightNowMessage callerName]
 
     heal        .= True
     healUsed    .= True
@@ -114,19 +113,19 @@ pingCommand :: Command
 pingCommand = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> return ()
     DefendersTurn   -> do
-        defender <- findPlayerByRole_ defenderRole
+        defender <- findPlayerBy_ role defenderRole
 
-        tell [pingRoleMessage $ defender ^. role . Role.name]
+        tell [pingRoleMessage $ defenderRole ^. Role.name]
         tell [pingPlayerMessage $ defender ^. name]
     ScapegoatsTurn  -> do
-        scapegoat <- findPlayerByRole_ scapegoatRole
+        scapegoat <- findPlayerBy_ role scapegoatRole
 
-        tell [pingRoleMessage $ scapegoat ^. role . Role.name]
+        tell [pingRoleMessage $ scapegoatRole ^. Role.name]
         tell [pingPlayerMessage $ scapegoat ^. name]
     SeersTurn       -> do
-        seer <- findPlayerByRole_ seerRole
+        seer <- findPlayerBy_ role seerRole
 
-        tell [pingRoleMessage $ seer ^. role . Role.name]
+        tell [pingRoleMessage $ seerRole ^. Role.name]
         tell [pingPlayerMessage $ seer ^. name]
     Sunrise         -> return ()
     Sunset          -> return ()
@@ -143,27 +142,27 @@ pingCommand = Command $ use stage >>= \stage' -> case stage' of
         tell [pingRoleMessage "Werewolves"]
         tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
     WildChildsTurn  -> do
-        wildChild <- findPlayerByRole_ wildChildRole
+        wildChild <- findPlayerBy_ role wildChildRole
 
-        tell [pingRoleMessage $ wildChild ^. role . Role.name]
+        tell [pingRoleMessage $ wildChildRole ^. Role.name]
         tell [pingPlayerMessage $ wildChild ^. name]
     WitchsTurn      -> do
-        witch <- findPlayerByRole_ witchRole
+        witch <- findPlayerBy_ role witchRole
 
-        tell [pingRoleMessage $ witch ^. role . Role.name]
+        tell [pingRoleMessage $ witchRole ^. Role.name]
         tell [pingPlayerMessage $ witch ^. name]
     WolfHoundsTurn  -> do
-        wolfHound <- findPlayerByRole_ wolfHoundRole
+        wolfHound <- findPlayerBy_ role wolfHoundRole
 
-        tell [pingRoleMessage $ wolfHound ^. role . Role.name]
+        tell [pingRoleMessage $ wolfHoundRole ^. Role.name]
         tell [pingPlayerMessage $ wolfHound ^. name]
 
 poisonCommand :: Text -> Text -> Command
 poisonCommand callerName targetName = Command $ do
     validateWitchsCommand callerName
-    whenM (use poisonUsed)                                                          $ throwError [playerHasAlreadyPoisonedMessage callerName]
+    whenM (use poisonUsed)                                                      $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
-    whenM (isJust <$> preuse (events . traverse . _DevourEvent . only targetName))  $ throwError [playerCannotDoThatMessage callerName]
+    whenM (has (events . traverse . _DevourEvent . only targetName) <$> get)    $ throwError [playerCannotDoThatMessage callerName]
 
     poison      .= Just targetName
     poisonUsed  .= True
@@ -171,11 +170,10 @@ poisonCommand callerName targetName = Command $ do
 protectCommand :: Text -> Text -> Command
 protectCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM (isPlayerDefender callerName)   $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isDefendersTurn                 $ throwError [playerCannotDoThatRightNowMessage callerName]
+    unlessM (isPlayerDefender callerName)                           $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isDefendersTurn                                         $ throwError [playerCannotDoThatRightNowMessage callerName]
     validatePlayer callerName targetName
-    whenJustM (use priorProtect) $ \priorName ->
-        when (targetName == priorName) $ throwError [playerCannotProtectSamePlayerTwiceInARowMessage callerName]
+    whenM (has (priorProtect . traverse . only targetName) <$> get) $ throwError [playerCannotProtectSamePlayerTwiceInARowMessage callerName]
 
     priorProtect    .= Just targetName
     protect         .= Just targetName
@@ -184,7 +182,7 @@ quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
     validatePlayer callerName callerName
 
-    caller <- findPlayerByName_ callerName
+    caller <- findPlayerBy_ name callerName
 
     killPlayer callerName
     tell [playerQuitMessage caller]
@@ -220,23 +218,18 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
-        game                <- get
-        allowedVoterNames   <- use allowedVoters
-        pendingVoterNames   <- toListOf names <$> getPendingVoters
+        allowedVoterNames <- use allowedVoters
+        pendingVoterNames <- toListOf names <$> getPendingVoters
 
-        tell $ standardStatusMessages stage' (game ^. players)
+        tell . standardStatusMessages stage' =<< use players
         tell [waitingOnMessage (Just callerName) (allowedVoterNames `intersect` pendingVoterNames)]
     WerewolvesTurn  -> do
-        game                <- get
-        pendingVoterNames   <- toListOf (werewolves . name) <$> getPendingVoters
+        pendingVoterNames <- toListOf (werewolves . name) <$> getPendingVoters
 
-        tell $ standardStatusMessages stage' (game ^. players)
+        tell . standardStatusMessages stage' =<< use players
         whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
             tell [waitingOnMessage (Just callerName) pendingVoterNames]
-    _               -> do
-        game <- get
-
-        tell $ standardStatusMessages stage' (game ^. players)
+    _               -> tell . standardStatusMessages stage' =<< use players
     where
         standardStatusMessages stage players =
             currentStageMessages callerName stage ++ [playersInGameMessage callerName players]
@@ -244,24 +237,24 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 voteDevourCommand :: Text -> Text -> Command
 voteDevourCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerVote callerName) . const    $ throwError [playerHasAlreadyVotedMessage callerName]
+    unlessM (isPlayerWerewolf callerName)       $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWerewolvesTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (isJust <$> getPlayerVote callerName) $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
-    whenM (isPlayerWerewolf targetName)             $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
+    whenM (isPlayerWerewolf targetName)         $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- gets $ toListOf (players . werewolves . alive . name)
+    aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
-    tell $ map (\werewolfName -> playerMadeDevourVoteMessage werewolfName callerName targetName) (aliveWerewolfNames \\ [callerName])
+    tell [playerMadeDevourVoteMessage werewolfName callerName targetName | werewolfName <- aliveWerewolfNames \\ [callerName]]
 
 voteLynchCommand :: Text -> Text -> Command
 voteLynchCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     whenM (uses allowedVoters (callerName `notElem`))                       $ throwError [playerCannotDoThatMessage callerName]
     unlessM isVillagesTurn                                                  $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerVote callerName) . const                            $ throwError [playerHasAlreadyVotedMessage callerName]
+    whenM (isJust <$> getPlayerVote callerName)                             $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
     whenM (use villageIdiotRevealed &&^ isPlayerVillageIdiot targetName)    $ throwError [playerCannotLynchVillageIdiotMessage callerName]
 

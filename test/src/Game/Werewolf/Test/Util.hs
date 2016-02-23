@@ -5,8 +5,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
-
 module Game.Werewolf.Test.Util (
     -- * Utility functions
     run, run_,

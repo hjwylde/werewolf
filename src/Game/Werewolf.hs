@@ -6,27 +6,26 @@ Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Re-exports all of the public modules under /Game.Werewolf/.
+Re-exports all of the public modules under /Game.Werewolf/. These are:
 
-Where clashes are found between "Game.Werewolf.Game" and "Game.Werewolf.Engine", the
-"Game.Werewolf.Game" functions are preferred.
+* "Game.Werewolf.Command"
+* "Game.Werewolf.Engine"
+* "Game.Werewolf.Game"
+* "Game.Werewolf.Player"
+* "Game.Werewolf.Response"
+* "Game.Werewolf.Role"
 
-Likewise, where clashes are found between "Game.Werewolf.Player" and "Game.Werewolf.Role", the
+N.B., where clashes are found between "Game.Werewolf.Player" and "Game.Werewolf.Role", the
 "Game.Werewolf.Player" functions are preferred.
 -}
 
 module Game.Werewolf (
-    module Game.Werewolf.Command,
-    module Game.Werewolf.Engine,
-    module Game.Werewolf.Game,
-    module Game.Werewolf.Player,
-    module Game.Werewolf.Response,
-    module Game.Werewolf.Role
+    module Werewolf
 ) where
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine   hiding (doesPlayerExist)
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (name)
+import Game.Werewolf.Command  as Werewolf
+import Game.Werewolf.Engine   as Werewolf
+import Game.Werewolf.Game     as Werewolf
+import Game.Werewolf.Player   as Werewolf
+import Game.Werewolf.Response as Werewolf
+import Game.Werewolf.Role     as Werewolf hiding (name)

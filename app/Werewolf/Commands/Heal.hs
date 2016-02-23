@@ -25,6 +25,7 @@ import Data.Text (Text)
 
 import Game.Werewolf
 
+import Werewolf.Game
 import Werewolf.Messages
 
 handle :: MonadIO m => Text -> m ()

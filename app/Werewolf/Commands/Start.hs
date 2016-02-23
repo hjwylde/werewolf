@@ -27,15 +27,15 @@ import Control.Monad.Random
 import Control.Monad.State
 import Control.Monad.Writer
 
-import           Data.List
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf
-import Game.Werewolf.Role as Role
+import Game.Werewolf      hiding (name)
+import Game.Werewolf.Role
 
 import System.Random.Shuffle
 
+import Werewolf.Game
 import Werewolf.Messages
 
 data Options = Options
@@ -80,4 +80,4 @@ useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByNa
     Nothing     -> throwError [roleDoesNotExistMessage callerName roleName]
 
 findByName :: Text -> Maybe Role
-findByName name' = find ((name' ==) . T.toLower . view Role.name) allRoles
+findByName name' = restrictedRoles ^? traverse . filtered ((name' ==) . T.toLower . view name)

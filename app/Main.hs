@@ -6,7 +6,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main (

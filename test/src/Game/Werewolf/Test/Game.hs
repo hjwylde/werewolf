@@ -5,8 +5,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# OPTIONS_HADDOCK hide, prune #-}
-
 module Game.Werewolf.Test.Game (
     -- * Tests
     allGameTests,
@@ -16,9 +14,9 @@ import Control.Lens
 
 import Data.Maybe
 
-import Game.Werewolf.Internal.Game
-import Game.Werewolf.Internal.Player
-import Game.Werewolf.Test.Arbitrary  ()
+import Game.Werewolf.Game
+import Game.Werewolf.Player
+import Game.Werewolf.Test.Arbitrary ()
 
 import Prelude hiding (round)
 

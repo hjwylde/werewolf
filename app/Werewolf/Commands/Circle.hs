@@ -26,6 +26,7 @@ import Data.Text (Text)
 
 import Game.Werewolf
 
+import Werewolf.Game
 import Werewolf.Messages
 
 data Options = Options
