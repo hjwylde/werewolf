@@ -28,26 +28,26 @@ executable werewolf
     hs-source-dirs: app/
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
-        Werewolf.Commands.Choose,
-        Werewolf.Commands.Circle,
-        Werewolf.Commands.End,
-        Werewolf.Commands.Heal,
-        Werewolf.Commands.Help,
-        Werewolf.Commands.Interpret,
-        Werewolf.Commands.Pass,
-        Werewolf.Commands.Ping,
-        Werewolf.Commands.Poison,
-        Werewolf.Commands.Protect,
-        Werewolf.Commands.Quit,
-        Werewolf.Commands.See,
-        Werewolf.Commands.Start,
-        Werewolf.Commands.Status,
-        Werewolf.Commands.Version,
-        Werewolf.Commands.Vote,
-        Werewolf.Game,
-        Werewolf.Messages,
-        Werewolf.Options,
-        Werewolf.Version,
+        Werewolf.Commands.Choose
+        Werewolf.Commands.Circle
+        Werewolf.Commands.End
+        Werewolf.Commands.Heal
+        Werewolf.Commands.Help
+        Werewolf.Commands.Interpret
+        Werewolf.Commands.Pass
+        Werewolf.Commands.Ping
+        Werewolf.Commands.Poison
+        Werewolf.Commands.Protect
+        Werewolf.Commands.Quit
+        Werewolf.Commands.See
+        Werewolf.Commands.Start
+        Werewolf.Commands.Status
+        Werewolf.Commands.Version
+        Werewolf.Commands.Vote
+        Werewolf.Game
+        Werewolf.Messages
+        Werewolf.Options
+        Werewolf.Version
         Paths_werewolf
 
     default-language: Haskell2010
@@ -73,15 +73,15 @@ executable werewolf
 library
     hs-source-dirs: src/
     exposed-modules:
-        Game.Werewolf,
-        Game.Werewolf.Command,
-        Game.Werewolf.Engine,
-        Game.Werewolf.Game,
-        Game.Werewolf.Player,
-        Game.Werewolf.Response,
+        Game.Werewolf
+        Game.Werewolf.Command
+        Game.Werewolf.Engine
+        Game.Werewolf.Game
+        Game.Werewolf.Player
+        Game.Werewolf.Response
         Game.Werewolf.Role
     other-modules:
-        Game.Werewolf.Messages,
+        Game.Werewolf.Messages
         Game.Werewolf.Util
 
     default-language: Haskell2010
