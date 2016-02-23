@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.7.0
+
 *Revisions*
 
 * Fixed balance calculation to ensure total balance is between -2 and 2.
