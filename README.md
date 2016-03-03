@@ -145,7 +145,7 @@ This time, even though the command was successful, there are no messages.
 
 ```bash
 > werewolf --caller @corge vote @grault
-{"ok":false,"messages":[{"to":["@corge"],"message":"You've already voted!"}]}
+{"ok":false,"messages":[{"to":"@corge","message":"You've already voted!"}]}
 ```
 
 Here the command was unsuccessful and an error message is sent to _@corge_.
