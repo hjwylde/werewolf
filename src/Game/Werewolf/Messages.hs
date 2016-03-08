@@ -460,7 +460,7 @@ scapegoatLynchedMessage name = publicMessage $ T.unwords
 
 villageIdiotLynchedMessage :: Text -> Message
 villageIdiotLynchedMessage name = publicMessage $ T.concat
-    [ "Just as the townsfolk tie", name, "up to the pyre, a voice in the crowd yells out."
+    [ "Just as the townsfolk tie ", name, " up to the pyre, a voice in the crowd yells out."
     , " \"We can't burn ", name, "! He's that oaf, you know, John's boy!\""
     , " The Village Idiot is quickly untied and apologised to."
     ]
