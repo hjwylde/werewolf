@@ -232,7 +232,10 @@ statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     _               -> tell . standardStatusMessages stage' =<< use players
     where
         standardStatusMessages stage players =
-            currentStageMessages callerName stage ++ [playersInGameMessage callerName players]
+            currentStageMessages callerName stage ++
+            [ rolesInGameMessage (Just callerName) (players ^.. roles)
+            , playersInGameMessage callerName players
+            ]
 
 voteDevourCommand :: Text -> Text -> Command
 voteDevourCommand callerName targetName = Command $ do
