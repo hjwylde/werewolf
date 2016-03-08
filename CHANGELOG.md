@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed a bug where the Werewolves couldn't win if it was down to 1 Werewolf and the Village Idiot. ([#88](https://github.com/hjwylde/werewolf/issues/88))
+
 #### v0.4.6.0
 
 *Minor*

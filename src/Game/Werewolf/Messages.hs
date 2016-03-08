@@ -59,7 +59,7 @@ module Game.Werewolf.Messages (
     scapegoatLynchedMessage, villageIdiotLynchedMessage,
 
     -- ** Error messages
-    playerHasAlreadyVotedMessage, playerCannotLynchVillageIdiotMessage,
+    playerHasAlreadyVotedMessage,
 
     -- * Werewolves' turn messages
     playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
@@ -467,10 +467,6 @@ villageIdiotLynchedMessage name = publicMessage $ T.concat
 
 playerHasAlreadyVotedMessage :: Text -> Message
 playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
-
-playerCannotLynchVillageIdiotMessage :: Text -> Message
-playerCannotLynchVillageIdiotMessage to =
-    privateMessage to "You cannot lynch the Village Idiot!"
 
 playerMadeDevourVoteMessage :: Text -> Text -> Text -> Message
 playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat
