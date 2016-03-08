@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.6.1
+
 *Revisions*
 
 * Fixed Village Idiot text to have spaces around the name. ([#87](https://github.com/hjwylde/werewolf/issues/87))
