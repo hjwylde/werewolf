@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.8.0
+
 *Minor*
 
 * Added role allocations to the game over messages. ([#27](https://github.com/hjwylde/werewolf/issues/27))
