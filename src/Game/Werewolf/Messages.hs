@@ -254,7 +254,8 @@ witchsTurnMessages game = concat
 wolfHoundsTurnMessages :: Text -> [Message]
 wolfHoundsTurnMessages to =
     [ publicMessage "The Wolf-hound wakes up."
-    , privateMessage to "Which allegiance do you `choose` to be aligned with?"
+    , privateMessage to
+        "Which allegiance do you `choose` to be aligned with? (Either `villagers` or `werewolves`.)"
     ]
 
 gameOverMessages :: Game -> [Message]

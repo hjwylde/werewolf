@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Improved prompt to Wolf-hound on how to choose an allegiance. ([#90](https://github.com/hjwylde/werewolf/issues/90))
+
 #### v0.4.7.0
 
 *Revisions*
