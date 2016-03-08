@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Changed Scapegoat's balance to 0. ([#91](https://github.com/hjwylde/werewolf/issues/91))
+
 #### v0.4.7.0
 
 *Revisions*

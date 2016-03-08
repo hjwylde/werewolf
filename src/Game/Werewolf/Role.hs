@@ -258,7 +258,7 @@ scapegoatRole :: Role
 scapegoatRole = Role
     { _name         = "Scapegoat"
     , _allegiance   = Villagers
-    , _balance      = 1
+    , _balance      = 0
     , _description  = T.unwords
         [ "It's sad to say, but in Miller's Hollow, when something doesn't go right"
         , "it's always him who unjustly suffers the consequences."
