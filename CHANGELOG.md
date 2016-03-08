@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Grouped `help commands` to improve readability. ([#97](https://github.com/hjwylde/werewolf/issues/97))
+
 #### v0.4.7.0
 
 *Revisions*

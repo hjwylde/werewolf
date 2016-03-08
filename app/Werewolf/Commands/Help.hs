@@ -57,21 +57,41 @@ handle callerName (Options Nothing) = exitWith success
     }
 
 commandsMessages :: [Text]
-commandsMessages =
-    [ "choose (ALLEGIANCE | PLAYER,...) - choose an allegiance or player(s)."
-    , "circle [--include-dead] - get the game circle."
-    , "end - ends the current game."
-    , "heal - heal the devoured player."
-    , "pass - pass on healing or poisoning a player."
-    , "ping - ping the status of the current game publicly."
-    , "poison PLAYER - poison a player."
-    , "protect PLAYER - protect a player."
-    , "quit - quit the current game."
-    , "see PLAYER - see a player's allegiance."
-    , "start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER... - starts a new game with the given players and extra roles. A game requires at least 7 players."
-    , "status - get the status of the current game."
-    , "version - show this engine's version."
-    , "vote PLAYER - vote against a player."
+commandsMessages = map (T.intercalate "\n")
+    [ [ "Global commands:"
+      , "start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER..."
+      , "end"
+      , "quit"
+      , "version"
+      ]
+    , [ "Status commands:"
+      , "ping - ping the status of the current game publicly."
+      , "status - get the status of the current game."
+      , "circle [--include-dead] - get the game circle."
+      ]
+    , [ "Standard commands:"
+      , "vote PLAYER"
+      ]
+    , [ "Defender commands:"
+      , "protect PLAYER"
+      ]
+    , [ "Scapegoat commands:"
+      , "choose PLAYER,..."
+      ]
+    , [ "Seer commands:"
+      , "see PLAYER"
+      ]
+    , [ "Wild-child commands:"
+      , "choose PLAYER"
+      ]
+    , [ "Witch commands:"
+      , "heal"
+      , "poison PLAYER"
+      , "pass"
+      ]
+    , [ "Wolf-hound commands:"
+      , "choose (villagers | werewolves)"
+      ]
     ]
 
 descriptionMessages :: [Text]
@@ -139,8 +159,10 @@ rulesMessages = map (T.intercalate "\n")
 
 helpMessages :: [Text]
 helpMessages =
-    [ "help commands - print the in-game commands."
-    , "help description - print the game description."
-    , "help roles - print the roles and their description."
-    , "help rules - print the game rules."
+    [ T.intercalate "\n"
+        [ "help commands - print the in-game commands."
+        , "help description - print the game description."
+        , "help roles - print the roles and their description."
+        , "help rules - print the game rules."
+        ]
     ]
