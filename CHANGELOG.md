@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed a bug causing the Angel's joining Villagers message to be shown every round. ([#95](https://github.com/hjwylde/werewolf/issues/95))
+
 #### v0.4.7.0
 
 *Revisions*
