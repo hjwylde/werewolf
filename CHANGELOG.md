@@ -6,6 +6,7 @@
 
 * Improved prompt to Wolf-hound on how to choose an allegiance. ([#90](https://github.com/hjwylde/werewolf/issues/90))
 * Changed Scapegoat's balance to 0. ([#91](https://github.com/hjwylde/werewolf/issues/91))
+* Grouped `help commands` to improve readability. ([#97](https://github.com/hjwylde/werewolf/issues/97))
 
 #### v0.4.7.0
 
