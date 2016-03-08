@@ -34,7 +34,7 @@ handle callerName = do
 
     game <- readGame
 
-    let command = pingCommand
+    let command = pingCommand callerName
 
     case runExcept (execWriterT $ execStateT (apply command) game) of
         Left errorMessages  -> exitWith failure { messages = errorMessages }

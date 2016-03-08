@@ -109,9 +109,9 @@ passCommand callerName = Command $ do
 
     passes %= nub . cons callerName
 
-pingCommand :: Command
-pingCommand = Command $ use stage >>= \stage' -> case stage' of
-    GameOver        -> return ()
+pingCommand :: Text -> Command
+pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
+    GameOver        -> tell [gameIsOverMessage callerName]
     DefendersTurn   -> do
         defender <- findPlayerBy_ role defenderRole
 
@@ -214,7 +214,7 @@ seeCommand callerName targetName = Command $ do
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    GameOver        -> get >>= tell . gameOverMessages
+    GameOver        -> tell [gameIsOverMessage callerName]
     Sunrise         -> return ()
     Sunset          -> return ()
     VillagesTurn    -> do
