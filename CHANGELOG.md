@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added role allocations to the game over messages. ([#27](https://github.com/hjwylde/werewolf/issues/27))
+
 *Revisions*
 
 * Improved prompt to Wolf-hound on how to choose an allegiance. ([#90](https://github.com/hjwylde/werewolf/issues/90))

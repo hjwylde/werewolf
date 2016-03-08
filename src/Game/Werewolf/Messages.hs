@@ -263,21 +263,34 @@ gameOverMessages game
     | hasAngelWon game      = concat
         [ [publicMessage "You should have heeded my warning, for now the Angel has been set free!"]
         , [publicMessage "The game is over! The Angel has won."]
+        , [playerRolesMessage]
         , playerWonMessages
         , playerLostMessages
         ]
     | hasVillagersWon game  = concat
         [ [publicMessage "The game is over! The Villagers have won."]
+        , [playerRolesMessage]
         , playerWonMessages
         , playerLostMessages
         ]
     | hasWerewolvesWon game = concat
         [ [publicMessage "The game is over! The Werewolves have won."]
+        , [playerRolesMessage]
         , playerWonMessages
         , playerLostMessages
         ]
     | otherwise             = undefined
     where
+        playerRolesMessage = publicMessage $ T.concat
+            [ "As I know you're all wondering who lied to you, here's the role allocations: "
+            , T.intercalate ", "
+                (map
+                    (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"])
+                    (game ^. players)
+                    )
+            , "."
+            ]
+
         winningAllegiance
             | hasAngelWon game      = Angel
             | hasVillagersWon game  = Villagers
