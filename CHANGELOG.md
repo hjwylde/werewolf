@@ -2,6 +2,8 @@
 
 #### Upcoming
 
+#### v0.4.7.1
+
 *Revisions*
 
 * Fixed bug where the Wolf-hound's turn messages would be displayed on every round. ([#87](https://github.com/hjwylde/werewolf/issues/87))
