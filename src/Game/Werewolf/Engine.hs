@@ -82,10 +82,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
-        whenJustM (preuse $ players . angels . alive) $ \angel -> do
-            tell [angelJoinedVillagersMessage]
+        whenJustM (preuse $ players . angels . alive) $ \angel ->
+            unless (is villager angel) $ do
+                tell [angelJoinedVillagersMessage]
 
-            setPlayerAllegiance (angel ^. name) Villagers
+                setPlayerAllegiance (angel ^. name) Villagers
 
         advanceStage
 
