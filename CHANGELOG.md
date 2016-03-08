@@ -14,6 +14,15 @@
 * Changed the `status` and `ping` commands to tell the caller when the game is over. ([#89](https://github.com/hjwylde/werewolf/issues/89))
 * Added roles in game to the `status` command. ([#93](https://github.com/hjwylde/werewolf/issues/93))
 
+#### v0.4.7.1
+
+*Revisions*
+
+* Fixed bug where the Wolf-hound's turn messages would be displayed on every round. ([#87](https://github.com/hjwylde/werewolf/issues/87))
+* Fixed a bug causing the Angel's joining Villagers message to be shown every round. ([#95](https://github.com/hjwylde/werewolf/issues/95))
+* Fixed Village Idiot text to have spaces around the name. ([#87](https://github.com/hjwylde/werewolf/issues/87))
+* Fixed a bug where the Werewolves couldn't win if it was down to 1 Werewolf and the Village Idiot. ([#88](https://github.com/hjwylde/werewolf/issues/88))
+
 #### v0.4.7.0
 
 *Revisions*
@@ -26,6 +35,13 @@
 * Fixed the grammar on the first Werewolves' turn messages.
 * Moved Wolf-hound's turn to before the Seer's so that the Seer may see his allegiance properly.
 * Restricted specifying `Simple Villager` or `Simple Werewolf` as extra roles.
+
+#### v0.4.6.1
+
+*Revisions*
+
+* Fixed Village Idiot text to have spaces around the name. ([#87](https://github.com/hjwylde/werewolf/issues/87))
+* Fixed a bug where the Werewolves couldn't win if it was down to 1 Werewolf and the Village Idiot. ([#88](https://github.com/hjwylde/werewolf/issues/88))
 
 #### v0.4.6.0
 

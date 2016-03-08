@@ -173,7 +173,9 @@ stageAvailable game WildChildsTurn  =
 stageAvailable game WitchsTurn      =
     has (players . witches . alive) game
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
-stageAvailable game WolfHoundsTurn  = has (players . wolfHounds . alive) game
+stageAvailable game WolfHoundsTurn  =
+    has (players . wolfHounds . alive) game
+    && (isNothing $ game ^. allegianceChosen)
 
 -- | Creates a new 'Game' with the given players. No validations are performed here, those are left
 --   to 'Game.Werewolf.Engine.startGame'.

@@ -50,8 +50,9 @@ allEngineTests =
     , testProperty "check defender's turn advances when no defender"        prop_checkDefendersTurnAdvancesWhenNoDefender
     , testProperty "check defender's turn does nothing unless protected"    prop_checkDefendersTurnDoesNothingUnlessProtected
 
-    , testProperty "check scapegoat's turn advances to wolf-hound's turn"       prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn
-    , testProperty "check scapegoat's turn does nothing while scapegoat blamed" prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed
+    , testProperty "check scapegoat's turn advances to wolf-hound's turn"                   prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn
+    , testProperty "check scapegoat's turn skips wolf-hound's turn when allegiance chosen"  prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen
+    , testProperty "check scapegoat's turn does nothing while scapegoat blamed"             prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed
 
     , testProperty "check seer's turn advances to wild-child's turn"    prop_checkSeersTurnAdvancesToWildChildsTurn
     , testProperty "check seer's turn advances when no seer"            prop_checkSeersTurnAdvancesWhenNoSeer
@@ -185,6 +186,13 @@ prop_checkDefendersTurnDoesNothingUnlessProtected (GameAtDefendersTurn game) =
 prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn :: GameWithAllowedVoters -> Bool
 prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn (GameWithAllowedVoters game) =
     has (stage . _WolfHoundsTurn) (run_ checkStage game)
+
+prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen :: GameWithAllowedVoters -> Property
+prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen (GameWithAllowedVoters game) =
+    forAll (elements [Villagers, Werewolves]) $ \allegiance -> do
+        let game' = game & allegianceChosen .~ Just allegiance
+
+        hasn't (stage . _WolfHoundsTurn) (run_ checkStage game')
 
 prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed :: GameAtScapegoatsTurn -> Bool
 prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed (GameAtScapegoatsTurn game) =
