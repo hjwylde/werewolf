@@ -5,6 +5,7 @@
 *Revisions*
 
 * Fixed Village Idiot text to have spaces around the name. ([#87](https://github.com/hjwylde/werewolf/issues/87))
+* Fixed a bug where the Werewolves couldn't win if it was down to 1 Werewolf and the Village Idiot. ([#88](https://github.com/hjwylde/werewolf/issues/88))
 
 #### v0.4.6.0
 

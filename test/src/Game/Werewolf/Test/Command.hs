@@ -146,7 +146,6 @@ allCommandTests =
     , testProperty "vote lynch command errors when caller has voted"                prop_voteLynchCommandErrorsWhenCallerHasVoted
     , testProperty "vote lynch command errors when caller is not in allowed voters" prop_voteLynchCommandErrorsWhenCallerIsNotInAllowedVoters
     , testProperty "vote lynch command errors when caller is known village idiot"   prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot
-    , testProperty "vote lynch command errors when target is known village idiot"   prop_voteLynchCommandErrorsWhenTargetIsKnownVillageIdiot
     , testProperty "vote lynch command updates votes"                               prop_voteLynchCommandUpdatesVotes
     ]
 
@@ -867,15 +866,6 @@ prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot (GameWithVillageIdiotRe
         verbose_runCommandErrors game command
     where
         caller = findByRole_ villageIdiotRole (game ^. players)
-
-prop_voteLynchCommandErrorsWhenTargetIsKnownVillageIdiot :: GameWithVillageIdiotRevealedAtVillagesTurn -> Property
-prop_voteLynchCommandErrorsWhenTargetIsKnownVillageIdiot (GameWithVillageIdiotRevealedAtVillagesTurn game) =
-    forAll (arbitraryPlayer game) $ \caller -> do
-        let command = voteLynchCommand (caller ^. name) (target ^. name)
-
-        verbose_runCommandErrors game command
-    where
-        target = findByRole_ villageIdiotRole (game ^. players)
 
 prop_voteLynchCommandUpdatesVotes :: GameAtVillagesTurn -> Property
 prop_voteLynchCommandUpdatesVotes (GameAtVillagesTurn game) =

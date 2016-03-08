@@ -262,11 +262,10 @@ voteDevourCommand callerName targetName = Command $ do
 voteLynchCommand :: Text -> Text -> Command
 voteLynchCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    whenM (uses allowedVoters (callerName `notElem`))                       $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isVillagesTurn                                                  $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenJustM (getPlayerVote callerName) . const                            $ throwError [playerHasAlreadyVotedMessage callerName]
+    whenM (uses allowedVoters (callerName `notElem`))   $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isVillagesTurn                              $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenJustM (getPlayerVote callerName) . const        $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
-    whenM (use villageIdiotRevealed &&^ isPlayerVillageIdiot targetName)    $ throwError [playerCannotLynchVillageIdiotMessage callerName]
 
     votes %= Map.insert callerName targetName
 
