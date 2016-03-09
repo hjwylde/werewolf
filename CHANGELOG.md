@@ -5,6 +5,8 @@
 *Minor*
 
 * Added player contributed messages upon game over. ([#86](https://github.com/hjwylde/werewolf/issues/86))
+* Filtered `help` commands based on the current game. ([#94](https://github.com/hjwylde/werewolf/issues/94))
+* Added `--all` option to `help` commands. ([#94](https://github.com/hjwylde/werewolf/issues/94))
 
 #### v0.4.8.0
 
