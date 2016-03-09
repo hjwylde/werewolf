@@ -55,9 +55,12 @@ handle callerName (Options (Just Roles)) = do
     exitWith success
         { messages = map (privateMessage callerName . roleMessage) roles
         }
-handle callerName (Options (Just Rules)) = exitWith success
-    { messages = map (privateMessage callerName) rulesMessages
-    }
+handle callerName (Options (Just Rules)) = do
+    mGame <- ifM doesGameExist (Just <$> readGame) (return Nothing)
+
+    exitWith success
+        { messages = map (privateMessage callerName) (rulesMessages mGame)
+        }
 handle callerName (Options Nothing) = exitWith success
     { messages = map (privateMessage callerName) helpMessages
     }
@@ -78,29 +81,29 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     , [ "Standard commands:"
       , "- `vote PLAYER`"
       ]
-    , ifPlayerHasRole callerName mGame defenderRole
+    , whenPlayerHasRole callerName mGame defenderRole
       [ "Defender commands:"
       , "- `protect PLAYER`"
       ]
-    , ifPlayerHasRole callerName mGame scapegoatRole
+    , whenPlayerHasRole callerName mGame scapegoatRole
       [ "Scapegoat commands:"
       , "- `choose PLAYER,...`"
       ]
-    , ifPlayerHasRole callerName mGame seerRole
+    , whenPlayerHasRole callerName mGame seerRole
       [ "Seer commands:"
       , "- `see PLAYER`"
       ]
-    , ifPlayerHasRole callerName mGame wildChildRole
+    , whenPlayerHasRole callerName mGame wildChildRole
       [ "Wild-child commands:"
       , "- `choose PLAYER`"
       ]
-    , ifPlayerHasRole callerName mGame witchRole
+    , whenPlayerHasRole callerName mGame witchRole
       [ "Witch commands:"
       , "- `heal`"
       , "- `poison PLAYER`"
       , "- `pass`"
       ]
-    , ifPlayerHasRole callerName mGame wolfHoundRole
+    , whenPlayerHasRole callerName mGame wolfHoundRole
       [ "Wolf-hound commands:"
       , "- `choose (villagers | werewolves)`"
       ]
@@ -113,8 +116,8 @@ roleMessage role = T.intercalate "\n"
     , role ^. advice
     ]
 
-rulesMessages :: [Text]
-rulesMessages = map (T.intercalate "\n")
+rulesMessages :: Maybe Game -> [Text]
+rulesMessages mGame = map (T.intercalate "\n")
     [ [ T.unwords
         [ "Each night, the Werewolves bite, kill and devour one Villager."
         , "During the day they try to conceal their identity and vile deeds from the Villagers."
@@ -130,25 +133,36 @@ rulesMessages = map (T.intercalate "\n")
         , "who is then hanged, burned and eliminated from the game."
         ]
       ]
-    , [ T.unwords
+    , filter (/= "") [ T.concat
         [ "Each player is informed of their role (see `help roles' for a list)"
-        , "at the start of the game. A game begins at night and follows a standard cycle."
-        , "(N.B., when the Angel is in play the game begins with the village vote.)"
+        , " at the start of the game."
+        , " A game begins at night and follows a standard cycle."
+        , whenRoleInPlay mGame angelRole
+          " (N.B., when the Angel is in play the game begins with the village vote.)"
         ]
-      , "1. (When the Angel is in play) the village votes to lynch a suspect."
-      , "2. The village falls asleep."
-      , "3. (First round only) the Wild-child wakes up and chooses a role model."
-      , "4. The Defender wakes up and protects someone."
-      , "5. The Seer wakes up and sees someone's allegiance."
-      , "6. (First round only) the Wolf-hound wakes up and chooses an allegiance."
-      , "7. The Werewolves wake up and select a victim."
-      , "8. The Witch wakes up and may heal the victim and/or poison someone."
-      , "9. The village wakes up and find the victim."
-      , "10. The village votes to lynch a suspect."
-      , "11. (When the Scapegoat is blamed) the Scapegot chooses whom may vote on the next day."
-      , T.unwords
-        [ "The game is over when only Villagers or Werewolves are left alive,"
-        , "or when one of the Loners completes their own objective."
+      , whenRoleInPlay mGame angelRole
+        "- (When the Angel is in play) the village votes to lynch a suspect."
+      , "- The village falls asleep."
+      , whenRoleInPlay mGame wildChildRole
+        "- (First round only) the Wild-child wakes up and chooses a role model."
+      , whenRoleInPlay mGame defenderRole
+        "- The Defender wakes up and protects someone."
+      , whenRoleInPlay mGame seerRole
+        "- The Seer wakes up and sees someone's allegiance."
+      , whenRoleInPlay mGame wolfHoundRole
+        "- (First round only) the Wolf-hound wakes up and chooses an allegiance."
+      , "- The Werewolves wake up and select a victim."
+      , whenRoleInPlay mGame witchRole
+        "- The Witch wakes up and may heal the victim and/or poison someone."
+      , "- The village wakes up and find the victim."
+      , "- The village votes to lynch a suspect."
+      , whenRoleInPlay mGame scapegoatRole
+        "- (When the Scapegoat is blamed) the Scapegoat chooses whom may vote on the next day."
+      , T.concat
+        [ "The game is over when only Villagers or Werewolves are left alive"
+        , ifRoleInPlay mGame angelRole
+          ", or when one of the Loners completes their own objective."
+          "."
         ]
       ]
     ]
@@ -176,18 +190,20 @@ helpMessages = map (T.intercalate "\n")
       ]
     ]
 
-ifPlayerHasRole :: Monoid m => Text -> Maybe Game -> Role -> m -> m
-ifPlayerHasRole _ Nothing _ m                   = m
-ifPlayerHasRole callerName (Just game) role' m
+whenPlayerHasRole :: Monoid m => Text -> Maybe Game -> Role -> m -> m
+whenPlayerHasRole _ Nothing _ m                   = m
+whenPlayerHasRole callerName (Just game) role' m
      | has (players . names . only callerName) game
         && has (role . only role') player           = m
     | otherwise                                     = mempty
      where
         player = game ^?! players . traverse . filteredBy name callerName
 
---ifRoleInPlay :: Monoid m => Maybe Game -> Role -> m -> m
---ifRoleInPlay Nothing _ m        = m
---ifRoleInPlay (Just game) role' m
---    | has (players . roles . only role') game   = m
---    | otherwise                                 = mempty
---
+ifRoleInPlay :: Maybe Game -> Role -> a -> a -> a
+ifRoleInPlay Nothing _ true _               = true
+ifRoleInPlay (Just game) role' true false
+    | has (players . roles . only role') game   = true
+    | otherwise                                 = false
+
+whenRoleInPlay :: Monoid m => Maybe Game -> Role -> m -> m
+whenRoleInPlay mGame role m = ifRoleInPlay mGame role m mempty
