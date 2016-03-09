@@ -109,7 +109,7 @@ werewolf = Options
         ])
 
 choose :: Parser Command
-choose = Choose . Choose.Options . T.pack <$> strArgument (metavar "ALLEGIANCE | PLAYER,...")
+choose = Choose . Choose.Options . map T.pack <$> some (strArgument $ metavar "ALLEGIANCE | PLAYER...")
 
 circle :: Parser Command
 circle = Circle . Circle.Options

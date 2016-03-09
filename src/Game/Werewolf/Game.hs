@@ -153,7 +153,7 @@ stageCycle = cycle allStages
 -- | Checks whether the stage is available for the given 'Game'. Most often this just involves
 --   checking if there is an applicable role alive, but sometimes it is more complex.
 --
---   One of the most complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
+--   One of the more complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
 --   the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
 stageAvailable game DefendersTurn   = has (players . defenders . alive) game

@@ -25,8 +25,7 @@ import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
-import           Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text (Text)
 
 import Game.Werewolf
 
@@ -34,11 +33,11 @@ import Werewolf.Game
 import Werewolf.Messages
 
 data Options = Options
-    { arg :: Text
+    { args :: [Text]
     } deriving (Eq, Show)
 
 handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options arg) = do
+handle callerName (Options args) = do
     unlessM doesGameExist $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
@@ -46,9 +45,9 @@ handle callerName (Options arg) = do
     game <- readGame
 
     let command = case game ^. stage of
-            ScapegoatsTurn  -> choosePlayersCommand callerName (filter (/= T.empty) (T.splitOn "," arg))
-            WildChildsTurn  -> choosePlayerCommand callerName arg
-            WolfHoundsTurn  -> chooseAllegianceCommand callerName arg
+            ScapegoatsTurn  -> choosePlayersCommand callerName args
+            WildChildsTurn  -> choosePlayerCommand callerName (head args)
+            WolfHoundsTurn  -> chooseAllegianceCommand callerName (head args)
             -- TODO (hjw): throw an error
             _               -> undefined
 

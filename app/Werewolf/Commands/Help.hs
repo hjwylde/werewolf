@@ -76,7 +76,7 @@ commandsMessages = map (T.intercalate "\n")
       , "protect PLAYER"
       ]
     , [ "Scapegoat commands:"
-      , "choose PLAYER,..."
+      , "choose PLAYER..."
       ]
     , [ "Seer commands:"
       , "see PLAYER"
