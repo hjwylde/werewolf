@@ -128,7 +128,6 @@ help_ :: Parser Command
 help_ = Help . Help.Options
     <$> optional (subparser $ mconcat
         [ command "commands"    $ info (pure Help.Commands)     (fullDesc <> progDesc "Print the in-game commands")
-        , command "description" $ info (pure Help.Description)  (fullDesc <> progDesc "Print the game description")
         , command "rules"       $ info (pure Help.Rules)        (fullDesc <> progDesc "Print the game rules")
         , command "roles"       $ info (pure Help.Roles)        (fullDesc <> progDesc "Print the roles and their descriptions")
         ])

@@ -25,29 +25,22 @@ import Control.Monad.IO.Class
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf      hiding (Command)
-import Game.Werewolf.Role as Role
+import           Game.Werewolf      hiding (Command)
+import qualified Game.Werewolf.Role as Role
 
 data Options = Options
     { argCommand :: Maybe Command
     } deriving (Eq, Show)
 
-data Command = Commands | Description | Rules | Roles
+data Command = Commands | Rules | Roles
     deriving (Eq, Show)
 
 handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options (Just Commands)) = exitWith success
     { messages = map (privateMessage callerName) commandsMessages
     }
-handle callerName (Options (Just Description)) = exitWith success
-    { messages = map (privateMessage callerName) descriptionMessages
-    }
 handle callerName (Options (Just Roles)) = exitWith success
-    { messages = map (\role -> privateMessage callerName $ T.intercalate "\n"
-        [ T.concat [role ^. Role.name, " (", T.pack . show $ role ^. balance, "):"]
-        , role ^. description
-        , role ^. advice
-        ]) allRoles
+    { messages = map (privateMessage callerName . roleMessage) allRoles
     }
 handle callerName (Options (Just Rules)) = exitWith success
     { messages = map (privateMessage callerName) rulesMessages
@@ -59,62 +52,46 @@ handle callerName (Options Nothing) = exitWith success
 commandsMessages :: [Text]
 commandsMessages = map (T.intercalate "\n")
     [ [ "Global commands:"
-      , "`start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER...`"
-      , "`end`"
-      , "`quit`"
-      , "`version`"
+      , "- `start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER...`"
+      , "- `end`"
+      , "- `quit`"
+      , "- `version`"
       ]
     , [ "Status commands:"
-      , "`ping` ping the status of the current game publicly"
-      , "`status` get the status of the current game"
-      , "`circle [--include-dead]` get the game circle"
+      , "- `ping` ping the status of the current game publicly"
+      , "- `status` get the status of the current game"
+      , "- `circle [--include-dead]` get the game circle"
       ]
     , [ "Standard commands:"
-      , "`vote PLAYER`"
+      , "- `vote PLAYER`"
       ]
     , [ "Defender commands:"
-      , "`protect PLAYER`"
+      , "- `protect PLAYER`"
       ]
     , [ "Scapegoat commands:"
-      , "`choose PLAYER,...`"
+      , "- `choose PLAYER,...`"
       ]
     , [ "Seer commands:"
-      , "`see PLAYER`"
+      , "- `see PLAYER`"
       ]
     , [ "Wild-child commands:"
-      , "`choose PLAYER`"
+      , "- `choose PLAYER`"
       ]
     , [ "Witch commands:"
-      , "`heal`"
-      , "`poison PLAYER`"
-      , "`pass`"
+      , "- `heal`"
+      , "- `poison PLAYER`"
+      , "- `pass`"
       ]
     , [ "Wolf-hound commands:"
-      , "`choose (villagers | werewolves)`"
+      , "- `choose (villagers | werewolves)`"
       ]
     ]
 
-descriptionMessages :: [Text]
-descriptionMessages = map (T.intercalate "\n")
-    [ [ T.unwords
-        [ "Deep in the American countryside,"
-        , "the little town of Millers Hollow has recently been infiltrated by Werewolves."
-        ]
-      , T.unwords
-        [ "Each night, murders are committed by the Villagers,"
-        , "who due to some mysterious phenomenon (possibly the greenhouse effect)"
-        , "have become Werewolves."
-        ]
-      , T.unwords
-        [ "It is now time to take control and eliminate this ancient evil,"
-        , "before the town loses its last few inhabitants."
-        ]
-      ]
-    , [ "Objective of the Game:"
-      , "For the Angel: die in the first round."
-      , "For the Villagers: lynch all of the Werewolves."
-      , "For the Werewolves: devour all of the Villagers."
-      ]
+roleMessage :: Role -> Text
+roleMessage role = T.intercalate "\n"
+    [ T.concat [role ^. Role.name, " (", T.pack . show $ role ^. balance, "):"]
+    , role ^. description
+    , role ^. advice
     ]
 
 rulesMessages :: [Text]
@@ -158,12 +135,24 @@ rulesMessages = map (T.intercalate "\n")
     ]
 
 helpMessages :: [Text]
-helpMessages =
-    [ T.intercalate "\n"
-        [ "Help commands:"
-        , "`help commands` print the in-game commands"
-        , "`help description` print the game description"
-        , "`help roles` print the roles and their description"
-        , "`help rules` print the game rules"
+helpMessages = map (T.intercalate "\n")
+    [ [ T.unwords
+        [ "Deep in the American countryside,"
+        , "the little town of Millers Hollow has recently been infiltrated by Werewolves."
         ]
+      , T.unwords
+        [ "Each night, murders are committed by the Villagers,"
+        , "who due to some mysterious phenomenon (possibly the greenhouse effect)"
+        , "have become Werewolves."
+        ]
+      , T.unwords
+        [ "It is now time to take control and eliminate this ancient evil,"
+        , "before the town loses its last few inhabitants."
+        ]
+      ]
+    , [ "Help commands:"
+      , "- `help commands`"
+      , "- `help roles`"
+      , "- `help rules`"
+      ]
     ]
