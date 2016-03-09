@@ -168,7 +168,7 @@ start = fmap Start $ Start.Options
             ])
 
         randomExtraRolesOption = flag Start.None Start.Random $ mconcat
-            [ long "random-extra-roles", short 'r',
+            [ long "random-extra-roles", short 'r'
             , help "Use random extra roles"
             ]
 
