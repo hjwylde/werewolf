@@ -59,38 +59,38 @@ handle callerName (Options Nothing) = exitWith success
 commandsMessages :: [Text]
 commandsMessages = map (T.intercalate "\n")
     [ [ "Global commands:"
-      , "start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER..."
-      , "end"
-      , "quit"
-      , "version"
+      , "`start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER...`"
+      , "`end`"
+      , "`quit`"
+      , "`version`"
       ]
     , [ "Status commands:"
-      , "ping - ping the status of the current game publicly."
-      , "status - get the status of the current game."
-      , "circle [--include-dead] - get the game circle."
+      , "`ping` ping the status of the current game publicly"
+      , "`status` get the status of the current game"
+      , "`circle [--include-dead]` get the game circle"
       ]
     , [ "Standard commands:"
-      , "vote PLAYER"
+      , "`vote PLAYER`"
       ]
     , [ "Defender commands:"
-      , "protect PLAYER"
+      , "`protect PLAYER`"
       ]
     , [ "Scapegoat commands:"
-      , "choose PLAYER,..."
+      , "`choose PLAYER,...`"
       ]
     , [ "Seer commands:"
-      , "see PLAYER"
+      , "`see PLAYER`"
       ]
     , [ "Wild-child commands:"
-      , "choose PLAYER"
+      , "`choose PLAYER`"
       ]
     , [ "Witch commands:"
-      , "heal"
-      , "poison PLAYER"
-      , "pass"
+      , "`heal`"
+      , "`poison PLAYER`"
+      , "`pass`"
       ]
     , [ "Wolf-hound commands:"
-      , "choose (villagers | werewolves)"
+      , "`choose (villagers | werewolves)`"
       ]
     ]
 
@@ -160,9 +160,10 @@ rulesMessages = map (T.intercalate "\n")
 helpMessages :: [Text]
 helpMessages =
     [ T.intercalate "\n"
-        [ "help commands - print the in-game commands."
-        , "help description - print the game description."
-        , "help roles - print the roles and their description."
-        , "help rules - print the game rules."
+        [ "Help commands:"
+        , "`help commands` print the in-game commands"
+        , "`help description` print the game description"
+        , "`help roles` print the roles and their description"
+        , "`help rules` print the game rules"
         ]
     ]
