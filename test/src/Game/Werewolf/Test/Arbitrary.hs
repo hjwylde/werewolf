@@ -385,8 +385,9 @@ arbitraryPlayerSet = do
 
 arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
-    GameOver        -> return $ Blind noopCommand
     DefendersTurn   -> arbitraryProtectCommand game
+    GameOver        -> return $ Blind noopCommand
+    Lynching        -> return $ Blind noopCommand
     ScapegoatsTurn  -> arbitraryChoosePlayersCommand game
     SeersTurn       -> arbitrarySeeCommand game
     Sunrise         -> return $ Blind noopCommand

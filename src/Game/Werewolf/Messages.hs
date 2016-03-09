@@ -136,8 +136,9 @@ villagerVillagerMessage name = publicMessage $ T.unwords
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
-    GameOver        -> []
     DefendersTurn   -> defendersTurnMessages defendersName
+    GameOver        -> []
+    Lynching        -> []
     ScapegoatsTurn  -> scapegoatsTurnMessages scapegoatsName
     SeersTurn       -> seersTurnMessages seersName
     Sunrise         -> [sunriseMessage]
@@ -355,6 +356,7 @@ pingRoleMessage roleName = publicMessage $ T.concat ["Waiting on the ", roleName
 
 currentStageMessages :: Text -> Stage -> [Message]
 currentStageMessages to GameOver    = [gameIsOverMessage to]
+currentStageMessages _ Lynching     = []
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
 currentStageMessages _ UrsussGrunt  = []
@@ -365,6 +367,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn :: Stage -> Text
         showTurn DefendersTurn  = "Defender's"
         showTurn GameOver       = undefined
+        showTurn Lynching       = undefined
         showTurn ScapegoatsTurn = "Scapegoat's"
         showTurn SeersTurn      = "Seer's"
         showTurn Sunrise        = undefined

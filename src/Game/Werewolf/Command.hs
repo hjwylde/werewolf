@@ -111,12 +111,13 @@ passCommand callerName = Command $ do
 
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    GameOver        -> tell [gameIsOverMessage callerName]
     DefendersTurn   -> do
         defender <- findPlayerBy_ role defenderRole
 
         tell [pingRoleMessage $ defenderRole ^. Role.name]
         tell [pingPlayerMessage $ defender ^. name]
+    GameOver        -> tell [gameIsOverMessage callerName]
+    Lynching        -> return ()
     ScapegoatsTurn  -> do
         scapegoat <- findPlayerBy_ role scapegoatRole
 
@@ -215,8 +216,10 @@ seeCommand callerName targetName = Command $ do
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> tell [gameIsOverMessage callerName]
+    Lynching        -> return ()
     Sunrise         -> return ()
     Sunset          -> return ()
+    UrsussGrunt     -> return ()
     VillagesTurn    -> do
         allowedVoterNames <- use allowedVoters
         pendingVoterNames <- toListOf names <$> getPendingVoters

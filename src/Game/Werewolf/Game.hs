@@ -21,8 +21,8 @@ module Game.Werewolf.Game (
     poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
 
     Stage(..),
-    _DefendersTurn, _GameOver, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _UrsussGrunt,
-    _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn, _WolfHoundsTurn,
+    _DefendersTurn, _GameOver, _Lynching, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset,
+    _UrsussGrunt, _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn, _WolfHoundsTurn,
 
     allStages,
     stageCycle, stageAvailable,
@@ -106,7 +106,7 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = GameOver | DefendersTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
+data Stage  = DefendersTurn | GameOver | Lynching | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
             | UrsussGrunt | VillagesTurn | WerewolvesTurn | WildChildsTurn | WitchsTurn
             | WolfHoundsTurn
     deriving (Eq, Read, Show)
@@ -133,6 +133,7 @@ makePrisms ''Event
 allStages :: [Stage]
 allStages =
     [ VillagesTurn
+    , Lynching
     , ScapegoatsTurn
     , Sunset
     , WolfHoundsTurn
@@ -158,6 +159,7 @@ stageCycle = cycle allStages
 stageAvailable :: Game -> Stage -> Bool
 stageAvailable game DefendersTurn   = has (players . defenders . alive) game
 stageAvailable _ GameOver           = False
+stageAvailable game Lynching        = Map.size (game ^. votes) > 0
 stageAvailable game ScapegoatsTurn  = game ^. scapegoatBlamed
 stageAvailable game SeersTurn       = has (players . seers . alive) game
 stageAvailable _ Sunrise            = True
