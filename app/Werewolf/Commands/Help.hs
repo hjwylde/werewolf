@@ -41,9 +41,12 @@ data Command = Commands | Rules | Roles
     deriving (Eq, Show)
 
 handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options (Just Commands)) = exitWith success
-    { messages = map (privateMessage callerName) commandsMessages
-    }
+handle callerName (Options (Just Commands)) = do
+    mGame <- ifM doesGameExist (Just <$> readGame) (return Nothing)
+
+    exitWith success
+        { messages = map (privateMessage callerName) (commandsMessages callerName mGame)
+        }
 handle callerName (Options (Just Roles)) = do
     roles <- (sortBy (compare `on` view Role.name) . nub) <$> ifM doesGameExist
         (toListOf (players . roles) <$> readGame)
@@ -59,8 +62,8 @@ handle callerName (Options Nothing) = exitWith success
     { messages = map (privateMessage callerName) helpMessages
     }
 
-commandsMessages :: [Text]
-commandsMessages = map (T.intercalate "\n")
+commandsMessages :: Text -> Maybe Game -> [Text]
+commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     [ [ "Global commands:"
       , "- `start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER...`"
       , "- `end`"
@@ -75,24 +78,30 @@ commandsMessages = map (T.intercalate "\n")
     , [ "Standard commands:"
       , "- `vote PLAYER`"
       ]
-    , [ "Defender commands:"
+    , ifPlayerHasRole callerName mGame defenderRole
+      [ "Defender commands:"
       , "- `protect PLAYER`"
       ]
-    , [ "Scapegoat commands:"
+    , ifPlayerHasRole callerName mGame scapegoatRole
+      [ "Scapegoat commands:"
       , "- `choose PLAYER,...`"
       ]
-    , [ "Seer commands:"
+    , ifPlayerHasRole callerName mGame seerRole
+      [ "Seer commands:"
       , "- `see PLAYER`"
       ]
-    , [ "Wild-child commands:"
+    , ifPlayerHasRole callerName mGame wildChildRole
+      [ "Wild-child commands:"
       , "- `choose PLAYER`"
       ]
-    , [ "Witch commands:"
+    , ifPlayerHasRole callerName mGame witchRole
+      [ "Witch commands:"
       , "- `heal`"
       , "- `poison PLAYER`"
       , "- `pass`"
       ]
-    , [ "Wolf-hound commands:"
+    , ifPlayerHasRole callerName mGame wolfHoundRole
+      [ "Wolf-hound commands:"
       , "- `choose (villagers | werewolves)`"
       ]
     ]
@@ -167,17 +176,18 @@ helpMessages = map (T.intercalate "\n")
       ]
     ]
 
+ifPlayerHasRole :: Monoid m => Text -> Maybe Game -> Role -> m -> m
+ifPlayerHasRole _ Nothing _ m                   = m
+ifPlayerHasRole callerName (Just game) role' m
+     | has (players . names . only callerName) game
+        && has (role . only role') player           = m
+    | otherwise                                     = mempty
+     where
+        player = game ^?! players . traverse . filteredBy name callerName
+
 --ifRoleInPlay :: Monoid m => Maybe Game -> Role -> m -> m
 --ifRoleInPlay Nothing _ m        = m
 --ifRoleInPlay (Just game) role' m
 --    | has (players . roles . only role') game   = m
 --    | otherwise                                 = mempty
 --
---ifPlayerHasRole :: Monoid m => Maybe Game -> Text -> Role -> m -> m
---ifPlayerHasRole Nothing _ _ m                   = m
---ifPlayerHasRole (Just game) callerName role' m
---     | has (players . names . only callerName) game
---        && has (role . only role') player           = m
---    | otherwise                                     = mempty
---     where
---        player = game ^?! players . traverse . filteredBy name callerName
