@@ -9,9 +9,12 @@ This engine is based off of [Werewolves of Millers Hollow](http://www.games-wiki
 
 ### Game description
 
-Deep in the American countryside, the little town of Millers Hollow has recently been infiltrated by Werewolves.
-Each night, murders are committed by the Villagers, who due to some mysterious phenomenon (possibly the greenhouse effect) have become Werewolves.
-It is now time to take control and eliminate this ancient evil, before the town loses its last few inhabitants.
+Deep in the American countryside, the little town of Millers Hollow has recently been infiltrated by
+    Werewolves.
+Each night, murders are committed by the Villagers, who due to some mysterious phenomenon (possibly
+    the greenhouse effect) have become Werewolves.
+It is now time to take control and eliminate this ancient evil, before the town loses its last few
+    inhabitants.
 
 Objective of the Game:  
 For the Angel: die in the first round.  
@@ -24,35 +27,47 @@ The implemented roles are split into four categories.
 
 **The Ambiguous:**
 
-The Ambiguous may change allegiance during the game.
+They could very well be allies of the village or become its enemies.
+During the game, they can change sides or characters.
 
-* Wild-child.
-* Wolf-hound.
+The Ambiguous must aid their side to achieve victory.
+
+* Wild-child
+* Wolf-hound
 
 **The Loners:**
 
-The Loners have their own win condition.
+Their past could no doubt reveal to us why they hate the inhabitants of Miller's Hollow.
+One thing is known for sure: they really scare everyone!
 
-* Angel.
+The Loners have their own objectives, no matter which side they're on.
+
+* Angel
 
 **The Villagers:**
 
+Attached to the village's survival, the following characters defend its harmony with determination.
+Faced with various menaces, they will be brought to eliminate those they suspect of being too
+    dangerous, even if that might be painful to them.
+
 The Villagers must lynch all of the Werewolves.
 
-* Bear Tamer.
-* Defender.
-* Scapegoat.
-* Seer.
-* Simple Villager.
-* Village Idiot.
-* Villager-Villager.
-* Witch.
+* Bear Tamer
+* Defender
+* Scapegoat
+* Seer
+* Simple Villager
+* Village Idiot
+* Villager-Villager
+* Witch
 
 **The Werewolves:**
 
+They can be lethally dangerous and put in doubt the village's survival.
+
 The Werewolves must devour all of the Villagers.
 
-* Simple Werewolf.
+* Simple Werewolf
 
 ### Installing
 
