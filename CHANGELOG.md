@@ -5,6 +5,7 @@
 *Minor*
 
 * Added player contributed messages upon game over. ([#86](https://github.com/hjwylde/werewolf/issues/86))
+* Changed `choose` command for Scapegoat to take a space separated list rather than comma separated. ([#98](https://github.com/hjwylde/werewolf/issues/98))
 
 #### v0.4.8.0
 
