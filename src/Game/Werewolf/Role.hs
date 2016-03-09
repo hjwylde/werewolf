@@ -35,7 +35,7 @@ module Game.Werewolf.Role (
     --   can change sides or characters.
     --
     --   The Ambiguous must aid their side to achieve victory.
-    wildChildRole, wolfHoundRole,
+    devotedServantRole, wildChildRole, wolfHoundRole,
 
     -- *** The Loners
     -- | Their past could no doubt reveal to us why they hate the inhabitants of Miller's Hollow.
@@ -106,6 +106,7 @@ allRoles =
     [ angelRole
     , bearTamerRole
     , defenderRole
+    , devotedServantRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
@@ -130,6 +131,30 @@ restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 --   TODO (hjw): use reflection to get this list
 allAllegiances :: [Allegiance]
 allAllegiances = [Angel, Villagers, Werewolves]
+
+-- | /Who could dream of a better servant than one willing to give up her life for that of her/
+--   /masters? Don't rejoice too fast, as the devouring ambition within her could spell the end of/
+--   /the village!/
+--
+--   Before the revelation of the card of the player eliminated by the village's vote, she can
+--   reveal herself by showing her card and taking on the role of the eliminated player.
+devotedServantRole :: Role
+devotedServantRole = Role
+    { _name         = "Devoted Servant"
+    , _allegiance   = Villagers
+    , _balance      = 1
+    , _description  = T.unwords
+        [ "Who could dream of a better servant than one willing to give up her life for that of her"
+        , "masters?"
+        , "Don't rejoice too fast,"
+        , "as the devouring ambition within her could spell the end of the village!"
+        ]
+    , _advice       = T.unwords
+        [ "Think twice before trying to take on the role of a Werewolf."
+        , "If people strongly believed your master as such,"
+        , "then they will be quick to point fingers at you too!"
+        ]
+    }
 
 -- | /Abandoned in the woods by his parents at a young age, he was raised by wolves. As soon as he/
 --   /learned how to walk on all fours, the Wild-child began to wander around Miller's Hollow. One/
