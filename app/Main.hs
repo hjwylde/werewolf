@@ -50,7 +50,7 @@ interpret callerName args = do
 
     case result of
         Success options -> handle options
-        _               -> handle (Options callerName . Help . Help.Options $ Just Help.Commands)
+        _               -> handle (Options callerName . Help . Help.Options . Just $ Help.Commands False)
 
 handle :: Options -> IO ()
 handle (Options callerName command) = case command of

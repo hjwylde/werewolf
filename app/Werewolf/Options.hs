@@ -95,7 +95,7 @@ werewolf = Options
         , command "end"         $ info (helper <*> end)         (fullDesc <> progDesc "End the current game")
         , command "heal"        $ info (helper <*> heal)        (fullDesc <> progDesc "Heal the devoured player")
         , command "help"        $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents")
-        , command "interpret"   $ info (helper <*> interpret)   (fullDesc <> progDesc "Interpret a command" <> noIntersperse)
+        , command "interpret"   $ info (helper <*> interpret)   (fullDesc <> noIntersperse <> progDesc "Interpret a command")
         , command "pass"        $ info (helper <*> pass)        (fullDesc <> progDesc "Pass")
         , command "ping"        $ info (helper <*> ping)        (fullDesc <> progDesc "Ping the status of the current game publicly")
         , command "poison"      $ info (helper <*> poison)      (fullDesc <> progDesc "Poison a player")
@@ -109,7 +109,7 @@ werewolf = Options
         ])
 
 choose :: Parser Command
-choose = Choose . Choose.Options . map T.pack <$> some (strArgument $ metavar "ALLEGIANCE | PLAYER...")
+choose = Choose . Choose.Options . map T.pack <$> some (strArgument $ metavar "(ALLEGIANCE | PLAYER...)")
 
 circle :: Parser Command
 circle = Circle . Circle.Options
@@ -127,11 +127,12 @@ heal = pure Heal
 help_ :: Parser Command
 help_ = Help . Help.Options
     <$> optional (subparser $ mconcat
-        [ command "commands"    $ info (pure Help.Commands)     (fullDesc <> progDesc "Print the in-game commands")
-        , command "description" $ info (pure Help.Description)  (fullDesc <> progDesc "Print the game description")
-        , command "rules"       $ info (pure Help.Rules)        (fullDesc <> progDesc "Print the game rules")
-        , command "roles"       $ info (pure Help.Roles)        (fullDesc <> progDesc "Print the roles and their descriptions")
+        [ command "commands"    $ info (Help.Commands <$> allOption)    (fullDesc <> progDesc "Print the in-game commands")
+        , command "roles"       $ info (Help.Roles <$> allOption)       (fullDesc <> progDesc "Print the roles and their descriptions")
+        , command "rules"       $ info (Help.Rules <$> allOption)       (fullDesc <> progDesc "Print the game rules")
         ])
+    where
+        allOption = switch $ long "all" <> short 'a'
 
 interpret :: Parser Command
 interpret = Interpret . Interpret.Options
@@ -161,13 +162,13 @@ start = fmap Start $ Start.Options
     <*> some (T.pack <$> strArgument (metavar "PLAYER..."))
     where
         extraRolesOption = fmap (Start.Use . filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
-            [ long "extra-roles", metavar "ROLE,..."
+            [ long "extra-roles", short 'e', metavar "ROLE,..."
             , value []
             , help "Specify the extra roles to use"
             ])
 
         randomExtraRolesOption = flag Start.None Start.Random $ mconcat
-            [ long "random-extra-roles"
+            [ long "random-extra-roles", short 'r',
             , help "Use random extra roles"
             ]
 
