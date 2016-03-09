@@ -20,13 +20,18 @@ module Werewolf.Commands.Help (
 ) where
 
 import Control.Lens
+import Control.Monad.Extra
 import Control.Monad.IO.Class
 
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.Function
+import           Data.List
+import           Data.Text     (Text)
+import qualified Data.Text     as T
 
 import           Game.Werewolf      hiding (Command)
 import qualified Game.Werewolf.Role as Role
+
+import Werewolf.Game
 
 data Options = Options
     { argCommand :: Maybe Command
@@ -39,9 +44,14 @@ handle :: MonadIO m => Text -> Options -> m ()
 handle callerName (Options (Just Commands)) = exitWith success
     { messages = map (privateMessage callerName) commandsMessages
     }
-handle callerName (Options (Just Roles)) = exitWith success
-    { messages = map (privateMessage callerName . roleMessage) allRoles
-    }
+handle callerName (Options (Just Roles)) = do
+    roles <- (sortBy (compare `on` view Role.name) . nub) <$> ifM doesGameExist
+        (toListOf (players . roles) <$> readGame)
+        (return allRoles)
+
+    exitWith success
+        { messages = map (privateMessage callerName . roleMessage) roles
+        }
 handle callerName (Options (Just Rules)) = exitWith success
     { messages = map (privateMessage callerName) rulesMessages
     }
@@ -156,3 +166,18 @@ helpMessages = map (T.intercalate "\n")
       , "- `help rules`"
       ]
     ]
+
+--ifRoleInPlay :: Monoid m => Maybe Game -> Role -> m -> m
+--ifRoleInPlay Nothing _ m        = m
+--ifRoleInPlay (Just game) role' m
+--    | has (players . roles . only role') game   = m
+--    | otherwise                                 = mempty
+--
+--ifPlayerHasRole :: Monoid m => Maybe Game -> Text -> Role -> m -> m
+--ifPlayerHasRole Nothing _ _ m                   = m
+--ifPlayerHasRole (Just game) callerName role' m
+--     | has (players . names . only callerName) game
+--        && has (role . only role') player           = m
+--    | otherwise                                     = mempty
+--     where
+--        player = game ^?! players . traverse . filteredBy name callerName
