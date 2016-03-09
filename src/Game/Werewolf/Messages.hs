@@ -271,12 +271,14 @@ gameOverMessages game
         [ [publicMessage "The game is over! The Villagers have won."]
         , [playerRolesMessage]
         , playerWonMessages
+        , playerContributedMessages
         , playerLostMessages
         ]
     | hasWerewolvesWon game = concat
         [ [publicMessage "The game is over! The Werewolves have won."]
         , [playerRolesMessage]
         , playerWonMessages
+        , playerContributedMessages
         , playerLostMessages
         ]
     | otherwise             = undefined
@@ -297,17 +299,21 @@ gameOverMessages game
             | hasWerewolvesWon game = Werewolves
             | otherwise             = undefined
 
-        winningPlayerNames  = game ^.. players . traverse . filteredBy (role . allegiance) winningAllegiance . name
-        losingPlayerNames   = game ^.. players . names \\ winningPlayerNames
+        winningPlayers  = game ^.. players . traverse . filteredBy (role . allegiance) winningAllegiance
+        losingPlayers   = game ^. players \\ winningPlayers
 
-        playerWonMessages   = map playerWonMessage winningPlayerNames
-        playerLostMessages  = map playerLostMessage losingPlayerNames
+        playerWonMessages           = map playerWonMessage (winningPlayers ^.. traverse . alive . name)
+        playerContributedMessages   = map playerContributedMessage (winningPlayers ^.. traverse . dead . name)
+        playerLostMessages          = map playerLostMessage (losingPlayers ^.. names)
 
 playerWonMessage :: Text -> Message
 playerWonMessage to = privateMessage to "Victory! You won!"
 
+playerContributedMessage :: Text -> Message
+playerContributedMessage to = privateMessage to "Your team won, but you died. Congratulations?"
+
 playerLostMessage :: Text -> Message
-playerLostMessage to = privateMessage to "Feck, you lost this time round..."
+playerLostMessage to = privateMessage to "Feck, you lost this time round."
 
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [playerName, "the", playerRole, "has quit!"]
