@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added player contributed messages upon game over. ([#86](https://github.com/hjwylde/werewolf/issues/86))
+
 #### v0.4.8.0
 
 *Minor*
