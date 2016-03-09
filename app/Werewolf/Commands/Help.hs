@@ -37,26 +37,31 @@ data Options = Options
     { argCommand :: Maybe Command
     } deriving (Eq, Show)
 
-data Command = Commands | Rules | Roles
-    deriving (Eq, Show)
+data Command = Commands
+    { optAll :: Bool
+    } | Rules
+    { optAll :: Bool
+    } | Roles
+    { optAll :: Bool
+    } deriving (Eq, Show)
 
 handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options (Just Commands)) = do
-    mGame <- ifM doesGameExist (Just <$> readGame) (return Nothing)
+handle callerName (Options (Just (Commands optAll))) = do
+    mGame <- ifM (doesGameExist &&^ return (not optAll)) (Just <$> readGame) (return Nothing)
 
     exitWith success
         { messages = map (privateMessage callerName) (commandsMessages callerName mGame)
         }
-handle callerName (Options (Just Roles)) = do
-    roles <- (sortBy (compare `on` view Role.name) . nub) <$> ifM doesGameExist
+handle callerName (Options (Just (Roles optAll))) = do
+    roles <- (sortBy (compare `on` view Role.name) . nub) <$> ifM (doesGameExist &&^ return (not optAll))
         (toListOf (players . roles) <$> readGame)
         (return allRoles)
 
     exitWith success
         { messages = map (privateMessage callerName . roleMessage) roles
         }
-handle callerName (Options (Just Rules)) = do
-    mGame <- ifM doesGameExist (Just <$> readGame) (return Nothing)
+handle callerName (Options (Just (Rules optAll))) = do
+    mGame <- ifM (doesGameExist &&^ return (not optAll)) (Just <$> readGame) (return Nothing)
 
     exitWith success
         { messages = map (privateMessage callerName) (rulesMessages mGame)
@@ -68,7 +73,7 @@ handle callerName (Options Nothing) = exitWith success
 commandsMessages :: Text -> Maybe Game -> [Text]
 commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     [ [ "Global commands:"
-      , "- `start ([--extra-roles ROLE,...] | [--random-extra-roles]) PLAYER...`"
+      , "- `start ([-e | --extra-roles ROLE,...] | [-r | --random-extra-roles]) PLAYER...`"
       , "- `end`"
       , "- `quit`"
       , "- `version`"
@@ -76,7 +81,7 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     , [ "Status commands:"
       , "- `ping` ping the status of the current game publicly"
       , "- `status` get the status of the current game"
-      , "- `circle [--include-dead]` get the game circle"
+      , "- `circle [-a | --include-dead]` get the game circle"
       ]
     , [ "Standard commands:"
       , "- `vote PLAYER`"
@@ -184,9 +189,9 @@ helpMessages = map (T.intercalate "\n")
         ]
       ]
     , [ "Help commands:"
-      , "- `help commands`"
-      , "- `help roles`"
-      , "- `help rules`"
+      , "- `help commands [-a | --all]`"
+      , "- `help roles [-a | --all]`"
+      , "- `help rules [-a | --all]`"
       ]
     ]
 
