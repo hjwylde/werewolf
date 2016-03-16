@@ -1,21 +1,23 @@
 {-|
-Module      : Werewolf.Commands.Heal
-Description : Handler for the heal subcommand.
+Module      : Werewolf.Command.Vote
+Description : Options and handler for the vote subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the heal subcommand.
+Options and handler for the vote subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
+module Werewolf.Command.Vote (
+    -- * Options
+    Options(..),
 
-module Werewolf.Commands.Heal (
     -- * Handle
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -28,15 +30,23 @@ import Game.Werewolf
 import Werewolf.Game
 import Werewolf.Messages
 
-handle :: MonadIO m => Text -> m ()
-handle callerName = do
+data Options = Options
+    { argTarget :: Text
+    } deriving (Eq, Show)
+
+handle :: MonadIO m => Text -> Options -> m ()
+handle callerName (Options targetName) = do
     unlessM doesGameExist $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
 
-    let command = healCommand callerName
+    let command = case game ^. stage of
+            VillagesTurn    -> voteLynchCommand callerName targetName
+            WerewolvesTurn  -> voteDevourCommand callerName targetName
+            -- TODO (hjw): throw an error
+            _               -> undefined
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

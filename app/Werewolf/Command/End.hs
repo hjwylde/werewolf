@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.End
+Module      : Werewolf.Command.End
 Description : Handler for the end subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -11,7 +11,7 @@ Handler for the end subcommand.
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Werewolf.Commands.End (
+module Werewolf.Command.End (
     -- * Handle
     handle,
 ) where

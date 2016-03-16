@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Help
+Module      : Werewolf.Command.Help
 Description : Options and handler for the help subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -11,7 +11,7 @@ Options and handler for the help subcommand.
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Werewolf.Commands.Help (
+module Werewolf.Command.Help (
     -- * Options
     Options(..), Command(..),
 

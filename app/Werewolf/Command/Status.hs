@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Status
+Module      : Werewolf.Command.Status
 Description : Handler for the status subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 Handler for the status subcommand.
 -}
 
-module Werewolf.Commands.Status (
+module Werewolf.Command.Status (
     -- * Handle
     handle,
 ) where

@@ -23,16 +23,16 @@ import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version (showVersion)
 
-import qualified Werewolf.Commands.Choose    as Choose
-import qualified Werewolf.Commands.Circle    as Circle
-import qualified Werewolf.Commands.Help      as Help
-import qualified Werewolf.Commands.Interpret as Interpret
-import qualified Werewolf.Commands.Poison    as Poison
-import qualified Werewolf.Commands.Protect   as Protect
-import qualified Werewolf.Commands.See       as See
-import qualified Werewolf.Commands.Start     as Start
-import qualified Werewolf.Commands.Vote      as Vote
-import qualified Werewolf.Version            as This
+import qualified Werewolf.Command.Choose    as Choose
+import qualified Werewolf.Command.Circle    as Circle
+import qualified Werewolf.Command.Help      as Help
+import qualified Werewolf.Command.Interpret as Interpret
+import qualified Werewolf.Command.Poison    as Poison
+import qualified Werewolf.Command.Protect   as Protect
+import qualified Werewolf.Command.See       as See
+import qualified Werewolf.Command.Start     as Start
+import qualified Werewolf.Command.Vote      as Vote
+import qualified Werewolf.Version           as This
 
 import Options.Applicative
 

@@ -1,15 +1,15 @@
 {-|
-Module      : Werewolf.Commands.Vote
-Description : Options and handler for the vote subcommand.
+Module      : Werewolf.Command.Poison
+Description : Options and handler for the poison subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Options and handler for the vote subcommand.
+Options and handler for the poison subcommand.
 -}
 
-module Werewolf.Commands.Vote (
+module Werewolf.Command.Poison (
     -- * Options
     Options(..),
 
@@ -17,7 +17,6 @@ module Werewolf.Commands.Vote (
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -42,11 +41,7 @@ handle callerName (Options targetName) = do
 
     game <- readGame
 
-    let command = case game ^. stage of
-            VillagesTurn    -> voteLynchCommand callerName targetName
-            WerewolvesTurn  -> voteDevourCommand callerName targetName
-            -- TODO (hjw): throw an error
-            _               -> undefined
+    let command = poisonCommand callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

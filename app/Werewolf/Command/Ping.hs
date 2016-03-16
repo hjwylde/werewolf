@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Ping
+Module      : Werewolf.Command.Ping
 Description : Handler for the ping subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 Handler for the ping subcommand.
 -}
 
-module Werewolf.Commands.Ping (
+module Werewolf.Command.Ping (
     -- * Handle
     handle,
 ) where

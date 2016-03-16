@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Interpret
+Module      : Werewolf.Command.Interpret
 Description : Options for the interpret subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 Options for the interpret subcommand.
 -}
 
-module Werewolf.Commands.Interpret (
+module Werewolf.Command.Interpret (
     -- * Options
     Options(..),
 ) where

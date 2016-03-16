@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Circle
+Module      : Werewolf.Command.Circle
 Description : Options and handler for the circle subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 Options and handler for the circle subcommand.
 -}
 
-module Werewolf.Commands.Circle (
+module Werewolf.Command.Circle (
     -- * Options
     Options(..),
 

@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Version
+Module      : Werewolf.Command.Version
 Description : Handler for the version subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 Handler for the start subcommand.
 -}
 
-module Werewolf.Commands.Version (
+module Werewolf.Command.Version (
     -- * Handle
     handle,
 ) where

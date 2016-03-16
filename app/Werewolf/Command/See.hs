@@ -1,17 +1,15 @@
 {-|
-Module      : Werewolf.Commands.Choose
-Description : Options and handler for the choose subcommand.
+Module      : Werewolf.Command.See
+Description : Options and handler for the see subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Options and handler for the choose subcommand.
+Options and handler for the see subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
-module Werewolf.Commands.Choose (
+module Werewolf.Command.See (
     -- * Options
     Options(..),
 
@@ -19,7 +17,6 @@ module Werewolf.Commands.Choose (
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -33,24 +30,19 @@ import Werewolf.Game
 import Werewolf.Messages
 
 data Options = Options
-    { args :: [Text]
+    { argTarget :: Text
     } deriving (Eq, Show)
 
 handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options args) = do
+handle callerName (Options targetName) = do
     unlessM doesGameExist $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
 
-    let command = case game ^. stage of
-            ScapegoatsTurn  -> choosePlayersCommand callerName args
-            WildChildsTurn  -> choosePlayerCommand callerName (head args)
-            WolfHoundsTurn  -> chooseAllegianceCommand callerName (head args)
-            -- TODO (hjw): throw an error
-            _               -> undefined
+    let command = seeCommand callerName targetName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game, messages)  -> writeGame game >> exitWith success { messages = messages }
+        Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }

@@ -1,20 +1,19 @@
 {-|
-Module      : Werewolf.Commands.Pass
-Description : Handler for the pass subcommand.
+Module      : Werewolf.Command.Quit
+Description : Handler for the quit subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the pass subcommand.
+Handler for the quit subcommand.
 -}
 
-module Werewolf.Commands.Pass (
+module Werewolf.Command.Quit (
     -- * Handle
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -35,11 +34,7 @@ handle callerName = do
 
     game <- readGame
 
-    let command = case game ^. stage of
-            DevotedServantsTurn -> passDevotedServantsTurnCommand callerName
-            WitchsTurn          -> passWitchsTurnCommand callerName
-            -- TODO (hjw): throw an error
-            _                   -> undefined
+    let command = quitCommand callerName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
