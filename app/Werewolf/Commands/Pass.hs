@@ -14,6 +14,7 @@ module Werewolf.Commands.Pass (
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -34,7 +35,11 @@ handle callerName = do
 
     game <- readGame
 
-    let command = passCommand callerName
+    let command = case game ^. stage of
+            DevotedServantsTurn -> passDevotedServantsTurnCommand callerName
+            WitchsTurn          -> passWitchsTurnCommand callerName
+            -- TODO (hjw): throw an error
+            _                   -> undefined
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

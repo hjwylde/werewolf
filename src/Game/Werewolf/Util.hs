@@ -17,23 +17,23 @@ module Game.Werewolf.Util (
     -- * Game
 
     -- ** Manipulations
-    killPlayer, setPlayerAllegiance,
+    killPlayer, setPlayerAllegiance, setPlayerRole,
 
     -- ** Searches
     findPlayerBy_, getAdjacentAlivePlayers, getPassers, getPlayerVote,
     getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
-    isDefendersTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise, isVillagesTurn,
-    isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
+    isDefendersTurn, isDevotedServantsTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise,
+    isVillagesTurn, isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDefender, isPlayerScapegoat, isPlayerSeer, isPlayerVillageIdiot, isPlayerWildChild,
-    isPlayerWitch, isPlayerWolfHound,
+    isPlayerDefender, isPlayerDevotedServant, isPlayerScapegoat, isPlayerSeer, isPlayerVillageIdiot,
+    isPlayerWildChild, isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -62,6 +62,11 @@ killPlayer name = modify $ Game.killPlayer name
 --   they align themselves differently given some trigger.
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
 setPlayerAllegiance name' allegiance' = modify $ players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
+
+-- | Fudges the player's role. This function is useful for roles such as the Devoted Servant where
+--   they take on a different role.
+setPlayerRole :: MonadState Game m => Text -> Role -> m ()
+setPlayerRole name' role' = modify $ players . traverse . filteredBy name name' . role .~ role'
 
 findPlayerBy_ :: (Eq a, MonadState Game m) => Lens' Player a -> a -> m Player
 findPlayerBy_ lens value = fromJust <$> preuse (players . traverse . filteredBy lens value)
@@ -93,6 +98,9 @@ getVoteResult = gets Game.getVoteResult
 
 isDefendersTurn :: MonadState Game m => m Bool
 isDefendersTurn = has (stage . _DefendersTurn) <$> get
+
+isDevotedServantsTurn :: MonadState Game m => m Bool
+isDevotedServantsTurn = has (stage . _DevotedServantsTurn) <$> get
 
 isGameOver :: MonadState Game m => m Bool
 isGameOver = has (stage . _GameOver) <$> get
@@ -138,6 +146,9 @@ doesPlayerExist name = gets $ Game.doesPlayerExist name
 
 isPlayerDefender :: MonadState Game m => Text -> m Bool
 isPlayerDefender name' = is defender <$> findPlayerBy_ name name'
+
+isPlayerDevotedServant :: MonadState Game m => Text -> m Bool
+isPlayerDevotedServant name' = is devotedServant <$> findPlayerBy_ name name'
 
 isPlayerScapegoat :: MonadState Game m => Text -> m Bool
 isPlayerScapegoat name' = is scapegoat <$> findPlayerBy_ name name'

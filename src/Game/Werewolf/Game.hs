@@ -21,8 +21,9 @@ module Game.Werewolf.Game (
     poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
 
     Stage(..),
-    _DefendersTurn, _GameOver, _Lynching, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset,
-    _UrsussGrunt, _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn, _WolfHoundsTurn,
+    _DefendersTurn, _DevotedServantsTurn, _GameOver, _Lynching, _ScapegoatsTurn, _SeersTurn,
+    _Sunrise, _Sunset, _UrsussGrunt, _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn,
+    _WolfHoundsTurn,
 
     allStages,
     stageCycle, stageAvailable,
@@ -106,9 +107,9 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = DefendersTurn | GameOver | Lynching | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
-            | UrsussGrunt | VillagesTurn | WerewolvesTurn | WildChildsTurn | WitchsTurn
-            | WolfHoundsTurn
+data Stage  = DefendersTurn | DevotedServantsTurn | GameOver | Lynching | ScapegoatsTurn
+            | SeersTurn | Sunrise | Sunset | UrsussGrunt | VillagesTurn | WerewolvesTurn
+            | WildChildsTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
 -- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
@@ -133,6 +134,7 @@ makePrisms ''Event
 allStages :: [Stage]
 allStages =
     [ VillagesTurn
+    , DevotedServantsTurn
     , Lynching
     , ScapegoatsTurn
     , Sunset
@@ -157,25 +159,29 @@ stageCycle = cycle allStages
 --   One of the more complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
 --   the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
-stageAvailable game DefendersTurn   = has (players . defenders . alive) game
-stageAvailable _ GameOver           = False
-stageAvailable game Lynching        = Map.size (game ^. votes) > 0
-stageAvailable game ScapegoatsTurn  = game ^. scapegoatBlamed
-stageAvailable game SeersTurn       = has (players . seers . alive) game
-stageAvailable _ Sunrise            = True
-stageAvailable _ Sunset             = True
-stageAvailable game UrsussGrunt     = has (players . bearTamers . alive) game
-stageAvailable game VillagesTurn    =
+stageAvailable game DefendersTurn       = has (players . defenders . alive) game
+stageAvailable game DevotedServantsTurn =
+    has (players . devotedServants . alive) game
+    && length (getVoteResult game) == 1
+    && isn't devotedServant (head $ getVoteResult game)
+stageAvailable _ GameOver               = False
+stageAvailable game Lynching            = Map.size (game ^. votes) > 0
+stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
+stageAvailable game SeersTurn           = has (players . seers . alive) game
+stageAvailable _ Sunrise                = True
+stageAvailable _ Sunset                 = True
+stageAvailable game UrsussGrunt         = has (players . bearTamers . alive) game
+stageAvailable game VillagesTurn        =
     (has (players . angels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)
-stageAvailable game WerewolvesTurn  = has (players . werewolves . alive) game
-stageAvailable game WildChildsTurn  =
+stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
+stageAvailable game WildChildsTurn      =
     has (players . wildChildren . alive) game
     && isNothing (game ^. roleModel)
-stageAvailable game WitchsTurn      =
+stageAvailable game WitchsTurn          =
     has (players . witches . alive) game
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
-stageAvailable game WolfHoundsTurn  =
+stageAvailable game WolfHoundsTurn      =
     has (players . wolfHounds . alive) game
     && isNothing (game ^. allegianceChosen)
 
@@ -226,7 +232,9 @@ getPendingVoters game =
 -- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
 --   on whether the votes were in conflict.
 getVoteResult :: Game -> [Player]
-getVoteResult game = map (\name' -> game ^?! players . traverse . filteredBy name name') result
+getVoteResult game
+    | Map.null (game ^. votes)  = []
+    | otherwise                 = map (\name' -> game ^?! players . traverse . filteredBy name name') result
     where
         votees = Map.elems $ game ^. votes
         result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)

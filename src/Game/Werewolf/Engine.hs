@@ -60,6 +60,12 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         whenM (isJust <$> use protect) advanceStage
 
+    DevotedServantsTurn -> do
+        whenM (has (players . devotedServants . dead) <$> get) advanceStage
+
+        whenM (has devotedServants <$> getVoteResult)   advanceStage
+        whenM (has devotedServants <$> getPassers)      advanceStage
+
     GameOver -> return ()
 
     Lynching -> do
@@ -111,8 +117,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
                 setPlayerAllegiance (wildChild ^. name) Werewolves
 
-                tell [playerJoinedPackMessage (wildChild ^. name) aliveWerewolfNames]
-                tell $ wildChildJoinedPackMessages aliveWerewolfNames (wildChild ^. name)
+                tell $ wildChildJoinedPackMessages (wildChild ^. name) aliveWerewolfNames
 
         advanceStage
 

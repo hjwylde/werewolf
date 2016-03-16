@@ -20,8 +20,9 @@ module Game.Werewolf.Command (
 
     -- ** Instances
     chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand, healCommand,
-    noopCommand, passCommand, pingCommand, poisonCommand, protectCommand, quitCommand, seeCommand,
-    statusCommand, voteDevourCommand, voteLynchCommand,
+    noopCommand, passDevotedServantsTurnCommand, passWitchsTurnCommand, pingCommand, poisonCommand,
+    protectCommand, quitCommand, revealCommand, seeCommand, statusCommand, voteDevourCommand,
+    voteLynchCommand,
 ) where
 
 import Control.Lens
@@ -36,7 +37,8 @@ import           Data.Maybe
 import           Data.Text  (Text)
 import qualified Data.Text  as T
 
-import           Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, killPlayer)
+import           Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, getVoteResult,
+                                         killPlayer)
 import           Game.Werewolf.Messages
 import           Game.Werewolf.Player
 import           Game.Werewolf.Response
@@ -103,56 +105,67 @@ healCommand callerName = Command $ do
 noopCommand :: Command
 noopCommand = Command $ return ()
 
-passCommand :: Text -> Command
-passCommand callerName = Command $ do
+passDevotedServantsTurnCommand :: Text -> Command
+passDevotedServantsTurnCommand callerName = Command $ do
+    validateDevotedServantsCommand callerName
+
+    passes %= nub . cons callerName
+
+passWitchsTurnCommand :: Text -> Command
+passWitchsTurnCommand callerName = Command $ do
     validateWitchsCommand callerName
 
     passes %= nub . cons callerName
 
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    DefendersTurn   -> do
+    DefendersTurn       -> do
         defender <- findPlayerBy_ role defenderRole
 
         tell [pingRoleMessage $ defenderRole ^. Role.name]
         tell [pingPlayerMessage $ defender ^. name]
-    GameOver        -> tell [gameIsOverMessage callerName]
-    Lynching        -> return ()
-    ScapegoatsTurn  -> do
+    DevotedServantsTurn -> do
+        devotedServant <- findPlayerBy_ role devotedServantRole
+
+        tell [pingRoleMessage $ devotedServantRole ^. Role.name]
+        tell [pingPlayerMessage $ devotedServant ^. name]
+    GameOver            -> tell [gameIsOverMessage callerName]
+    Lynching            -> return ()
+    ScapegoatsTurn      -> do
         scapegoat <- findPlayerBy_ role scapegoatRole
 
         tell [pingRoleMessage $ scapegoatRole ^. Role.name]
         tell [pingPlayerMessage $ scapegoat ^. name]
-    SeersTurn       -> do
+    SeersTurn           -> do
         seer <- findPlayerBy_ role seerRole
 
         tell [pingRoleMessage $ seerRole ^. Role.name]
         tell [pingPlayerMessage $ seer ^. name]
-    Sunrise         -> return ()
-    Sunset          -> return ()
-    UrsussGrunt     -> return ()
-    VillagesTurn    -> do
+    Sunrise             -> return ()
+    Sunset              -> return ()
+    UrsussGrunt         -> return ()
+    VillagesTurn        -> do
         allowedVoterNames <- use allowedVoters
         pendingVoterNames <- toListOf names <$> getPendingVoters
 
         tell [waitingOnMessage Nothing $ allowedVoterNames `intersect` pendingVoterNames]
         tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
-    WerewolvesTurn  -> do
+    WerewolvesTurn      -> do
         pendingVoters <- getPendingVoters
 
         tell [pingRoleMessage "Werewolves"]
         tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
-    WildChildsTurn  -> do
+    WildChildsTurn      -> do
         wildChild <- findPlayerBy_ role wildChildRole
 
         tell [pingRoleMessage $ wildChildRole ^. Role.name]
         tell [pingPlayerMessage $ wildChild ^. name]
-    WitchsTurn      -> do
+    WitchsTurn          -> do
         witch <- findPlayerBy_ role witchRole
 
         tell [pingRoleMessage $ witchRole ^. Role.name]
         tell [pingPlayerMessage $ witch ^. name]
-    WolfHoundsTurn  -> do
+    WolfHoundsTurn      -> do
         wolfHound <- findPlayerBy_ role wolfHoundRole
 
         tell [pingRoleMessage $ wolfHoundRole ^. Role.name]
@@ -203,6 +216,33 @@ quitCommand callerName = Command $ do
         poison      .= Nothing
         poisonUsed  .= False
     when (is wolfHound caller)  $ allegianceChosen .= Nothing
+
+revealCommand :: Text -> Command
+revealCommand callerName = Command $ do
+    validateDevotedServantsCommand callerName
+
+    target <- head <$> getVoteResult
+
+    let targetRole = target ^. role
+    let targetName = target ^. name
+
+    setPlayerRole callerName targetRole
+    setPlayerRole targetName devotedServantRole
+
+    tell [devotedServantRevealedMessage callerName]
+
+    resetRole targetRole
+    where
+        resetRole role
+            | role == simpleWerewolfRole    = do
+                aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
+
+                tell $ devotedServantJoinedPackMessages callerName aliveWerewolfNames
+            | role == villageIdiotRole      = villageIdiotRevealed .= False
+            | role == wildChildRole         = roleModel .= Nothing
+            | role == witchRole             = healUsed .= False >> poisonUsed .= False
+            | role == wolfHoundRole         = allegianceChosen .= Nothing
+            | otherwise                     = return ()
 
 seeCommand :: Text -> Text -> Command
 seeCommand callerName targetName = Command $ do
@@ -270,6 +310,12 @@ validatePlayer callerName name = do
     whenM isGameOver                $ throwError [gameIsOverMessage callerName]
     unlessM (doesPlayerExist name)  $ throwError [playerDoesNotExistMessage callerName name]
     whenM (isPlayerDead name)       $ throwError [if callerName == name then playerIsDeadMessage callerName else targetIsDeadMessage callerName name]
+
+validateDevotedServantsCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
+validateDevotedServantsCommand callerName = do
+    validatePlayer callerName callerName
+    unlessM (isPlayerDevotedServant callerName) $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isDevotedServantsTurn               $ throwError [playerCannotDoThatRightNowMessage callerName]
 
 validateWitchsCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
 validateWitchsCommand callerName = do
