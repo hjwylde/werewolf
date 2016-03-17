@@ -25,6 +25,7 @@ import           Data.Version (showVersion)
 
 import qualified Werewolf.Command.Choose    as Choose
 import qualified Werewolf.Command.Circle    as Circle
+import qualified Werewolf.Command.End as End
 import qualified Werewolf.Command.Help      as Help
 import qualified Werewolf.Command.Interpret as Interpret
 import qualified Werewolf.Command.Poison    as Poison
@@ -44,7 +45,7 @@ data Options = Options
 data Command
     = Choose Choose.Options
     | Circle Circle.Options
-    | End
+    | End End.Options
     | Heal
     | Help Help.Options
     | Interpret Interpret.Options
@@ -121,7 +122,11 @@ circle = Circle . Circle.Options
         ])
 
 end :: Parser Command
-end = pure End
+end = End . End.Options
+    <$> switch (mconcat
+        [ long "force", short 'f'
+        , help "Force the game to end"
+        ])
 
 heal :: Parser Command
 heal = pure Heal

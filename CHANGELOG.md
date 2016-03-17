@@ -9,6 +9,7 @@
 * Filtered `help` commands based on the current game. ([#94](https://github.com/hjwylde/werewolf/issues/94))
 * Added `--all` option to `help` commands. ([#94](https://github.com/hjwylde/werewolf/issues/94))
 * Added the Devoted Servant role. ([#47](https://github.com/hjwylde/werewolf/issues/47))
+* Added `--force` flag to `end`. ([#77](https://github.com/hjwylde/werewolf/issues/77))
 
 #### v0.4.8.0
 
