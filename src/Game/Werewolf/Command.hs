@@ -19,10 +19,10 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand, healCommand,
-    noopCommand, passDevotedServantsTurnCommand, passWitchsTurnCommand, pingCommand, poisonCommand,
-    protectCommand, quitCommand, revealCommand, seeCommand, statusCommand, voteDevourCommand,
-    voteLynchCommand,
+    bootCommand, chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand,
+    healCommand, noopCommand, passDevotedServantsTurnCommand, passWitchsTurnCommand, pingCommand,
+    poisonCommand, protectCommand, quitCommand, revealCommand, seeCommand, statusCommand,
+    voteDevourCommand, voteLynchCommand,
 ) where
 
 import Control.Lens
@@ -47,6 +47,15 @@ import qualified Game.Werewolf.Role     as Role
 import           Game.Werewolf.Util
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
+
+bootCommand :: Text -> Text -> Command
+bootCommand callerName targetName = Command $ do
+    validatePlayer callerName callerName
+    validatePlayer callerName targetName
+    whenM (uses (boots . at targetName) $ elem callerName . maybe [] id) $
+        throwError [playerHasAlreadyBootedMessage callerName targetName]
+
+    boots %= Map.insertWith (++) targetName [callerName]
 
 chooseAllegianceCommand :: Text -> Text -> Command
 chooseAllegianceCommand callerName allegianceName = Command $ do
@@ -198,24 +207,9 @@ quitCommand callerName = Command $ do
 
     caller <- findPlayerBy_ name callerName
 
-    killPlayer callerName
     tell [playerQuitMessage caller]
 
-    passes  %= delete callerName
-    votes   %= Map.delete callerName
-
-    when (is angel caller)      $ setPlayerAllegiance callerName Villagers
-    when (is defender caller)   $ do
-        protect         .= Nothing
-        priorProtect    .= Nothing
-    when (is seer caller)       $ see .= Nothing
-    when (is wildChild caller)  $ roleModel .= Nothing
-    when (is witch caller)      $ do
-        heal        .= False
-        healUsed    .= False
-        poison      .= Nothing
-        poisonUsed  .= False
-    when (is wolfHound caller)  $ allegianceChosen .= Nothing
+    removePlayer callerName
 
 revealCommand :: Text -> Command
 revealCommand callerName = Command $ do

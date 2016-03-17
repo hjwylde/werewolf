@@ -75,6 +75,7 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     [ [ "Global commands:"
       , "- `start ([-e | --extra-roles ROLE,...] | [-r | --random-extra-roles]) PLAYER...`"
       , "- `end`"
+      , "- `boot PLAYER`"
       , "- `quit`"
       , "- `version`"
       ]

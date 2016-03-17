@@ -4,6 +4,12 @@
 
 *Minor*
 
+* Added `boot` command. ([#14](https://github.com/hjwylde/werewolf/issues/14))
+
+#### v0.4.9.0
+
+*Minor*
+
 * Added player contributed messages upon game over. ([#86](https://github.com/hjwylde/werewolf/issues/86))
 * Changed `choose` command for Scapegoat to take a space separated list rather than comma separated. ([#98](https://github.com/hjwylde/werewolf/issues/98))
 * Filtered `help` commands based on the current game. ([#94](https://github.com/hjwylde/werewolf/issues/94))

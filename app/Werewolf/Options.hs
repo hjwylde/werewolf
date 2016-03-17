@@ -23,9 +23,10 @@ import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version (showVersion)
 
+import qualified Werewolf.Command.Boot      as Boot
 import qualified Werewolf.Command.Choose    as Choose
 import qualified Werewolf.Command.Circle    as Circle
-import qualified Werewolf.Command.End as End
+import qualified Werewolf.Command.End       as End
 import qualified Werewolf.Command.Help      as Help
 import qualified Werewolf.Command.Interpret as Interpret
 import qualified Werewolf.Command.Poison    as Poison
@@ -43,7 +44,8 @@ data Options = Options
     } deriving (Eq, Show)
 
 data Command
-    = Choose Choose.Options
+    = Boot Boot.Options
+    | Choose Choose.Options
     | Circle Circle.Options
     | End End.Options
     | Heal
@@ -92,7 +94,8 @@ werewolf = Options
         , help "Specify the calling player's name"
         ])
     <*> subparser (mconcat
-        [ command "choose"      $ info (helper <*> choose)      (fullDesc <> progDesc "Choose an allegiance or player(s)")
+        [ command "boot"        $ info (helper <*> boot)        (fullDesc <> progDesc "Vote to boot a player")
+        , command "choose"      $ info (helper <*> choose)      (fullDesc <> progDesc "Choose an allegiance or player(s)")
         , command "circle"      $ info (helper <*> circle)      (fullDesc <> progDesc "Get the game circle")
         , command "end"         $ info (helper <*> end)         (fullDesc <> progDesc "End the current game")
         , command "heal"        $ info (helper <*> heal)        (fullDesc <> progDesc "Heal the devoured player")
@@ -110,6 +113,9 @@ werewolf = Options
         , command "version"     $ info (helper <*> version)     (fullDesc <> progDesc "Show this engine's version")
         , command "vote"        $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
         ])
+
+boot :: Parser Command
+boot = Boot . Boot.Options <$> playerArgument
 
 choose :: Parser Command
 choose = Choose . Choose.Options . map T.pack <$> some (strArgument $ metavar "(ALLEGIANCE | PLAYER...)")

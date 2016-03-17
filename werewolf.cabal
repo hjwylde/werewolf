@@ -1,5 +1,5 @@
 name:           werewolf
-version:        0.4.8.0
+version:        0.4.9.0
 
 author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
@@ -28,6 +28,7 @@ executable werewolf
     hs-source-dirs: app/
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
+        Werewolf.Command.Boot
         Werewolf.Command.Choose
         Werewolf.Command.Circle
         Werewolf.Command.End
