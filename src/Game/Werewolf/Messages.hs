@@ -26,10 +26,10 @@ module Game.Werewolf.Messages (
     playerIsDeadMessage, targetIsDeadMessage,
 
     -- * Boot messages
-    playerBootedMessage,
+    playerVotedToBootMessage, playerBootedMessage,
 
     -- ** Error messages
-    playerHasAlreadyBootedMessage,
+    playerHasAlreadyVotedToBootMessage,
 
     -- * Circle messages
     circleMessage,
@@ -359,6 +359,10 @@ playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
 targetIsDeadMessage :: Text -> Text -> Message
 targetIsDeadMessage to targetName = privateMessage to $ T.unwords [targetName, "is already dead!"]
 
+playerVotedToBootMessage :: Text -> Text -> Message
+playerVotedToBootMessage playerName targetName = publicMessage $ T.concat
+    [playerName, " voted to boot ", targetName, "!"]
+
 playerBootedMessage :: Player -> Message
 playerBootedMessage player = publicMessage $ T.unwords
     [ playerName, article playerRole, playerRole ^. Role.name
@@ -368,8 +372,8 @@ playerBootedMessage player = publicMessage $ T.unwords
         playerName = player ^. name
         playerRole = player ^. role
 
-playerHasAlreadyBootedMessage :: Text -> Text -> Message
-playerHasAlreadyBootedMessage to targetName = privateMessage to $ T.concat
+playerHasAlreadyVotedToBootMessage :: Text -> Text -> Message
+playerHasAlreadyVotedToBootMessage to targetName = privateMessage to $ T.concat
     ["You've already voted to boot ", targetName, "!"]
 
 circleMessage :: Text -> [Player] -> Message
