@@ -50,7 +50,7 @@ allEngineTests =
     , testProperty "check defender's turn advances when no defender"        prop_checkDefendersTurnAdvancesWhenNoDefender
     , testProperty "check defender's turn does nothing unless protected"    prop_checkDefendersTurnDoesNothingUnlessProtected
 
-    , testProperty "check devoted servant's turn advances to scapegoat's turn"              prop_checkDevotedServantsTurnAdvancesToScapegoatsTurn
+    , testProperty "check devoted servant's turn advances to wolf-hound's turn"             prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn
     , testProperty "check devoted servant's turn advances when no devoted servant"          prop_checkDevotedServantsTurnAdvancesWhenNoDevotedServant
     , testProperty "check devoted servant's turn does nothing unless revealed or passed"    prop_checkDevotedServantsTurnDoesNothingUnlessRevealedOrPassed
 
@@ -135,15 +135,15 @@ prop_checkStageSkipsDevotedServantsTurnWhenNoDevotedServant (GameWithMajorityVot
         devotedServantsName = game ^?! players . devotedServants . name
         game'               = run_ (apply (quitCommand devotedServantsName) >> checkStage) game
 
-prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat :: GameWithScapegoatBlamed -> Bool
-prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat (GameWithScapegoatBlamed game) =
+prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat :: GameWithConflictingVote -> Bool
+prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat (GameWithConflictingVote game) =
     hasn't (stage . _ScapegoatsTurn) game'
     where
         scapegoatsName  = game ^?! players . scapegoats . name
         game'           = run_ (apply (quitCommand scapegoatsName) >> checkStage) game
 
-prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithMajorityVoteAtDevotedServantsTurn -> Bool
-prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithMajorityVoteAtDevotedServantsTurn game) =
+prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithPassAtDevotedServantsTurn -> Bool
+prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithPassAtDevotedServantsTurn game) =
     hasn't (stage . _SeersTurn) game'
     where
         seersName   = game ^?! players . seers . name
@@ -193,17 +193,27 @@ prop_checkDefendersTurnDoesNothingUnlessProtected :: GameAtDefendersTurn -> Bool
 prop_checkDefendersTurnDoesNothingUnlessProtected (GameAtDefendersTurn game) =
     has (stage . _DefendersTurn) (run_ checkStage game)
 
-prop_checkDevotedServantsTurnAdvancesToScapegoatsTurn :: Game -> Bool
-prop_checkDevotedServantsTurnAdvancesToScapegoatsTurn = undefined
+prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn :: GameAtDevotedServantsTurn -> Property
+prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn (GameAtDevotedServantsTurn game) = do
+    forAll (arbitraryCommand game) $ \(Blind command) ->
+        isn't angel target && isn't wolfHound target
+        ==> has (stage . _WolfHoundsTurn) (run_ (apply command >> checkStage) game)
+    where
+        target = head $ getVoteResult game
 
-prop_checkDevotedServantsTurnAdvancesWhenNoDevotedServant :: Game -> Bool
-prop_checkDevotedServantsTurnAdvancesWhenNoDevotedServant = undefined
+prop_checkDevotedServantsTurnAdvancesWhenNoDevotedServant :: GameAtDevotedServantsTurn -> Bool
+prop_checkDevotedServantsTurnAdvancesWhenNoDevotedServant (GameAtDevotedServantsTurn game) = do
+    let devotedServantsName = game ^?! players . devotedServants . name
+    let command             = quitCommand devotedServantsName
 
-prop_checkDevotedServantsTurnDoesNothingUnlessRevealedOrPassed :: Game -> Bool
-prop_checkDevotedServantsTurnDoesNothingUnlessRevealedOrPassed = undefined
+    hasn't (stage . _DevotedServantsTurn) (run_ (apply command >> checkStage) game)
 
-prop_checkLynchingLynchesOnePlayerWhenConsensus :: GameWithMajorityVote -> Property
-prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithMajorityVote game) =
+prop_checkDevotedServantsTurnDoesNothingUnlessRevealedOrPassed :: GameAtDevotedServantsTurn -> Bool
+prop_checkDevotedServantsTurnDoesNothingUnlessRevealedOrPassed (GameAtDevotedServantsTurn game) =
+    has (stage . _DevotedServantsTurn) (run_ checkStage game)
+
+prop_checkLynchingLynchesOnePlayerWhenConsensus :: GameWithPassAtDevotedServantsTurn -> Property
+prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithPassAtDevotedServantsTurn game) =
     isn't villageIdiot target
     ==> length (run_ checkStage game ^.. players . traverse . dead) == 1
     where
@@ -221,9 +231,12 @@ prop_checkLynchingLynchesScapegoatWhenConflicted :: GameAtScapegoatsTurn -> Bool
 prop_checkLynchingLynchesScapegoatWhenConflicted (GameAtScapegoatsTurn game) =
     is dead $ run_ checkStage game ^?! players . scapegoats
 
-prop_checkLynchingResetsVotes :: GameWithLynchVotes -> Bool
-prop_checkLynchingResetsVotes (GameWithLynchVotes game) =
-    Map.null $ run_ checkStage game ^. votes
+prop_checkLynchingResetsVotes :: GameWithPassAtDevotedServantsTurn -> Property
+prop_checkLynchingResetsVotes (GameWithPassAtDevotedServantsTurn game) =
+    isn't devotedServant target
+    ==> Map.null $ run_ checkStage game ^. votes
+    where
+        target = head $ getVoteResult game
 
 prop_checkLynchingSetsAllowedVoters :: GameWithLynchVotes -> Property
 prop_checkLynchingSetsAllowedVoters (GameWithLynchVotes game) =
@@ -282,17 +295,24 @@ prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAt
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
-    isn't angel roleModel' && isn't villageIdiot roleModel'
-        ==> is werewolf $ run_ checkStage game' ^?! players . wildChildren
+    let devotedServantsName = game ^?! players . devotedServants . name
+    let command             = passDevotedServantsTurnCommand devotedServantsName
+
+    isn't angel roleModel' && isn't devotedServant roleModel' && isn't villageIdiot roleModel'
+        ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . wildChildren
     where
         roleModel' = game ^?! players . traverse . filteredBy name (fromJust $ game ^. roleModel)
 
-prop_checkVillagesTurnAdvancesToDevotedServantsTurn :: GameWithMajorityVote -> Bool
+prop_checkVillagesTurnAdvancesToDevotedServantsTurn :: GameWithMajorityVote -> Property
 prop_checkVillagesTurnAdvancesToDevotedServantsTurn (GameWithMajorityVote game) =
-    has (stage . _DevotedServantsTurn) (run_ checkStage game)
+    isn't angel target && isn't devotedServant target
+    ==> has (stage . _DevotedServantsTurn) (run_ checkStage game)
+    where
+        target = head $ getVoteResult game
 
-prop_checkVillagesTurnSkipsDevotedServantsTurnWhenConflicted :: Game -> Bool
-prop_checkVillagesTurnSkipsDevotedServantsTurnWhenConflicted = undefined
+prop_checkVillagesTurnSkipsDevotedServantsTurnWhenConflicted :: GameWithConflictingVote -> Bool
+prop_checkVillagesTurnSkipsDevotedServantsTurnWhenConflicted (GameWithConflictingVote game) =
+    hasn't (stage . _DevotedServantsTurn) (run_ checkStage game)
 
 -- TODO (hjw): tidy this test
 prop_checkLynchingLynchesNoOneWhenConflictedAndNoScapegoats :: Game -> Property

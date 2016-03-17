@@ -38,20 +38,34 @@ allPassCommandTests =
     , testProperty "pass witch's turn command updates passes"                       prop_passWitchsTurnCommandUpdatesPasses
     ]
 
-prop_passDevotedServantsTurnCommandErrorsWhenGameIsOver :: Game -> Bool
-prop_passDevotedServantsTurnCommandErrorsWhenGameIsOver = undefined
+prop_passDevotedServantsTurnCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
+prop_passDevotedServantsTurnCommandErrorsWhenGameIsOver (GameAtGameOver game) =
+    forAll (arbitraryPassDevotedServantsTurnCommand game) $ verbose_runCommandErrors game . getBlind
 
-prop_passDevotedServantsTurnCommandErrorsWhenCallerDoesNotExist :: Game -> Bool
-prop_passDevotedServantsTurnCommandErrorsWhenCallerDoesNotExist = undefined
+prop_passDevotedServantsTurnCommandErrorsWhenCallerDoesNotExist :: GameAtDevotedServantsTurn -> Player -> Property
+prop_passDevotedServantsTurnCommandErrorsWhenCallerDoesNotExist (GameAtDevotedServantsTurn game) caller =
+    not (doesPlayerExist (caller ^. name) game)
+    ==> verbose_runCommandErrors game (passDevotedServantsTurnCommand (caller ^. name))
 
-prop_passDevotedServantsTurnCommandErrorsWhenCallerIsDead :: Game -> Bool
-prop_passDevotedServantsTurnCommandErrorsWhenCallerIsDead = undefined
+prop_passDevotedServantsTurnCommandErrorsWhenCallerIsDead :: GameAtDevotedServantsTurn -> Property
+prop_passDevotedServantsTurnCommandErrorsWhenCallerIsDead (GameAtDevotedServantsTurn game) = do
+    let devotedServantsName = game ^?! players . devotedServants . name
+    let game'               = killPlayer devotedServantsName game
+    let command             = passDevotedServantsTurnCommand devotedServantsName
 
-prop_passDevotedServantsTurnCommandErrorsWhenNotDevotedServantsTurn :: Game -> Bool
-prop_passDevotedServantsTurnCommandErrorsWhenNotDevotedServantsTurn = undefined
+    verbose_runCommandErrors game' command
 
-prop_passDevotedServantsTurnCommandUpdatesPasses :: Game -> Bool
-prop_passDevotedServantsTurnCommandUpdatesPasses = undefined
+prop_passDevotedServantsTurnCommandErrorsWhenNotDevotedServantsTurn :: Game -> Property
+prop_passDevotedServantsTurnCommandErrorsWhenNotDevotedServantsTurn game =
+    hasn't (stage . _DevotedServantsTurn) game
+    ==> forAll (arbitraryPassDevotedServantsTurnCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_passDevotedServantsTurnCommandUpdatesPasses :: GameAtDevotedServantsTurn -> Property
+prop_passDevotedServantsTurnCommandUpdatesPasses (GameAtDevotedServantsTurn game) =
+    forAll (arbitraryPassDevotedServantsTurnCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command) game
+
+        length (game' ^. passes) == 1
 
 prop_passWitchsTurnCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_passWitchsTurnCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -63,12 +77,12 @@ prop_passWitchsTurnCommandErrorsWhenCallerDoesNotExist (GameAtWitchsTurn game) c
     ==> verbose_runCommandErrors game (passWitchsTurnCommand (caller ^. name))
 
 prop_passWitchsTurnCommandErrorsWhenCallerIsDead :: GameAtWitchsTurn -> Property
-prop_passWitchsTurnCommandErrorsWhenCallerIsDead (GameAtWitchsTurn game) =
-    forAll (arbitraryPlayer game) $ \caller -> do
-        let game'   = killPlayer (caller ^. name) game
-        let command = passWitchsTurnCommand (caller ^. name)
+prop_passWitchsTurnCommandErrorsWhenCallerIsDead (GameAtWitchsTurn game) = do
+    let witchsName  = game ^?! players . witches . name
+    let game'       = killPlayer witchsName game
+    let command     = passWitchsTurnCommand witchsName
 
-        verbose_runCommandErrors game' command
+    verbose_runCommandErrors game' command
 
 prop_passWitchsTurnCommandErrorsWhenNotWitchsTurn :: Game -> Property
 prop_passWitchsTurnCommandErrorsWhenNotWitchsTurn game =

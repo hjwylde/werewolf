@@ -12,16 +12,17 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Game
     NewGame(..),
-    GameAtDefendersTurn(..), GameAtGameOver(..), GameAtScapegoatsTurn(..), GameAtSeersTurn(..),
-    GameAtSunrise(..), GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..),
-    GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
+    GameAtDefendersTurn(..), GameAtDevotedServantsTurn(..), GameAtGameOver(..),
+    GameAtScapegoatsTurn(..), GameAtSeersTurn(..), GameAtSunrise(..), GameAtVillagesTurn(..),
+    GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..), GameAtWitchsTurn(..),
+    GameAtWolfHoundsTurn(..),
     GameOnSecondRound(..),
-    GameWithAllegianceChosen(..), GameWithAllowedVoters(..), GameWithDeadPlayers(..),
-    GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..), GameWithLynchVotes(..),
-    GameWithMajorityVote(..), GameWithMajorityVoteAtDevotedServantsTurn(..),
-    GameWithOneAllegianceAlive(..), GameWithPoison(..), GameWithProtect(..),
+    GameWithAllegianceChosen(..), GameWithAllowedVoters(..), GameWithConflictingVote(..),
+    GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
+    GameWithLynchVotes(..), GameWithMajorityVote(..), GameWithOneAllegianceAlive(..),
+    GameWithPassAtDevotedServantsTurn(..), GameWithPoison(..), GameWithProtect(..),
     GameWithProtectAndDevourVotes(..), GameWithRoleModel(..), GameWithRoleModelAtVillagesTurn(..),
-    GameWithScapegoatBlamed(..), GameWithSee(..), GameWithVillageIdiotRevealedAtVillagesTurn(..),
+    GameWithSee(..), GameWithVillageIdiotRevealedAtVillagesTurn(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -30,9 +31,10 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Command
     arbitraryCommand, arbitraryChooseAllegianceCommand, arbitraryChoosePlayerCommand,
-    arbitraryChoosePlayersCommand, arbitraryHealCommand, arbitraryPassWitchsTurnCommand,
-    arbitraryPoisonCommand, arbitraryProtectCommand, arbitraryQuitCommand, arbitrarySeeCommand,
-    arbitraryVoteDevourCommand, arbitraryVoteLynchCommand,
+    arbitraryChoosePlayersCommand, arbitraryHealCommand, arbitraryPassDevotedServantsTurnCommand,
+    arbitraryPassWitchsTurnCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
+    arbitraryQuitCommand, arbitraryRevealCommand, arbitrarySeeCommand, arbitraryVoteDevourCommand,
+    arbitraryVoteLynchCommand,
     runArbitraryCommands,
 
     -- ** Player
@@ -97,6 +99,16 @@ instance Arbitrary GameAtDefendersTurn where
 
         return $ GameAtDefendersTurn (game & stage .~ DefendersTurn)
 
+newtype GameAtDevotedServantsTurn = GameAtDevotedServantsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtDevotedServantsTurn where
+    arbitrary = do
+        (GameWithMajorityVote game) <- suchThat arbitrary $ \(GameWithMajorityVote game) ->
+            isn't devotedServant (head $ getVoteResult game)
+
+        return $ GameAtDevotedServantsTurn (run_ checkStage game)
+
 newtype GameAtGameOver = GameAtGameOver Game
     deriving (Eq, Show)
 
@@ -111,7 +123,7 @@ newtype GameAtScapegoatsTurn = GameAtScapegoatsTurn Game
 
 instance Arbitrary GameAtScapegoatsTurn where
     arbitrary = do
-        (GameWithScapegoatBlamed game) <- arbitrary
+        (GameWithConflictingVote game) <- arbitrary
 
         return $ GameAtScapegoatsTurn (run_ checkStage game)
 
@@ -207,6 +219,16 @@ instance Arbitrary GameWithAllowedVoters where
 
         return $ GameWithAllowedVoters (run_ (apply command) game)
 
+newtype GameWithConflictingVote = GameWithConflictingVote Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithConflictingVote where
+    arbitrary = do
+        (GameWithLynchVotes game) <- suchThat arbitrary $ \(GameWithLynchVotes game) ->
+            length (getVoteResult game) > 1
+
+        return $ GameWithConflictingVote game
+
 newtype GameWithDeadPlayers = GameWithDeadPlayers Game
     deriving (Eq, Show)
 
@@ -287,6 +309,16 @@ instance Arbitrary GameWithOneAllegianceAlive where
 
         return $ GameWithOneAllegianceAlive game'
 
+newtype GameWithPassAtDevotedServantsTurn = GameWithPassAtDevotedServantsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithPassAtDevotedServantsTurn where
+    arbitrary = do
+        (GameAtDevotedServantsTurn game)    <- arbitrary
+        (Blind command)                     <- arbitraryPassDevotedServantsTurnCommand game
+
+        return $ GameWithPassAtDevotedServantsTurn (run_ (apply command) game)
+
 newtype GameWithPassAtWitchsTurn = GameWithPassAtWitchsTurn Game
     deriving (Eq, Show)
 
@@ -349,16 +381,6 @@ instance Arbitrary GameWithRoleModelAtVillagesTurn where
         (GameWithRoleModel game) <- arbitrary
 
         return $ GameWithRoleModelAtVillagesTurn (game & stage .~ VillagesTurn)
-
-newtype GameWithScapegoatBlamed = GameWithScapegoatBlamed Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameWithScapegoatBlamed where
-    arbitrary = do
-        (GameWithLynchVotes game) <- suchThat arbitrary $ \(GameWithLynchVotes game) ->
-            length (getVoteResult game) > 1
-
-        return $ GameWithScapegoatBlamed game
 
 newtype GameWithSee = GameWithSee Game
     deriving (Eq, Show)
