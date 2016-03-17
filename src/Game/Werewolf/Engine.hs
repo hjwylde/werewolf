@@ -55,12 +55,30 @@ checkStage = do
 
 checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
-    GameOver -> return ()
-
     DefendersTurn -> do
         whenM (has (players . defenders . dead) <$> get) advanceStage
 
         whenM (isJust <$> use protect) advanceStage
+
+    DevotedServantsTurn -> do
+        whenM (has (players . devotedServants . dead) <$> get) advanceStage
+
+        whenM (has devotedServants <$> getVoteResult)   advanceStage
+        whenM (has devotedServants <$> getPassers)      advanceStage
+
+    GameOver -> return ()
+
+    Lynching -> do
+        getVoteResult >>= lynchVotees
+
+        allVoters       <- ifM (use villageIdiotRevealed)
+            (uses players $ filter (isn't villageIdiot))
+            (use players)
+        allowedVoters   .= allVoters ^.. traverse . alive . name
+
+        votes .= Map.empty
+
+        advanceStage
 
     ScapegoatsTurn -> unlessM (use scapegoatBlamed) $ do
         allowedVoters' <- use allowedVoters
@@ -99,8 +117,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
                 setPlayerAllegiance (wildChild ^. name) Werewolves
 
-                tell [playerJoinedPackMessage (wildChild ^. name) aliveWerewolfNames]
-                tell $ wildChildJoinedPackMessages aliveWerewolfNames (wildChild ^. name)
+                tell $ wildChildJoinedPackMessages (wildChild ^. name) aliveWerewolfNames
 
         advanceStage
 
@@ -115,19 +132,13 @@ checkStage' = use stage >>= \stage' -> case stage' of
     VillagesTurn -> whenM (null <$> liftM2 intersect getAllowedVoters getPendingVoters) $ do
         tell . map (uncurry playerMadeLynchVoteMessage) =<< uses votes Map.toList
 
-        getVoteResult >>= lynchVotees
-
-        allVoters       <- ifM (use villageIdiotRevealed)
-            (uses players $ filter (isn't villageIdiot))
-            (use players)
-        allowedVoters   .= allVoters ^.. traverse . alive . name
-
         advanceStage
 
     WerewolvesTurn -> whenM (none (is werewolf) <$> getPendingVoters) $ do
         getVoteResult >>= devourVotees
 
         protect .= Nothing
+        votes .= Map.empty
 
         advanceStage
 
@@ -195,7 +206,6 @@ advanceStage = do
     stage   .= nextStage
     passes  .= []
     see     .= Nothing
-    votes   .= Map.empty
 
     tell . stageMessages =<< get
 

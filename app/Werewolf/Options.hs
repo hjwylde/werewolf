@@ -23,16 +23,16 @@ import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version (showVersion)
 
-import qualified Werewolf.Commands.Choose    as Choose
-import qualified Werewolf.Commands.Circle    as Circle
-import qualified Werewolf.Commands.Help      as Help
-import qualified Werewolf.Commands.Interpret as Interpret
-import qualified Werewolf.Commands.Poison    as Poison
-import qualified Werewolf.Commands.Protect   as Protect
-import qualified Werewolf.Commands.See       as See
-import qualified Werewolf.Commands.Start     as Start
-import qualified Werewolf.Commands.Vote      as Vote
-import qualified Werewolf.Version            as This
+import qualified Werewolf.Command.Choose    as Choose
+import qualified Werewolf.Command.Circle    as Circle
+import qualified Werewolf.Command.Help      as Help
+import qualified Werewolf.Command.Interpret as Interpret
+import qualified Werewolf.Command.Poison    as Poison
+import qualified Werewolf.Command.Protect   as Protect
+import qualified Werewolf.Command.See       as See
+import qualified Werewolf.Command.Start     as Start
+import qualified Werewolf.Command.Vote      as Vote
+import qualified Werewolf.Version           as This
 
 import Options.Applicative
 
@@ -53,6 +53,7 @@ data Command
     | Poison Poison.Options
     | Protect Protect.Options
     | Quit
+    | Reveal
     | See See.Options
     | Start Start.Options
     | Status
@@ -101,6 +102,7 @@ werewolf = Options
         , command "poison"      $ info (helper <*> poison)      (fullDesc <> progDesc "Poison a player")
         , command "protect"     $ info (helper <*> protect)     (fullDesc <> progDesc "Protect a player")
         , command "quit"        $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game")
+        , command "reveal"      $ info (helper <*> reveal)      (fullDesc <> progDesc "Reveal yourself")
         , command "see"         $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance")
         , command "start"       $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game")
         , command "status"      $ info (helper <*> status)      (fullDesc <> progDesc "Get the status of the current game")
@@ -152,6 +154,9 @@ protect = Protect . Protect.Options <$> playerArgument
 
 quit :: Parser Command
 quit = pure Quit
+
+reveal :: Parser Command
+reveal = pure Reveal
 
 see :: Parser Command
 see = See . See.Options <$> playerArgument

@@ -1,22 +1,20 @@
 {-|
-Module      : Werewolf.Commands.Protect
-Description : Options and handler for the protect subcommand.
+Module      : Werewolf.Command.Pass
+Description : Handler for the pass subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Options and handler for the protect subcommand.
+Handler for the pass subcommand.
 -}
 
-module Werewolf.Commands.Protect (
-    -- * Options
-    Options(..),
-
+module Werewolf.Command.Pass (
     -- * Handle
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -29,19 +27,19 @@ import Game.Werewolf
 import Werewolf.Game
 import Werewolf.Messages
 
-data Options = Options
-    { argTarget :: Text
-    } deriving (Eq, Show)
-
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options targetName) = do
+handle :: MonadIO m => Text -> m ()
+handle callerName = do
     unlessM doesGameExist $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
 
-    let command = protectCommand callerName targetName
+    let command = case game ^. stage of
+            DevotedServantsTurn -> passDevotedServantsTurnCommand callerName
+            WitchsTurn          -> passWitchsTurnCommand callerName
+            -- TODO (hjw): throw an error
+            _                   -> undefined
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

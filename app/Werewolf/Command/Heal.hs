@@ -1,15 +1,17 @@
 {-|
-Module      : Werewolf.Commands.Quit
-Description : Handler for the quit subcommand.
+Module      : Werewolf.Command.Heal
+Description : Handler for the heal subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the quit subcommand.
+Handler for the heal subcommand.
 -}
 
-module Werewolf.Commands.Quit (
+{-# LANGUAGE OverloadedStrings #-}
+
+module Werewolf.Command.Heal (
     -- * Handle
     handle,
 ) where
@@ -34,7 +36,7 @@ handle callerName = do
 
     game <- readGame
 
-    let command = quitCommand callerName
+    let command = healCommand callerName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

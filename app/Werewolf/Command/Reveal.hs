@@ -1,23 +1,21 @@
 {-|
-Module      : Werewolf.Commands.Vote
-Description : Options and handler for the vote subcommand.
+Module      : Werewolf.Command.Reveal
+Description : Handler for the reveal subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Options and handler for the vote subcommand.
+Handler for the reveal subcommand.
 -}
 
-module Werewolf.Commands.Vote (
-    -- * Options
-    Options(..),
+{-# LANGUAGE OverloadedStrings #-}
 
+module Werewolf.Command.Reveal (
     -- * Handle
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -30,23 +28,15 @@ import Game.Werewolf
 import Werewolf.Game
 import Werewolf.Messages
 
-data Options = Options
-    { argTarget :: Text
-    } deriving (Eq, Show)
-
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options targetName) = do
+handle :: MonadIO m => Text -> m ()
+handle callerName = do
     unlessM doesGameExist $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
     game <- readGame
 
-    let command = case game ^. stage of
-            VillagesTurn    -> voteLynchCommand callerName targetName
-            WerewolvesTurn  -> voteDevourCommand callerName targetName
-            -- TODO (hjw): throw an error
-            _               -> undefined
+    let command = revealCommand callerName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

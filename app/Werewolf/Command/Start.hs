@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Start
+Module      : Werewolf.Command.Start
 Description : Options and handler for the start subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -12,7 +12,7 @@ Options and handler for the start subcommand.
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Werewolf.Commands.Start (
+module Werewolf.Command.Start (
     -- * Options
     Options(..), ExtraRoles(..),
 

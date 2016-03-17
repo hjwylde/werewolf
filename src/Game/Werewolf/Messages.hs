@@ -45,6 +45,9 @@ module Game.Werewolf.Messages (
     -- ** Error messages
     playerCannotProtectSamePlayerTwiceInARowMessage,
 
+    -- * Devoted Servant's turn messages
+    devotedServantRevealedMessage, devotedServantJoinedPackMessages,
+
     -- * Scapegoat's turn messages
     scapegoatChoseAllowedVotersMessage,
 
@@ -68,7 +71,7 @@ module Game.Werewolf.Messages (
     playerCannotDevourAnotherWerewolfMessage,
 
     -- * Wild-child's turn messages
-    playerJoinedPackMessage, wildChildJoinedPackMessages,
+    wildChildJoinedPackMessages,
 
     -- ** Error messages
     playerCannotChooseSelfMessage,
@@ -136,25 +139,29 @@ villagerVillagerMessage name = publicMessage $ T.unwords
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
-    GameOver        -> []
-    DefendersTurn   -> defendersTurnMessages defendersName
-    ScapegoatsTurn  -> scapegoatsTurnMessages scapegoatsName
-    SeersTurn       -> seersTurnMessages seersName
-    Sunrise         -> [sunriseMessage]
-    Sunset          -> [nightFallsMessage]
-    UrsussGrunt     -> []
-    VillagesTurn    -> if isFirstRound game
+    DefendersTurn       -> defendersTurnMessages defendersName
+    DevotedServantsTurn -> devotedServantsTurnMessages devotedServantsName victimsName
+    GameOver            -> []
+    Lynching            -> []
+    ScapegoatsTurn      -> scapegoatsTurnMessages scapegoatsName
+    SeersTurn           -> seersTurnMessages seersName
+    Sunrise             -> [sunriseMessage]
+    Sunset              -> [nightFallsMessage]
+    UrsussGrunt         -> []
+    VillagesTurn        -> if isFirstRound game
         then firstVillagesTurnMessages
         else villagesTurnMessages
-    WerewolvesTurn  -> if isFirstRound game
+    WerewolvesTurn      -> if isFirstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
-    WildChildsTurn  -> wildChildsTurnMessages wildChildsName
-    WitchsTurn      -> witchsTurnMessages game
-    WolfHoundsTurn  -> wolfHoundsTurnMessages wolfHoundsName
+    WildChildsTurn      -> wildChildsTurnMessages wildChildsName
+    WitchsTurn          -> witchsTurnMessages game
+    WolfHoundsTurn      -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
         defendersName       = players' ^?! defenders . name
+        devotedServantsName = players' ^?! devotedServants . name
+        victimsName         = head (getVoteResult game) ^. name
         scapegoatsName      = players' ^?! scapegoats . name
         seersName           = players' ^?! seers . name
         aliveWerewolfNames  = players' ^.. werewolves . alive . name
@@ -165,6 +172,13 @@ defendersTurnMessages :: Text -> [Message]
 defendersTurnMessages to =
     [ publicMessage "The Defender wakes up."
     , privateMessage to "Whom would you like to `protect`?"
+    ]
+
+devotedServantsTurnMessages :: Text -> Text -> [Message]
+devotedServantsTurnMessages to victimsName =
+    [ publicMessage "The Devoted Servant ponders."
+    , privateMessage to $ T.concat
+        ["Would you like to `reveal` yourself and take on ", victimsName, "'s role?"]
     ]
 
 scapegoatsTurnMessages :: Text -> [Message]
@@ -355,6 +369,7 @@ pingRoleMessage roleName = publicMessage $ T.concat ["Waiting on the ", roleName
 
 currentStageMessages :: Text -> Stage -> [Message]
 currentStageMessages to GameOver    = [gameIsOverMessage to]
+currentStageMessages _ Lynching     = []
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
 currentStageMessages _ UrsussGrunt  = []
@@ -363,18 +378,20 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
     ]]
     where
         showTurn :: Stage -> Text
-        showTurn DefendersTurn  = "Defender's"
-        showTurn GameOver       = undefined
-        showTurn ScapegoatsTurn = "Scapegoat's"
-        showTurn SeersTurn      = "Seer's"
-        showTurn Sunrise        = undefined
-        showTurn Sunset         = undefined
-        showTurn UrsussGrunt    = undefined
-        showTurn VillagesTurn   = "Village's"
-        showTurn WerewolvesTurn = "Werewolves'"
-        showTurn WildChildsTurn = "Wild-child's"
-        showTurn WitchsTurn     = "Witch's"
-        showTurn WolfHoundsTurn = "Wolf-hound's"
+        showTurn DefendersTurn          = "Defender's"
+        showTurn DevotedServantsTurn    = "Devoted Servant's"
+        showTurn GameOver               = undefined
+        showTurn Lynching               = undefined
+        showTurn ScapegoatsTurn         = "Scapegoat's"
+        showTurn SeersTurn              = "Seer's"
+        showTurn Sunrise                = undefined
+        showTurn Sunset                 = undefined
+        showTurn UrsussGrunt            = undefined
+        showTurn VillagesTurn           = "village's"
+        showTurn WerewolvesTurn         = "Werewolves'"
+        showTurn WildChildsTurn         = "Wild-child's"
+        showTurn WitchsTurn             = "Witch's"
+        showTurn WolfHoundsTurn         = "Wolf-hound's"
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat
@@ -424,6 +441,25 @@ ursusGruntsMessage = publicMessage $ T.unwords
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
 playerCannotProtectSamePlayerTwiceInARowMessage to =
     privateMessage to "You cannot protect the same player twice in a row!"
+
+devotedServantRevealedMessage :: Text -> Message
+devotedServantRevealedMessage devotedServantsName = publicMessage $ T.unwords
+    [ devotedServantsName, " the stands up in horror."
+    , "Determined to not let their master's abilities be lost forever,"
+    , "she selflessly takes on their role."
+    ]
+
+devotedServantJoinedPackMessages :: Text -> [Text] -> [Message]
+devotedServantJoinedPackMessages devotedServantsName werewolfNames =
+    -- TODO (hjw): what if the pack's empty?
+    privateMessage devotedServantsName (T.unwords
+        [ "Upon learning your master was a Werewolf, you head towards the woods to learn more about his home and family."
+        , "As you enter you see his pack", T.intercalate ", " werewolfNames
+        , "waiting for you."
+        ])
+    : groupMessages werewolfNames (T.unwords
+        [ devotedServantsName, "heads towards the woods in search of his master's home and family."
+        ])
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message
 scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
@@ -518,20 +554,19 @@ noPlayerDevouredMessage = publicMessage $ T.unwords
 playerCannotDevourAnotherWerewolfMessage :: Text -> Message
 playerCannotDevourAnotherWerewolfMessage to = privateMessage to "You cannot devour another Werewolf!"
 
-playerJoinedPackMessage :: Text -> [Text] -> Message
-playerJoinedPackMessage to werewolfNames = privateMessage to $ T.unwords
-    [ "The death of your role model is distressing."
-    , "Without second thought you abandon the Villagers and run off into the woods,"
-    , "towards your old home."
-    , "As you arrive you see the familiar faces of", T.intercalate ", " werewolfNames
-    , "waiting and happy to have you back."
-    ]
-
-wildChildJoinedPackMessages :: [Text] -> Text -> [Message]
-wildChildJoinedPackMessages tos wildChildsName = groupMessages tos $ T.unwords
-    [ wildChildsName, "the Wild-child scampers off into the woods."
-    , "Without his role model nothing is holding back his true, wolfish, nature."
-    ]
+wildChildJoinedPackMessages :: Text -> [Text] -> [Message]
+wildChildJoinedPackMessages wildChildsName werewolfNames =
+    privateMessage wildChildsName (T.unwords
+        [ "The death of your role model is distressing."
+        , "Without second thought you abandon the Villagers and run off into the woods,"
+        , "towards your old home."
+        , "As you arrive you see the familiar faces of", T.intercalate ", " werewolfNames
+        , "waiting and happy to have you back."
+        ])
+    : groupMessages werewolfNames (T.unwords
+        [ wildChildsName, "the Wild-child scampers off into the woods."
+        , "Without his role model nothing is holding back his true, wolfish, nature."
+        ])
 
 playerCannotChooseSelfMessage :: Text -> Message
 playerCannotChooseSelfMessage to = privateMessage to "You cannot choose yourself!"

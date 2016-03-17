@@ -1,5 +1,5 @@
 {-|
-Module      : Werewolf.Commands.Help
+Module      : Werewolf.Command.Help
 Description : Options and handler for the help subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
@@ -11,7 +11,7 @@ Options and handler for the help subcommand.
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Werewolf.Commands.Help (
+module Werewolf.Command.Help (
     -- * Options
     Options(..), Command(..),
 
@@ -90,6 +90,10 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
       [ "Defender commands:"
       , "- `protect PLAYER`"
       ]
+    , whenPlayerHasRole callerName mGame devotedServantRole
+      [ "Devoted Servant commands:"
+      , "- `reveal`"
+      ]
     , whenPlayerHasRole callerName mGame scapegoatRole
       [ "Scapegoat commands:"
       , "- `choose PLAYER...`"
@@ -161,6 +165,8 @@ rulesMessages mGame = map (T.intercalate "\n")
         "- The Witch wakes up and may heal the victim and/or poison someone."
       , "- The village wakes up and find the victim."
       , "- The village votes to lynch a suspect."
+      , whenRoleInPlay mGame devotedServantRole
+        "- The Devoted Servant may choose whether to reveal themselves and take on the role of their master."
       , whenRoleInPlay mGame scapegoatRole
         "- (When the Scapegoat is blamed) the Scapegoat chooses whom may vote on the next day."
       , T.concat

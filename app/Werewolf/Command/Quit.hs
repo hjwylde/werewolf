@@ -1,15 +1,15 @@
 {-|
-Module      : Werewolf.Commands.Status
-Description : Handler for the status subcommand.
+Module      : Werewolf.Command.Quit
+Description : Handler for the quit subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the status subcommand.
+Handler for the quit subcommand.
 -}
 
-module Werewolf.Commands.Status (
+module Werewolf.Command.Quit (
     -- * Handle
     handle,
 ) where
@@ -34,8 +34,8 @@ handle callerName = do
 
     game <- readGame
 
-    let command = statusCommand callerName
+    let command = quitCommand callerName
 
-    case runExcept (execWriterT $ execStateT (apply command) game) of
-        Left errorMessages  -> exitWith failure { messages = errorMessages }
-        Right messages      -> exitWith success { messages = messages }
+    case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
+        Left errorMessages      -> exitWith failure { messages = errorMessages }
+        Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }

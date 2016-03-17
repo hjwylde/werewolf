@@ -1,15 +1,15 @@
 {-|
-Module      : Werewolf.Commands.Ping
-Description : Handler for the ping subcommand.
+Module      : Werewolf.Command.Status
+Description : Handler for the status subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the ping subcommand.
+Handler for the status subcommand.
 -}
 
-module Werewolf.Commands.Ping (
+module Werewolf.Command.Status (
     -- * Handle
     handle,
 ) where
@@ -34,7 +34,7 @@ handle callerName = do
 
     game <- readGame
 
-    let command = pingCommand callerName
+    let command = statusCommand callerName
 
     case runExcept (execWriterT $ execStateT (apply command) game) of
         Left errorMessages  -> exitWith failure { messages = errorMessages }

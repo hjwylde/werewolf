@@ -20,22 +20,23 @@ import Options.Applicative
 
 import System.Environment
 
-import qualified Werewolf.Commands.Choose    as Choose
-import qualified Werewolf.Commands.Circle    as Circle
-import qualified Werewolf.Commands.End       as End
-import qualified Werewolf.Commands.Heal      as Heal
-import qualified Werewolf.Commands.Help      as Help
-import qualified Werewolf.Commands.Interpret as Interpret
-import qualified Werewolf.Commands.Pass      as Pass
-import qualified Werewolf.Commands.Ping      as Ping
-import qualified Werewolf.Commands.Poison    as Poison
-import qualified Werewolf.Commands.Protect   as Protect
-import qualified Werewolf.Commands.Quit      as Quit
-import qualified Werewolf.Commands.See       as See
-import qualified Werewolf.Commands.Start     as Start
-import qualified Werewolf.Commands.Status    as Status
-import qualified Werewolf.Commands.Version   as Version
-import qualified Werewolf.Commands.Vote      as Vote
+import qualified Werewolf.Command.Choose    as Choose
+import qualified Werewolf.Command.Circle    as Circle
+import qualified Werewolf.Command.End       as End
+import qualified Werewolf.Command.Heal      as Heal
+import qualified Werewolf.Command.Help      as Help
+import qualified Werewolf.Command.Interpret as Interpret
+import qualified Werewolf.Command.Pass      as Pass
+import qualified Werewolf.Command.Ping      as Ping
+import qualified Werewolf.Command.Poison    as Poison
+import qualified Werewolf.Command.Protect   as Protect
+import qualified Werewolf.Command.Quit      as Quit
+import qualified Werewolf.Command.Reveal    as Reveal
+import qualified Werewolf.Command.See       as See
+import qualified Werewolf.Command.Start     as Start
+import qualified Werewolf.Command.Status    as Status
+import qualified Werewolf.Command.Version   as Version
+import qualified Werewolf.Command.Vote      as Vote
 import           Werewolf.Options
 
 main :: IO ()
@@ -65,6 +66,7 @@ handle (Options callerName command) = case command of
     Poison options                      -> Poison.handle callerName options
     Protect options                     -> Protect.handle callerName options
     Quit                                -> Quit.handle callerName
+    Reveal                              -> Reveal.handle callerName
     See options                         -> See.handle callerName options
     Start options                       -> Start.handle callerName options
     Status                              -> Status.handle callerName

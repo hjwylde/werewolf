@@ -26,16 +26,16 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    angel, bearTamer, defender, scapegoat, seer, simpleVillager, simpleWerewolf, villageIdiot,
-    villagerVillager, wildChild, witch, wolfHound,
+    angel, bearTamer, defender, devotedServant, scapegoat, seer, simpleVillager, simpleWerewolf,
+    villageIdiot, villagerVillager, wildChild, witch, wolfHound,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    angels, bearTamers, defenders, scapegoats, seers, simpleVillagers, simpleWerewolves,
-    villageIdiots, villagerVillagers, wildChildren, witches, wolfHounds,
+    angels, bearTamers, defenders, devotedServants, scapegoats, seers, simpleVillagers,
+    simpleWerewolves, villageIdiots, villagerVillagers, wildChildren, witches, wolfHounds,
     villagers, werewolves,
     alive, dead,
 
@@ -98,6 +98,14 @@ bearTamer = role . only bearTamerRole
 -- @
 defender :: Traversal' Player ()
 defender = role . only defenderRole
+
+-- | The traversal of 'Player's with a 'devotedServantRole'.
+--
+-- @
+-- 'devotedServant' = 'role' . 'only' 'devotedServantRole'
+-- @
+devotedServant :: Traversal' Player ()
+devotedServant = role . only devotedServantRole
 
 -- | The traversal of 'Player's with a 'scapegoatRole'.
 --
@@ -234,6 +242,14 @@ bearTamers = traverse . filtered (is bearTamer)
 -- @
 defenders :: Traversable t => Traversal' (t Player) Player
 defenders = traverse . filtered (is defender)
+
+-- | This 'Traversal' provides the traversal of 'devotedServant' 'Player's.
+--
+-- @
+-- 'devotedServants' = 'traverse' . 'filtered' ('is' 'devotedServant')
+-- @
+devotedServants :: Traversable t => Traversal' (t Player) Player
+devotedServants = traverse . filtered (is devotedServant)
 
 -- | This 'Traversal' provides the traversal of 'scapegoat' 'Player's.
 --

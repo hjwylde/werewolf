@@ -32,6 +32,7 @@ During the game, they can change sides or characters.
 
 The Ambiguous must aid their side to achieve victory.
 
+* Devoted Servant
 * Wild-child
 * Wolf-hound
 
