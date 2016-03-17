@@ -444,12 +444,14 @@ playerCannotProtectSamePlayerTwiceInARowMessage to =
 
 devotedServantRevealedMessage :: Text -> Message
 devotedServantRevealedMessage devotedServantsName = publicMessage $ T.unwords
-    -- TODO (hjw)
-    [ devotedServantsName ]
+    [ devotedServantsName, " the stands up in horror."
+    , "Determined to not let their master's abilities be lost forever,"
+    , "she selflessly takes on their role."
+    ]
 
 devotedServantJoinedPackMessages :: Text -> [Text] -> [Message]
 devotedServantJoinedPackMessages devotedServantsName werewolfNames =
-    -- TODO (hjw): what is the packs empty?
+    -- TODO (hjw): what if the pack's empty?
     privateMessage devotedServantsName (T.unwords
         [ "Upon learning your master was a Werewolf, you head towards the woods to learn more about his home and family."
         , "As you enter you see his pack", T.intercalate ", " werewolfNames

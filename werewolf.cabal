@@ -39,6 +39,7 @@ executable werewolf
         Werewolf.Command.Poison
         Werewolf.Command.Protect
         Werewolf.Command.Quit
+        Werewolf.Command.Reveal
         Werewolf.Command.See
         Werewolf.Command.Start
         Werewolf.Command.Status
