@@ -28,6 +28,7 @@ executable werewolf
     hs-source-dirs: app/
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
+        Werewolf.Command.Boot
         Werewolf.Command.Choose
         Werewolf.Command.Circle
         Werewolf.Command.End

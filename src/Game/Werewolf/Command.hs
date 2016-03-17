@@ -52,6 +52,8 @@ bootCommand :: Text -> Text -> Command
 bootCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     validatePlayer callerName targetName
+    whenM (uses (boots . at targetName) $ elem callerName . maybe [] id) $
+        throwError [playerHasAlreadyBootedMessage callerName targetName]
 
     boots %= Map.insertWith (++) targetName [callerName]
 

@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Added `boot` command. ([#14](https://github.com/hjwylde/werewolf/issues/14))
+
 #### v0.4.9.0
 
 *Minor*
