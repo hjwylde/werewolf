@@ -458,7 +458,7 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
 ursusGruntsMessage :: Message
 ursusGruntsMessage = publicMessage $ T.unwords
     [ "Ursus wakes from his slumber, disturbed and on edge."
-    , "He loudly grunts as if he smells danger."
+    , "He loudly grunts as he smells danger."
     ]
 
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
@@ -474,15 +474,21 @@ devotedServantRevealedMessage devotedServantsName = publicMessage $ T.unwords
 
 devotedServantJoinedPackMessages :: Text -> [Text] -> [Message]
 devotedServantJoinedPackMessages devotedServantsName werewolfNames =
-    -- TODO (hjw): what if the pack's empty?
-    privateMessage devotedServantsName (T.unwords
-        [ "Upon learning your master was a Werewolf, you head towards the woods to learn more about his home and family."
-        , "As you enter you see his pack", T.intercalate ", " werewolfNames
-        , "waiting for you."
-        ])
+    privateMessage devotedServantsName (T.unwords $ masterWasWerewolfMessage:packMessages)
     : groupMessages werewolfNames (T.unwords
         [ devotedServantsName, "heads towards the woods in search of his master's home and family."
         ])
+    where
+        masterWasWerewolfMessage = T.unwords
+            [ "Upon learning your master was a Werewolf,"
+            , "you head towards the woods to learn more about his home and family."
+            ]
+        packMessages
+            | null werewolfNames    = []
+            | otherwise             = [T.unwords
+                [ "As you enter you see his pack", T.intercalate ", " werewolfNames
+                , "waiting for you."
+                ]]
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message
 scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
