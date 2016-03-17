@@ -17,7 +17,7 @@ module Game.Werewolf.Util (
     -- * Game
 
     -- ** Manipulations
-    killPlayer, setPlayerAllegiance, setPlayerRole,
+    killPlayer, removePlayer, setPlayerAllegiance, setPlayerRole,
 
     -- ** Searches
     findPlayerBy_, getAdjacentAlivePlayers, getPassers, getPlayerVote,
@@ -44,6 +44,7 @@ import Control.Monad.State hiding (state)
 
 import Data.List
 import Data.Maybe
+import qualified Data.Map as Map
 import Data.Text  (Text)
 
 import           Game.Werewolf.Game   hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
@@ -57,6 +58,28 @@ import Prelude hiding (round)
 
 killPlayer :: MonadState Game m => Text -> m ()
 killPlayer name = modify $ Game.killPlayer name
+
+removePlayer :: MonadState Game m => Text -> m ()
+removePlayer name' = do
+    killPlayer name'
+
+    passes  %= delete name'
+    votes   %= Map.delete name'
+
+    player <- findPlayerBy_ name name'
+
+    when (is angel player)      $ setPlayerAllegiance name' Villagers
+    when (is defender player)   $ do
+        protect         .= Nothing
+        priorProtect    .= Nothing
+    when (is seer player)       $ see .= Nothing
+    when (is wildChild player)  $ roleModel .= Nothing
+    when (is witch player)      $ do
+        heal        .= False
+        healUsed    .= False
+        poison      .= Nothing
+        poisonUsed  .= False
+    when (is wolfHound player)  $ allegianceChosen .= Nothing
 
 -- | Fudges the player's allegiance. This function is useful for roles such as the Wild-child where
 --   they align themselves differently given some trigger.

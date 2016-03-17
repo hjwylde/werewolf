@@ -25,6 +25,9 @@ module Game.Werewolf.Messages (
     playerDoesNotExistMessage, playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
     playerIsDeadMessage, targetIsDeadMessage,
 
+    -- * Boot messages
+    playerBootedMessage,
+
     -- * Circle messages
     circleMessage,
 
@@ -352,6 +355,12 @@ playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
 
 targetIsDeadMessage :: Text -> Text -> Message
 targetIsDeadMessage to targetName = privateMessage to $ T.unwords [targetName, "is already dead!"]
+
+playerBootedMessage :: Player -> Message
+playerBootedMessage player = publicMessage $ T.unwords [playerName, article playerRole, playerRole ^. Role.name, "has been booted from the game!"]
+    where
+        playerName = player ^. name
+        playerRole = player ^. role
 
 circleMessage :: Text -> [Player] -> Message
 circleMessage to players = privateMessage to $ T.concat

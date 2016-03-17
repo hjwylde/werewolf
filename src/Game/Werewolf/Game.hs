@@ -17,8 +17,9 @@ It also has a few additional functions for manipulating and querying the game st
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, events, passes, allegianceChosen, allowedVoters, heal, healUsed, poison,
-    poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see, villageIdiotRevealed, votes,
+    stage, round, players, events, boots, passes, allegianceChosen, allowedVoters, heal, healUsed,
+    poison, poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see,
+    villageIdiotRevealed, votes,
 
     Stage(..),
     _DefendersTurn, _DevotedServantsTurn, _GameOver, _Lynching, _ScapegoatsTurn, _SeersTurn,
@@ -85,6 +86,7 @@ data Game = Game
     , _round                :: Int
     , _players              :: [Player]
     , _events               :: [Event]
+    , _boots                :: Map Text [Text]
     , _allegianceChosen     :: Maybe Allegiance -- ^ Wolf-hound
     , _allowedVoters        :: [Text]           -- ^ Scapegoat
     , _heal                 :: Bool             -- ^ Witch
@@ -195,6 +197,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _round                = 0
             , _players              = players
             , _events               = []
+            , _boots                = Map.empty
             , _passes               = []
             , _allegianceChosen     = Nothing
             , _allowedVoters        = players ^.. names

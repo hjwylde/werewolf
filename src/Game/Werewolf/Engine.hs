@@ -48,10 +48,22 @@ import Prelude hiding (round)
 checkStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage = do
     game <- get
-    checkStage' >> checkEvents
+    checkBoots >> checkStage' >> checkEvents
     game' <- get
 
     when (game /= game') checkStage
+
+checkBoots :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkBoots = do
+    alivePlayerCount <- length . toListOf (players . traverse . alive) <$> get
+
+    booteeNames <- uses boots $ Map.keys . Map.filter (\voters -> length voters > alivePlayerCount `div` 2)
+    bootees     <- mapM (findPlayerBy_ name) booteeNames
+
+    forM_ (filter (is alive) bootees) $ \bootee -> do
+        tell [playerBootedMessage bootee]
+
+        removePlayer (bootee ^. name)
 
 checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
@@ -204,6 +216,7 @@ advanceStage = do
         (return . head $ filter (stageAvailable game) (drop1 $ dropWhile (game ^. stage /=) stageCycle))
 
     stage   .= nextStage
+    boots   .= Map.empty
     passes  .= []
     see     .= Nothing
 
