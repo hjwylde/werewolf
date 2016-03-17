@@ -57,7 +57,7 @@ handle :: Options -> IO ()
 handle (Options callerName command) = case command of
     Choose options                      -> Choose.handle callerName options
     Circle options                      -> Circle.handle callerName options
-    End                                 -> End.handle callerName
+    End options                         -> End.handle callerName options
     Heal                                -> Heal.handle callerName
     Help options                        -> Help.handle callerName options
     Interpret (Interpret.Options args)  -> interpret callerName args

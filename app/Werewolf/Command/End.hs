@@ -1,17 +1,20 @@
 {-|
 Module      : Werewolf.Command.End
-Description : Handler for the end subcommand.
+Description : Options and handler for the end subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the end subcommand.
+Options and handler for the end subcommand.
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
 
 module Werewolf.Command.End (
+    -- * Options
+    Options(..),
+
     -- * Handle
     handle,
 ) where
@@ -27,14 +30,19 @@ import Game.Werewolf
 import Werewolf.Game
 import Werewolf.Messages
 
-handle :: MonadIO m => Text -> m ()
-handle callerName = do
+data Options = Options
+    { optForce :: Bool
+    } deriving (Eq, Show)
+
+handle :: MonadIO m => Text -> Options -> m ()
+handle callerName (Options force) = do
     unlessM doesGameExist $ exitWith failure { messages = [noGameRunningMessage callerName] }
 
-    game <- readGame
+    unless force $ do
+        game <- readGame
 
-    unless (doesPlayerExist callerName game) $
-        exitWith failure { messages = [playerCannotDoThatMessage callerName] }
+        unless (doesPlayerExist callerName game) $
+            exitWith failure { messages = [playerCannotDoThatMessage callerName] }
 
     deleteGame
 
