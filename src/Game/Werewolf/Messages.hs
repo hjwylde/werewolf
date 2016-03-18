@@ -186,7 +186,7 @@ devotedServantsTurnMessages to victimsName =
     [ publicMessage "The Devoted Servant ponders."
     , privateMessage to $ T.concat
         [ "Would you like to `reveal` yourself and take on ", victimsName, "'s role?"
-        , "(Or you can type `pass`.)"
+        , " (Or you can type `pass`.)"
         ]
     ]
 
@@ -470,7 +470,7 @@ playerCannotProtectSamePlayerTwiceInARowMessage to =
 
 devotedServantRevealedMessage :: Text -> Message
 devotedServantRevealedMessage devotedServantsName = publicMessage $ T.unwords
-    [ devotedServantsName, " the stands up in horror."
+    [ devotedServantsName, "stands up in horror."
     , "Determined to not let their master's abilities be lost forever,"
     , "she selflessly takes on their role."
     ]
