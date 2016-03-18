@@ -2,6 +2,12 @@
 
 #### Upcoming
 
+*Revisions*
+
+* Fixed a bug where extra roles with spaces in them weren't recognised.
+* Fixed Devoted Servant messages to exclude her when joining the Werewolf pack.
+* Fixed Devoted Servant help messages to include how to `pass`.
+
 #### v0.4.10.0
 
 *Minor*
