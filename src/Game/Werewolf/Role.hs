@@ -145,7 +145,7 @@ devotedServantRole :: Role
 devotedServantRole = Role
     { _name         = "Devoted Servant"
     , _allegiance   = Villagers
-    , _balance      = 1
+    , _balance      = 2
     , _description  = T.unwords
         [ "Who could dream of a better servant than one willing to give up her life for that of her"
         , "masters? Don't rejoice too fast, as the devouring ambition within her could spell the"
