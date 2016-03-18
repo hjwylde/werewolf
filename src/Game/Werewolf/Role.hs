@@ -21,7 +21,7 @@ Roles are split into four categories:
 module Game.Werewolf.Role (
     -- * Role
     Role,
-    name, allegiance, balance, description, advice,
+    name, allegiance, balance, description, rules, advice,
 
     Allegiance(..),
     _Angel, _Villagers, _Werewolves,
@@ -86,6 +86,7 @@ data Role = Role
     , _allegiance  :: Allegiance
     , _balance     :: Int
     , _description :: Text
+    , _rules       :: Text
     , _advice      :: Text
     } deriving (Read, Show)
 
@@ -136,8 +137,10 @@ allAllegiances = [Angel, Villagers, Werewolves]
 --   /masters? Don't rejoice too fast, as the devouring ambition within her could spell the end of/
 --   /the village!/
 --
---   Before the revelation of the card of the player eliminated by the village's vote, she can
---   reveal herself by showing her card and taking on the role of the eliminated player.
+--   Before the revelation of the card of the player eliminated by the village's vote, the Devoted
+--   Servant can reveal herself by showing her card and taking on the role of the eliminated player.
+--   Upon taking on her master's role, any special abilities are reset and any first turns are
+--   replayed.
 devotedServantRole :: Role
 devotedServantRole = Role
     { _name         = "Devoted Servant"
@@ -145,14 +148,18 @@ devotedServantRole = Role
     , _balance      = 1
     , _description  = T.unwords
         [ "Who could dream of a better servant than one willing to give up her life for that of her"
-        , "masters?"
-        , "Don't rejoice too fast,"
-        , "as the devouring ambition within her could spell the end of the village!"
+        , "masters? Don't rejoice too fast, as the devouring ambition within her could spell the"
+        , "end of the village!"
+        ]
+    , _rules        = T.unwords
+        [ "Before the revelation of the card of the player eliminated by the village's vote, the"
+        , "Devoted Servant can reveal herself by showing her card and taking on the role of the"
+        , "eliminated player. Upon taking on her master's role, any special abilities are reset and"
+        , "any first turns are replayed."
         ]
     , _advice       = T.unwords
-        [ "Think twice before trying to take on the role of a Werewolf."
-        , "If people strongly believed your master as such,"
-        , "then they will be quick to point fingers at you too!"
+        [ "Think twice before trying to take on the role of a Werewolf. If people strongly believed"
+        , "your master as such, then they will be quick to point fingers at you too!"
         ]
     }
 
@@ -175,22 +182,26 @@ wildChildRole = Role
     , _allegiance   = Villagers
     , _balance      = -1
     , _description  = T.unwords
-        [ "Abandoned in the woods by his parents at a young age, he was raised by wolves."
-        , "As soon as he learned how to walk on all fours,"
-        , "the Wild-child began to wander around Miller's Hollow."
-        , "One day, fascinated by an inhabitant of the village who was walking upright"
-        , "with grace and presence, he made them his secret role model."
-        , "He then decided to integrate himself into the community of Miller's Hollow and entered,"
-        , "worried, in the village."
-        , "The community was moved by his frailty, adopted him, and welcomed him in their fold."
-        , "What will become of him: honest Villager or terrible Werewolf?"
-        , "For all of his life,"
-        , "the heart of the Wild-child will swing between these two alternatives."
-        , "May his model confirm him in his newfound humanity."
+        [ "Abandoned in the woods by his parents at a young age, he was raised by wolves. As soon"
+        , "as he learned how to walk on all fours, the Wild-child began to wander around Miller's"
+        , "Hollow. One day, fascinated by an inhabitant of the village who was walking upright"
+        , "with grace and presence, he made them his secret role model. He then decided to"
+        , "integrate himself into the community of Miller's Hollow and entered, worried, in the"
+        , "village. The community was moved by his frailty, adopted him, and welcomed him in their"
+        , "fold. What will become of him: honest Villager or terrible Werewolf? For all of his"
+        , "life, the heart of the Wild-child will swing between these two alternatives. May his"
+        , "model confirm him in his newfound humanity."
+        ]
+    , _rules        = T.unwords
+        [ "On the first night, the Wild-child may choose a player to become his role model. If"
+        , "during the game the chosen player is eliminated, the Wild-child becomes a Werewolf. He"
+        , "will then wake up the next night with his peers and will devour with them each night"
+        , "until the end of the game.  However for as long as the Wild-child's role model is alive,"
+        , "he remains a Villager."
         ]
     , _advice       = T.unwords
-        [ "Nothing is keeping you from taking part in the elimination of your role model,"
-        , "if you so wish..."
+        [ "Nothing is keeping you from taking part in the elimination of your role model, if you so"
+        , "wish..."
         ]
     }
 
@@ -199,19 +210,22 @@ wildChildRole = Role
 --   /companions. In any case, only the Wolf-hound can decide if he'll obey his human and civilized/
 --   /master or if he'll listen to the call of wild nature buried within him./
 --
---   On the first night, he chooses if he wants to be a Simple Villager or Werewolf. The choice is
---   final.
+--   On the first night, the Wolf-hound chooses if he wants to be a Simple Villager or Werewolf. The
+--   choice is final.
 wolfHoundRole :: Role
 wolfHoundRole = Role
     { _name         = "Wolf-hound"
     , _allegiance   = Villagers
     , _balance      = -1
     , _description  = T.unwords
-        [ "All dogs know in the depths of their soul that their ancestors were wolves"
-        , "and that it's mankind who has kept them in the state of childishness and fear,"
-        , "the faithful and generous companions."
-        , "In any case, only the Wolf-hound can decide if he'll obey his human and civilized master"
-        , "or if he'll listen to the call of wild nature buried within him."
+        [ "All dogs know in the depths of their soul that their ancestors were wolves and that it's"
+        , "mankind who has kept them in the state of childishness and fear, the faithful and"
+        , "generous companions. In any case, only the Wolf-hound can decide if he'll obey his human"
+        , "and civilized master or if he'll listen to the call of wild nature buried within him."
+        ]
+    , _rules        = T.unwords
+        [ "On the first night, the Wolf-hound chooses if he wants to be a Simple Villager or"
+        , "Werewolf. The choice is final."
         ]
     , _advice       =
         "The choice of being a Simple Villager or Werewolf is final, so decide carefully!"
@@ -231,9 +245,19 @@ angelRole = Role
     , _allegiance   = Angel
     , _balance      = 0
     , _description  = T.unwords
-        [ "The muddy life of a village infested with evil creatures repulses him;"
-        , "he wishes to believe he's the victim of a terrible nightmare,"
-        , "in order to finally wake up in his comfortable bed."
+        [ "The muddy life of a village infested with evil creatures repulses him; he wishes to"
+        , "believe he's the victim of a terrible nightmare, in order to finally wake up in his"
+        , "comfortable bed."
+        ]
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "When the Angel is in play, the game always begins with the village's debate followed"
+            , "by an elimination vote, and then the first night."
+            ]
+        , T.unwords
+            [ "The Angel wins if he manages to get eliminated on the first round (day or night). If"
+            , "he fails, then he becomes a Simple Villager for the rest of the game."
+            ]
         ]
     , _advice       = T.unwords
         [ "It's going to take all your guile and wits to con the village into eliminating you."
@@ -257,11 +281,16 @@ bearTamerRole = Role
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
-        [ "Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones"
-        , "of the \"Three Road\" plaza, accompanied by the grunting of Ursus."
-        , "Ah! How long ago it was that Titan, the Bear Tamer, would lead his companion in a ballet"
-        , "so gravious that we'd cry every summer in Miller's Hollow."
-        , "Ursus even had the oh-so-previous ability to detect lycanthropes hidden near him."
+        [ "Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of"
+        , "the \"Three Road\" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was"
+        , "that Titan, the Bear Tamer, would lead his companion in a ballet so gravious that we'd"
+        , "cry every summer in Miller's Hollow. Ursus even had the oh-so-previous ability to detect"
+        , "lycanthropes hidden near him."
+        ]
+    , _rules        = T.unwords
+        [ "Each morning, right after the revelation of any possible nocturnal victims, if at least"
+        , "one Werewolf is or ends up directly next to the Bear Tamer, then Ursus grunts to"
+        , "indicate danger to all of the other players."
         ]
     , _advice       =
         "Aren't you lucky to have a companion with a strong nose. Just don't let him wander off!"
@@ -271,6 +300,8 @@ bearTamerRole = Role
 --
 --   Each night the Defender is called before the Werewolves to select a player deserving of his
 --   protection. That player is safe during the night (and only that night) against the Werewolves.
+--
+--   The Defender may not protect the same person two nights in a row.
 defenderRole :: Role
 defenderRole = Role
     { _name         = "Defender"
@@ -278,9 +309,17 @@ defenderRole = Role
     , _balance      = 2
     , _description  =
         "This character can save the Villagers from the bite of the Werewolves."
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "Each night the Defender is called before the Werewolves to select a player deserving"
+            , "of his protection. That player is safe during the night (and only that night)"
+            , "against the Werewolves."
+            ]
+        , "The Defender may not protect the same person two nights in a row."
+        ]
     , _advice       = T.unwords
-        [ "Be careful: you can protect yourself,"
-        , "but you're not allowed to protect the same player two nights in a row."
+        [ "Be careful: you can protect yourself, but you're not allowed to protect the same player"
+        , "two nights in a row."
         ]
     }
 
@@ -297,15 +336,23 @@ scapegoatRole = Role
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
-        [ "It's sad to say, but in Miller's Hollow, when something doesn't go right"
-        , "it's always him who unjustly suffers the consequences."
+        [ "It's sad to say, but in Miller's Hollow, when something doesn't go right it's always him"
+        , "who unjustly suffers the consequences."
+        ]
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "If the village's vote ends in a tie, it's the Scapegoat who is eliminated instead of"
+            , "no-one."
+            ]
+        , T.unwords
+            [ "In this event, the Scapegoat has one last task to complete: he must choose whom is"
+            , "permitted to vote or not on the next day."
+            ]
         ]
     , _advice       = T.unwords
-        [ "Cross your fingers that the votes don't end up tied."
-        , "If you do so happen to be that unlucky,"
-        , "then be wary of whom you allow to vote on the next day."
-        , "If you choose only one player and the Werewolves devour them in the night,"
-        , "then there will be no village vote."
+        [ "Cross your fingers that the votes don't end up tied. If you do so happen to be that"
+        , "unlucky, then be wary of whom you allow to vote on the next day. If you choose only one"
+        , "player and the Werewolves devour them in the night, then there will be no village vote."
         ]
     }
 
@@ -319,28 +366,34 @@ seerRole = Role
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
-        [ "A fortunate teller by other names, with the ability to see into fellow"
-        , "townsfolk and determine their allegiance."
+        [ "A fortunate teller by other names, with the ability to see into fellow townsfolk and"
+        , "determine their allegiance."
         ]
+    , _rules        = "Each night the Seer sees the allegiance of a player of her choice."
     , _advice       = T.unwords
-        [ "You should help the other Villagers,"
-        , "but try to remain discreet so as to not arouse suspicion from any of the Werewolves."
+        [ "You should help the other Villagers, but try to remain discreet so as to not arouse"
+        , "suspicion from any of the Werewolves."
         ]
     }
 
 -- | /A simple, ordinary townsperson in every way. Their only weapons are the ability to analyze/
 --   /behaviour to identify Werewolves, and the strength of their conviction to prevent the/
 --   /execution of the innocents like themselves./
+--
+--   A Simple Villager has no rules whatsoever, their only goal is to lynch all of the Werewolves.
 simpleVillagerRole :: Role
 simpleVillagerRole = Role
     { _name         = "Simple Villager"
     , _allegiance   = Villagers
     , _balance      = 1
     , _description  = T.unwords
-        [ "A simple, ordinary townsperson in every way."
-        , "Their only weapons are the ability to analyze behaviour to identify Werewolves,"
-        , "and the strength of their conviction to prevent"
-        , "the execution of the innocents like themselves."
+        [ "A simple, ordinary townsperson in every way. Their only weapons are the ability to"
+        , "analyze behaviour to identify Werewolves, and the strength of their conviction to"
+        , "prevent the execution of the innocents like themselves."
+        ]
+    , _rules        = T.unwords
+        [ "A Simple Villager has no rules whatsoever, their only goal is to lynch all of the"
+        , "Werewolves."
         ]
     , _advice       =
         "Bluffing can be a good technique, but you had better be convincing about what you say."
@@ -360,9 +413,18 @@ villageIdiotRole = Role
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
-        [ "What is a village without an idiot?"
-        , "He does pretty much nothing important,"
-        , "but he's so charming that no one would want to hurt him."
+        [ "What is a village without an idiot? He does pretty much nothing important, but he's so"
+        , "charming that no one would want to hurt him."
+        ]
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "If the village votes against the Village Idiot, his identity is revealed. At that"
+            , "moment the Villagers understand their mistake and immediately let him be."
+            ]
+        , T.unwords
+            [ "The Village Idiot continues to play but may no longer vote, as what would the vote"
+            , "of an idiot be worth?"
+            ]
         ]
     , _advice       =
         "Hah! As if advice would do you any good..."
@@ -381,8 +443,12 @@ villagerVillagerRole = Role
     , _balance      = 2
     , _description  = T.unwords
         [ "This person has a soul as clear and transparent as the water from a mountain stream."
-        , "They will deserve the attentive ear of their peers"
-        , "and will make their word decisive in crucial moments."
+        , "They will deserve the attentive ear of their peers and will make their word decisive in"
+        , "crucial moments."
+        ]
+    , _rules        = T.unwords
+        [ "When the game begins, the village is told the identity of the Villager-Villager, thus"
+        , "ensuring certainty that its owner is truly an innocent Villager."
         ]
     , _advice       = "You'll make friends quickly, but be wary about whom you trust."
     }
@@ -398,13 +464,17 @@ witchRole = Role
     , _allegiance   = Villagers
     , _balance      = 3
     , _description  = T.unwords
-        [ "She knows how to brew two extremely powerful potions:"
-        , "a healing potion, to resurrect the player devoured by the Werewolves,"
-        , "and a poison potion, used at night to eliminate a player."
+        [ "She knows how to brew two extremely powerful potions: a healing potion, to resurrect the"
+        , "player devoured by the Werewolves, and a poison potion, used at night to eliminate a"
+        , "player."
+        ]
+    , _rules        = T.unwords
+        [ "The Witch is called after the Werewolves. She is allowed to use both potions in the same"
+        , "night and is also allowed to heal herself."
         ]
     , _advice       = T.unwords
-        [ "Each potion may only be used once per game,"
-        , "but there are no restrictions on using both of your potions in the same night."
+        [ "Each potion may only be used once per game, but there are no restrictions on using both"
+        , "of your potions in the same night."
         ]
     }
 
@@ -418,9 +488,10 @@ simpleWerewolfRole = Role
     , _allegiance   = Werewolves
     , _balance      = -4
     , _description  = T.unwords
-        [ "Each night they devour a Villager."
-        , "During the day they try to hide their nocturnal identity to avoid mob justice."
+        [ "Each night they devour a Villager. During the day they try to hide their nocturnal"
+        , "identity to avoid mob justice."
         ]
+    , _rules        = "A Werewolf may never devour another Werewolf."
     , _advice       =
         "Voting to lynch your partner can be a good way to deflect suspicion from yourself."
     }
