@@ -124,7 +124,7 @@ roleMessage :: Role -> Text
 roleMessage role = T.intercalate "\n"
     [ T.concat [role ^. Role.name, " (", T.pack . show $ role ^. balance, "):"]
     , role ^. description
-    , role ^. advice
+    , role ^. rules
     ]
 
 rulesMessages :: Maybe Game -> [Text]

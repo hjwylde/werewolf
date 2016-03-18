@@ -131,6 +131,7 @@ newPlayerMessage :: Player -> Message
 newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
     [ T.concat ["You're ", article playerRole, " ", playerRole ^. Role.name, "."]
     , playerRole ^. description
+    , playerRole ^. rules
     ]
     where
         playerRole = player ^. role
