@@ -233,7 +233,7 @@ revealCommand callerName = Command $ do
             | role == simpleWerewolfRole    = do
                 aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
-                tell $ devotedServantJoinedPackMessages callerName aliveWerewolfNames
+                tell $ devotedServantJoinedPackMessages callerName (aliveWerewolfNames \\ [callerName])
             | role == villageIdiotRole      = villageIdiotRevealed .= False
             | role == wildChildRole         = roleModel .= Nothing
             | role == witchRole             = healUsed .= False >> poisonUsed .= False
