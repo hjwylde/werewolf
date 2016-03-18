@@ -52,7 +52,7 @@ bootCommand :: Text -> Text -> Command
 bootCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     validatePlayer callerName targetName
-    whenM (uses (boots . at targetName) $ elem callerName . maybe [] id) $
+    whenM (uses (boots . at targetName) $ elem callerName . fromMaybe []) $
         throwError [playerHasAlreadyVotedToBootMessage callerName targetName]
 
     boots %= Map.insertWith (++) targetName [callerName]

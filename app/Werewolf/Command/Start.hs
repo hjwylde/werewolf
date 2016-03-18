@@ -11,6 +11,7 @@ Options and handler for the start subcommand.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 
 module Werewolf.Command.Start (
     -- * Options
@@ -80,4 +81,6 @@ useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByNa
     Nothing     -> throwError [roleDoesNotExistMessage callerName roleName]
 
 findByName :: Text -> Maybe Role
-findByName name' = restrictedRoles ^? traverse . filtered ((name' ==) . T.toLower . view name)
+findByName name' = restrictedRoles ^? traverse . filtered ((sanitise name' ==) . T.toLower . sanitise . view name)
+    where
+        sanitise = T.replace " " "-"
