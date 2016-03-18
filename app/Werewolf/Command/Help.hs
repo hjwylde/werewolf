@@ -94,6 +94,7 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     , whenPlayerHasRole callerName mGame devotedServantRole
       [ "Devoted Servant commands:"
       , "- `reveal`"
+      , "- `pass`"
       ]
     , whenPlayerHasRole callerName mGame scapegoatRole
       [ "Scapegoat commands:"

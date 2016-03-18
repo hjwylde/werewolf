@@ -184,7 +184,9 @@ devotedServantsTurnMessages :: Text -> Text -> [Message]
 devotedServantsTurnMessages to victimsName =
     [ publicMessage "The Devoted Servant ponders."
     , privateMessage to $ T.concat
-        ["Would you like to `reveal` yourself and take on ", victimsName, "'s role?"]
+        [ "Would you like to `reveal` yourself and take on ", victimsName, "'s role?"
+        , "(Or you can type `pass`.)"
+        ]
     ]
 
 scapegoatsTurnMessages :: Text -> [Message]
