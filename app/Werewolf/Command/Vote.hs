@@ -26,6 +26,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command.Villager
 
 import Werewolf.Game
 import Werewolf.Messages
@@ -43,7 +44,7 @@ handle callerName (Options targetName) = do
     game <- readGame
 
     let command = case game ^. stage of
-            VillagesTurn    -> voteLynchCommand callerName targetName
+            VillagesTurn    -> voteCommand callerName targetName
             WerewolvesTurn  -> voteDevourCommand callerName targetName
             -- TODO (hjw): throw an error
             _               -> undefined

@@ -20,7 +20,7 @@ module Game.Werewolf.Command (
 
     -- ** Instances
     bootCommand, chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand,
-    noopCommand, pingCommand, quitCommand, statusCommand, voteDevourCommand, voteLynchCommand,
+    noopCommand, pingCommand, quitCommand, statusCommand, voteDevourCommand,
 
     -- ** Validation
     validatePlayer,
@@ -213,16 +213,6 @@ voteDevourCommand callerName targetName = Command $ do
     aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
     tell [playerMadeDevourVoteMessage werewolfName callerName targetName | werewolfName <- aliveWerewolfNames \\ [callerName]]
-
-voteLynchCommand :: Text -> Text -> Command
-voteLynchCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    whenM (uses allowedVoters (callerName `notElem`))   $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isVillagesTurn                              $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenM (isJust <$> getPlayerVote callerName)         $ throwError [playerHasAlreadyVotedMessage callerName]
-    validatePlayer callerName targetName
-
-    votes %= Map.insert callerName targetName
 
 validatePlayer :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
 validatePlayer callerName name = do

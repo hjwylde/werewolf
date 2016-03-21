@@ -23,6 +23,7 @@ import           Data.Maybe
 
 import Game.Werewolf
 import Game.Werewolf.Command.DevotedServant
+import Game.Werewolf.Command.Villager
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -218,7 +219,7 @@ prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithPassAtDevotedServantsTu
 
 prop_checkLynchingLynchesNoOneWhenTargetIsVillageIdiot :: GameAtVillagesTurn -> Bool
 prop_checkLynchingLynchesNoOneWhenTargetIsVillageIdiot (GameAtVillagesTurn game) = do
-    let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (villageIdiot ^. name))) game (game ^. players)
+    let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (villageIdiot ^. name))) game (game ^. players)
 
     none (is dead) (run_ checkStage game' ^. players)
     where
@@ -290,7 +291,7 @@ prop_checkSunriseSetsAngelsAllegiance (GameAtSunrise game) = do
 
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
-    let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
+    let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
     let devotedServantsName = game ^?! players . devotedServants . name
     let command             = passCommand devotedServantsName
