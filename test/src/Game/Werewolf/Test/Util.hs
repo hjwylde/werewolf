@@ -16,9 +16,7 @@ import Control.Monad.Writer
 
 import Data.Either.Extra
 
-import Game.Werewolf.Command
-import Game.Werewolf.Game
-import Game.Werewolf.Response
+import Game.Werewolf
 
 import Test.QuickCheck
 

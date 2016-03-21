@@ -21,11 +21,7 @@ import           Data.List.Extra
 import qualified Data.Map          as Map
 import           Data.Maybe
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Role           hiding (name)
+import Game.Werewolf
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 

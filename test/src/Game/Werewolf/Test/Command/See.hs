@@ -16,9 +16,7 @@ import Control.Lens hiding (elements, isn't)
 
 import Data.Maybe
 
-import Game.Werewolf.Command
-import Game.Werewolf.Game
-import Game.Werewolf.Player
+import Game.Werewolf
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 

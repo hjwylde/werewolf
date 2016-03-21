@@ -18,10 +18,7 @@ import           Data.Maybe
 import           Data.Text  (Text)
 import qualified Data.Text  as T
 
-import Game.Werewolf.Command
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Role           hiding (name)
+import Game.Werewolf
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 

@@ -20,8 +20,8 @@ module Game.Werewolf.Command (
 
     -- ** Instances
     bootCommand, chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand,
-    noopCommand, passDevotedServantsTurnCommand, pingCommand, protectCommand, quitCommand,
-    revealCommand, seeCommand, statusCommand, voteDevourCommand, voteLynchCommand,
+    noopCommand, passDevotedServantsTurnCommand, pingCommand, quitCommand, revealCommand,
+    seeCommand, statusCommand, voteDevourCommand, voteLynchCommand,
 
     -- ** Validation
     validatePlayer,
@@ -168,17 +168,6 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingRoleMessage $ wolfHoundRole ^. Role.name]
         tell [pingPlayerMessage $ wolfHound ^. name]
-
-protectCommand :: Text -> Text -> Command
-protectCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerDefender callerName)                           $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isDefendersTurn                                         $ throwError [playerCannotDoThatRightNowMessage callerName]
-    validatePlayer callerName targetName
-    whenM (has (priorProtect . traverse . only targetName) <$> get) $ throwError [playerCannotProtectSamePlayerTwiceInARowMessage callerName]
-
-    priorProtect    .= Just targetName
-    protect         .= Just targetName
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do

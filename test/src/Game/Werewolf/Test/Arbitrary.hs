@@ -49,6 +49,7 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import Game.Werewolf
+import Game.Werewolf.Command.Defender
 import Game.Werewolf.Command.Witch
 import Game.Werewolf.Test.Util
 

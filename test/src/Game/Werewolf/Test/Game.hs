@@ -14,8 +14,7 @@ import Control.Lens
 
 import Data.Maybe
 
-import Game.Werewolf.Game
-import Game.Werewolf.Player
+import Game.Werewolf
 import Game.Werewolf.Test.Arbitrary ()
 
 import Prelude hiding (round)
