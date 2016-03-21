@@ -14,9 +14,8 @@ module Game.Werewolf.Test.Command.Pass (
 
 import Control.Lens hiding (elements, isn't)
 
-import Game.Werewolf.Command
-import Game.Werewolf.Game
-import Game.Werewolf.Player
+import Game.Werewolf
+import Game.Werewolf.Command.Witch
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -74,13 +73,13 @@ prop_passWitchsTurnCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 prop_passWitchsTurnCommandErrorsWhenCallerDoesNotExist :: GameAtWitchsTurn -> Player -> Property
 prop_passWitchsTurnCommandErrorsWhenCallerDoesNotExist (GameAtWitchsTurn game) caller =
     not (doesPlayerExist (caller ^. name) game)
-    ==> verbose_runCommandErrors game (passWitchsTurnCommand (caller ^. name))
+    ==> verbose_runCommandErrors game (passCommand (caller ^. name))
 
 prop_passWitchsTurnCommandErrorsWhenCallerIsDead :: GameAtWitchsTurn -> Property
 prop_passWitchsTurnCommandErrorsWhenCallerIsDead (GameAtWitchsTurn game) = do
     let witchsName  = game ^?! players . witches . name
     let game'       = killPlayer witchsName game
-    let command     = passWitchsTurnCommand witchsName
+    let command     = passCommand witchsName
 
     verbose_runCommandErrors game' command
 

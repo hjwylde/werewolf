@@ -23,6 +23,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command.Witch
 
 import Werewolf.Game
 import Werewolf.Messages
@@ -37,7 +38,7 @@ handle callerName = do
 
     let command = case game ^. stage of
             DevotedServantsTurn -> passDevotedServantsTurnCommand callerName
-            WitchsTurn          -> passWitchsTurnCommand callerName
+            WitchsTurn          -> passCommand callerName
             -- TODO (hjw): throw an error
             _                   -> undefined
 

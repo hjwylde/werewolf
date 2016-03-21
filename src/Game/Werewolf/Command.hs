@@ -20,9 +20,11 @@ module Game.Werewolf.Command (
 
     -- ** Instances
     bootCommand, chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand,
-    healCommand, noopCommand, passDevotedServantsTurnCommand, passWitchsTurnCommand, pingCommand,
-    poisonCommand, protectCommand, quitCommand, revealCommand, seeCommand, statusCommand,
-    voteDevourCommand, voteLynchCommand,
+    noopCommand, passDevotedServantsTurnCommand, pingCommand, protectCommand, quitCommand,
+    revealCommand, seeCommand, statusCommand, voteDevourCommand, voteLynchCommand,
+
+    -- ** Validation
+    validatePlayer,
 ) where
 
 import Control.Lens
@@ -104,27 +106,12 @@ circleCommand callerName includeDead = Command $ do
 
         tell [circleMessage callerName players']
 
-healCommand :: Text -> Command
-healCommand callerName = Command $ do
-    validateWitchsCommand callerName
-    whenM (use healUsed)                                        $ throwError [playerHasAlreadyHealedMessage callerName]
-    whenM (hasn't (events . traverse . _DevourEvent) <$> get)   $ throwError [playerCannotDoThatRightNowMessage callerName]
-
-    heal        .= True
-    healUsed    .= True
-
 noopCommand :: Command
 noopCommand = Command $ return ()
 
 passDevotedServantsTurnCommand :: Text -> Command
 passDevotedServantsTurnCommand callerName = Command $ do
     validateDevotedServantsCommand callerName
-
-    passes %= nub . cons callerName
-
-passWitchsTurnCommand :: Text -> Command
-passWitchsTurnCommand callerName = Command $ do
-    validateWitchsCommand callerName
 
     passes %= nub . cons callerName
 
@@ -181,16 +168,6 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingRoleMessage $ wolfHoundRole ^. Role.name]
         tell [pingPlayerMessage $ wolfHound ^. name]
-
-poisonCommand :: Text -> Text -> Command
-poisonCommand callerName targetName = Command $ do
-    validateWitchsCommand callerName
-    whenM (use poisonUsed)                                                      $ throwError [playerHasAlreadyPoisonedMessage callerName]
-    validatePlayer callerName targetName
-    whenM (has (events . traverse . _DevourEvent . only targetName) <$> get)    $ throwError [playerCannotDoThatMessage callerName]
-
-    poison      .= Just targetName
-    poisonUsed  .= True
 
 protectCommand :: Text -> Text -> Command
 protectCommand callerName targetName = Command $ do
@@ -312,9 +289,3 @@ validateDevotedServantsCommand callerName = do
     validatePlayer callerName callerName
     unlessM (isPlayerDevotedServant callerName) $ throwError [playerCannotDoThatMessage callerName]
     unlessM isDevotedServantsTurn               $ throwError [playerCannotDoThatRightNowMessage callerName]
-
-validateWitchsCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
-validateWitchsCommand callerName = do
-    validatePlayer callerName callerName
-    unlessM (isPlayerWitch callerName)  $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWitchsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]

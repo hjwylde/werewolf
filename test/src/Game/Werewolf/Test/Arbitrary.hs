@@ -48,11 +48,8 @@ import           Data.Maybe
 import           Data.Text       (Text)
 import qualified Data.Text       as T
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine    (checkStage)
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Role      hiding (name)
+import Game.Werewolf
+import Game.Werewolf.Command.Witch
 import Game.Werewolf.Test.Util
 
 import Prelude hiding (round)
@@ -488,7 +485,7 @@ arbitraryPassWitchsTurnCommand :: Game -> Gen (Blind Command)
 arbitraryPassWitchsTurnCommand game = do
     let witchsName = game ^?! players . witches . name
 
-    return . Blind $ passWitchsTurnCommand witchsName
+    return . Blind $ passCommand witchsName
 
 arbitraryPoisonCommand :: Game -> Gen (Blind Command)
 arbitraryPoisonCommand game = do
