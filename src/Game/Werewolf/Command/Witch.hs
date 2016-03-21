@@ -13,7 +13,7 @@ Witch commands.
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Game.Werewolf.Command.Witch (
-    -- ** Instances
+    -- * Commands
     healCommand, passCommand, poisonCommand,
 ) where
 
@@ -25,10 +25,8 @@ import Control.Monad.State  hiding (state)
 import Data.List
 import Data.Text (Text)
 
-import Game.Werewolf.Command
-import Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, getVoteResult, killPlayer)
+import Game.Werewolf
 import Game.Werewolf.Messages
-import Game.Werewolf.Response
 import Game.Werewolf.Util
 
 healCommand :: Text -> Command

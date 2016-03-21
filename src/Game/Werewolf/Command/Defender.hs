@@ -13,7 +13,7 @@ Defender commands.
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Game.Werewolf.Command.Defender (
-    -- ** Instances
+    -- * Commands
     protectCommand,
 ) where
 
@@ -24,8 +24,7 @@ import Control.Monad.State  hiding (state)
 
 import Data.Text (Text)
 
-import Game.Werewolf.Command
-import Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, getVoteResult, killPlayer)
+import Game.Werewolf
 import Game.Werewolf.Messages
 import Game.Werewolf.Util
 

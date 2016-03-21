@@ -21,7 +21,7 @@ module Game.Werewolf.Command (
     -- ** Instances
     bootCommand, chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand,
     noopCommand, passDevotedServantsTurnCommand, pingCommand, quitCommand, revealCommand,
-    seeCommand, statusCommand, voteDevourCommand, voteLynchCommand,
+    statusCommand, voteDevourCommand, voteLynchCommand,
 
     -- ** Validation
     validatePlayer,
@@ -205,15 +205,6 @@ revealCommand callerName = Command $ do
             | role == witchRole             = healUsed .= False >> poisonUsed .= False
             | role == wolfHoundRole         = allegianceChosen .= Nothing
             | otherwise                     = return ()
-
-seeCommand :: Text -> Text -> Command
-seeCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerSeer callerName)       $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isSeersTurn                     $ throwError [playerCannotDoThatRightNowMessage callerName]
-    validatePlayer callerName targetName
-
-    see .= Just targetName
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
