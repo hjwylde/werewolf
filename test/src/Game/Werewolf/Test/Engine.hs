@@ -22,6 +22,7 @@ import qualified Data.Map          as Map
 import           Data.Maybe
 
 import Game.Werewolf
+import Game.Werewolf.Command.DevotedServant
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -292,7 +293,7 @@ prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVi
     let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
     let devotedServantsName = game ^?! players . devotedServants . name
-    let command             = passDevotedServantsTurnCommand devotedServantsName
+    let command             = passCommand devotedServantsName
 
     isn't angel roleModel' && isn't devotedServant roleModel' && isn't villageIdiot roleModel'
         ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . wildChildren

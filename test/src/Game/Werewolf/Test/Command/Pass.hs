@@ -15,7 +15,8 @@ module Game.Werewolf.Test.Command.Pass (
 import Control.Lens hiding (elements, isn't)
 
 import Game.Werewolf
-import Game.Werewolf.Command.Witch
+import Game.Werewolf.Command.DevotedServant as DevotedServant
+import Game.Werewolf.Command.Witch          as Witch
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -44,13 +45,13 @@ prop_passDevotedServantsTurnCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 prop_passDevotedServantsTurnCommandErrorsWhenCallerDoesNotExist :: GameAtDevotedServantsTurn -> Player -> Property
 prop_passDevotedServantsTurnCommandErrorsWhenCallerDoesNotExist (GameAtDevotedServantsTurn game) caller =
     not (doesPlayerExist (caller ^. name) game)
-    ==> verbose_runCommandErrors game (passDevotedServantsTurnCommand (caller ^. name))
+    ==> verbose_runCommandErrors game (DevotedServant.passCommand (caller ^. name))
 
 prop_passDevotedServantsTurnCommandErrorsWhenCallerIsDead :: GameAtDevotedServantsTurn -> Property
 prop_passDevotedServantsTurnCommandErrorsWhenCallerIsDead (GameAtDevotedServantsTurn game) = do
     let devotedServantsName = game ^?! players . devotedServants . name
     let game'               = killPlayer devotedServantsName game
-    let command             = passDevotedServantsTurnCommand devotedServantsName
+    let command             = DevotedServant.passCommand devotedServantsName
 
     verbose_runCommandErrors game' command
 
@@ -73,13 +74,13 @@ prop_passWitchsTurnCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 prop_passWitchsTurnCommandErrorsWhenCallerDoesNotExist :: GameAtWitchsTurn -> Player -> Property
 prop_passWitchsTurnCommandErrorsWhenCallerDoesNotExist (GameAtWitchsTurn game) caller =
     not (doesPlayerExist (caller ^. name) game)
-    ==> verbose_runCommandErrors game (passCommand (caller ^. name))
+    ==> verbose_runCommandErrors game (Witch.passCommand (caller ^. name))
 
 prop_passWitchsTurnCommandErrorsWhenCallerIsDead :: GameAtWitchsTurn -> Property
 prop_passWitchsTurnCommandErrorsWhenCallerIsDead (GameAtWitchsTurn game) = do
     let witchsName  = game ^?! players . witches . name
     let game'       = killPlayer witchsName game
-    let command     = passCommand witchsName
+    let command     = Witch.passCommand witchsName
 
     verbose_runCommandErrors game' command
 

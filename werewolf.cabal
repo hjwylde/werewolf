@@ -78,6 +78,7 @@ library
         Game.Werewolf
         Game.Werewolf.Command
         Game.Werewolf.Command.Defender
+        Game.Werewolf.Command.DevotedServant
         Game.Werewolf.Command.Seer
         Game.Werewolf.Command.Witch
         Game.Werewolf.Engine

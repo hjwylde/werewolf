@@ -50,8 +50,9 @@ import qualified Data.Text       as T
 
 import Game.Werewolf
 import Game.Werewolf.Command.Defender
+import Game.Werewolf.Command.DevotedServant as DevotedServant
 import Game.Werewolf.Command.Seer
-import Game.Werewolf.Command.Witch
+import Game.Werewolf.Command.Witch          as Witch
 import Game.Werewolf.Test.Util
 
 import Prelude hiding (round)
@@ -481,13 +482,13 @@ arbitraryPassDevotedServantsTurnCommand :: Game -> Gen (Blind Command)
 arbitraryPassDevotedServantsTurnCommand game = do
     let devotedServantsName = game ^?! players . devotedServants . name
 
-    return . Blind $ passDevotedServantsTurnCommand devotedServantsName
+    return . Blind $ DevotedServant.passCommand devotedServantsName
 
 arbitraryPassWitchsTurnCommand :: Game -> Gen (Blind Command)
 arbitraryPassWitchsTurnCommand game = do
     let witchsName = game ^?! players . witches . name
 
-    return . Blind $ passCommand witchsName
+    return . Blind $ Witch.passCommand witchsName
 
 arbitraryPoisonCommand :: Game -> Gen (Blind Command)
 arbitraryPoisonCommand game = do

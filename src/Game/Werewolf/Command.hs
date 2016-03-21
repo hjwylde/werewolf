@@ -20,8 +20,7 @@ module Game.Werewolf.Command (
 
     -- ** Instances
     bootCommand, chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand,
-    noopCommand, passDevotedServantsTurnCommand, pingCommand, quitCommand, revealCommand,
-    statusCommand, voteDevourCommand, voteLynchCommand,
+    noopCommand, pingCommand, quitCommand, statusCommand, voteDevourCommand, voteLynchCommand,
 
     -- ** Validation
     validatePlayer,
@@ -109,12 +108,6 @@ circleCommand callerName includeDead = Command $ do
 noopCommand :: Command
 noopCommand = Command $ return ()
 
-passDevotedServantsTurnCommand :: Text -> Command
-passDevotedServantsTurnCommand callerName = Command $ do
-    validateDevotedServantsCommand callerName
-
-    passes %= nub . cons callerName
-
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     DefendersTurn       -> do
@@ -179,33 +172,6 @@ quitCommand callerName = Command $ do
 
     removePlayer callerName
 
-revealCommand :: Text -> Command
-revealCommand callerName = Command $ do
-    validateDevotedServantsCommand callerName
-
-    target <- head <$> getVoteResult
-
-    let targetRole = target ^. role
-    let targetName = target ^. name
-
-    setPlayerRole callerName targetRole
-    setPlayerRole targetName devotedServantRole
-
-    tell [devotedServantRevealedMessage callerName]
-
-    resetRole targetRole
-    where
-        resetRole role
-            | role == simpleWerewolfRole    = do
-                aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
-
-                tell $ devotedServantJoinedPackMessages callerName (aliveWerewolfNames \\ [callerName])
-            | role == villageIdiotRole      = villageIdiotRevealed .= False
-            | role == wildChildRole         = roleModel .= Nothing
-            | role == witchRole             = healUsed .= False >> poisonUsed .= False
-            | role == wolfHoundRole         = allegianceChosen .= Nothing
-            | otherwise                     = return ()
-
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     GameOver        -> tell [gameIsOverMessage callerName]
@@ -263,9 +229,3 @@ validatePlayer callerName name = do
     whenM isGameOver                $ throwError [gameIsOverMessage callerName]
     unlessM (doesPlayerExist name)  $ throwError [playerDoesNotExistMessage callerName name]
     whenM (isPlayerDead name)       $ throwError [if callerName == name then playerIsDeadMessage callerName else targetIsDeadMessage callerName name]
-
-validateDevotedServantsCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
-validateDevotedServantsCommand callerName = do
-    validatePlayer callerName callerName
-    unlessM (isPlayerDevotedServant callerName) $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isDevotedServantsTurn               $ throwError [playerCannotDoThatRightNowMessage callerName]

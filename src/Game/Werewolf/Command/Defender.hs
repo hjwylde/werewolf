@@ -9,9 +9,6 @@ Maintainer  : public@hjwylde.com
 Defender commands.
 -}
 
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 module Game.Werewolf.Command.Defender (
     -- * Commands
     protectCommand,
