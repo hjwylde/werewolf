@@ -19,8 +19,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    bootCommand, choosePlayerCommand, choosePlayersCommand, circleCommand, noopCommand, pingCommand,
-    quitCommand, statusCommand,
+    bootCommand, choosePlayersCommand, circleCommand, noopCommand, pingCommand, quitCommand,
+    statusCommand,
 
     -- ** Validation
     validatePlayer,
@@ -58,16 +58,6 @@ bootCommand callerName targetName = Command $ do
     boots %= Map.insertWith (++) targetName [callerName]
 
     tell [playerVotedToBootMessage callerName targetName]
-
-choosePlayerCommand :: Text -> Text -> Command
-choosePlayerCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerWildChild callerName)  $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWildChildsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
-    when (callerName == targetName)         $ throwError [playerCannotChooseSelfMessage callerName]
-    validatePlayer callerName targetName
-
-    roleModel .= Just targetName
 
 choosePlayersCommand :: Text -> [Text] -> Command
 choosePlayersCommand callerName targetNames = Command $ do
