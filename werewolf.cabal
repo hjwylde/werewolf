@@ -82,6 +82,7 @@ library
         Game.Werewolf.Command.Global
         Game.Werewolf.Command.Scapegoat
         Game.Werewolf.Command.Seer
+        Game.Werewolf.Command.Status
         Game.Werewolf.Command.Villager
         Game.Werewolf.Command.Werewolf
         Game.Werewolf.Command.WildChild
