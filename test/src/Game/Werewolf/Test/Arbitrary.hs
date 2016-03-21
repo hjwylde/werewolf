@@ -55,6 +55,7 @@ import Game.Werewolf.Command.Seer
 import Game.Werewolf.Command.Villager       as Villager
 import Game.Werewolf.Command.Werewolf       as Werewolf
 import Game.Werewolf.Command.Witch          as Witch
+import Game.Werewolf.Command.WolfHound
 import Game.Werewolf.Test.Util
 
 import Prelude hiding (round)
@@ -456,7 +457,7 @@ arbitraryChooseAllegianceCommand game = do
     let wolfHoundsName  = game ^?! players . wolfHounds . name
     allegianceName      <- elements $ map (T.pack . show) [Villagers, Werewolves]
 
-    return . Blind $ chooseAllegianceCommand wolfHoundsName allegianceName
+    return . Blind $ chooseCommand wolfHoundsName allegianceName
 
 arbitraryChoosePlayerCommand :: Game -> Gen (Blind Command)
 arbitraryChoosePlayerCommand game = do

@@ -28,6 +28,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command.WolfHound
 
 import Werewolf.Game
 import Werewolf.Messages
@@ -47,7 +48,7 @@ handle callerName (Options args) = do
     let command = case game ^. stage of
             ScapegoatsTurn  -> choosePlayersCommand callerName args
             WildChildsTurn  -> choosePlayerCommand callerName (head args)
-            WolfHoundsTurn  -> chooseAllegianceCommand callerName (head args)
+            WolfHoundsTurn  -> chooseCommand callerName (head args)
             -- TODO (hjw): throw an error
             _               -> undefined
 

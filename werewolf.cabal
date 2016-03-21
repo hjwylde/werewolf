@@ -83,6 +83,7 @@ library
         Game.Werewolf.Command.Villager
         Game.Werewolf.Command.Werewolf
         Game.Werewolf.Command.Witch
+        Game.Werewolf.Command.WolfHound
         Game.Werewolf.Engine
         Game.Werewolf.Game
         Game.Werewolf.Player

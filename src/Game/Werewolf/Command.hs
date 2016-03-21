@@ -19,8 +19,8 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    bootCommand, chooseAllegianceCommand, choosePlayerCommand, choosePlayersCommand, circleCommand,
-    noopCommand, pingCommand, quitCommand, statusCommand,
+    bootCommand, choosePlayerCommand, choosePlayersCommand, circleCommand, noopCommand, pingCommand,
+    quitCommand, statusCommand,
 
     -- ** Validation
     validatePlayer,
@@ -36,7 +36,6 @@ import           Data.List
 import qualified Data.Map   as Map
 import           Data.Maybe
 import           Data.Text  (Text)
-import qualified Data.Text  as T
 
 import           Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, getVoteResult,
                                          killPlayer)
@@ -59,20 +58,6 @@ bootCommand callerName targetName = Command $ do
     boots %= Map.insertWith (++) targetName [callerName]
 
     tell [playerVotedToBootMessage callerName targetName]
-
-chooseAllegianceCommand :: Text -> Text -> Command
-chooseAllegianceCommand callerName allegianceName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerWolfHound callerName)  $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWolfHoundsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
-    when (isNothing mAllegiance)            $ throwError [allegianceDoesNotExistMessage callerName allegianceName]
-
-    allegianceChosen .= mAllegiance
-    where
-        mAllegiance = case T.toLower allegianceName of
-            "villagers"     -> Just Villagers
-            "werewolves"    -> Just Werewolves
-            _               -> Nothing
 
 choosePlayerCommand :: Text -> Text -> Command
 choosePlayerCommand callerName targetName = Command $ do

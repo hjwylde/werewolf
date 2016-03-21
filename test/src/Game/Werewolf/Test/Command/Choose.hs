@@ -19,6 +19,7 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import Game.Werewolf
+import Game.Werewolf.Command.WolfHound
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -61,7 +62,7 @@ prop_chooseAllegianceCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 
 prop_chooseAllegianceCommandErrorsWhenCallerDoesNotExist :: GameAtWolfHoundsTurn -> Player -> Allegiance -> Property
 prop_chooseAllegianceCommandErrorsWhenCallerDoesNotExist (GameAtWolfHoundsTurn game) caller allegiance = do
-    let command = chooseAllegianceCommand (caller ^. name) (T.pack $ show allegiance)
+    let command = chooseCommand (caller ^. name) (T.pack $ show allegiance)
 
     not (doesPlayerExist (caller ^. name) game)
         ==> verbose_runCommandErrors game command
@@ -70,7 +71,7 @@ prop_chooseAllegianceCommandErrorsWhenCallerIsDead :: GameAtWolfHoundsTurn -> Al
 prop_chooseAllegianceCommandErrorsWhenCallerIsDead (GameAtWolfHoundsTurn game) allegiance = do
     let wolfHound   = game ^?! players . wolfHounds
     let game'       = killPlayer (wolfHound ^. name) game
-    let command     = chooseAllegianceCommand (wolfHound ^. name) (T.pack $ show allegiance)
+    let command     = chooseCommand (wolfHound ^. name) (T.pack $ show allegiance)
 
     verbose_runCommandErrors game' command
 
@@ -82,14 +83,14 @@ prop_chooseAllegianceCommandErrorsWhenNotWolfHoundsTurn game =
 prop_chooseAllegianceCommandErrorsWhenCallerNotWolfHound :: GameAtWolfHoundsTurn -> Allegiance -> Property
 prop_chooseAllegianceCommandErrorsWhenCallerNotWolfHound (GameAtWolfHoundsTurn game) allegiance =
     forAll (suchThat (arbitraryPlayer game) (isn't wolfHound)) $ \caller -> do
-        let command = chooseAllegianceCommand (caller ^. name) (T.pack $ show allegiance)
+        let command = chooseCommand (caller ^. name) (T.pack $ show allegiance)
 
         verbose_runCommandErrors game command
 
 prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist :: GameAtWolfHoundsTurn -> Text -> Property
 prop_chooseAllegianceCommandErrorsWhenAllegianceDoesNotExist (GameAtWolfHoundsTurn game) allegiance = do
     let wolfHound   = game ^?! players . wolfHounds
-    let command     = chooseAllegianceCommand (wolfHound ^. name) allegiance
+    let command     = chooseCommand (wolfHound ^. name) allegiance
 
     allegiance `notElem` ["Villagers", "Werewolves"]
         ==> verbose_runCommandErrors game command
@@ -99,7 +100,7 @@ prop_chooseAllegianceCommandSetsAllegianceChosen (GameAtWolfHoundsTurn game) = d
     let wolfHoundsName = game ^?! players . wolfHounds . name
 
     forAll (elements [Villagers, Werewolves]) $ \allegiance' -> do
-        let command = chooseAllegianceCommand wolfHoundsName (T.pack $ show allegiance')
+        let command = chooseCommand wolfHoundsName (T.pack $ show allegiance')
         let game'   = run_ (apply command) game
 
         fromJust (game' ^. allegianceChosen) === allegiance'
