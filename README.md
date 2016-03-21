@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/hjwylde/werewolf.svg?branch=master)](https://travis-ci.org/hjwylde/werewolf)
 [![Release](https://img.shields.io/github/release/hjwylde/werewolf.svg)](https://github.com/hjwylde/werewolf/releases/latest)
 
-A game engine for running werewolf in a chat client.
+A game engine for playing werewolf in a chat client.
 This engine is based off of [Werewolves of Millers Hollow](http://www.games-wiki.org/wiki/Werewolves_of_Millers_Hollow/).
 
 ### Game description

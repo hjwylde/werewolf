@@ -5,7 +5,7 @@ author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
 homepage:       https://github.com/hjwylde/werewolf
 
-synopsis:       A game engine for running werewolf in a chat client
+synopsis:       A game engine for playing werewolf in a chat client
 description:    This engine is based off of Werewolves of Millers Hollow
                 (http://www.games-wiki.org/wiki/Werewolves_of_Millers_Hollow/).
                 See https://github.com/hjwylde/werewolf for help on writing chat interfaces.
