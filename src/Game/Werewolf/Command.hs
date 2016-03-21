@@ -19,7 +19,7 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    bootCommand, circleCommand, noopCommand, pingCommand, quitCommand, statusCommand,
+    circleCommand, noopCommand, pingCommand, statusCommand,
 
     -- ** Validation
     validatePlayer,
@@ -31,10 +31,8 @@ import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
-import           Data.List
-import qualified Data.Map   as Map
-import           Data.Maybe
-import           Data.Text  (Text)
+import Data.List
+import Data.Text (Text)
 
 import           Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, getVoteResult,
                                          killPlayer)
@@ -46,17 +44,6 @@ import qualified Game.Werewolf.Role     as Role
 import           Game.Werewolf.Util
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
-
-bootCommand :: Text -> Text -> Command
-bootCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    validatePlayer callerName targetName
-    whenM (uses (boots . at targetName) $ elem callerName . fromMaybe []) $
-        throwError [playerHasAlreadyVotedToBootMessage callerName targetName]
-
-    boots %= Map.insertWith (++) targetName [callerName]
-
-    tell [playerVotedToBootMessage callerName targetName]
 
 circleCommand :: Text -> Bool -> Command
 circleCommand callerName includeDead = Command $ do
@@ -120,16 +107,6 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingRoleMessage $ wolfHoundRole ^. Role.name]
         tell [pingPlayerMessage $ wolfHound ^. name]
-
-quitCommand :: Text -> Command
-quitCommand callerName = Command $ do
-    validatePlayer callerName callerName
-
-    caller <- findPlayerBy_ name callerName
-
-    tell [playerQuitMessage caller]
-
-    removePlayer callerName
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of

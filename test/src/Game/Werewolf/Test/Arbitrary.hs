@@ -51,6 +51,7 @@ import qualified Data.Text       as T
 import Game.Werewolf
 import Game.Werewolf.Command.Defender
 import Game.Werewolf.Command.DevotedServant as DevotedServant
+import Game.Werewolf.Command.Global
 import Game.Werewolf.Command.Scapegoat      as Scapegoat
 import Game.Werewolf.Command.Seer
 import Game.Werewolf.Command.Villager       as Villager
