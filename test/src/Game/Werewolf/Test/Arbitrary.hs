@@ -51,6 +51,7 @@ import qualified Data.Text       as T
 import Game.Werewolf
 import Game.Werewolf.Command.Defender
 import Game.Werewolf.Command.DevotedServant as DevotedServant
+import Game.Werewolf.Command.Scapegoat      as Scapegoat
 import Game.Werewolf.Command.Seer
 import Game.Werewolf.Command.Villager       as Villager
 import Game.Werewolf.Command.Werewolf       as Werewolf
@@ -472,7 +473,7 @@ arbitraryChoosePlayersCommand game = do
     let scapegoatsName  = game ^?! players . scapegoats . name
     (NonEmpty players') <- NonEmpty <$> sublistOf (game ^.. players . traverse . alive)
 
-    return . Blind $ choosePlayersCommand scapegoatsName (players' ^.. names)
+    return . Blind $ Scapegoat.chooseCommand scapegoatsName (players' ^.. names)
 
 arbitraryHealCommand :: Game -> Gen (Blind Command)
 arbitraryHealCommand game = do

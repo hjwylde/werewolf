@@ -28,6 +28,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command.Scapegoat as Scapegoat
 import Game.Werewolf.Command.WildChild as WildChild
 import Game.Werewolf.Command.WolfHound as WolfHound
 
@@ -47,7 +48,7 @@ handle callerName (Options args) = do
     game <- readGame
 
     let command = case game ^. stage of
-            ScapegoatsTurn  -> choosePlayersCommand callerName args
+            ScapegoatsTurn  -> Scapegoat.chooseCommand callerName args
             WildChildsTurn  -> WildChild.chooseCommand callerName (head args)
             WolfHoundsTurn  -> WolfHound.chooseCommand callerName (head args)
             -- TODO (hjw): throw an error

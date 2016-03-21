@@ -79,6 +79,7 @@ library
         Game.Werewolf.Command
         Game.Werewolf.Command.Defender
         Game.Werewolf.Command.DevotedServant
+        Game.Werewolf.Command.Scapegoat
         Game.Werewolf.Command.Seer
         Game.Werewolf.Command.Villager
         Game.Werewolf.Command.Werewolf

@@ -19,6 +19,7 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import Game.Werewolf
+import Game.Werewolf.Command.Scapegoat as Scapegoat
 import Game.Werewolf.Command.WildChild as WildChild
 import Game.Werewolf.Command.WolfHound as WolfHound
 import Game.Werewolf.Test.Arbitrary
@@ -183,7 +184,7 @@ prop_choosePlayersCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 prop_choosePlayersCommandErrorsWhenCallerDoesNotExist :: GameAtScapegoatsTurn -> Player -> Property
 prop_choosePlayersCommandErrorsWhenCallerDoesNotExist (GameAtScapegoatsTurn game) caller =
     forAll (NonEmpty <$> sublistOf (game ^.. players . traverse . alive)) $ \(NonEmpty targets) -> do
-        let command = choosePlayersCommand (caller ^. name) (targets ^.. names)
+        let command = Scapegoat.chooseCommand (caller ^. name) (targets ^.. names)
 
         not (doesPlayerExist (caller ^. name) game)
             ==> verbose_runCommandErrors game command
@@ -191,7 +192,7 @@ prop_choosePlayersCommandErrorsWhenCallerDoesNotExist (GameAtScapegoatsTurn game
 prop_choosePlayersCommandErrorsWhenAnyTargetDoesNotExist :: GameAtScapegoatsTurn -> Player -> Property
 prop_choosePlayersCommandErrorsWhenAnyTargetDoesNotExist (GameAtScapegoatsTurn game) target = do
     let scapegoat   = game ^?! players . scapegoats
-    let command     = choosePlayersCommand (scapegoat ^. name) [target ^. name]
+    let command     = Scapegoat.chooseCommand (scapegoat ^. name) [target ^. name]
 
     not (doesPlayerExist (target ^. name) game)
         ==> verbose_runCommandErrors game command
@@ -203,7 +204,7 @@ prop_choosePlayersCommandErrorsWhenAnyTargetIsDead (GameAtScapegoatsTurn game) =
     forAll (NonEmpty <$> sublistOf (game ^.. players . traverse . alive)) $ \(NonEmpty targets) ->
         forAll (elements targets) $ \target -> do
             let game'   = killPlayer (target ^. name) game
-            let command = choosePlayersCommand (scapegoat ^. name) (targets ^.. names)
+            let command = Scapegoat.chooseCommand (scapegoat ^. name) (targets ^.. names)
 
             verbose_runCommandErrors game' command
 
@@ -216,7 +217,7 @@ prop_choosePlayersCommandErrorsWhenCallerNotScapegoat :: GameAtScapegoatsTurn ->
 prop_choosePlayersCommandErrorsWhenCallerNotScapegoat (GameAtScapegoatsTurn game) =
     forAll (suchThat (arbitraryPlayer game) (isn't scapegoat)) $ \caller ->
     forAll (NonEmpty <$> sublistOf (game ^.. players . traverse . alive)) $ \(NonEmpty targets) -> do
-        let command = choosePlayersCommand (caller ^. name) (targets ^.. names)
+        let command = Scapegoat.chooseCommand (caller ^. name) (targets ^.. names)
 
         verbose_runCommandErrors game command
 
@@ -225,7 +226,7 @@ prop_choosePlayersCommandSetsAllowedVoters (GameAtScapegoatsTurn game) = do
     let scapegoat = game ^?! players . scapegoats
 
     forAll (NonEmpty <$> sublistOf (game ^.. players . traverse . alive)) $ \(NonEmpty targets) -> do
-        let command = choosePlayersCommand (scapegoat ^. name) (targets ^.. names)
+        let command = Scapegoat.chooseCommand (scapegoat ^. name) (targets ^.. names)
         let game'   = run_ (apply command) game
 
         game' ^. allowedVoters === targets ^.. names

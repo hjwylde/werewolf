@@ -19,8 +19,7 @@ module Game.Werewolf.Command (
     Command(..),
 
     -- ** Instances
-    bootCommand, choosePlayersCommand, circleCommand, noopCommand, pingCommand, quitCommand,
-    statusCommand,
+    bootCommand, circleCommand, noopCommand, pingCommand, quitCommand, statusCommand,
 
     -- ** Validation
     validatePlayer,
@@ -58,21 +57,6 @@ bootCommand callerName targetName = Command $ do
     boots %= Map.insertWith (++) targetName [callerName]
 
     tell [playerVotedToBootMessage callerName targetName]
-
-choosePlayersCommand :: Text -> [Text] -> Command
-choosePlayersCommand callerName targetNames = Command $ do
-    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
-    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
-    unlessM (isPlayerScapegoat callerName)  $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isScapegoatsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
-    when (null targetNames)                 $ throwError [playerMustChooseAtLeastOneTargetMessage callerName]
-    when (callerName `elem` targetNames)    $ throwError [playerCannotChooseSelfMessage callerName]
-    forM_ targetNames $ validatePlayer callerName
-    whenM (use villageIdiotRevealed &&^ anyM isPlayerVillageIdiot targetNames) $
-        throwError [playerCannotChooseVillageIdiotMessage callerName]
-
-    allowedVoters   .= targetNames
-    scapegoatBlamed .= False
 
 circleCommand :: Text -> Bool -> Command
 circleCommand callerName includeDead = Command $ do
