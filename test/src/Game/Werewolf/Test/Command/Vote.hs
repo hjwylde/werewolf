@@ -17,7 +17,8 @@ import Control.Lens hiding (elements, isn't)
 import qualified Data.Map as Map
 
 import Game.Werewolf
-import Game.Werewolf.Command.Villager
+import Game.Werewolf.Command.Villager as Villager
+import Game.Werewolf.Command.Werewolf as Werewolf
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -57,7 +58,7 @@ prop_voteDevourCommandErrorsWhenCallerDoesNotExist :: GameAtWerewolvesTurn -> Pl
 prop_voteDevourCommandErrorsWhenCallerDoesNotExist (GameAtWerewolvesTurn game) caller =
     not (doesPlayerExist (caller ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \target -> do
-        let command = voteDevourCommand (caller ^. name) (target ^. name)
+        let command = Werewolf.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
@@ -65,7 +66,7 @@ prop_voteDevourCommandErrorsWhenTargetDoesNotExist :: GameAtWerewolvesTurn -> Pl
 prop_voteDevourCommandErrorsWhenTargetDoesNotExist (GameAtWerewolvesTurn game) target =
     not (doesPlayerExist (target ^. name) game)
     ==> forAll (arbitraryWerewolf game) $ \caller -> do
-        let command = voteDevourCommand (caller ^. name) (target ^. name)
+        let command = Werewolf.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
@@ -74,7 +75,7 @@ prop_voteDevourCommandErrorsWhenCallerIsDead (GameAtWerewolvesTurn game) =
     forAll (arbitraryWerewolf game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer (caller ^. name) game
-        let command = voteDevourCommand (caller ^. name) (target ^. name)
+        let command = Werewolf.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
@@ -83,7 +84,7 @@ prop_voteDevourCommandErrorsWhenTargetIsDead (GameAtWerewolvesTurn game) =
     forAll (arbitraryWerewolf game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer (target ^. name) game
-        let command = voteDevourCommand (caller ^. name) (target ^. name)
+        let command = Werewolf.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
@@ -96,7 +97,7 @@ prop_voteDevourCommandErrorsWhenCallerNotWerewolf :: GameAtWerewolvesTurn -> Pro
 prop_voteDevourCommandErrorsWhenCallerNotWerewolf (GameAtWerewolvesTurn game) =
     forAll (suchThat (arbitraryPlayer game) (isn't werewolf)) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
-        let command = voteDevourCommand (caller ^. name) (target ^. name)
+        let command = Werewolf.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
@@ -104,7 +105,7 @@ prop_voteDevourCommandErrorsWhenCallerHasVoted :: GameWithDevourVotes -> Propert
 prop_voteDevourCommandErrorsWhenCallerHasVoted (GameWithDevourVotes game) =
     forAll (arbitraryWerewolf game) $ \caller ->
     forAll (suchThat (arbitraryPlayer game) (isn't werewolf)) $ \target -> do
-        let command = voteDevourCommand (caller ^. name) (target ^. name)
+        let command = Werewolf.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
@@ -112,7 +113,7 @@ prop_voteDevourCommandErrorsWhenTargetWerewolf :: GameAtWerewolvesTurn -> Proper
 prop_voteDevourCommandErrorsWhenTargetWerewolf (GameAtWerewolvesTurn game) =
     forAll (arbitraryPlayer game) $ \caller ->
     forAll (arbitraryWerewolf game) $ \target ->
-    verbose_runCommandErrors game (voteDevourCommand (caller ^. name) (target ^. name))
+    verbose_runCommandErrors game (Werewolf.voteCommand (caller ^. name) (target ^. name))
 
 prop_voteDevourCommandUpdatesVotes :: GameAtWerewolvesTurn -> Property
 prop_voteDevourCommandUpdatesVotes (GameAtWerewolvesTurn game) =
@@ -129,7 +130,7 @@ prop_voteLynchCommandErrorsWhenCallerDoesNotExist :: GameAtVillagesTurn -> Playe
 prop_voteLynchCommandErrorsWhenCallerDoesNotExist (GameAtVillagesTurn game) caller =
     not (doesPlayerExist (caller ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \target -> do
-        let command = voteCommand (caller ^. name) (target ^. name)
+        let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
@@ -137,7 +138,7 @@ prop_voteLynchCommandErrorsWhenTargetDoesNotExist :: GameAtVillagesTurn -> Playe
 prop_voteLynchCommandErrorsWhenTargetDoesNotExist (GameAtVillagesTurn game) target =
     not (doesPlayerExist (target ^. name) game)
     ==> forAll (arbitraryPlayer game) $ \caller -> do
-        let command = voteCommand (caller ^. name) (target ^. name)
+        let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
@@ -146,7 +147,7 @@ prop_voteLynchCommandErrorsWhenCallerIsDead (GameAtVillagesTurn game) =
     forAll (arbitraryPlayer game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer (caller ^. name) game
-        let command = voteCommand (caller ^. name) (target ^. name)
+        let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
@@ -155,7 +156,7 @@ prop_voteLynchCommandErrorsWhenTargetIsDead (GameAtVillagesTurn game) =
     forAll (arbitraryPlayer game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
         let game'   = killPlayer (target ^. name) game
-        let command = voteCommand (caller ^. name) (target ^. name)
+        let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
 
@@ -168,7 +169,7 @@ prop_voteLynchCommandErrorsWhenCallerHasVoted :: GameWithLynchVotes -> Property
 prop_voteLynchCommandErrorsWhenCallerHasVoted (GameWithLynchVotes game) =
     forAll (arbitraryPlayer game) $ \caller ->
     forAll (arbitraryPlayer game) $ \target -> do
-        let command = voteCommand (caller ^. name) (target ^. name)
+        let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
 
@@ -176,7 +177,7 @@ prop_voteLynchCommandErrorsWhenCallerIsNotInAllowedVoters :: GameWithAllowedVote
 prop_voteLynchCommandErrorsWhenCallerIsNotInAllowedVoters (GameWithAllowedVoters game) =
     forAll (suchThat (arbitraryPlayer game') (`notElem` getAllowedVoters game')) $ \caller ->
     forAll (arbitraryPlayer game') $ \target -> do
-        let command = voteCommand (caller ^. name) (target ^. name)
+        let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game' command
     where
@@ -185,7 +186,7 @@ prop_voteLynchCommandErrorsWhenCallerIsNotInAllowedVoters (GameWithAllowedVoters
 prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot :: GameWithVillageIdiotRevealedAtVillagesTurn -> Property
 prop_voteLynchCommandErrorsWhenCallerIsKnownVillageIdiot (GameWithVillageIdiotRevealedAtVillagesTurn game) =
     forAll (arbitraryPlayer game) $ \target -> do
-        let command = voteCommand (caller ^. name) (target ^. name)
+        let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
     where

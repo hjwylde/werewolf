@@ -52,7 +52,8 @@ import Game.Werewolf
 import Game.Werewolf.Command.Defender
 import Game.Werewolf.Command.DevotedServant as DevotedServant
 import Game.Werewolf.Command.Seer
-import Game.Werewolf.Command.Villager
+import Game.Werewolf.Command.Villager       as Villager
+import Game.Werewolf.Command.Werewolf       as Werewolf
 import Game.Werewolf.Command.Witch          as Witch
 import Game.Werewolf.Test.Util
 
@@ -542,7 +543,7 @@ arbitraryVoteDevourCommand game = do
     if null applicableCallerNames
         then return $ Blind noopCommand
         else elements applicableCallerNames >>= \callerName ->
-            return . Blind $ voteDevourCommand callerName (target ^. name)
+            return . Blind $ Werewolf.voteCommand callerName (target ^. name)
 
 arbitraryVoteLynchCommand :: Game -> Gen (Blind Command)
 arbitraryVoteLynchCommand game = do
@@ -552,7 +553,7 @@ arbitraryVoteLynchCommand game = do
     if null applicableCallerNames
         then return $ Blind noopCommand
         else elements applicableCallerNames >>= \callerName ->
-            return . Blind $ voteCommand callerName (target ^. name)
+            return . Blind $ Villager.voteCommand callerName (target ^. name)
 
 runArbitraryCommands :: Int -> Game -> Gen Game
 runArbitraryCommands n = iterateM n $ \game -> do
