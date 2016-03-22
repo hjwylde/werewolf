@@ -30,11 +30,11 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
 
     -- ** Command
-    arbitraryCommand, arbitraryChooseAllegianceCommand, arbitraryChoosePlayerCommand,
-    arbitraryChoosePlayersCommand, arbitraryHealCommand, arbitraryPassDevotedServantsTurnCommand,
-    arbitraryPassWitchsTurnCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
-    arbitraryQuitCommand, arbitraryRevealCommand, arbitrarySeeCommand, arbitraryVoteDevourCommand,
-    arbitraryVoteLynchCommand,
+    arbitraryCommand, arbitraryWolfHoundChooseCommand, arbitraryWildChildChooseCommand,
+    arbitraryScapegoatChooseCommand, arbitraryHealCommand, arbitraryDevotedServantPassCommand,
+    arbitraryWitchPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
+    arbitraryQuitCommand, arbitraryRevealCommand, arbitrarySeeCommand, arbitraryWerewolfVoteCommand,
+    arbitraryVillagerVoteCommand,
     runArbitraryCommands,
 
     -- ** Player
@@ -211,7 +211,7 @@ newtype GameWithAllegianceChosen = GameWithAllegianceChosen Game
 instance Arbitrary GameWithAllegianceChosen where
     arbitrary = do
         (GameAtWolfHoundsTurn game) <- arbitrary
-        (Blind command)             <- arbitraryChooseAllegianceCommand game
+        (Blind command)             <- arbitraryWolfHoundChooseCommand game
 
         return $ GameWithAllegianceChosen (run_ (apply command) game)
 
@@ -221,7 +221,7 @@ newtype GameWithAllowedVoters = GameWithAllowedVoters Game
 instance Arbitrary GameWithAllowedVoters where
     arbitrary = do
         (GameAtScapegoatsTurn game) <- arbitrary
-        (Blind command)             <- arbitraryChoosePlayersCommand game
+        (Blind command)             <- arbitraryScapegoatChooseCommand game
 
         return $ GameWithAllowedVoters (run_ (apply command) game)
 
@@ -321,7 +321,7 @@ newtype GameWithPassAtDevotedServantsTurn = GameWithPassAtDevotedServantsTurn Ga
 instance Arbitrary GameWithPassAtDevotedServantsTurn where
     arbitrary = do
         (GameAtDevotedServantsTurn game)    <- arbitrary
-        (Blind command)                     <- arbitraryPassDevotedServantsTurnCommand game
+        (Blind command)                     <- arbitraryDevotedServantPassCommand game
 
         return $ GameWithPassAtDevotedServantsTurn (run_ (apply command) game)
 
@@ -332,7 +332,7 @@ instance Arbitrary GameWithPassAtWitchsTurn where
     arbitrary = do
         game            <- arbitrary
         let game'       = game & stage .~ WitchsTurn
-        (Blind command) <- arbitraryPassWitchsTurnCommand game'
+        (Blind command) <- arbitraryWitchPassCommand game'
 
         return $ GameWithPassAtWitchsTurn (run_ (apply command) game')
 
@@ -374,7 +374,7 @@ newtype GameWithRoleModel = GameWithRoleModel Game
 instance Arbitrary GameWithRoleModel where
     arbitrary = do
         (GameAtWildChildsTurn game) <- arbitrary
-        (Blind command)             <- arbitraryChoosePlayerCommand game
+        (Blind command)             <- arbitraryWildChildChooseCommand game
         let game'                   = run_ (apply command) game
 
         return $ GameWithRoleModel game'
@@ -435,42 +435,42 @@ arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
     DefendersTurn       -> arbitraryProtectCommand game
     DevotedServantsTurn -> oneof
-        [ arbitraryPassDevotedServantsTurnCommand game
+        [ arbitraryDevotedServantPassCommand game
         , arbitraryRevealCommand game
         ]
     GameOver            -> return $ Blind noopCommand
     Lynching            -> return $ Blind noopCommand
-    ScapegoatsTurn      -> arbitraryChoosePlayersCommand game
+    ScapegoatsTurn      -> arbitraryScapegoatChooseCommand game
     SeersTurn           -> arbitrarySeeCommand game
     Sunrise             -> return $ Blind noopCommand
     Sunset              -> return $ Blind noopCommand
     UrsussGrunt         -> return $ Blind noopCommand
-    VillagesTurn        -> arbitraryVoteLynchCommand game
-    WerewolvesTurn      -> arbitraryVoteDevourCommand game
-    WildChildsTurn      -> arbitraryChoosePlayerCommand game
+    VillagesTurn        -> arbitraryVillagerVoteCommand game
+    WerewolvesTurn      -> arbitraryWerewolfVoteCommand game
+    WildChildsTurn      -> arbitraryWildChildChooseCommand game
     WitchsTurn          -> oneof
         [ arbitraryHealCommand game
-        , arbitraryPassWitchsTurnCommand game
+        , arbitraryWitchPassCommand game
         , arbitraryPoisonCommand game
         ]
-    WolfHoundsTurn      -> arbitraryChooseAllegianceCommand game
+    WolfHoundsTurn      -> arbitraryWolfHoundChooseCommand game
 
-arbitraryChooseAllegianceCommand :: Game -> Gen (Blind Command)
-arbitraryChooseAllegianceCommand game = do
+arbitraryWolfHoundChooseCommand :: Game -> Gen (Blind Command)
+arbitraryWolfHoundChooseCommand game = do
     let wolfHoundsName  = game ^?! players . wolfHounds . name
     allegianceName      <- elements $ map (T.pack . show) [Villagers, Werewolves]
 
     return . Blind $ WolfHound.chooseCommand wolfHoundsName allegianceName
 
-arbitraryChoosePlayerCommand :: Game -> Gen (Blind Command)
-arbitraryChoosePlayerCommand game = do
+arbitraryWildChildChooseCommand :: Game -> Gen (Blind Command)
+arbitraryWildChildChooseCommand game = do
     let wildChild   = game ^?! players . wildChildren
     target          <- suchThat (arbitraryPlayer game) (wildChild /=)
 
     return . Blind $ WildChild.chooseCommand (wildChild ^. name) (target ^. name)
 
-arbitraryChoosePlayersCommand :: Game -> Gen (Blind Command)
-arbitraryChoosePlayersCommand game = do
+arbitraryScapegoatChooseCommand :: Game -> Gen (Blind Command)
+arbitraryScapegoatChooseCommand game = do
     let scapegoatsName  = game ^?! players . scapegoats . name
     (NonEmpty players') <- NonEmpty <$> sublistOf (game ^.. players . traverse . alive)
 
@@ -484,14 +484,14 @@ arbitraryHealCommand game = do
         then noopCommand
         else healCommand witchsName
 
-arbitraryPassDevotedServantsTurnCommand :: Game -> Gen (Blind Command)
-arbitraryPassDevotedServantsTurnCommand game = do
+arbitraryDevotedServantPassCommand :: Game -> Gen (Blind Command)
+arbitraryDevotedServantPassCommand game = do
     let devotedServantsName = game ^?! players . devotedServants . name
 
     return . Blind $ DevotedServant.passCommand devotedServantsName
 
-arbitraryPassWitchsTurnCommand :: Game -> Gen (Blind Command)
-arbitraryPassWitchsTurnCommand game = do
+arbitraryWitchPassCommand :: Game -> Gen (Blind Command)
+arbitraryWitchPassCommand game = do
     let witchsName = game ^?! players . witches . name
 
     return . Blind $ Witch.passCommand witchsName
@@ -539,8 +539,8 @@ arbitrarySeeCommand game = do
         then Blind noopCommand
         else Blind $ seeCommand seersName (target ^. name)
 
-arbitraryVoteDevourCommand :: Game -> Gen (Blind Command)
-arbitraryVoteDevourCommand game = do
+arbitraryWerewolfVoteCommand :: Game -> Gen (Blind Command)
+arbitraryWerewolfVoteCommand game = do
     let applicableCallerNames   = getPendingVoters game ^.. werewolves . name
     target                      <- suchThat (arbitraryPlayer game) $ isn't werewolf
 
@@ -549,8 +549,8 @@ arbitraryVoteDevourCommand game = do
         else elements applicableCallerNames >>= \callerName ->
             return . Blind $ Werewolf.voteCommand callerName (target ^. name)
 
-arbitraryVoteLynchCommand :: Game -> Gen (Blind Command)
-arbitraryVoteLynchCommand game = do
+arbitraryVillagerVoteCommand :: Game -> Gen (Blind Command)
+arbitraryVillagerVoteCommand game = do
     let applicableCallerNames   = (game ^. allowedVoters) `intersect` (getPendingVoters game ^.. names)
     target                      <- arbitraryPlayer game
 
