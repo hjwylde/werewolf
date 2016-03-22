@@ -5,6 +5,7 @@
 *Minor*
 
 * Renamed the Wild-child to Orphan. ([#128](https://github.com/hjwylde/werewolf/issues/128))
+* Added the Hunter role. ([#3](https://github.com/hjwylde/werewolf/issues/3))
 
 *Revisions*
 

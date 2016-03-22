@@ -47,7 +47,7 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    druidRole, jesterRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole,
+    druidRole, hunterRole, jesterRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole,
     villagerVillagerRole, witchRole,
 
     -- *** The Werewolves
@@ -103,6 +103,7 @@ allRoles =
     [ angelRole
     , devotedServantRole
     , druidRole
+    , hunterRole
     , jesterRole
     , orphanRole
     , protectorRole
@@ -261,6 +262,28 @@ druidRole = Role
     , _rules        = T.unwords
         [ "Each morning when Ferina wakes from her slumber she will be alert and cautious. If the"
         , "Druid is next to a Werewolf then Ferina will grunt in warning."
+        ]
+    }
+
+-- | /A skilled marksman with quick reflexes. In the unfortunate situation that they are jumped and/
+--   /killed unjustly, they are able to let off a shot at their attacker, killing them instantly./
+--   /The Hunter never misses./
+--
+--   If the Hunter gets killed they get to choose one player, believed to be an attacker, to kill
+--   immediately.
+hunterRole :: Role
+hunterRole = Role
+    { _name         = "Hunter"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = T.unwords
+        [ "A skilled marksman with quick reflexes. In the unfortunate situation that they are"
+        , "jumped and killed unjustly, they are able to let off a shot at their attacker, killing"
+        , "them instantly. The Hunter never misses."
+        ]
+    , _rules        = T.unwords
+        [ "If the Hunter gets killed they get to choose one player, believed to be an attacker, to"
+        , "kill immediately."
         ]
     }
 
