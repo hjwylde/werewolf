@@ -368,7 +368,7 @@ playerVotedToBootMessage playerName targetName = publicMessage $ T.concat
 
 playerBootedMessage :: Player -> Message
 playerBootedMessage player = publicMessage $ T.unwords
-    [ playerName, article playerRole, playerRole ^. Role.name
+    [ playerName, "the", playerRole ^. Role.name
     , "has been booted from the game!"
     ]
     where
