@@ -7,6 +7,10 @@
 A game engine for playing werewolf in a chat client.
 This engine is based off of [Werewolves of Millers Hollow](http://www.games-wiki.org/wiki/Werewolves_of_Millers_Hollow/).
 
+DISCLAIMER:
+I recently asked the copyright owners of the Werewolves of Millers Hollow if I may have permission to use some content from the rule book, but they have said no.
+I am currently working on removing all copyrighted material from the project.
+
 ### Game description
 
 Deep in the American countryside, the little town of Millers Hollow has recently been infiltrated by
@@ -17,7 +21,7 @@ It is now time to take control and eliminate this ancient evil, before the town 
     inhabitants.
 
 Objective of the Game:  
-For the Angel: die in the first round.  
+For the Loners: complete their own objective.  
 For the Villagers: lynch all of the Werewolves.  
 For the Werewolves: devour all of the Villagers.
 
