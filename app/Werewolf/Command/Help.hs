@@ -130,24 +130,23 @@ roleMessage role = T.intercalate "\n"
 rulesMessages :: Maybe Game -> [Text]
 rulesMessages mGame = map (T.intercalate "\n")
     [ [ T.unwords
-        [ "Each night, the Werewolves bite, kill and devour one Villager."
-        , "During the day they try to conceal their identity and vile deeds from the Villagers."
-        , "The number of Werewolves in play depends upon"
-        , " the number of players and variants used in the game."
+        [ "Each night, the Werewolves transform and subsequently assault and devour one Villager."
+        , "After feasting their lycanthropic form subsides and they once again hide in plain sight."
         ]
       , T.unwords
-        [ "Each day,"
-        , "the survivors gather in the town square and try to discover who the Werewolves are."
-        , "This is done by studying the other player's social behaviours"
-        , "for hidden signs of lycanthropy."
-        , "After discussing and debating, the village votes to lynch a suspect,"
-        , "who is then hanged, burned and eliminated from the game."
+        [ "Each day, after discovering the victim, the village gathers in the town square. In a"
+        , "democratic fashion they then vote for whom they believe to be a Werewolf. The votee is"
+        , "immediately tied to a pyre and burned alive in an attempt to rid them of any"
+        , "lycanthropy."
+        ]
+    , T.unwords
+        [ "The number of Werewolves in play depends upon the number of players and extra roles in"
+        , "the game."
         ]
       ]
     , filter (/= "") [ T.concat
-        [ "Each player is informed of their role (see `help roles' for a list)"
-        , " at the start of the game."
-        , " A game begins at night and follows a standard cycle."
+        [ "Each player is informed of their role (see `help roles' for a list) at the start of the"
+        , "game. A game begins at night and follows a standard cycle."
         , whenRoleInPlay mGame angelRole
           " (N.B., when the Angel is in play the game begins with the village vote.)"
         ]
@@ -185,17 +184,14 @@ rulesMessages mGame = map (T.intercalate "\n")
 helpMessages :: [Text]
 helpMessages = map (T.intercalate "\n")
     [ [ T.unwords
-        [ "Deep in the American countryside,"
-        , "the little town of Millers Hollow has recently been infiltrated by Werewolves."
+        [ "Long has the woods been home to wild creatures, both kind and cruel. Most have faces and"
+        , "are known to the inhabitants of Fougères in Brittany, France; but no-one from the"
+        , "village has yet to lay eyes on the merciless Werewolf."
         ]
       , T.unwords
-        [ "Each night, murders are committed by the Villagers,"
-        , "who due to some mysterious phenomenon (possibly the greenhouse effect)"
-        , "have become Werewolves."
-        ]
-      , T.unwords
-        [ "It is now time to take control and eliminate this ancient evil,"
-        , "before the town loses its last few inhabitants."
+        [ "Each night Werewolves attack the village and devour the innocent. For centuries no one"
+        , "knew how to fight this scourge, however recently a theory has taken ahold that maphaps"
+        , "the Werewolves walk among the Villagers themselves..."
         ]
       ]
     , [ "Help commands:"

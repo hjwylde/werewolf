@@ -2,6 +2,10 @@
 
 #### Upcoming
 
+*Minor*
+
+* Replaced references to Millers Hollow with an original game description. ([#126](https://github.com/hjwylde/werewolf/issues/126))
+
 *Revisions*
 
 * Fixed a bug where extra roles with spaces in them weren't recognised.

@@ -4,21 +4,25 @@
 [![Build Status](https://travis-ci.org/hjwylde/werewolf.svg?branch=master)](https://travis-ci.org/hjwylde/werewolf)
 [![Release](https://img.shields.io/github/release/hjwylde/werewolf.svg)](https://github.com/hjwylde/werewolf/releases/latest)
 
-A game engine for playing werewolf in a chat client.
-This engine is based off of [Werewolves of Millers Hollow](http://www.games-wiki.org/wiki/Werewolves_of_Millers_Hollow/).
+A game engine for playing werewolf within a chat client.
+This engine is based off of the party game Mafia, also known as Werewolf.
+See the [Wikipedia article](https://en.wikipedia.org/wiki/Mafia_(party_game)) for a rundown on it's
+    gameplay and history.
 
 DISCLAIMER:
-I recently asked the copyright owners of the Werewolves of Millers Hollow if I may have permission to use some content from the rule book, but they have said no.
+I recently asked the copyright owners of the Werewolves of Millers Hollow if I may have permission
+    to use some content from the rule book, but they have said no.
 I am currently working on removing all copyrighted material from the project.
 
 ### Game description
 
-Deep in the American countryside, the little town of Millers Hollow has recently been infiltrated by
-    Werewolves.
-Each night, murders are committed by the Villagers, who due to some mysterious phenomenon (possibly
-    the greenhouse effect) have become Werewolves.
-It is now time to take control and eliminate this ancient evil, before the town loses its last few
-    inhabitants.
+Long has the woods been home to wild creatures, both kind and cruel.
+Most have faces and are known to the inhabitants of Fougères in Brittany, France; but no-one from
+    the village has yet to lay eyes on the merciless Werewolf.
+
+Each night Werewolves attack the village and devour the innocent.
+For centuries no one knew how to fight this scourge, however recently a theory has taken ahold that
+    maphaps the Werewolves walk among the Villagers themselves...
 
 Objective of the Game:  
 For the Loners: complete their own objective.  
@@ -31,10 +35,9 @@ The implemented roles are split into four categories.
 
 **The Ambiguous:**
 
-They could very well be allies of the village or become its enemies.
-During the game, they can change sides or characters.
+No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
 
-The Ambiguous must aid their side to achieve victory.
+The Ambiguous are able to change allegiance throughout the game.
 
 * Devoted Servant
 * Wild-child
@@ -42,18 +45,18 @@ The Ambiguous must aid their side to achieve victory.
 
 **The Loners:**
 
-Their past could no doubt reveal to us why they hate the inhabitants of Miller's Hollow.
-One thing is known for sure: they really scare everyone!
+The Loners look out for themselves and themselves alone.
 
-The Loners have their own objectives, no matter which side they're on.
+The Loners must complete their own objective.
 
 * Angel
 
 **The Villagers:**
 
-Attached to the village's survival, the following characters defend its harmony with determination.
-Faced with various menaces, they will be brought to eliminate those they suspect of being too
-    dangerous, even if that might be painful to them.
+Fraught with fear of the unseen enemy, the Villagers must work together to determine the truth and
+    eliminate the threat to Fougères.
+The task before them will not be easy, but a certain few have learnt some tricks over the years that
+    may turn out rather useful.
 
 The Villagers must lynch all of the Werewolves.
 
@@ -68,7 +71,7 @@ The Villagers must lynch all of the Werewolves.
 
 **The Werewolves:**
 
-They can be lethally dangerous and put in doubt the village's survival.
+Hiding in plain sight, the Werewolves are not a small trifle.
 
 The Werewolves must devour all of the Villagers.
 
