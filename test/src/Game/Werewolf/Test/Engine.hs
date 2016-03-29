@@ -21,11 +21,10 @@ import           Data.List.Extra
 import qualified Data.Map          as Map
 import           Data.Maybe
 
-import Game.Werewolf.Command
-import Game.Werewolf.Engine
-import Game.Werewolf.Game
-import Game.Werewolf.Player
-import Game.Werewolf.Role           hiding (name)
+import Game.Werewolf
+import Game.Werewolf.Command.DevotedServant
+import Game.Werewolf.Command.Global
+import Game.Werewolf.Command.Villager
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -151,7 +150,7 @@ prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithPassAtDevotedServantsTurn game)
 
 prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty :: GameAtWitchsTurn -> Property
 prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty (GameAtWitchsTurn game) =
-    forAll (arbitraryPassWitchsTurnCommand game') $ \(Blind passWitchsTurnCommand) -> do
+    forAll (arbitraryWitchPassCommand game') $ \(Blind passWitchsTurnCommand) -> do
         hasn't (stage . _VillagesTurn) (run_ (apply passWitchsTurnCommand >> checkStage) game')
     where
         game' = game & allowedVoters .~ []
@@ -221,7 +220,7 @@ prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithPassAtDevotedServantsTu
 
 prop_checkLynchingLynchesNoOneWhenTargetIsVillageIdiot :: GameAtVillagesTurn -> Bool
 prop_checkLynchingLynchesNoOneWhenTargetIsVillageIdiot (GameAtVillagesTurn game) = do
-    let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (villageIdiot ^. name))) game (game ^. players)
+    let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (villageIdiot ^. name))) game (game ^. players)
 
     none (is dead) (run_ checkStage game' ^. players)
     where
@@ -293,10 +292,10 @@ prop_checkSunriseSetsAngelsAllegiance (GameAtSunrise game) = do
 
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
 prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
-    let game' = foldr (\player -> run_ (apply $ voteLynchCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
+    let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
     let devotedServantsName = game ^?! players . devotedServants . name
-    let command             = passDevotedServantsTurnCommand devotedServantsName
+    let command             = passCommand devotedServantsName
 
     isn't angel roleModel' && isn't devotedServant roleModel' && isn't villageIdiot roleModel'
         ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . wildChildren
@@ -378,7 +377,7 @@ prop_checkWerewolvesTurnDoesNothingUnlessAllVoted (GameAtWerewolvesTurn game) =
 
 prop_checkWildChildsTurnAdvancesToDefendersTurn :: GameAtWildChildsTurn -> Property
 prop_checkWildChildsTurnAdvancesToDefendersTurn (GameAtWildChildsTurn game) =
-    forAll (arbitraryChoosePlayerCommand game) $ \(Blind command) ->
+    forAll (arbitraryWildChildChooseCommand game) $ \(Blind command) ->
     has (stage . _DefendersTurn) (run_ (apply command >> checkStage) game)
 
 prop_checkWildChildsTurnAdvancesWhenNoWildChild :: GameAtWildChildsTurn -> Bool
@@ -394,7 +393,7 @@ prop_checkWildChildsTurnDoesNothingUnlessRoleModelChosen (GameAtWildChildsTurn g
 
 prop_checkWitchsTurnAdvancesToVillagesTurn :: GameAtWitchsTurn -> Property
 prop_checkWitchsTurnAdvancesToVillagesTurn (GameAtWitchsTurn game) =
-    forAll (arbitraryPassWitchsTurnCommand game) $ \(Blind command) ->
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
     has (stage . _VillagesTurn) (run_ (apply command >> checkStage) game)
 
 prop_checkWitchsTurnAdvancesWhenNoWitch :: GameAtWitchsTurn -> Bool
@@ -406,17 +405,17 @@ prop_checkWitchsTurnAdvancesWhenNoWitch (GameAtWitchsTurn game) = do
 
 prop_checkWitchsTurnHealsDevoureeWhenHealed :: GameWithHeal -> Property
 prop_checkWitchsTurnHealsDevoureeWhenHealed (GameWithHeal game) =
-    forAll (arbitraryPassWitchsTurnCommand game) $ \(Blind command) ->
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
     none (is dead) (run_ (apply command >> checkStage) game ^. players)
 
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned :: GameWithPoison -> Property
 prop_checkWitchsTurnKillsOnePlayerWhenPoisoned (GameWithPoison game) =
-    forAll (arbitraryPassWitchsTurnCommand game) $ \(Blind command) ->
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
     length (run_ (apply command >> checkStage) game ^.. players . traverse . dead) == 1
 
 prop_checkWitchsTurnDoesNothingWhenPassed :: GameAtWitchsTurn -> Property
 prop_checkWitchsTurnDoesNothingWhenPassed (GameAtWitchsTurn game) =
-    forAll (arbitraryPassWitchsTurnCommand game) $ \(Blind command) ->
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
     none (is dead) $ run_ (apply command >> checkStage) game ^. players
 
 prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed :: GameAtWitchsTurn -> Bool
@@ -425,22 +424,22 @@ prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed (GameAtWitchsTurn game) =
 
 prop_checkWitchsTurnResetsHeal :: GameWithHeal -> Property
 prop_checkWitchsTurnResetsHeal (GameWithHeal game) =
-    forAll (arbitraryPassWitchsTurnCommand game) $ \(Blind command) ->
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
     not $ run_ (apply command >> checkStage) game ^. heal
 
 prop_checkWitchsTurnResetsPoison :: GameWithPoison -> Property
 prop_checkWitchsTurnResetsPoison (GameWithPoison game) =
-    forAll (arbitraryPassWitchsTurnCommand game) $ \(Blind command) ->
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
     isNothing $ run_ (apply command >> checkStage) game ^. poison
 
 prop_checkWitchsTurnClearsPasses :: GameAtWitchsTurn -> Property
 prop_checkWitchsTurnClearsPasses (GameAtWitchsTurn game) =
-    forAll (arbitraryPassWitchsTurnCommand game) $ \(Blind command) ->
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
     null $ run_ (apply command >> checkStage) game ^. passes
 
 prop_checkWolfHoundsTurnAdvancesToSeersTurn :: GameAtWolfHoundsTurn -> Property
 prop_checkWolfHoundsTurnAdvancesToSeersTurn (GameAtWolfHoundsTurn game) =
-    forAll (arbitraryChooseAllegianceCommand game) $ \(Blind command) ->
+    forAll (arbitraryWolfHoundChooseCommand game) $ \(Blind command) ->
     has (stage . _SeersTurn) (run_ (apply command >> checkStage) game)
 
 prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound :: GameAtWolfHoundsTurn -> Bool

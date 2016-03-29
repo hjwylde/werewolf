@@ -77,6 +77,17 @@ library
     exposed-modules:
         Game.Werewolf
         Game.Werewolf.Command
+        Game.Werewolf.Command.Defender
+        Game.Werewolf.Command.DevotedServant
+        Game.Werewolf.Command.Global
+        Game.Werewolf.Command.Scapegoat
+        Game.Werewolf.Command.Seer
+        Game.Werewolf.Command.Status
+        Game.Werewolf.Command.Villager
+        Game.Werewolf.Command.Werewolf
+        Game.Werewolf.Command.WildChild
+        Game.Werewolf.Command.Witch
+        Game.Werewolf.Command.WolfHound
         Game.Werewolf.Engine
         Game.Werewolf.Game
         Game.Werewolf.Player

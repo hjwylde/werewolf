@@ -16,11 +16,9 @@ import Control.Lens hiding (isn't)
 
 import Data.Maybe
 
-import Game.Werewolf.Game
+import Game.Werewolf
+import Game.Werewolf.Command.DevotedServant
 import Game.Werewolf.Test.Arbitrary
-import Game.Werewolf.Player
-import Game.Werewolf.Role hiding (name)
-import Game.Werewolf.Command
 import Game.Werewolf.Test.Util
 
 import Test.Tasty

@@ -22,6 +22,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command.Global
 
 import Werewolf.Game
 import Werewolf.Messages
