@@ -1,12 +1,14 @@
-## Changelog
+# Changelog
 
-#### Upcoming
+### Upcoming
 
 *Revisions*
 
 * Fixed a bug where extra roles with spaces in them weren't recognised.
 * Fixed Devoted Servant messages to exclude her when joining the Werewolf pack.
 * Fixed Devoted Servant help messages to include how to `pass`.
+
+### v0.4
 
 #### v0.4.10.0
 
@@ -211,6 +213,8 @@
 * Added private pinging to the `ping` command. ([#69](https://github.com/hjwylde/werewolf/issues/69))
 * Restricted `end` to players in the current game. ([#74](https://github.com/hjwylde/werewolf/issues/74))
 
+### v0.3
+
 #### v0.3.4.0
 
 *Minor*
@@ -333,6 +337,8 @@
 * Allowed `start` to work when the game has ended but `end` hasn't been called. ([#15](https://github.com/hjwylde/werewolf/issues/15))
 * Added `quit` command. ([#13](https://github.com/hjwylde/werewolf/issues/13))
 
+### v0.2
+
 #### v0.2.0.2
 
 *Revisions*
@@ -352,6 +358,8 @@
 
 * Added the Seer role. ([#4](https://github.com/hjwylde/werewolf/issues/4))
 * Removed the need to encode / decode to JSON for the state file. ([#9](https://github.com/hjwylde/werewolf/issues/9))
+
+### v0.1
 
 #### v0.1.0.0
 
