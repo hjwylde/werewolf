@@ -58,7 +58,7 @@ executable werewolf
         MultiParamTypeClasses,
         OverloadedStrings
     build-depends:
-        aeson >= 0.8 && < 0.11,
+        aeson >= 0.8 && < 0.12,
         base >= 4.8 && < 5,
         directory == 1.2.*,
         extra == 1.4.*,
@@ -107,7 +107,7 @@ library
         Rank2Types,
         TemplateHaskell
     build-depends:
-        aeson >= 0.8 && < 0.11,
+        aeson >= 0.8 && < 0.12,
         base >= 4.8 && < 5,
         containers == 0.5.*,
         directory == 1.2.*,
