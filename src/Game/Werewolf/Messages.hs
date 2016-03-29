@@ -239,7 +239,7 @@ firstWerewolvesTurnMessages tos =
 
 werewolvesTurnMessages :: [Text] -> [Message]
 werewolvesTurnMessages tos =
-    publicMessage "The Werewolves wake up, recognise one another and choose a new victim."
+    publicMessage "The Werewolves wake up, transform and choose a new victim."
     : groupMessages tos "Whom would you like to `vote` to devour?"
 
 wildChildsTurnMessages :: Text -> [Message]
@@ -580,7 +580,7 @@ playerDevouredMessage player = publicMessage $ T.concat
 noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords
     [ "Surprisingly you see everyone present at the town square."
-    , "Perhaps the Werewolves have left Miller's Hollow?"
+    , "Perhaps the Werewolves have left Fougères?"
     ]
 
 playerCannotDevourAnotherWerewolfMessage :: Text -> Message

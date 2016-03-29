@@ -79,10 +79,9 @@ werewolfInfo = info (infoOptions <*> werewolf) (fullDesc <> header' <> progDesc'
             , help "Show this binary's version"
             ]
 
-        header'     = header "A game engine for running werewolf in a chat client."
+        header'     = header "A game engine for running werewolf within a chat client."
         progDesc'   = progDesc $ unwords
-            [ "This engine is based off of Werewolves of Millers Hollow"
-            , "(http://www.games-wiki.org/wiki/Werewolves_of_Millers_Hollow/)."
+            [ "This engine is based off of the party game Mafia, also known as Werewolf."
             , "See https://github.com/hjwylde/werewolf for help on writing chat interfaces."
             ]
 

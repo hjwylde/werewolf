@@ -31,31 +31,29 @@ module Game.Werewolf.Role (
     allAllegiances,
 
     -- *** The Ambiguous
-    -- | They could very well be allies of the village or become its enemies. During the game, they
-    --   can change sides or characters.
+    -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
     --
-    --   The Ambiguous must aid their side to achieve victory.
+    --   The Ambiguous are able to change allegiance throughout the game.
     devotedServantRole, wildChildRole, wolfHoundRole,
 
     -- *** The Loners
-    -- | Their past could no doubt reveal to us why they hate the inhabitants of Miller's Hollow.
-    --   One thing is known for sure: they really scare everyone!
-    --
-    --   The Loners have their own objectives, no matter which side they're on.
+    -- | The Loners look out for themselves and themselves alone.
+
+    --   The Loners must complete their own objective.
     angelRole,
 
     -- *** The Villagers
-    -- | Attached to the village's survival, the following characters defend its harmony with
-    --   determination. Faced with various menaces, they will be brought to eliminate those they
-    --   suspect of being too dangerous, even if that might be painful to them.
-    --
+    -- | Fraught with fear of the unseen enemy, the Villagers must work together to determine the
+    --   truth and eliminate the threat to Fougères. The task before them will not be easy, but a
+    --   certain few have learnt some tricks over the years that may turn out rather useful.
+
     --   The Villagers must lynch all of the Werewolves.
     bearTamerRole, defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villageIdiotRole,
     villagerVillagerRole, witchRole,
 
     -- *** The Werewolves
-    -- | They can be lethally dangerous and put in doubt the village's survival.
-    --
+    -- | Hiding in plain sight, the Werewolves are not a small trifle.
+
     --   The Werewolves must devour all of the Villagers.
     simpleWerewolfRole,
 
