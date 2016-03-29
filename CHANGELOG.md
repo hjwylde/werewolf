@@ -8,15 +8,13 @@
 * Fixed Devoted Servant messages to exclude her when joining the Werewolf pack.
 * Fixed Devoted Servant help messages to include how to `pass`.
 
-### v0.4
-
-#### v0.4.10.0
+### v0.4.10.0
 
 *Minor*
 
 * Added `boot` command. ([#14](https://github.com/hjwylde/werewolf/issues/14))
 
-#### v0.4.9.0
+### v0.4.9.0
 
 *Minor*
 
@@ -27,7 +25,7 @@
 * Added the Devoted Servant role. ([#47](https://github.com/hjwylde/werewolf/issues/47))
 * Added `--force` flag to `end`. ([#77](https://github.com/hjwylde/werewolf/issues/77))
 
-#### v0.4.8.0
+### v0.4.8.0
 
 *Minor*
 
@@ -41,7 +39,7 @@
 * Changed the `status` and `ping` commands to tell the caller when the game is over. ([#89](https://github.com/hjwylde/werewolf/issues/89))
 * Added roles in game to the `status` command. ([#93](https://github.com/hjwylde/werewolf/issues/93))
 
-#### v0.4.7.1
+### v0.4.7.1
 
 *Revisions*
 
@@ -50,7 +48,7 @@
 * Fixed Village Idiot text to have spaces around the name. ([#87](https://github.com/hjwylde/werewolf/issues/87))
 * Fixed a bug where the Werewolves couldn't win if it was down to 1 Werewolf and the Village Idiot. ([#88](https://github.com/hjwylde/werewolf/issues/88))
 
-#### v0.4.7.0
+### v0.4.7.0
 
 *Revisions*
 
@@ -63,14 +61,14 @@
 * Moved Wolf-hound's turn to before the Seer's so that the Seer may see his allegiance properly.
 * Restricted specifying `Simple Villager` or `Simple Werewolf` as extra roles.
 
-#### v0.4.6.1
+### v0.4.6.1
 
 *Revisions*
 
 * Fixed Village Idiot text to have spaces around the name. ([#87](https://github.com/hjwylde/werewolf/issues/87))
 * Fixed a bug where the Werewolves couldn't win if it was down to 1 Werewolf and the Village Idiot. ([#88](https://github.com/hjwylde/werewolf/issues/88))
 
-#### v0.4.6.0
+### v0.4.6.0
 
 *Minor*
 
@@ -86,7 +84,7 @@
 * Fixed the Defender being unable to protect himself.
 * Restructured library modules to only export relevant functions. ([#11](https://github.com/hjwylde/werewolf/issues/11))
 
-#### v0.4.5.0
+### v0.4.5.0
 
 *Minor*
 
@@ -102,14 +100,14 @@
 * Renamed the devourVoteCommand and lynchVoteCommand to voteDevourCommand and voteLynchCommand. ([#49](https://github.com/hjwylde/werewolf/issues/49))
 * Fixed `quit` to advance the stage when the only role for that stage has quit.
 
-#### v0.4.4.1
+### v0.4.4.1
 
 *Revisions*
 
 * Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
 * Fixed the `heal` command help message to not require a `PLAYER` argument. ([#82](https://github.com/hjwylde/werewolf/issues/82))
 
-#### v0.4.4.0
+### v0.4.4.0
 
 *Minor*
 
@@ -123,82 +121,82 @@
 * Fixed the `noPlayerDevouredMessage` to be displayed after sunrise. ([#80](https://github.com/hjwylde/werewolf/issues/80))
 * Removed `Show` instance for `Command` and used `Blind`. ([#78](https://github.com/hjwylde/werewolf/issues/78))
 
-#### v0.4.3.2
+### v0.4.3.2
 
 *Revisions*
 
 * Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
 * Fixed the `heal` command help message to not require a `PLAYER` argument. ([#82](https://github.com/hjwylde/werewolf/issues/82))
 
-#### v0.4.3.1
+### v0.4.3.1
 
 *Revisions*
 
 * Added missing module to Cabal file.
 
-#### v0.4.3.0
+### v0.4.3.0
 
 *Minor*
 
 * Added the Defender role. ([#38](https://github.com/hjwylde/werewolf/issues/38))
 
-#### v0.4.2.3
+### v0.4.2.3
 
 *Revisions*
 
 * Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
 * Fixed the `heal` command help message to not require a `PLAYER` argument. ([#82](https://github.com/hjwylde/werewolf/issues/82))
 
-#### v0.4.2.2
+### v0.4.2.2
 
 *Revisions*
 
 * Added missing module to Cabal file.
 
-#### v0.4.2.1
+### v0.4.2.1
 
 *Revisions*
 
 * Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
 
-#### v0.4.2.0
+### v0.4.2.0
 
 *Minor*
 
 * Added the Villager-Villager role. ([#37](https://github.com/hjwylde/werewolf/issues/37))
 
-#### v0.4.1.3
+### v0.4.1.3
 
 *Revisions*
 
 * Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
 * Fixed the `heal` command help message to not require a `PLAYER` argument. ([#82](https://github.com/hjwylde/werewolf/issues/82))
 
-#### v0.4.1.2
+### v0.4.1.2
 
 *Revisions*
 
 * Added missing module to Cabal file.
 
-#### v0.4.1.1
+### v0.4.1.1
 
 *Revisions*
 
 * Fixed a bug causing the Witch being unable to heal themselves. ([#76](https://github.com/hjwylde/werewolf/issues/76))
 
-#### v0.4.1.0
+### v0.4.1.0
 
 *Minor*
 
 * Added the Witch role. ([#5](https://github.com/hjwylde/werewolf/issues/5))
 
-#### v0.4.0.1
+### v0.4.0.1
 
 *Revisions*
 
 * Fixed grammar for the `currentStageMessages`. ([#83](https://github.com/hjwylde/werewolf/issues/83))
 
-#### v0.4.0.0
+### v0.4.0.0
 
 *Major*
 
@@ -213,9 +211,7 @@
 * Added private pinging to the `ping` command. ([#69](https://github.com/hjwylde/werewolf/issues/69))
 * Restricted `end` to players in the current game. ([#74](https://github.com/hjwylde/werewolf/issues/74))
 
-### v0.3
-
-#### v0.3.4.0
+### v0.3.4.0
 
 *Minor*
 
@@ -231,19 +227,19 @@
 * Turned start of day and night into distinct turns.
 * Added private message to players when the game is over. ([#65](https://github.com/hjwylde/werewolf/issues/65))
 
-#### v0.3.3.2
+### v0.3.3.2
 
 *Revisions*
 
 * Fixed missing file in Cabal file. ([#18](https://github.com/hjwylde/werewolf/issues/18))
 
-#### v0.3.3.1
+### v0.3.3.1
 
 *Revisions*
 
 * Added `noIntersperse` to `interpret`. ([#60](https://github.com/hjwylde/werewolf/issues/60))
 
-#### v0.3.3.0
+### v0.3.3.0
 
 *Minor*
 
@@ -254,7 +250,7 @@
 
 * Added `--` to help description of `interpret`. ([#60](https://github.com/hjwylde/werewolf/issues/60))
 
-#### v0.3.2.0
+### v0.3.2.0
 
 *Minor*
 
@@ -265,67 +261,67 @@
 
 * Shrunk some of the help text to make it more readable. ([#25](https://github.com/hjwylde/werewolf/issues/25))
 
-#### v0.3.1.3
+### v0.3.1.3
 
 *Revisions*
 
 * Fixed a bug where Werewolves could devour other Werewolves. ([#34](https://github.com/hjwylde/werewolf/issues/34))
 * Changed Werewolf text from "kill" to "devour". ([#34](https://github.com/hjwylde/werewolf/issues/34))
 
-#### v0.3.1.2
+### v0.3.1.2
 
 *Revisions*
 
 * Fixed dead werewolves being informed of votes. ([#24](https://github.com/hjwylde/werewolf/issues/24))
 
-#### v0.3.1.1
+### v0.3.1.1
 
 *Revisions*
 
 * Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 * Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 
-#### v0.3.1.0
+### v0.3.1.0
 
 *Minor*
 
 * Added a message to say the names of all the players at the start of a game. ([#23](https://github.com/hjwylde/werewolf/issues/23))
 * Added a message to say the roles in play at the start of a game. ([#16](https://github.com/hjwylde/werewolf/issues/16))
 
-#### v0.3.0.5
+### v0.3.0.5
 
 *Revisions*
 
 * Fixed a bug where Werewolves could devour other Werewolves. ([#34](https://github.com/hjwylde/werewolf/issues/34))
 * Changed Werewolf text from "kill" to "devour". ([#34](https://github.com/hjwylde/werewolf/issues/34))
 
-#### v0.3.0.4
+### v0.3.0.4
 
 *Revisions*
 
 * Fixed dead werewolves being informed of votes. ([#24](https://github.com/hjwylde/werewolf/issues/24))
 
-#### v0.3.0.3
+### v0.3.0.3
 
 *Revisions*
 
 * Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 * Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 
-#### v0.3.0.2
+### v0.3.0.2
 
 *Revisions*
 
 * Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 * Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 
-#### v0.3.0.1
+### v0.3.0.1
 
 *Revisions*
 
 * Fixed `interpret` to display the commands help messages when given invalid arguments. ([#22](https://github.com/hjwylde/werewolf/issues/22))
 
-#### v0.3.0.0
+### v0.3.0.0
 
 *Major*
 
@@ -337,31 +333,27 @@
 * Allowed `start` to work when the game has ended but `end` hasn't been called. ([#15](https://github.com/hjwylde/werewolf/issues/15))
 * Added `quit` command. ([#13](https://github.com/hjwylde/werewolf/issues/13))
 
-### v0.2
-
-#### v0.2.0.2
+### v0.2.0.2
 
 *Revisions*
 
 * Fixed dead werewolves being informed of votes. ([#24](https://github.com/hjwylde/werewolf/issues/24))
 
-#### v0.2.0.1
+### v0.2.0.1
 
 *Revisions*
 
 * Tidied up the help text to be smaller. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 * Fixed a bug where the turn was advanced to Werewolves when no Werewolves were alive. ([#26](https://github.com/hjwylde/werewolf/issues/26))
 
-#### v0.2.0.0
+### v0.2.0.0
 
 *Major*
 
 * Added the Seer role. ([#4](https://github.com/hjwylde/werewolf/issues/4))
 * Removed the need to encode / decode to JSON for the state file. ([#9](https://github.com/hjwylde/werewolf/issues/9))
 
-### v0.1
-
-#### v0.1.0.0
+### v0.1.0.0
 
 *Major*
 
