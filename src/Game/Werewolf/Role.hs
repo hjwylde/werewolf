@@ -327,20 +327,24 @@ scapegoatRole = Role
         ]
     }
 
--- | /A fortunate teller by other names, with the ability to see into fellow townsfolk and/
---   /determine their allegiance./
+-- | /Frequently misunderstood and thought to be a fortune teller, the Seer has the ability to see/
+--   /into fellow townsfolk and determine their true nature. This ability to see is not given out/
+--   /lightly, for certain it is a gift! Visions will always be true, but only for the present as/
+--   /not even the Seer knowns what the future holds./
 --
---   Each night the Seer sees the allegiance of a player of her choice.
+--   Each night the Seer sees the allegiance of a player of their choice.
 seerRole :: Role
 seerRole = Role
     { _name         = "Seer"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
-        [ "A fortunate teller by other names, with the ability to see into fellow townsfolk and"
-        , "determine their allegiance."
+        [ "Frequently misunderstood and thought to be a fortune teller, the Seer has the ability to"
+        , "see into fellow townsfolk and determine their true nature. This ability to see is not"
+        , "given out lightly, for certain it is a gift! Visions will always be true, but only for"
+        , "the present as not even the Seer knowns what the future holds."
         ]
-    , _rules        = "Each night the Seer sees the allegiance of a player of her choice."
+    , _rules        = "Each night the Seer sees the allegiance of a player of their choice."
     }
 
 -- | /A simple, ordinary townsperson in every way. Their only weapons are the ability to analyze/
