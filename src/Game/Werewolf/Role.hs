@@ -21,7 +21,7 @@ Roles are split into four categories:
 module Game.Werewolf.Role (
     -- * Role
     Role,
-    name, allegiance, balance, description, rules, advice,
+    name, allegiance, balance, description, rules,
 
     Allegiance(..),
     _Angel, _Villagers, _Werewolves,
@@ -85,7 +85,6 @@ data Role = Role
     , _balance     :: Int
     , _description :: Text
     , _rules       :: Text
-    , _advice      :: Text
     } deriving (Read, Show)
 
 -- | The Loner allegiances are seldom used, rather they are present for correctness.
@@ -155,10 +154,6 @@ devotedServantRole = Role
         , "eliminated player. Upon taking on her master's role, any special abilities are reset and"
         , "any first turns are replayed."
         ]
-    , _advice       = T.unwords
-        [ "Think twice before trying to take on the role of a Werewolf. If people strongly believed"
-        , "your master as such, then they will be quick to point fingers at you too!"
-        ]
     }
 
 -- | /Abandoned in the woods by his parents at a young age, he was raised by wolves. As soon as he/
@@ -197,10 +192,6 @@ wildChildRole = Role
         , "until the end of the game.  However for as long as the Wild-child's role model is alive,"
         , "he remains a Villager."
         ]
-    , _advice       = T.unwords
-        [ "Nothing is keeping you from taking part in the elimination of your role model, if you so"
-        , "wish..."
-        ]
     }
 
 -- | /All dogs know in the depths of their soul that their ancestors were wolves and that it's/
@@ -225,8 +216,6 @@ wolfHoundRole = Role
         [ "On the first night, the Wolf-hound chooses if he wants to be a Simple Villager or"
         , "Werewolf. The choice is final."
         ]
-    , _advice       =
-        "The choice of being a Simple Villager or Werewolf is final, so decide carefully!"
     }
 
 -- | /The muddy life of a village infested with evil creatures repulses him; he wishes to believe/
@@ -257,11 +246,6 @@ angelRole = Role
             , "he fails, then he becomes a Simple Villager for the rest of the game."
             ]
         ]
-    , _advice       = T.unwords
-        [ "It's going to take all your guile and wits to con the village into eliminating you."
-        , "Pretending to be a Werewolf is one tactic, but if it doesn't work then you may have just"
-        , "dug yourself a hole for the rest of the game..."
-        ]
     }
 
 -- | /Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of the/
@@ -290,8 +274,6 @@ bearTamerRole = Role
         , "one Werewolf is or ends up directly next to the Bear Tamer, then Ursus grunts to"
         , "indicate danger to all of the other players."
         ]
-    , _advice       =
-        "Aren't you lucky to have a companion with a strong nose. Just don't let him wander off!"
     }
 
 -- | /This character can save the Villagers from the bite of the Werewolves./
@@ -314,10 +296,6 @@ defenderRole = Role
             , "against the Werewolves."
             ]
         , "The Defender may not protect the same person two nights in a row."
-        ]
-    , _advice       = T.unwords
-        [ "Be careful: you can protect yourself, but you're not allowed to protect the same player"
-        , "two nights in a row."
         ]
     }
 
@@ -347,31 +325,26 @@ scapegoatRole = Role
             , "permitted to vote or not on the next day."
             ]
         ]
-    , _advice       = T.unwords
-        [ "Cross your fingers that the votes don't end up tied. If you do so happen to be that"
-        , "unlucky, then be wary of whom you allow to vote on the next day. If you choose only one"
-        , "player and the Werewolves devour them in the night, then there will be no village vote."
-        ]
     }
 
--- | /A fortunate teller by other names, with the ability to see into fellow townsfolk and/
---   /determine their allegiance./
+-- | /Frequently misunderstood and thought to be a fortune teller, the Seer has the ability to see/
+--   /into fellow townsfolk and determine their true nature. This ability to see is not given out/
+--   /lightly, for certain it is a gift! Visions will always be true, but only for the present as/
+--   /not even the Seer knowns what the future holds./
 --
---   Each night the Seer sees the allegiance of a player of her choice.
+--   Each night the Seer sees the allegiance of a player of their choice.
 seerRole :: Role
 seerRole = Role
     { _name         = "Seer"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
-        [ "A fortunate teller by other names, with the ability to see into fellow townsfolk and"
-        , "determine their allegiance."
+        [ "Frequently misunderstood and thought to be a fortune teller, the Seer has the ability to"
+        , "see into fellow townsfolk and determine their true nature. This ability to see is not"
+        , "given out lightly, for certain it is a gift! Visions will always be true, but only for"
+        , "the present as not even the Seer knowns what the future holds."
         ]
-    , _rules        = "Each night the Seer sees the allegiance of a player of her choice."
-    , _advice       = T.unwords
-        [ "You should help the other Villagers, but try to remain discreet so as to not arouse"
-        , "suspicion from any of the Werewolves."
-        ]
+    , _rules        = "Each night the Seer sees the allegiance of a player of their choice."
     }
 
 -- | /A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even/
@@ -394,8 +367,6 @@ simpleVillagerRole = Role
         [ "A Simple Villager has no special abilities, they must use their guile to determine whom"
         , "among them is not who they say they are."
         ]
-    , _advice       =
-        "Bluffing can be a good technique, but you had better be convincing about what you say."
     }
 
 -- | /What is a village without an idiot? He does pretty much nothing important, but he's so/
@@ -425,8 +396,6 @@ villageIdiotRole = Role
             , "of an idiot be worth?"
             ]
         ]
-    , _advice       =
-        "Hah! As if advice would do you any good..."
     }
 
 -- | /This person has a soul as clear and transparent as the water from a mountain stream. They/
@@ -449,7 +418,6 @@ villagerVillagerRole = Role
         [ "When the game begins, the village is told the identity of the Villager-Villager, thus"
         , "ensuring certainty that its owner is truly an innocent Villager."
         ]
-    , _advice       = "You'll make friends quickly, but be wary about whom you trust."
     }
 
 -- | /She knows how to brew two extremely powerful potions: a healing potion, to resurrect the/
@@ -471,10 +439,6 @@ witchRole = Role
         [ "The Witch is called after the Werewolves. She is allowed to use both potions in the same"
         , "night and is also allowed to heal herself."
         ]
-    , _advice       = T.unwords
-        [ "Each potion may only be used once per game, but there are no restrictions on using both"
-        , "of your potions in the same night."
-        ]
     }
 
 -- | /Each night they devour a Villager. During the day they try to hide their nocturnal identity/
@@ -491,8 +455,6 @@ simpleWerewolfRole = Role
         , "identity to avoid mob justice."
         ]
     , _rules        = "A Werewolf may never devour another Werewolf."
-    , _advice       =
-        "Voting to lynch your partner can be a good way to deflect suspicion from yourself."
     }
 
 -- | The counter-part to 'isn't', but more general as it takes a 'Getting' instead.

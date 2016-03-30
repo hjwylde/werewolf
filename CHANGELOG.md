@@ -6,6 +6,8 @@
 
 * Replaced references to Millers Hollow with an original game description. ([#126](https://github.com/hjwylde/werewolf/issues/126))
 * Updated the Simple Villager's description and rules. ([#135](https://github.com/hjwylde/werewolf/issues/135))
+* Removed the advice field from Role. ([#134](https://github.com/hjwylde/werewolf/issues/134))
+* Updated the Seer's description. ([#134](https://github.com/hjwylde/werewolf/issues/134))
 
 *Revisions*
 
