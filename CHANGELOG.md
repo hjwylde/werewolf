@@ -5,6 +5,7 @@
 *Minor*
 
 * Replaced references to Millers Hollow with an original game description. ([#126](https://github.com/hjwylde/werewolf/issues/126))
+* Updated the Simple Villager's description and rules. ([#135](https://github.com/hjwylde/werewolf/issues/135))
 
 *Revisions*
 

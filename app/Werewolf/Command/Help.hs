@@ -81,7 +81,7 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
       ]
     , [ "Status commands:"
       , "- `ping` ping the status of the current game publicly"
-      , "- `status` get the status of the current game"
+      , "- `status` get the status of the current game privately"
       , "- `circle [-a | --include-dead]` get the game circle"
       ]
     , [ "Standard commands:"

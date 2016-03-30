@@ -374,24 +374,25 @@ seerRole = Role
         ]
     }
 
--- | /A simple, ordinary townsperson in every way. Their only weapons are the ability to analyze/
---   /behaviour to identify Werewolves, and the strength of their conviction to prevent the/
---   /execution of the innocents like themselves./
+-- | /A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even/
+--   /nobles. No matter their differences though, the plight of Werewolves in Fougères unites them/
+--   /in this unfortunate time./
 --
---   A Simple Villager has no rules whatsoever, their only goal is to lynch all of the Werewolves.
+--   A Simple Villager has no special abilities, they must use their guile to determine whom among
+--   them is not who they say they are.
 simpleVillagerRole :: Role
 simpleVillagerRole = Role
     { _name         = "Simple Villager"
     , _allegiance   = Villagers
     , _balance      = 1
     , _description  = T.unwords
-        [ "A simple, ordinary townsperson in every way. Their only weapons are the ability to"
-        , "analyze behaviour to identify Werewolves, and the strength of their conviction to"
-        , "prevent the execution of the innocents like themselves."
+        [ "A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even"
+        , "nobles. No matter their differences though, the plight of Werewolves in Fougères unites"
+        , "them in this unfortunate time."
         ]
     , _rules        = T.unwords
-        [ "A Simple Villager has no rules whatsoever, their only goal is to lynch all of the"
-        , "Werewolves."
+        [ "A Simple Villager has no special abilities, they must use their guile to determine whom"
+        , "among them is not who they say they are."
         ]
     , _advice       =
         "Bluffing can be a good technique, but you had better be convincing about what you say."
