@@ -421,7 +421,7 @@ instance Arbitrary GameWithVillageIdiotRevealedAtVillagesTurn where
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do
-    n       <- choose (14, 24)
+    n       <- choose (14, 30)
     players <- nubOn (view name) <$> infiniteList
 
     let playersWithRestrictedRole = map (\role' -> players ^?! traverse . filteredBy role role') restrictedRoles
