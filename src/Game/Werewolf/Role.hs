@@ -441,8 +441,10 @@ witchRole = Role
         ]
     }
 
--- | /Each night they devour a Villager. During the day they try to hide their nocturnal identity/
---   /to avoid mob justice./
+-- | /It's difficult to tell, but a Werewolf is merely a Villager underneath; unfortunately one/
+--   /that has been afflicted with lycanthropy and consequently transforms each night into a/
+--   /fearsome lupine. Not all hope is yet lost, some Villagers would like to try and cure the/
+--   /curse of lycanthropy. Perhaps one day this dream will be realised./
 --
 --   A Werewolf may never devour another Werewolf.
 simpleWerewolfRole :: Role
@@ -451,8 +453,10 @@ simpleWerewolfRole = Role
     , _allegiance   = Werewolves
     , _balance      = -4
     , _description  = T.unwords
-        [ "Each night they devour a Villager. During the day they try to hide their nocturnal"
-        , "identity to avoid mob justice."
+        [ "It's difficult to tell, but a Werewolf is merely a Villager underneath; unfortunately"
+        , "one that has been afflicted with lycanthropy and consequently transforms each night into"
+        , "a fearsome lupine. Not all hope is yet lost, some Villagers would like to try and cure"
+        , "the curse of lycanthropy. Perhaps one day this dream will be realised."
         ]
     , _rules        = "A Werewolf may never devour another Werewolf."
     }
