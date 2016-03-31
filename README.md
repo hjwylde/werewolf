@@ -10,7 +10,7 @@ See the [Wikipedia article](https://en.wikipedia.org/wiki/Mafia_(party_game)) fo
     gameplay and history.
 
 If you're here just to play werewolf, you may wish to skip straight to
-    [chat clients](https://github.com/hjwylde/werewolf#chat-clients).
+    [chat interfaces](https://github.com/hjwylde/werewolf#chat-interfaces).
 
 DISCLAIMER:
 I recently asked the copyright owners of the Werewolves of Millers Hollow if I may have permission
@@ -102,7 +102,7 @@ export PATH=$PATH:~/.cabal/bin
 
 ### Usage
 
-This section covers how a chat client interacts with the werewolf game engine.
+This section covers how a chat interface interacts with the werewolf game engine.
 
 All werewolf commands are designed to be run by a user from the chat client.
 E.g., to start a game:
@@ -175,11 +175,11 @@ This time, even though the command was successful, there are no messages.
 ```
 
 Here the command was unsuccessful and an error message is sent to _@corge_.
-Even though the command was unsuccessful, the chat client interface probably won't need to do
-    anything special.
+Even though the command was unsuccessful, the chat interface probably won't need to do anything
+    special.
 Relaying the error message back to the user should suffice.
 
-Thus a chat client interface must implement the following:
+Thus a chat interface must implement the following:
 * The ability to call werewolf commands. This includes passing the `--caller` option and arguments
   correctly. It is possible to only implement the `interpret` command, which interprets the
   caller's input.
@@ -190,8 +190,8 @@ Thus a chat client interface must implement the following:
 
 See `werewolf --help`.
 
-#### Chat clients
+#### Chat interfaces
 
-Click through for instructions on how to run a chat client and play werewolf.
+Click through for instructions on how to run a chat interface and play werewolf.
 
 * [Slack](https://github.com/hjwylde/werewolf-slack)

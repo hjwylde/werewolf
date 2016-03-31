@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 A response is used as a return result of calling the @werewolf@ binary. Each response has a list of
 associated messages.
 
-@werewolf@ was designed to be ambivalent to the calling chat client. The response-message structure
+@werewolf@ was designed to be ambivalent to the playing chat client. The response-message structure
 reflects this by staying away from anything that could be construed as client-specific. This
 includes features such as emoji support.
 -}
@@ -48,9 +48,9 @@ import qualified System.Exit as Exit
 
 -- | When a user sends a command to the @werewolf@ binary, a response is always returned.
 --
---   The chat client interface should then relay any @messages@ from the response. Whether or not
---   the command was valid (indicated by the @ok@ flag) is often irrelevant as the returned
---   @messages@ will include errors to the user.
+--   The chat interface should then relay any @messages@ from the response. Whether or not the
+--   command was valid (indicated by the @ok@ flag) is often irrelevant as the returned @messages@
+--   will include errors to the user.
 data Response = Response
     { ok       :: Bool      -- ^ Boolean flag to indicate success.
     , messages :: [Message] -- ^ List of messages.

@@ -10,7 +10,7 @@ A 'Message' is used to relay information back to either all players or a single 
 defines suite of messages used throughout the werewolf game, including both game play messages and
 binary errors.
 
-@werewolf@ was designed to be ambivalent to the calling chat client. The response-message structure
+@werewolf@ was designed to be ambivalent to the playing chat client. The response-message structure
 reflects this by staying away from anything that could be construed as client-specific. This
 includes features such as emoji support.
 -}
