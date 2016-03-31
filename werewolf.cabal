@@ -7,7 +7,6 @@ homepage:       https://github.com/hjwylde/werewolf
 
 synopsis:       A game engine for playing werewolf within a chat client
 description:    This engine is based off of the party game Mafia, also known as Werewolf.
-                See https://github.com/hjwylde/werewolf for help on writing chat interfaces.
 
 license:        BSD3
 license-file:   LICENSE
@@ -27,6 +26,7 @@ executable werewolf
     hs-source-dirs: app/
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
+        Paths_werewolf
         Werewolf.Command.Boot
         Werewolf.Command.Choose
         Werewolf.Command.Circle
@@ -49,7 +49,6 @@ executable werewolf
         Werewolf.Messages
         Werewolf.Options
         Werewolf.Version
-        Paths_werewolf
 
     default-language: Haskell2010
     other-extensions:

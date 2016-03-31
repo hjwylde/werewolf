@@ -80,10 +80,8 @@ werewolfInfo = info (infoOptions <*> werewolf) (fullDesc <> header' <> progDesc'
             ]
 
         header'     = header "A game engine for running werewolf within a chat client."
-        progDesc'   = progDesc $ unwords
-            [ "This engine is based off of the party game Mafia, also known as Werewolf."
-            , "See https://github.com/hjwylde/werewolf for help on writing chat interfaces."
-            ]
+        progDesc'   = progDesc
+            "This engine is based off of the party game Mafia, also known as Werewolf."
 
 -- | An options parser.
 werewolf :: Parser Options
