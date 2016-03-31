@@ -255,7 +255,6 @@ startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Playe
 startGame callerName players = do
     when (playerNames /= nub playerNames)   $ throwError [privateMessage callerName "Player names must be unique."]
     when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
-    when (length players > 24)              $ throwError [privateMessage callerName "Cannot have more than 24 players."]
     forM_ restrictedRoles $ \role' ->
         when (length (players ^.. traverse . filteredBy role role') > 1) $
             throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role' ^. Role.name, "."]]

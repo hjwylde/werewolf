@@ -116,7 +116,6 @@ allEngineTests =
     , testProperty "start game uses given players"                              prop_startGameUsesGivenPlayers
     , testProperty "start game errors unless unique player names"               prop_startGameErrorsUnlessUniquePlayerNames
     , testProperty "start game errors when less than 7 players"                 prop_startGameErrorsWhenLessThan7Players
-    , testProperty "start game errors when more than 24 players"                prop_startGameErrorsWhenMoreThan24Players
     , testProperty "start game errors when more than 1 of a restricted role"    prop_startGameErrorsWhenMoreThan1OfARestrictedRole
     ]
 
@@ -506,12 +505,6 @@ prop_startGameErrorsWhenLessThan7Players :: [Player] -> Property
 prop_startGameErrorsWhenLessThan7Players players =
     length players < 7
     ==> isLeft . runExcept . runWriterT $ startGame "" players
-
-prop_startGameErrorsWhenMoreThan24Players :: Property
-prop_startGameErrorsWhenMoreThan24Players =
-    forAll (resize 30 $ listOf arbitrary) $ \players ->
-        length players > 24
-        ==> isLeft . runExcept . runWriterT $ startGame "" players
 
 prop_startGameErrorsWhenMoreThan1OfARestrictedRole :: [Player] -> Property
 prop_startGameErrorsWhenMoreThan1OfARestrictedRole players =
