@@ -9,6 +9,9 @@ This engine is based off of the party game Mafia, also known as Werewolf.
 See the [Wikipedia article](https://en.wikipedia.org/wiki/Mafia_(party_game)) for a rundown on it's
     gameplay and history.
 
+If you're here just to play werewolf, you may wish to skip straight to
+    [chat clients](https://github.com/hjwylde/werewolf#chat-clients).
+
 DISCLAIMER:
 I recently asked the copyright owners of the Werewolves of Millers Hollow if I may have permission
     to use some content from the rule book, but they have said no.
@@ -189,5 +192,6 @@ See `werewolf --help`.
 
 #### Chat clients
 
-**Coming soon:**
-* Slack
+Click through for instructions on how to run a chat client and play werewolf.
+
+* [Slack](https://github.com/hjwylde/werewolf-slack)
