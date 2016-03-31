@@ -124,7 +124,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenJustM (use roleModel) $ \roleModelsName -> do
             wildChild <- findPlayerBy_ role wildChildRole
 
-            whenM (isPlayerDead roleModelsName &&^ return (is villager wildChild)) $ do
+            whenM (isPlayerDead roleModelsName &&^ return (is alive wildChild) &&^ return (is villager wildChild)) $ do
                 aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
                 setPlayerAllegiance (wildChild ^. name) Werewolves
