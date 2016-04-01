@@ -420,24 +420,30 @@ villagerVillagerRole = Role
         ]
     }
 
--- | /She knows how to brew two extremely powerful potions: a healing potion, to resurrect the/
---   /player devoured by the Werewolves, and a poison potion, used at night to eliminate a player./
+-- | /Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove themself/
+--   /valuable to the village. The Witch is blessed (or maybe cursed) with the ability to make two/
+--   /powerful potions; one of which may heal a victim of the Werewolves, the other able to poison/
+--   /a player. The use of these potions could alter the village's currently misguided perception/
+--   /of the Witch./
 --
---   The Witch is called after the Werewolves. She is allowed to use both potions in the same night
---   and is also allowed to heal herself.
+--   The Witch is called after the Werewolves. They are able to heal and poison one player per game.
+--   There is no restriction on using both potions in one night or to heal themself.
 witchRole :: Role
 witchRole = Role
     { _name         = "Witch"
     , _allegiance   = Villagers
     , _balance      = 3
     , _description  = T.unwords
-        [ "She knows how to brew two extremely powerful potions: a healing potion, to resurrect the"
-        , "player devoured by the Werewolves, and a poison potion, used at night to eliminate a"
-        , "player."
+        [ "Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove"
+        , "themself valuable to the village. The Witch is blessed (or maybe cursed) with the"
+        , "ability to make two powerful potions; one of which may heal a victim of the Werewolves,"
+        , "the other able to poison a player. The use of these potions could alter the village's"
+        , "currently misguided perception of the Witch."
         ]
     , _rules        = T.unwords
-        [ "The Witch is called after the Werewolves. She is allowed to use both potions in the same"
-        , "night and is also allowed to heal herself."
+        [ "The Witch is called after the Werewolves. They are able to heal and poison one player"
+        , "per game. There is no restriction on using both potions in one night or to heal"
+        , "themself."
         ]
     }
 
