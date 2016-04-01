@@ -43,9 +43,6 @@ module Game.Werewolf.Messages (
     -- * Angel's turn messages
     angelJoinedVillagersMessage,
 
-    -- * Bear Tamer's turn messages
-    ursusGruntsMessage,
-
     -- * Defender's turn messages
 
     -- ** Error messages
@@ -53,6 +50,9 @@ module Game.Werewolf.Messages (
 
     -- * Devoted Servant's turn messages
     devotedServantRevealedMessage, devotedServantJoinedPackMessages,
+
+    -- * Druid's turn messages
+    ursusGruntsMessage,
 
     -- * Scapegoat's turn messages
     scapegoatChoseAllowedVotersMessage,
@@ -458,12 +458,6 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
     , "Now he is stuck here, doomed forever to live out a mortal life as a Villager."
     ]
 
-ursusGruntsMessage :: Message
-ursusGruntsMessage = publicMessage $ T.unwords
-    [ "Ursus wakes from his slumber, disturbed and on edge."
-    , "He loudly grunts as he smells danger."
-    ]
-
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
 playerCannotProtectSamePlayerTwiceInARowMessage to =
     privateMessage to "You cannot protect the same player twice in a row!"
@@ -492,6 +486,12 @@ devotedServantJoinedPackMessages devotedServantsName werewolfNames =
                 [ "As you enter you see his pack", T.intercalate ", " werewolfNames
                 , "waiting for you."
                 ]]
+
+ursusGruntsMessage :: Message
+ursusGruntsMessage = publicMessage $ T.unwords
+    [ "Ursus wakes from his slumber, disturbed and on edge."
+    , "He loudly grunts as he smells danger."
+    ]
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message
 scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords

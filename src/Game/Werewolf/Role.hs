@@ -48,7 +48,7 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    bearTamerRole, defenderRole, scapegoatRole, seerRole, simpleVillagerRole, villageIdiotRole,
+    defenderRole, druidRole, scapegoatRole, seerRole, simpleVillagerRole, villageIdiotRole,
     villagerVillagerRole, witchRole,
 
     -- *** The Werewolves
@@ -102,9 +102,9 @@ makePrisms ''Allegiance
 allRoles :: [Role]
 allRoles =
     [ angelRole
-    , bearTamerRole
     , defenderRole
     , devotedServantRole
+    , druidRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
@@ -248,34 +248,6 @@ angelRole = Role
         ]
     }
 
--- | /Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of the/
---   /"Three Road" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was that Titan,/
---   /the Bear Tamer, would lead his companion in a ballet so gravious that we'd cry every summer/
---   /in Miller's Hollow. Ursus even had the oh-so-previous ability to detect lycanthropes hidden/
---   /near him./
---
---   Each morning, right after the revelation of any possible nocturnal victims, if at least one
---   Werewolf is or ends up directly next to the Bear Tamer, then Ursus grunts to indicate danger to
---   all of the other players.
-bearTamerRole :: Role
-bearTamerRole = Role
-    { _name         = "Bear Tamer"
-    , _allegiance   = Villagers
-    , _balance      = 2
-    , _description  = T.unwords
-        [ "Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of"
-        , "the \"Three Road\" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was"
-        , "that Titan, the Bear Tamer, would lead his companion in a ballet so gravious that we'd"
-        , "cry every summer in Miller's Hollow. Ursus even had the oh-so-previous ability to detect"
-        , "lycanthropes hidden near him."
-        ]
-    , _rules        = T.unwords
-        [ "Each morning, right after the revelation of any possible nocturnal victims, if at least"
-        , "one Werewolf is or ends up directly next to the Bear Tamer, then Ursus grunts to"
-        , "indicate danger to all of the other players."
-        ]
-    }
-
 -- | /This character can save the Villagers from the bite of the Werewolves./
 --
 --   Each night the Defender is called before the Werewolves to select a player deserving of his
@@ -296,6 +268,34 @@ defenderRole = Role
             , "against the Werewolves."
             ]
         , "The Defender may not protect the same person two nights in a row."
+        ]
+    }
+
+-- | /Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of the/
+--   /"Three Road" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was that Titan,/
+--   /the Druid, would lead his companion in a ballet so gravious that we'd cry every summer/
+--   /in Miller's Hollow. Ursus even had the oh-so-previous ability to detect lycanthropes hidden/
+--   /near him./
+--
+--   Each morning, right after the revelation of any possible nocturnal victims, if at least one
+--   Werewolf is or ends up directly next to the Druid, then Ursus grunts to indicate danger to all
+--   of the other players.
+druidRole :: Role
+druidRole = Role
+    { _name         = "Druid"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = T.unwords
+        [ "Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of"
+        , "the \"Three Road\" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was"
+        , "that Titan, the Druid, would lead his companion in a ballet so gravious that we'd"
+        , "cry every summer in Miller's Hollow. Ursus even had the oh-so-previous ability to detect"
+        , "lycanthropes hidden near him."
+        ]
+    , _rules        = T.unwords
+        [ "Each morning, right after the revelation of any possible nocturnal victims, if at least"
+        , "one Werewolf is or ends up directly next to the Druid, then Ursus grunts to indicate"
+        , "danger to all of the other players."
         ]
     }
 

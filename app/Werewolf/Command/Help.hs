@@ -165,8 +165,8 @@ rulesMessages mGame = map (T.intercalate "\n")
       , whenRoleInPlay mGame witchRole
         "- The Witch wakes up and may heal the victim and/or poison someone."
       , "- The village wakes up and find the victim."
-      , whenRoleInPlay mGame bearTamerRole
-        "- Ursus grunts if the Bear Tamer is next to a Werewolf."
+      , whenRoleInPlay mGame druidRole
+        "- Ursus grunts if the Druid is next to a Werewolf."
       , "- The village votes to lynch a suspect."
       , whenRoleInPlay mGame devotedServantRole
         "- The Devoted Servant may choose whether to reveal themselves and take on the role of their master."

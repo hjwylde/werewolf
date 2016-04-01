@@ -172,7 +172,7 @@ stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
 stageAvailable game SeersTurn           = has (players . seers . alive) game
 stageAvailable _ Sunrise                = True
 stageAvailable _ Sunset                 = True
-stageAvailable game UrsussGrunt         = has (players . bearTamers . alive) game
+stageAvailable game UrsussGrunt         = has (players . druids . alive) game
 stageAvailable game VillagesTurn        =
     (has (players . angels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)

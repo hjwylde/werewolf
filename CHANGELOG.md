@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Minor*
+
+* Renamed the Bear Tamer to Druid. ([#131](https://github.com/hjwylde/werewolf/issues/131))
+
 *Revisions*
 
 * Updated the Witch's description and rules. ([#138](https://github.com/hjwylde/werewolf/issues/138))

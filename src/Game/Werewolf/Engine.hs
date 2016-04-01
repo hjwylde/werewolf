@@ -134,8 +134,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     UrsussGrunt -> do
-        bearTamer   <- findPlayerBy_ role bearTamerRole
-        players'    <- getAdjacentAlivePlayers (bearTamer ^. name)
+        druid       <- findPlayerBy_ role druidRole
+        players'    <- getAdjacentAlivePlayers (druid ^. name)
 
         when (has werewolves players') $ tell [ursusGruntsMessage]
 
