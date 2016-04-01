@@ -299,8 +299,9 @@ defenderRole = Role
         ]
     }
 
--- | /It's sad to say, but in Miller's Hollow, when something doesn't go right it's always him who/
---   /unjustly suffers the consequences./
+-- | /Werewolves don't just spring up out of the ground! That's where dwarves come from. Clearly/
+--   /someone is to blame for this affliction to Fougères. Ah! Unluckily, since no-one actually/
+--   /knows who brought them here, the blame is always laid upon the Scapegoat./
 --
 --   If the village's vote ends in a tie, it's the Scapegoat who is eliminated instead of no-one.
 --
@@ -312,8 +313,9 @@ scapegoatRole = Role
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
-        [ "It's sad to say, but in Miller's Hollow, when something doesn't go right it's always him"
-        , "who unjustly suffers the consequences."
+        [ "Werewolves don't just spring up out of the ground! That's where dwarves come from."
+        , "Clearly someone is to blame for this affliction to Fougères. Ah! Unluckily, since no-one"
+        , "actually knows who brought them here, the blame is always laid upon the Scapegoat."
         ]
     , _rules        = T.intercalate "\n"
         [ T.unwords
