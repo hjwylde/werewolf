@@ -2,23 +2,27 @@
 
 ### Upcoming
 
+*Revisions*
+
+* Updated the Witch's description and rules. ([#138](https://github.com/hjwylde/werewolf/issues/138))
+
 ### v0.4.11.0
 
 *Minor*
 
-* Replaced references to Millers Hollow with an original game description. ([#126](https://github.com/hjwylde/werewolf/issues/126))
-* Updated the Simple Villager's description and rules. ([#135](https://github.com/hjwylde/werewolf/issues/135))
 * Removed the advice field from Role. ([#134](https://github.com/hjwylde/werewolf/issues/134))
-* Updated the Seer's description. ([#134](https://github.com/hjwylde/werewolf/issues/134))
-* Updated the Simple Werewolf's description. ([#139](https://github.com/hjwylde/werewolf/issues/139))
 
 *Revisions*
 
+* Replaced references to Millers Hollow with an original game description. ([#126](https://github.com/hjwylde/werewolf/issues/126))
 * Fixed a bug where extra roles with spaces in them weren't recognised.
 * Fixed Devoted Servant messages to exclude her when joining the Werewolf pack.
 * Fixed Devoted Servant help messages to include how to `pass`.
 * Removed player cap of 24. ([#143](https://github.com/hjwylde/werewolf/issues/143))
 * Fixed a bug where the Wild Child would receive role model died messages when dead. ([#145](https://github.com/hjwylde/werewolf/issues/145))
+* Updated the Simple Villager's description and rules. ([#135](https://github.com/hjwylde/werewolf/issues/135))
+* Updated the Seer's description. ([#134](https://github.com/hjwylde/werewolf/issues/134))
+* Updated the Simple Werewolf's description. ([#139](https://github.com/hjwylde/werewolf/issues/139))
 
 ### v0.4.10.0
 
