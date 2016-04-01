@@ -52,7 +52,7 @@ module Game.Werewolf.Messages (
     devotedServantRevealedMessage, devotedServantJoinedPackMessages,
 
     -- * Druid's turn messages
-    ursusGruntsMessage,
+    ferinaGruntsMessage,
 
     -- * Scapegoat's turn messages
     scapegoatChoseAllowedVotersMessage,
@@ -148,13 +148,13 @@ stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
     DefendersTurn       -> defendersTurnMessages defendersName
     DevotedServantsTurn -> devotedServantsTurnMessages devotedServantsName victimsName
+    FerinasGrunt        -> []
     GameOver            -> []
     Lynching            -> []
     ScapegoatsTurn      -> scapegoatsTurnMessages scapegoatsName
     SeersTurn           -> seersTurnMessages seersName
     Sunrise             -> [sunriseMessage]
     Sunset              -> [nightFallsMessage]
-    UrsussGrunt         -> []
     VillagesTurn        -> if isFirstRound game
         then firstVillagesTurnMessages
         else villagesTurnMessages
@@ -394,11 +394,11 @@ pingRoleMessage :: Text -> Message
 pingRoleMessage roleName = publicMessage $ T.concat ["Waiting on the ", roleName, "..."]
 
 currentStageMessages :: Text -> Stage -> [Message]
+currentStageMessages _ FerinasGrunt = []
 currentStageMessages to GameOver    = [gameIsOverMessage to]
 currentStageMessages _ Lynching     = []
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
-currentStageMessages _ UrsussGrunt  = []
 currentStageMessages to turn        = [privateMessage to $ T.concat
     [ "It's currently the ", showTurn turn, " turn."
     ]]
@@ -406,13 +406,13 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn :: Stage -> Text
         showTurn DefendersTurn          = "Defender's"
         showTurn DevotedServantsTurn    = "Devoted Servant's"
+        showTurn FerinasGrunt           = undefined
         showTurn GameOver               = undefined
         showTurn Lynching               = undefined
         showTurn ScapegoatsTurn         = "Scapegoat's"
         showTurn SeersTurn              = "Seer's"
         showTurn Sunrise                = undefined
         showTurn Sunset                 = undefined
-        showTurn UrsussGrunt            = undefined
         showTurn VillagesTurn           = "village's"
         showTurn WerewolvesTurn         = "Werewolves'"
         showTurn WildChildsTurn         = "Wild-child's"
@@ -487,10 +487,10 @@ devotedServantJoinedPackMessages devotedServantsName werewolfNames =
                 , "waiting for you."
                 ]]
 
-ursusGruntsMessage :: Message
-ursusGruntsMessage = publicMessage $ T.unwords
-    [ "Ursus wakes from his slumber, disturbed and on edge."
-    , "He loudly grunts as he smells danger."
+ferinaGruntsMessage :: Message
+ferinaGruntsMessage = publicMessage $ T.unwords
+    [ "Ferina wakes from her slumber, disturbed and on edge."
+    , "She loudly grunts as she smells danger."
     ]
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message

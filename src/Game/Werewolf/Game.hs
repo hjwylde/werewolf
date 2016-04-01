@@ -22,8 +22,8 @@ module Game.Werewolf.Game (
     villageIdiotRevealed, votes,
 
     Stage(..),
-    _DefendersTurn, _DevotedServantsTurn, _GameOver, _Lynching, _ScapegoatsTurn, _SeersTurn,
-    _Sunrise, _Sunset, _UrsussGrunt, _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn,
+    _DefendersTurn, _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _ScapegoatsTurn,
+    _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn,
     _WolfHoundsTurn,
 
     allStages,
@@ -109,8 +109,8 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = DefendersTurn | DevotedServantsTurn | GameOver | Lynching | ScapegoatsTurn
-            | SeersTurn | Sunrise | Sunset | UrsussGrunt | VillagesTurn | WerewolvesTurn
+data Stage  = DefendersTurn | DevotedServantsTurn | FerinasGrunt | GameOver | Lynching
+            | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn
             | WildChildsTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
@@ -147,7 +147,7 @@ allStages =
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise
-    , UrsussGrunt
+    , FerinasGrunt
     , GameOver
     ]
 
@@ -166,13 +166,13 @@ stageAvailable game DevotedServantsTurn =
     has (players . devotedServants . alive) game
     && length (getVoteResult game) == 1
     && isn't devotedServant (head $ getVoteResult game)
+stageAvailable game FerinasGrunt        = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
 stageAvailable game Lynching            = Map.size (game ^. votes) > 0
 stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
 stageAvailable game SeersTurn           = has (players . seers . alive) game
 stageAvailable _ Sunrise                = True
 stageAvailable _ Sunset                 = True
-stageAvailable game UrsussGrunt         = has (players . druids . alive) game
 stageAvailable game VillagesTurn        =
     (has (players . angels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)

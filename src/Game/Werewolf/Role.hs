@@ -272,13 +272,13 @@ defenderRole = Role
     }
 
 -- | /Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of the/
---   /"Three Road" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was that Titan,/
+--   /"Three Road" plaza, accompanied by the grunting of Ferina. Ah! How long ago it was that Titan,/
 --   /the Druid, would lead his companion in a ballet so gravious that we'd cry every summer/
---   /in Miller's Hollow. Ursus even had the oh-so-previous ability to detect lycanthropes hidden/
+--   /in Miller's Hollow. Ferina even had the oh-so-previous ability to detect lycanthropes hidden/
 --   /near him./
 --
 --   Each morning, right after the revelation of any possible nocturnal victims, if at least one
---   Werewolf is or ends up directly next to the Druid, then Ursus grunts to indicate danger to all
+--   Werewolf is or ends up directly next to the Druid, then Ferina grunts to indicate danger to all
 --   of the other players.
 druidRole :: Role
 druidRole = Role
@@ -287,14 +287,14 @@ druidRole = Role
     , _balance      = 2
     , _description  = T.unwords
         [ "Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of"
-        , "the \"Three Road\" plaza, accompanied by the grunting of Ursus. Ah! How long ago it was"
+        , "the \"Three Road\" plaza, accompanied by the grunting of Ferina. Ah! How long ago it was"
         , "that Titan, the Druid, would lead his companion in a ballet so gravious that we'd"
-        , "cry every summer in Miller's Hollow. Ursus even had the oh-so-previous ability to detect"
+        , "cry every summer in Miller's Hollow. Ferina even had the oh-so-previous ability to detect"
         , "lycanthropes hidden near him."
         ]
     , _rules        = T.unwords
         [ "Each morning, right after the revelation of any possible nocturnal victims, if at least"
-        , "one Werewolf is or ends up directly next to the Druid, then Ursus grunts to indicate"
+        , "one Werewolf is or ends up directly next to the Druid, then Ferina grunts to indicate"
         , "danger to all of the other players."
         ]
     }

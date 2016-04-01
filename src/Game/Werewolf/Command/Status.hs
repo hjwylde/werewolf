@@ -47,6 +47,7 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingRoleMessage $ devotedServantRole ^. Role.name]
         tell [pingPlayerMessage $ devotedServant ^. name]
+    FerinasGrunt        -> return ()
     GameOver            -> tell [gameIsOverMessage callerName]
     Lynching            -> return ()
     ScapegoatsTurn      -> do
@@ -61,7 +62,6 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
         tell [pingPlayerMessage $ seer ^. name]
     Sunrise             -> return ()
     Sunset              -> return ()
-    UrsussGrunt         -> return ()
     VillagesTurn        -> do
         allowedVoterNames <- use allowedVoters
         pendingVoterNames <- toListOf names <$> getPendingVoters
@@ -91,11 +91,11 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
+    FerinasGrunt    -> return ()
     GameOver        -> tell [gameIsOverMessage callerName]
     Lynching        -> return ()
     Sunrise         -> return ()
     Sunset          -> return ()
-    UrsussGrunt     -> return ()
     VillagesTurn    -> do
         allowedVoterNames <- use allowedVoters
         pendingVoterNames <- toListOf names <$> getPendingVoters

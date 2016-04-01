@@ -78,6 +78,14 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (has devotedServants <$> getVoteResult)   advanceStage
         whenM (has devotedServants <$> getPassers)      advanceStage
 
+    FerinasGrunt -> do
+        druid       <- findPlayerBy_ role druidRole
+        players'    <- getAdjacentAlivePlayers (druid ^. name)
+
+        when (has werewolves players') $ tell [ferinaGruntsMessage]
+
+        advanceStage
+
     GameOver -> return ()
 
     Lynching -> do
@@ -130,14 +138,6 @@ checkStage' = use stage >>= \stage' -> case stage' of
                 setPlayerAllegiance (wildChild ^. name) Werewolves
 
                 tell $ wildChildJoinedPackMessages (wildChild ^. name) aliveWerewolfNames
-
-        advanceStage
-
-    UrsussGrunt -> do
-        druid       <- findPlayerBy_ role druidRole
-        players'    <- getAdjacentAlivePlayers (druid ^. name)
-
-        when (has werewolves players') $ tell [ursusGruntsMessage]
 
         advanceStage
 
