@@ -190,7 +190,7 @@ helpMessages = map (T.intercalate "\n")
         ]
       , T.unwords
         [ "Each night Werewolves attack the village and devour the innocent. For centuries no one"
-        , "knew how to fight this scourge, however recently a theory has taken ahold that maphaps"
+        , "knew how to fight this scourge, however recently a theory has taken ahold that mayhaps"
         , "the Werewolves walk among the Villagers themselves..."
         ]
       ]

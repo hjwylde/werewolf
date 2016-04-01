@@ -25,7 +25,7 @@ Most have faces and are known to the inhabitants of Fougères in Brittany, Franc
 
 Each night Werewolves attack the village and devour the innocent.
 For centuries no one knew how to fight this scourge, however recently a theory has taken ahold that
-    maphaps the Werewolves walk among the Villagers themselves...
+    mayhaps the Werewolves walk among the Villagers themselves...
 
 Objective of the Game:  
 For the Loners: complete their own objective.  
