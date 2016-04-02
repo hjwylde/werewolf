@@ -45,28 +45,28 @@ data Command = Commands
     { optAll :: Bool
     } deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options (Just (Commands optAll))) = do
-    mGame <- ifM (doesGameExist &&^ return (not optAll)) (Just <$> readGame) (return Nothing)
+handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle callerName tag (Options (Just (Commands optAll))) = do
+    mGame <- ifM (doesGameExist tag &&^ return (not optAll)) (Just <$> readGame tag) (return Nothing)
 
     exitWith success
         { messages = map (privateMessage callerName) (commandsMessages callerName mGame)
         }
-handle callerName (Options (Just (Roles optAll))) = do
-    roles <- (sortBy (compare `on` view Role.name) . nub) <$> ifM (doesGameExist &&^ return (not optAll))
-        (toListOf (players . roles) <$> readGame)
+handle callerName tag (Options (Just (Roles optAll))) = do
+    roles <- (sortBy (compare `on` view Role.name) . nub) <$> ifM (doesGameExist tag &&^ return (not optAll))
+        (toListOf (players . roles) <$> readGame tag)
         (return allRoles)
 
     exitWith success
         { messages = map (privateMessage callerName . roleMessage) roles
         }
-handle callerName (Options (Just (Rules optAll))) = do
-    mGame <- ifM (doesGameExist &&^ return (not optAll)) (Just <$> readGame) (return Nothing)
+handle callerName tag (Options (Just (Rules optAll))) = do
+    mGame <- ifM (doesGameExist tag &&^ return (not optAll)) (Just <$> readGame tag) (return Nothing)
 
     exitWith success
         { messages = map (privateMessage callerName) (rulesMessages mGame)
         }
-handle callerName (Options Nothing) = exitWith success
+handle callerName _ (Options Nothing) = exitWith success
     { messages = map (privateMessage callerName) helpMessages
     }
 

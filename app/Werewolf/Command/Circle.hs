@@ -34,13 +34,13 @@ data Options = Options
     { optIncludeDead :: Bool
     } deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options includeDead) = do
-    unlessM doesGameExist $ exitWith failure
+handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle callerName tag (Options includeDead) = do
+    unlessM (doesGameExist tag) $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
-    game <- readGame
+    game <- readGame tag
 
     let command = circleCommand callerName includeDead
 

@@ -27,13 +27,13 @@ import Game.Werewolf.Command.Status
 import Werewolf.Game
 import Werewolf.Messages
 
-handle :: MonadIO m => Text -> m ()
-handle callerName = do
-    unlessM doesGameExist $ exitWith failure
+handle :: MonadIO m => Text -> Text -> m ()
+handle callerName tag = do
+    unlessM (doesGameExist tag) $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
-    game <- readGame
+    game <- readGame tag
 
     let command = pingCommand callerName
 

@@ -40,6 +40,7 @@ import Options.Applicative
 
 data Options = Options
     { optCaller  :: Text
+    , optTag     :: Text
     , argCommand :: Command
     } deriving (Eq, Show)
 
@@ -89,6 +90,10 @@ werewolf = Options
     <$> fmap T.pack (strOption $ mconcat
         [ long "caller", metavar "PLAYER"
         , help "Specify the calling player's name"
+        ])
+    <*> fmap T.pack (strOption $ mconcat
+        [ long "tag", metavar "TAG"
+        , help "Specify the game tag (for running multiple games at once)"
         ])
     <*> subparser (mconcat
         [ command "boot"        $ info (helper <*> boot)        (fullDesc <> progDesc "Vote to boot a player")

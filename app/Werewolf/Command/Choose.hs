@@ -39,13 +39,13 @@ data Options = Options
     { args :: [Text]
     } deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options args) = do
-    unlessM doesGameExist $ exitWith failure
+handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle callerName tag (Options args) = do
+    unlessM (doesGameExist tag) $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
-    game <- readGame
+    game <- readGame tag
 
     let command = case game ^. stage of
             ScapegoatsTurn  -> Scapegoat.chooseCommand callerName args
@@ -56,4 +56,4 @@ handle callerName (Options args) = do
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game, messages)  -> writeGame game >> exitWith success { messages = messages }
+        Right (game, messages)  -> writeGame tag game >> exitWith success { messages = messages }

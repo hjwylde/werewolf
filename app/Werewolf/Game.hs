@@ -17,7 +17,7 @@ module Werewolf.Game (
     startGame, createPlayers, padRoles,
 
     -- ** Working with an existing
-    defaultFilePath, readGame, writeGame, deleteGame, doesGameExist,
+    filePath, readGame, writeGame, deleteGame, doesGameExist,
 ) where
 
 import Control.Lens         hiding (cons)
@@ -26,6 +26,7 @@ import Control.Monad.Random
 
 import Data.List.Extra
 import Data.Text       (Text)
+import qualified Data.Text       as T
 
 import Game.Werewolf
 
@@ -55,20 +56,20 @@ padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
         simpleVillagerRoles = replicate simpleVillagersCount simpleVillagerRole
         simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole
 
-defaultFilePath :: MonadIO m => m FilePath
-defaultFilePath = (</> defaultFileName) <$> liftIO getHomeDirectory
+filePath :: MonadIO m => Text -> m FilePath
+filePath tag = (</> ".werewolf" </> T.unpack tag) <$> liftIO getHomeDirectory
 
-defaultFileName :: FilePath
-defaultFileName = ".werewolf"
+readGame :: MonadIO m => Text -> m Game
+readGame tag = liftIO . fmap read $ filePath tag >>= readFile
 
-readGame :: MonadIO m => m Game
-readGame = liftIO . fmap read $ defaultFilePath >>= readFile
+writeGame :: MonadIO m => Text -> Game -> m ()
+writeGame tag game = liftIO $ filePath tag >>= \tag -> do
+    createDirectoryIfMissing True (dropFileName tag)
 
-writeGame :: MonadIO m => Game -> m ()
-writeGame game = liftIO $ defaultFilePath >>= flip writeFile (show game)
+    writeFile tag (show game)
 
-deleteGame :: MonadIO m => m ()
-deleteGame = liftIO $ defaultFilePath >>= removeFile
+deleteGame :: MonadIO m => Text -> m ()
+deleteGame tag = liftIO $ filePath tag >>= removeFile
 
-doesGameExist :: MonadIO m => m Bool
-doesGameExist = liftIO $ defaultFilePath >>= doesFileExist
+doesGameExist :: MonadIO m => Text -> m Bool
+doesGameExist tag = liftIO $ filePath tag >>= doesFileExist
