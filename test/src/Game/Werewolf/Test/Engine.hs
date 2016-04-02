@@ -36,18 +36,14 @@ import Test.Tasty.QuickCheck
 
 allEngineTests :: [TestTree]
 allEngineTests =
-    [ testProperty "check stage skips defender's turn when no defender"                 prop_checkStageSkipsDefendersTurnWhenNoDefender
-    , testProperty "check stage skips devoted servant's turn when no devoted servant"   prop_checkStageSkipsDevotedServantsTurnWhenNoDevotedServant
+    [ testProperty "check stage skips devoted servant's turn when no devoted servant"   prop_checkStageSkipsDevotedServantsTurnWhenNoDevotedServant
+    , testProperty "check stage skips protector's turn when no protector"               prop_checkStageSkipsProtectorsTurnWhenNoProtector
     , testProperty "check stage skips scapegoat's turn when no scapegoat"               prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat
     , testProperty "check stage skips seer's turn when no seer"                         prop_checkStageSkipsSeersTurnWhenNoSeer
     , testProperty "check stage skips village's turn when allowed voters empty"         prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty
     , testProperty "check stage skips wild-child's turn when no wild-child"             prop_checkStageSkipsWildChildsTurnWhenNoWildChild
     , testProperty "check stage skips witch's turn when no witch"                       prop_checkStageSkipsWitchsTurnWhenNoWitch
     , testProperty "check stage skips wolf-hound's turn when no wolf-hound"             prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound
-
-    , testProperty "check defender's turn advances to werewolves' turn"     prop_checkDefendersTurnAdvancesToWerewolvesTurn
-    , testProperty "check defender's turn advances when no defender"        prop_checkDefendersTurnAdvancesWhenNoDefender
-    , testProperty "check defender's turn does nothing unless protected"    prop_checkDefendersTurnDoesNothingUnlessProtected
 
     , testProperty "check devoted servant's turn advances to wolf-hound's turn"             prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn
     , testProperty "check devoted servant's turn advances when no devoted servant"          prop_checkDevotedServantsTurnAdvancesWhenNoDevotedServant
@@ -66,6 +62,10 @@ allEngineTests =
     , testProperty "check game over advances stage when after first round and angel dead"       prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead
     , testProperty "check game over does nothing when angel dead but aligned with villagers"    prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers
     , testProperty "check game over does nothing when game over"                                prop_checkGameOverDoesNothingWhenGameOver
+
+    , testProperty "check protector's turn advances to werewolves' turn"    prop_checkProtectorsTurnAdvancesToWerewolvesTurn
+    , testProperty "check protector's turn advances when no protector"      prop_checkProtectorsTurnAdvancesWhenNoProtector
+    , testProperty "check protector's turn does nothing unless protected"   prop_checkProtectorsTurnDoesNothingUnlessProtected
 
     , testProperty "check scapegoat's turn advances to wolf-hound's turn"                   prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn
     , testProperty "check scapegoat's turn skips wolf-hound's turn when allegiance chosen"  prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen
@@ -94,7 +94,7 @@ allEngineTests =
     , testProperty "check werewolves' turn resets votes"                                prop_checkWerewolvesTurnResetsVotes
     , testProperty "check werewolves' turn does nothing unless all voted"               prop_checkWerewolvesTurnDoesNothingUnlessAllVoted
 
-    , testProperty "check wild-child's turn advances to defender's turn"    prop_checkWildChildsTurnAdvancesToDefendersTurn
+    , testProperty "check wild-child's turn advances to protector's turn"   prop_checkWildChildsTurnAdvancesToProtectorsTurn
     , testProperty "check wild-child's turn advances when no wild-child"    prop_checkWildChildsTurnAdvancesWhenNoWildChild
     , testProperty "check wild-child's turn does nothing unless chosen"     prop_checkWildChildsTurnDoesNothingUnlessRoleModelChosen
 
@@ -119,19 +119,19 @@ allEngineTests =
     , testProperty "start game errors when more than 1 of a restricted role"    prop_startGameErrorsWhenMoreThan1OfARestrictedRole
     ]
 
-prop_checkStageSkipsDefendersTurnWhenNoDefender :: GameWithRoleModel -> Bool
-prop_checkStageSkipsDefendersTurnWhenNoDefender (GameWithRoleModel game) =
-    hasn't (stage . _DefendersTurn) game'
-    where
-        defendersName   = game ^?! players . defenders . name
-        game'           = run_ (apply (quitCommand defendersName) >> checkStage) game
-
 prop_checkStageSkipsDevotedServantsTurnWhenNoDevotedServant :: GameWithMajorityVote -> Bool
 prop_checkStageSkipsDevotedServantsTurnWhenNoDevotedServant (GameWithMajorityVote game) =
     hasn't (stage . _DevotedServantsTurn) game'
     where
         devotedServantsName = game ^?! players . devotedServants . name
         game'               = run_ (apply (quitCommand devotedServantsName) >> checkStage) game
+
+prop_checkStageSkipsProtectorsTurnWhenNoProtector :: GameWithRoleModel -> Bool
+prop_checkStageSkipsProtectorsTurnWhenNoProtector (GameWithRoleModel game) =
+    hasn't (stage . _ProtectorsTurn) game'
+    where
+        protectorsName  = game ^?! players . protectors . name
+        game'           = run_ (apply (quitCommand protectorsName) >> checkStage) game
 
 prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat :: GameWithConflictingVote -> Bool
 prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat (GameWithConflictingVote game) =
@@ -175,21 +175,6 @@ prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound (GameWithProtect game) =
     where
         wolfHoundsName  = game ^?! players . wolfHounds . name
         game'           = run_ (apply (quitCommand wolfHoundsName) >> checkStage) game
-
-prop_checkDefendersTurnAdvancesToWerewolvesTurn :: GameWithProtect -> Bool
-prop_checkDefendersTurnAdvancesToWerewolvesTurn (GameWithProtect game) =
-    has (stage . _WerewolvesTurn) (run_ checkStage game)
-
-prop_checkDefendersTurnAdvancesWhenNoDefender :: GameAtDefendersTurn -> Bool
-prop_checkDefendersTurnAdvancesWhenNoDefender (GameAtDefendersTurn game) = do
-    let defender    = game ^?! players . defenders
-    let command     = quitCommand $ defender ^. name
-
-    hasn't (stage . _DefendersTurn) (run_ (apply command >> checkStage) game)
-
-prop_checkDefendersTurnDoesNothingUnlessProtected :: GameAtDefendersTurn -> Bool
-prop_checkDefendersTurnDoesNothingUnlessProtected (GameAtDefendersTurn game) =
-    has (stage . _DefendersTurn) (run_ checkStage game)
 
 prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn :: GameAtDevotedServantsTurn -> Property
 prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn (GameAtDevotedServantsTurn game) = do
@@ -244,6 +229,21 @@ prop_checkLynchingSetsAllowedVoters (GameWithLynchVotes game) =
         expectedAllowedVoters
             | game' ^. jesterRevealed   = filter (isn't jester) $ game' ^. players
             | otherwise                 = game' ^.. players . traverse . alive
+
+prop_checkProtectorsTurnAdvancesToWerewolvesTurn :: GameWithProtect -> Bool
+prop_checkProtectorsTurnAdvancesToWerewolvesTurn (GameWithProtect game) =
+    has (stage . _WerewolvesTurn) (run_ checkStage game)
+
+prop_checkProtectorsTurnAdvancesWhenNoProtector :: GameAtProtectorsTurn -> Bool
+prop_checkProtectorsTurnAdvancesWhenNoProtector (GameAtProtectorsTurn game) = do
+    let protector   = game ^?! players . protectors
+    let command     = quitCommand $ protector ^. name
+
+    hasn't (stage . _ProtectorsTurn) (run_ (apply command >> checkStage) game)
+
+prop_checkProtectorsTurnDoesNothingUnlessProtected :: GameAtProtectorsTurn -> Bool
+prop_checkProtectorsTurnDoesNothingUnlessProtected (GameAtProtectorsTurn game) =
+    has (stage . _ProtectorsTurn) (run_ checkStage game)
 
 prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn :: GameWithAllowedVoters -> Bool
 prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn (GameWithAllowedVoters game) =
@@ -374,10 +374,10 @@ prop_checkWerewolvesTurnDoesNothingUnlessAllVoted (GameAtWerewolvesTurn game) =
     where
         n = length (game ^.. players . werewolves) - 1
 
-prop_checkWildChildsTurnAdvancesToDefendersTurn :: GameAtWildChildsTurn -> Property
-prop_checkWildChildsTurnAdvancesToDefendersTurn (GameAtWildChildsTurn game) =
+prop_checkWildChildsTurnAdvancesToProtectorsTurn :: GameAtWildChildsTurn -> Property
+prop_checkWildChildsTurnAdvancesToProtectorsTurn (GameAtWildChildsTurn game) =
     forAll (arbitraryWildChildChooseCommand game) $ \(Blind command) ->
-    has (stage . _DefendersTurn) (run_ (apply command >> checkStage) game)
+    has (stage . _ProtectorsTurn) (run_ (apply command >> checkStage) game)
 
 prop_checkWildChildsTurnAdvancesWhenNoWildChild :: GameAtWildChildsTurn -> Bool
 prop_checkWildChildsTurnAdvancesWhenNoWildChild (GameAtWildChildsTurn game) = do

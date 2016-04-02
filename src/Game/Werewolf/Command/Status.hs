@@ -37,52 +37,65 @@ circleCommand callerName includeDead = Command $ do
 
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    DefendersTurn       -> do
-        defender <- findPlayerBy_ role defenderRole
-
-        tell [pingRoleMessage $ defenderRole ^. Role.name]
-        tell [pingPlayerMessage $ defender ^. name]
     DevotedServantsTurn -> do
         devotedServant <- findPlayerBy_ role devotedServantRole
 
         tell [pingRoleMessage $ devotedServantRole ^. Role.name]
         tell [pingPlayerMessage $ devotedServant ^. name]
+
     FerinasGrunt        -> return ()
+
     GameOver            -> tell [gameIsOverMessage callerName]
+
     Lynching            -> return ()
+
+    ProtectorsTurn      -> do
+        protector <- findPlayerBy_ role protectorRole
+
+        tell [pingRoleMessage $ protectorRole ^. Role.name]
+        tell [pingPlayerMessage $ protector ^. name]
+
     ScapegoatsTurn      -> do
         scapegoat <- findPlayerBy_ role scapegoatRole
 
         tell [pingRoleMessage $ scapegoatRole ^. Role.name]
         tell [pingPlayerMessage $ scapegoat ^. name]
+
     SeersTurn           -> do
         seer <- findPlayerBy_ role seerRole
 
         tell [pingRoleMessage $ seerRole ^. Role.name]
         tell [pingPlayerMessage $ seer ^. name]
+
     Sunrise             -> return ()
+
     Sunset              -> return ()
+
     VillagesTurn        -> do
         allowedVoterNames <- use allowedVoters
         pendingVoterNames <- toListOf names <$> getPendingVoters
 
         tell [waitingOnMessage Nothing $ allowedVoterNames `intersect` pendingVoterNames]
         tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
+
     WerewolvesTurn      -> do
         pendingVoters <- getPendingVoters
 
         tell [pingRoleMessage "Werewolves"]
         tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
+
     WildChildsTurn      -> do
         wildChild <- findPlayerBy_ role wildChildRole
 
         tell [pingRoleMessage $ wildChildRole ^. Role.name]
         tell [pingPlayerMessage $ wildChild ^. name]
+
     WitchsTurn          -> do
         witch <- findPlayerBy_ role witchRole
 
         tell [pingRoleMessage $ witchRole ^. Role.name]
         tell [pingPlayerMessage $ witch ^. name]
+
     WolfHoundsTurn      -> do
         wolfHound <- findPlayerBy_ role wolfHoundRole
 

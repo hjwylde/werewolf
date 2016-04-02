@@ -24,7 +24,7 @@ module Game.Werewolf.Util (
     getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
-    isDefendersTurn, isDevotedServantsTurn, isGameOver, isScapegoatsTurn, isSeersTurn, isSunrise,
+    isDevotedServantsTurn, isGameOver, isProtectorsTurn, isScapegoatsTurn, isSeersTurn, isSunrise,
     isVillagesTurn, isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
     hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 
@@ -32,7 +32,7 @@ module Game.Werewolf.Util (
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDefender, isPlayerDevotedServant, isPlayerJester, isPlayerScapegoat, isPlayerSeer,
+    isPlayerDevotedServant, isPlayerJester, isPlayerProtector, isPlayerScapegoat, isPlayerSeer,
     isPlayerWildChild, isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
@@ -69,7 +69,7 @@ removePlayer name' = do
     player <- findPlayerBy_ name name'
 
     when (is angel player)      $ setPlayerAllegiance name' Villagers
-    when (is defender player)   $ do
+    when (is protector player)  $ do
         protect         .= Nothing
         priorProtect    .= Nothing
     when (is seer player)       $ see .= Nothing
@@ -119,14 +119,14 @@ getPendingVoters = gets Game.getPendingVoters
 getVoteResult :: MonadState Game m => m [Player]
 getVoteResult = gets Game.getVoteResult
 
-isDefendersTurn :: MonadState Game m => m Bool
-isDefendersTurn = has (stage . _DefendersTurn) <$> get
-
 isDevotedServantsTurn :: MonadState Game m => m Bool
 isDevotedServantsTurn = has (stage . _DevotedServantsTurn) <$> get
 
 isGameOver :: MonadState Game m => m Bool
 isGameOver = has (stage . _GameOver) <$> get
+
+isProtectorsTurn :: MonadState Game m => m Bool
+isProtectorsTurn = has (stage . _ProtectorsTurn) <$> get
 
 isScapegoatsTurn :: MonadState Game m => m Bool
 isScapegoatsTurn = has (stage . _ScapegoatsTurn) <$> get
@@ -167,14 +167,14 @@ hasWerewolvesWon = gets Game.hasWerewolvesWon
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = gets $ Game.doesPlayerExist name
 
-isPlayerDefender :: MonadState Game m => Text -> m Bool
-isPlayerDefender name' = is defender <$> findPlayerBy_ name name'
-
 isPlayerDevotedServant :: MonadState Game m => Text -> m Bool
 isPlayerDevotedServant name' = is devotedServant <$> findPlayerBy_ name name'
 
 isPlayerJester :: MonadState Game m => Text -> m Bool
 isPlayerJester name' = is jester <$> findPlayerBy_ name name'
+
+isPlayerProtector :: MonadState Game m => Text -> m Bool
+isPlayerProtector name' = is protector <$> findPlayerBy_ name name'
 
 isPlayerScapegoat :: MonadState Game m => Text -> m Bool
 isPlayerScapegoat name' = is scapegoat <$> findPlayerBy_ name name'

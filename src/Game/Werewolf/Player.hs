@@ -26,15 +26,15 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    angel, defender, devotedServant, druid, jester, scapegoat, seer, simpleVillager, simpleWerewolf,
-    villagerVillager, wildChild, witch, wolfHound,
+    angel, devotedServant, druid, jester, protector, scapegoat, seer, simpleVillager,
+    simpleWerewolf, villagerVillager, wildChild, witch, wolfHound,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    angels, defenders, devotedServants, druids, jesters, scapegoats, seers, simpleVillagers,
+    angels, devotedServants, druids, jesters, protectors, scapegoats, seers, simpleVillagers,
     simpleWerewolves, villagerVillagers, wildChildren, witches, wolfHounds,
     villagers, werewolves,
     alive, dead,
@@ -83,14 +83,6 @@ newPlayer name role = Player name role Alive
 angel :: Traversal' Player ()
 angel = role . only angelRole
 
--- | The traversal of 'Player's with a 'defenderRole'.
---
--- @
--- 'defender' = 'role' . 'only' 'defenderRole'
--- @
-defender :: Traversal' Player ()
-defender = role . only defenderRole
-
 -- | The traversal of 'Player's with a 'devotedServantRole'.
 --
 -- @
@@ -114,6 +106,14 @@ druid = role . only druidRole
 -- @
 jester :: Traversal' Player ()
 jester = role . only jesterRole
+
+-- | The traversal of 'Player's with a 'protectorRole'.
+--
+-- @
+-- 'protector' = 'role' . 'only' 'protectorRole'
+-- @
+protector :: Traversal' Player ()
+protector = role . only protectorRole
 
 -- | The traversal of 'Player's with a 'scapegoatRole'.
 --
@@ -227,14 +227,6 @@ states = traverse . state
 angels :: Traversable t => Traversal' (t Player) Player
 angels = traverse . filtered (is angel)
 
--- | This 'Traversal' provides the traversal of 'defender' 'Player's.
---
--- @
--- 'defenders' = 'traverse' . 'filtered' ('is' 'defender')
--- @
-defenders :: Traversable t => Traversal' (t Player) Player
-defenders = traverse . filtered (is defender)
-
 -- | This 'Traversal' provides the traversal of 'devotedServant' 'Player's.
 --
 -- @
@@ -258,6 +250,14 @@ druids = traverse . filtered (is druid)
 -- @
 jesters :: Traversable t => Traversal' (t Player) Player
 jesters = traverse . filtered (is jester)
+
+-- | This 'Traversal' provides the traversal of 'protector' 'Player's.
+--
+-- @
+-- 'protectors' = 'traverse' . 'filtered' ('is' 'protector')
+-- @
+protectors :: Traversable t => Traversal' (t Player) Player
+protectors = traverse . filtered (is protector)
 
 -- | This 'Traversal' provides the traversal of 'scapegoat' 'Player's.
 --

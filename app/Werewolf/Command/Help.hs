@@ -87,14 +87,14 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     , [ "Standard commands:"
       , "- `vote PLAYER`"
       ]
-    , whenPlayerHasRole callerName mGame defenderRole
-      [ "Defender commands:"
-      , "- `protect PLAYER`"
-      ]
     , whenPlayerHasRole callerName mGame devotedServantRole
       [ "Devoted Servant commands:"
       , "- `reveal`"
       , "- `pass`"
+      ]
+    , whenPlayerHasRole callerName mGame protectorRole
+      [ "Protector commands:"
+      , "- `protect PLAYER`"
       ]
     , whenPlayerHasRole callerName mGame scapegoatRole
       [ "Scapegoat commands:"
@@ -155,8 +155,8 @@ rulesMessages mGame = map (T.intercalate "\n")
       , "- The village falls asleep."
       , whenRoleInPlay mGame wildChildRole
         "- (First round only) the Wild-child wakes up and chooses a role model."
-      , whenRoleInPlay mGame defenderRole
-        "- The Defender wakes up and protects someone."
+      , whenRoleInPlay mGame protectorRole
+        "- The Protector wakes up and protects someone."
       , whenRoleInPlay mGame seerRole
         "- The Seer wakes up and sees someone's allegiance."
       , whenRoleInPlay mGame wolfHoundRole

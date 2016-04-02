@@ -67,11 +67,6 @@ checkBoots = do
 
 checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
-    DefendersTurn -> do
-        whenM (has (players . defenders . dead) <$> get) advanceStage
-
-        whenM (isJust <$> use protect) advanceStage
-
     DevotedServantsTurn -> do
         whenM (has (players . devotedServants . dead) <$> get) advanceStage
 
@@ -99,6 +94,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
         votes .= Map.empty
 
         advanceStage
+
+    ProtectorsTurn -> do
+        whenM (has (players . protectors . dead) <$> get) advanceStage
+
+        whenM (isJust <$> use protect) advanceStage
 
     ScapegoatsTurn -> unlessM (use scapegoatBlamed) $ do
         allowedVoters' <- use allowedVoters

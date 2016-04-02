@@ -65,9 +65,9 @@ The task before them will not be easy, but a certain few have learnt some tricks
 
 The Villagers must lynch all of the Werewolves.
 
-* Defender
 * Druid
 * Jester
+* Protector
 * Scapegoat
 * Seer
 * Simple Villager

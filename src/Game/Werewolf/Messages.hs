@@ -43,16 +43,16 @@ module Game.Werewolf.Messages (
     -- * Angel's turn messages
     angelJoinedVillagersMessage,
 
-    -- * Defender's turn messages
-
-    -- ** Error messages
-    playerCannotProtectSamePlayerTwiceInARowMessage,
-
     -- * Devoted Servant's turn messages
     devotedServantRevealedMessage, devotedServantJoinedPackMessages,
 
     -- * Druid's turn messages
     ferinaGruntsMessage,
+
+    -- * Protector's turn messages
+
+    -- ** Error messages
+    playerCannotProtectSamePlayerTwiceInARowMessage,
 
     -- * Scapegoat's turn messages
     scapegoatChoseAllowedVotersMessage,
@@ -146,11 +146,11 @@ villagerVillagerMessage name = publicMessage $ T.unwords
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
-    DefendersTurn       -> defendersTurnMessages defendersName
     DevotedServantsTurn -> devotedServantsTurnMessages devotedServantsName victimsName
     FerinasGrunt        -> []
     GameOver            -> []
     Lynching            -> []
+    ProtectorsTurn      -> protectorsTurnMessages protectorsName
     ScapegoatsTurn      -> scapegoatsTurnMessages scapegoatsName
     SeersTurn           -> seersTurnMessages seersName
     Sunrise             -> [sunriseMessage]
@@ -166,7 +166,7 @@ stageMessages game = case game ^. stage of
     WolfHoundsTurn      -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
-        defendersName       = players' ^?! defenders . name
+        protectorsName       = players' ^?! protectors . name
         devotedServantsName = players' ^?! devotedServants . name
         victimsName         = head (getVoteResult game) ^. name
         scapegoatsName      = players' ^?! scapegoats . name
@@ -175,12 +175,6 @@ stageMessages game = case game ^. stage of
         wildChildsName      = players' ^?! wildChildren . name
         wolfHoundsName      = players' ^?! wolfHounds . name
 
-defendersTurnMessages :: Text -> [Message]
-defendersTurnMessages to =
-    [ publicMessage "The Defender wakes up."
-    , privateMessage to "Whom would you like to `protect`?"
-    ]
-
 devotedServantsTurnMessages :: Text -> Text -> [Message]
 devotedServantsTurnMessages to victimsName =
     [ publicMessage "The Devoted Servant ponders."
@@ -188,6 +182,12 @@ devotedServantsTurnMessages to victimsName =
         [ "Would you like to `reveal` yourself and take on ", victimsName, "'s role?"
         , " (Or you can type `pass`.)"
         ]
+    ]
+
+protectorsTurnMessages :: Text -> [Message]
+protectorsTurnMessages to =
+    [ publicMessage "The Protector wakes up."
+    , privateMessage to "Whom would you like to `protect`?"
     ]
 
 scapegoatsTurnMessages :: Text -> [Message]
@@ -404,11 +404,11 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
     ]]
     where
         showTurn :: Stage -> Text
-        showTurn DefendersTurn          = "Defender's"
         showTurn DevotedServantsTurn    = "Devoted Servant's"
         showTurn FerinasGrunt           = undefined
         showTurn GameOver               = undefined
         showTurn Lynching               = undefined
+        showTurn ProtectorsTurn         = "Protector's"
         showTurn ScapegoatsTurn         = "Scapegoat's"
         showTurn SeersTurn              = "Seer's"
         showTurn Sunrise                = undefined
@@ -458,10 +458,6 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
     , "Now he is stuck here, doomed forever to live out a mortal life as a Villager."
     ]
 
-playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
-playerCannotProtectSamePlayerTwiceInARowMessage to =
-    privateMessage to "You cannot protect the same player twice in a row!"
-
 devotedServantRevealedMessage :: Text -> Message
 devotedServantRevealedMessage devotedServantsName = publicMessage $ T.unwords
     [ devotedServantsName, "stands up in horror."
@@ -492,6 +488,10 @@ ferinaGruntsMessage = publicMessage $ T.unwords
     [ "Ferina wakes from her slumber, disturbed and on edge."
     , "She loudly grunts as she smells danger."
     ]
+
+playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
+playerCannotProtectSamePlayerTwiceInARowMessage to =
+    privateMessage to "You cannot protect the same player twice in a row!"
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message
 scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
