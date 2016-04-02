@@ -2,6 +2,8 @@
 
 ### Upcoming
 
+### v0.4.12.0
+
 *Minor*
 
 * Renamed the Bear Tamer to Druid. ([#131](https://github.com/hjwylde/werewolf/issues/131))
