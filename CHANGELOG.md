@@ -2,6 +2,8 @@
 
 ### Upcoming
 
+### v0.5.0.0
+
 *Major*
 
 * Added required `--tag` option for enabling multiple games at once. ([#29](https://github.com/hjwylde/werewolf/issues/29))
