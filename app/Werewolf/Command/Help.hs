@@ -145,7 +145,7 @@ rulesMessages mGame = map (T.intercalate "\n")
         ]
       ]
     , filter (/= "") [ T.concat
-        [ "Each player is informed of their role (see `help roles' for a list) at the start of the"
+        [ "Each player is informed of their role (see `help roles` for a list) at the start of the"
         , "game. A game begins at night and follows a standard cycle."
         , whenRoleInPlay mGame angelRole
           " (N.B., when the Angel is in play the game begins with the village vote.)"
