@@ -547,8 +547,8 @@ noPlayerLynchedMessage = publicMessage $ T.unwords
 jesterLynchedMessage :: Text -> Message
 jesterLynchedMessage name = publicMessage $ T.concat
     [ "Just as the townsfolk tie ", name, " up to the pyre, a voice in the crowd yells out."
-    , " \"We can't burn ", name, "! He's that funny one, you know, the Jester!\" "
-    , name, " is quickly untied and apologised to."
+    , " \"We can't burn ", name, "! He's the joke of the town!\" "
+    , name, " the Jester is quickly untied and apologised to."
     ]
 
 scapegoatLynchedMessage :: Text -> Message
