@@ -46,31 +46,31 @@ main = getArgs >>= run
 run :: [String] -> IO ()
 run args = handleParseResult (execParserPure werewolfPrefs werewolfInfo args) >>= handle
 
-interpret :: Text -> [Text] -> IO ()
-interpret callerName args = do
-    let result = execParserPure werewolfPrefs werewolfInfo (map T.unpack $ "--caller":callerName:args)
+interpret :: Text -> Text -> [Text] -> IO ()
+interpret callerName tag args = do
+    let result = execParserPure werewolfPrefs werewolfInfo (map T.unpack $ "--caller":callerName:"--tag":tag:args)
 
     case result of
         Success options -> handle options
-        _               -> handle (Options callerName . Help . Help.Options . Just $ Help.Commands False)
+        _               -> handle (Options callerName tag . Help . Help.Options . Just $ Help.Commands False)
 
 handle :: Options -> IO ()
-handle (Options callerName command) = case command of
-    Choose options                      -> Choose.handle callerName options
-    Boot options                        -> Boot.handle callerName options
-    Circle options                      -> Circle.handle callerName options
-    End options                         -> End.handle callerName options
-    Heal                                -> Heal.handle callerName
-    Help options                        -> Help.handle callerName options
-    Interpret (Interpret.Options args)  -> interpret callerName args
-    Pass                                -> Pass.handle callerName
-    Ping                                -> Ping.handle callerName
-    Poison options                      -> Poison.handle callerName options
-    Protect options                     -> Protect.handle callerName options
-    Quit                                -> Quit.handle callerName
-    Reveal                              -> Reveal.handle callerName
-    See options                         -> See.handle callerName options
-    Start options                       -> Start.handle callerName options
-    Status                              -> Status.handle callerName
+handle (Options callerName tag command) = case command of
+    Choose options                      -> Choose.handle callerName tag options
+    Boot options                        -> Boot.handle callerName tag options
+    Circle options                      -> Circle.handle callerName tag options
+    End options                         -> End.handle callerName tag options
+    Heal                                -> Heal.handle callerName tag
+    Help options                        -> Help.handle callerName tag options
+    Interpret (Interpret.Options args)  -> interpret callerName tag args
+    Pass                                -> Pass.handle callerName tag
+    Ping                                -> Ping.handle callerName tag
+    Poison options                      -> Poison.handle callerName tag options
+    Protect options                     -> Protect.handle callerName tag options
+    Quit                                -> Quit.handle callerName tag
+    Reveal                              -> Reveal.handle callerName tag
+    See options                         -> See.handle callerName tag options
+    Start options                       -> Start.handle callerName tag options
+    Status                              -> Status.handle callerName tag
     Version                             -> Version.handle callerName
-    Vote options                        -> Vote.handle callerName options
+    Vote options                        -> Vote.handle callerName tag options

@@ -47,9 +47,9 @@ data Options = Options
 data ExtraRoles = None | Random | Use [Text]
     deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options extraRoles playerNames) = do
-    whenM (doesGameExist &&^ (hasn't (stage . _GameOver) <$> readGame)) $ exitWith failure
+handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle callerName tag (Options extraRoles playerNames) = do
+    whenM (doesGameExist tag &&^ (hasn't (stage . _GameOver) <$> readGame tag)) $ exitWith failure
         { messages = [gameAlreadyRunningMessage callerName]
         }
 
@@ -65,7 +65,7 @@ handle callerName (Options extraRoles playerNames) = do
 
     case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game, messages)  -> writeGame game >> exitWith success { messages = messages }
+        Right (game, messages)  -> writeGame tag game >> exitWith success { messages = messages }
 
 randomExtraRoles :: MonadIO m => Int -> m [Role]
 randomExtraRoles n = liftIO . evalRandIO $ do

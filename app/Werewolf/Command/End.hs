@@ -34,17 +34,17 @@ data Options = Options
     { optForce :: Bool
     } deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options force) = do
-    unlessM doesGameExist $ exitWith failure { messages = [noGameRunningMessage callerName] }
+handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle callerName tag (Options force) = do
+    unlessM (doesGameExist tag) $ exitWith failure { messages = [noGameRunningMessage callerName] }
 
     unless force $ do
-        game <- readGame
+        game <- readGame tag
 
         unless (doesPlayerExist callerName game) $
             exitWith failure { messages = [playerCannotDoThatMessage callerName] }
 
-    deleteGame
+    deleteGame tag
 
     exitWith success { messages = [gameEndedMessage] }
     where

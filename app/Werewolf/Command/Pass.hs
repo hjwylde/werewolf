@@ -29,13 +29,13 @@ import Game.Werewolf.Command.Witch          as Witch
 import Werewolf.Game
 import Werewolf.Messages
 
-handle :: MonadIO m => Text -> m ()
-handle callerName = do
-    unlessM doesGameExist $ exitWith failure
+handle :: MonadIO m => Text -> Text -> m ()
+handle callerName tag = do
+    unlessM (doesGameExist tag) $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
-    game <- readGame
+    game <- readGame tag
 
     let command = case game ^. stage of
             DevotedServantsTurn -> DevotedServant.passCommand callerName
@@ -45,4 +45,4 @@ handle callerName = do
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }
+        Right (game', messages) -> writeGame tag game' >> exitWith success { messages = messages }

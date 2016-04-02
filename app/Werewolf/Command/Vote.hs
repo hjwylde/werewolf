@@ -36,13 +36,13 @@ data Options = Options
     { argTarget :: Text
     } deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Options -> m ()
-handle callerName (Options targetName) = do
-    unlessM doesGameExist $ exitWith failure
+handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle callerName tag (Options targetName) = do
+    unlessM (doesGameExist tag) $ exitWith failure
         { messages = [noGameRunningMessage callerName]
         }
 
-    game <- readGame
+    game <- readGame tag
 
     let command = case game ^. stage of
             VillagesTurn    -> Villager.voteCommand callerName targetName
@@ -52,4 +52,4 @@ handle callerName (Options targetName) = do
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game', messages) -> writeGame game' >> exitWith success { messages = messages }
+        Right (game', messages) -> writeGame tag game' >> exitWith success { messages = messages }
