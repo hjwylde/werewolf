@@ -46,7 +46,7 @@ allVoteCommandTests =
     , testProperty "villager vote command errors when not villages turn"                prop_villagerVoteCommandErrorsWhenNotVillagesTurn
     , testProperty "villager vote command errors when caller has voted"                 prop_villagerVoteCommandErrorsWhenCallerHasVoted
     , testProperty "villager vote command errors when caller is not in allowed voters"  prop_villagerVoteCommandErrorsWhenCallerIsNotInAllowedVoters
-    , testProperty "villager vote command errors when caller is known village idiot"    prop_villagerVoteCommandErrorsWhenCallerIsKnownVillageIdiot
+    , testProperty "villager vote command errors when caller is known jester"           prop_villagerVoteCommandErrorsWhenCallerIsKnownJester
     , testProperty "villager vote command updates votes"                                prop_villagerVoteCommandUpdatesVotes
     ]
 
@@ -183,14 +183,14 @@ prop_villagerVoteCommandErrorsWhenCallerIsNotInAllowedVoters (GameWithAllowedVot
     where
         game' = run_ checkStage game
 
-prop_villagerVoteCommandErrorsWhenCallerIsKnownVillageIdiot :: GameWithVillageIdiotRevealedAtVillagesTurn -> Property
-prop_villagerVoteCommandErrorsWhenCallerIsKnownVillageIdiot (GameWithVillageIdiotRevealedAtVillagesTurn game) =
+prop_villagerVoteCommandErrorsWhenCallerIsKnownJester :: GameWithJesterRevealedAtVillagesTurn -> Property
+prop_villagerVoteCommandErrorsWhenCallerIsKnownJester (GameWithJesterRevealedAtVillagesTurn game) =
     forAll (arbitraryPlayer game) $ \target -> do
         let command = Villager.voteCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
     where
-        caller = game ^?! players . villageIdiots
+        caller = game ^?! players . jesters
 
 prop_villagerVoteCommandUpdatesVotes :: GameAtVillagesTurn -> Property
 prop_villagerVoteCommandUpdatesVotes (GameAtVillagesTurn game) =

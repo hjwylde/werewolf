@@ -33,7 +33,7 @@ allRevealCommandTests =
     , testProperty "reveal command errors when caller not devoted servant"  prop_revealCommandErrorsWhenCallerNotDevotedServant
     , testProperty "reveal command sets caller's role"                      prop_revealCommandSetsCallersRole
     , testProperty "reveal command sets target's role"                      prop_revealCommandSetsTargetsRole
-    , testProperty "reveal command resets role when village idiot"          prop_revealCommandResetsRoleWhenVillageIdiot
+    , testProperty "reveal command resets role when jester"                 prop_revealCommandResetsRoleWhenJester
     , testProperty "reveal command resets role when wild-child"             prop_revealCommandResetsRoleWhenWildChild
     , testProperty "reveal command resets role when witch"                  prop_revealCommandResetsRoleWhenWitch
     , testProperty "reveal command resets role when wolf-hound"             prop_revealCommandResetsRoleWhenWolfHound
@@ -90,16 +90,16 @@ prop_revealCommandSetsTargetsRole (GameAtDevotedServantsTurn game) = do
     where
         targetsName = head (getVoteResult game) ^. name
 
-prop_revealCommandResetsRoleWhenVillageIdiot :: GameAtDevotedServantsTurn -> Bool
-prop_revealCommandResetsRoleWhenVillageIdiot (GameAtDevotedServantsTurn game) = do
+prop_revealCommandResetsRoleWhenJester :: GameAtDevotedServantsTurn -> Bool
+prop_revealCommandResetsRoleWhenJester (GameAtDevotedServantsTurn game) = do
     let devotedServantsName = game ^?! players . devotedServants . name
     let command             = revealCommand devotedServantsName
     let game''              = run_ (apply command) game'
 
-    not $ game'' ^. villageIdiotRevealed
+    not $ game'' ^. jesterRevealed
     where
         targetsName = head (getVoteResult game) ^. name
-        game'       = game & players . traverse . filteredBy name targetsName . role .~ villageIdiotRole & villageIdiotRevealed .~ True
+        game'       = game & players . traverse . filteredBy name targetsName . role .~ jesterRole & jesterRevealed .~ True
 
 prop_revealCommandResetsRoleWhenWildChild :: GameAtDevotedServantsTurn -> Bool
 prop_revealCommandResetsRoleWhenWildChild (GameAtDevotedServantsTurn game) = do

@@ -32,7 +32,7 @@ module Game.Werewolf.Util (
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDefender, isPlayerDevotedServant, isPlayerScapegoat, isPlayerSeer, isPlayerVillageIdiot,
+    isPlayerDefender, isPlayerDevotedServant, isPlayerJester, isPlayerScapegoat, isPlayerSeer,
     isPlayerWildChild, isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
@@ -42,10 +42,10 @@ import Control.Lens        hiding (cons)
 import Control.Monad.Extra
 import Control.Monad.State hiding (state)
 
-import Data.List
-import Data.Maybe
-import qualified Data.Map as Map
-import Data.Text  (Text)
+import           Data.List
+import qualified Data.Map   as Map
+import           Data.Maybe
+import           Data.Text  (Text)
 
 import           Game.Werewolf.Game   hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
                                        getVoteResult, hasAngelWon, hasAnyoneWon, hasVillagersWon,
@@ -173,14 +173,14 @@ isPlayerDefender name' = is defender <$> findPlayerBy_ name name'
 isPlayerDevotedServant :: MonadState Game m => Text -> m Bool
 isPlayerDevotedServant name' = is devotedServant <$> findPlayerBy_ name name'
 
+isPlayerJester :: MonadState Game m => Text -> m Bool
+isPlayerJester name' = is jester <$> findPlayerBy_ name name'
+
 isPlayerScapegoat :: MonadState Game m => Text -> m Bool
 isPlayerScapegoat name' = is scapegoat <$> findPlayerBy_ name name'
 
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name' = is seer <$> findPlayerBy_ name name'
-
-isPlayerVillageIdiot :: MonadState Game m => Text -> m Bool
-isPlayerVillageIdiot name' = is villageIdiot <$> findPlayerBy_ name name'
 
 isPlayerWildChild :: MonadState Game m => Text -> m Bool
 isPlayerWildChild name' = is wildChild <$> findPlayerBy_ name name'

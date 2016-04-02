@@ -58,14 +58,14 @@ module Game.Werewolf.Messages (
     scapegoatChoseAllowedVotersMessage,
 
     -- ** Error messages
-    playerMustChooseAtLeastOneTargetMessage, playerCannotChooseVillageIdiotMessage,
+    playerMustChooseAtLeastOneTargetMessage, playerCannotChooseJesterMessage,
 
     -- * Seer's turn messages
     playerSeenMessage,
 
     -- * Villages' turn messages
     playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
-    scapegoatLynchedMessage, villageIdiotLynchedMessage,
+    jesterLynchedMessage, scapegoatLynchedMessage,
 
     -- ** Error messages
     playerHasAlreadyVotedMessage,
@@ -503,9 +503,9 @@ playerMustChooseAtLeastOneTargetMessage :: Text -> Message
 playerMustChooseAtLeastOneTargetMessage to =
     privateMessage to "You must choose at least 1 target!"
 
-playerCannotChooseVillageIdiotMessage :: Text -> Message
-playerCannotChooseVillageIdiotMessage to =
-    privateMessage to "You cannot choose the Village Idiot!"
+playerCannotChooseJesterMessage :: Text -> Message
+playerCannotChooseJesterMessage to =
+    privateMessage to "You cannot choose the Jester!"
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
@@ -544,18 +544,18 @@ noPlayerLynchedMessage = publicMessage $ T.unwords
     , "Looks like no-one is being burned this day."
     ]
 
+jesterLynchedMessage :: Text -> Message
+jesterLynchedMessage name = publicMessage $ T.concat
+    [ "Just as the townsfolk tie ", name, " up to the pyre, a voice in the crowd yells out."
+    , " \"We can't burn ", name, "! He's the joke of the town!\" "
+    , name, " the Jester is quickly untied and apologised to."
+    ]
+
 scapegoatLynchedMessage :: Text -> Message
 scapegoatLynchedMessage name = publicMessage $ T.unwords
     [ "The townsfolk squabble over whom to tie up. Just as they are about to call it a day"
     , "they notice that", name, "has been acting awfully suspicious."
     , "Not wanting to take any chances,", name, "is promptly tied to a pyre and burned alive."
-    ]
-
-villageIdiotLynchedMessage :: Text -> Message
-villageIdiotLynchedMessage name = publicMessage $ T.concat
-    [ "Just as the townsfolk tie ", name, " up to the pyre, a voice in the crowd yells out."
-    , " \"We can't burn ", name, "! He's that oaf, you know, John's boy!\""
-    , " The Village Idiot is quickly untied and apologised to."
     ]
 
 playerHasAlreadyVotedMessage :: Text -> Message

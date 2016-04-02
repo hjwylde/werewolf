@@ -5,12 +5,14 @@
 *Minor*
 
 * Renamed the Bear Tamer to Druid. ([#131](https://github.com/hjwylde/werewolf/issues/131))
+* Renamed the Village Idiot to Jester. ([#136](https://github.com/hjwylde/werewolf/issues/136))
 
 *Revisions*
 
 * Updated the Witch's description and rules. ([#138](https://github.com/hjwylde/werewolf/issues/138))
 * Updated the Scapegoat's description. ([#133](https://github.com/hjwylde/werewolf/issues/133))
 * Updated the Druid's description and rules. ([#131](https://github.com/hjwylde/werewolf/issues/131))
+* Updated the Jester's description and rules. ([#136](https://github.com/hjwylde/werewolf/issues/136))
 
 ### v0.4.11.0
 

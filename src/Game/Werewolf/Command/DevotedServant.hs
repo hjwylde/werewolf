@@ -60,11 +60,11 @@ validateCommand callerName = do
 
 resetRole :: (MonadState Game m, MonadWriter [Message] m) => Text -> Role -> m ()
 resetRole callerName role
+    | role == jesterRole            = jesterRevealed .= False
     | role == simpleWerewolfRole    = do
         aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
         tell $ devotedServantJoinedPackMessages callerName (aliveWerewolfNames \\ [callerName])
-    | role == villageIdiotRole      = villageIdiotRevealed .= False
     | role == wildChildRole         = roleModel .= Nothing
     | role == witchRole             = healUsed .= False >> poisonUsed .= False
     | role == wolfHoundRole         = allegianceChosen .= Nothing

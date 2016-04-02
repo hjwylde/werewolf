@@ -38,7 +38,7 @@ allGameTests =
     , testProperty "new game starts with no protect"                        prop_newGameStartsWithNoProtect
     , testProperty "new game starts with scapegoat blamed false"            prop_newGameStartsWithScapegoatBlamedFalse
     , testProperty "new game starts with no see"                            prop_newGameStartsWithNoSee
-    , testProperty "new game starts with village idiot revealed false"      prop_newGameStartsWithVillageIdiotRevealedFalse
+    , testProperty "new game starts with jester revealed false"             prop_newGameStartsWithJesterRevealedFalse
     , testProperty "new game starts with votes empty"                       prop_newGameStartsWithVotesEmpty
     , testProperty "new game uses given players"                            prop_newGameUsesGivenPlayers
     ]
@@ -89,9 +89,9 @@ prop_newGameStartsWithScapegoatBlamedFalse players = not $ newGame players ^. sc
 prop_newGameStartsWithNoSee :: [Player] -> Bool
 prop_newGameStartsWithNoSee players = isNothing $ newGame players ^. see
 
-prop_newGameStartsWithVillageIdiotRevealedFalse :: [Player] -> Bool
-prop_newGameStartsWithVillageIdiotRevealedFalse players =
-    not $ newGame players ^. villageIdiotRevealed
+prop_newGameStartsWithJesterRevealedFalse :: [Player] -> Bool
+prop_newGameStartsWithJesterRevealedFalse players =
+    not $ newGame players ^. jesterRevealed
 
 prop_newGameStartsWithVotesEmpty :: [Player] -> Bool
 prop_newGameStartsWithVotesEmpty players = has (votes . _Empty) (newGame players)
