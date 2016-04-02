@@ -438,13 +438,13 @@ arbitraryCommand game = case game ^. stage of
         [ arbitraryDevotedServantPassCommand game
         , arbitraryRevealCommand game
         ]
+    FerinasGrunt        -> return $ Blind noopCommand
     GameOver            -> return $ Blind noopCommand
     Lynching            -> return $ Blind noopCommand
     ScapegoatsTurn      -> arbitraryScapegoatChooseCommand game
     SeersTurn           -> arbitrarySeeCommand game
     Sunrise             -> return $ Blind noopCommand
     Sunset              -> return $ Blind noopCommand
-    UrsussGrunt         -> return $ Blind noopCommand
     VillagesTurn        -> arbitraryVillagerVoteCommand game
     WerewolvesTurn      -> arbitraryWerewolfVoteCommand game
     WildChildsTurn      -> arbitraryWildChildChooseCommand game
