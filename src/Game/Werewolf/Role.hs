@@ -271,31 +271,30 @@ defenderRole = Role
         ]
     }
 
--- | /Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of the/
---   /"Three Road" plaza, accompanied by the grunting of Ferina. Ah! How long ago it was that Titan,/
---   /the Druid, would lead his companion in a ballet so gravious that we'd cry every summer/
---   /in Miller's Hollow. Ferina even had the oh-so-previous ability to detect lycanthropes hidden/
---   /near him./
+-- | /How honoured we are to be in the presence of such a noble leader. The return of the Druid/
+--   /marks an exceptional time in Fougères's history! Friend of the woodland creatures, practiced/
+--   /philosopher and now, with the help of Ferina their companion, a bane to the Werewolves/
+--   /themselves! My does she have a nose on her, strong enough to sniff out lycanthropes in close/
+--   /proximity! Listen for her grunt and heed the Druid's words for they will not let you down./
 --
---   Each morning, right after the revelation of any possible nocturnal victims, if at least one
---   Werewolf is or ends up directly next to the Druid, then Ferina grunts to indicate danger to all
---   of the other players.
+--   Each morning when Ferina wakes from her slumber she will be alert and cautious. If the Druid is
+--   next to a Werewolf then Ferina will grunt in warning.
 druidRole :: Role
 druidRole = Role
     { _name         = "Druid"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
-        [ "Ah! How sweet it is, in my memory, the sound of chains slipping onto the cobblestones of"
-        , "the \"Three Road\" plaza, accompanied by the grunting of Ferina. Ah! How long ago it was"
-        , "that Titan, the Druid, would lead his companion in a ballet so gravious that we'd"
-        , "cry every summer in Miller's Hollow. Ferina even had the oh-so-previous ability to detect"
-        , "lycanthropes hidden near him."
+        [ "How honoured we are to be in the presence of such a noble leader. The return of the"
+        , "Druid marks an exceptional time in Fougères's history! Friend of the woodland creatures,"
+        , "practiced philosopher and now, with the help of Ferina their companion, a bane to the"
+        , "Werewolves themselves! My does she have a nose on her, strong enough to sniff out"
+        , "lycanthropes in close proximity! Listen for her grunt and heed the Druid's words for"
+        , "they will not let you down."
         ]
     , _rules        = T.unwords
-        [ "Each morning, right after the revelation of any possible nocturnal victims, if at least"
-        , "one Werewolf is or ends up directly next to the Druid, then Ferina grunts to indicate"
-        , "danger to all of the other players."
+        [ "Each morning when Ferina wakes from her slumber she will be alert and cautious. If the"
+        , "Druid is next to a Werewolf then Ferina will grunt in warning."
         ]
     }
 
