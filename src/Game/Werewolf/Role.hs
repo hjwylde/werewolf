@@ -48,7 +48,7 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    defenderRole, druidRole, scapegoatRole, seerRole, simpleVillagerRole, villageIdiotRole,
+    defenderRole, druidRole, jesterRole, scapegoatRole, seerRole, simpleVillagerRole,
     villagerVillagerRole, witchRole,
 
     -- *** The Werewolves
@@ -105,10 +105,10 @@ allRoles =
     , defenderRole
     , devotedServantRole
     , druidRole
+    , jesterRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
-    , villageIdiotRole
     , simpleWerewolfRole
     , villagerVillagerRole
     , wildChildRole
@@ -373,14 +373,14 @@ simpleVillagerRole = Role
 -- | /What is a village without an idiot? He does pretty much nothing important, but he's so/
 --   /charming that no one would want to hurt him./
 --
---   If the village votes against the Village Idiot, his identity is revealed. At that moment the
+--   If the village votes against the Jester, his identity is revealed. At that moment the
 --   Villagers understand their mistake and immediately let him be.
 --
---   The Village Idiot continues to play but may no longer vote, as what would the vote of an idiot
+--   The Jester continues to play but may no longer vote, as what would the vote of an idiot
 --   be worth?
-villageIdiotRole :: Role
-villageIdiotRole = Role
-    { _name         = "Village Idiot"
+jesterRole :: Role
+jesterRole = Role
+    { _name         = "Jester"
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
@@ -389,11 +389,11 @@ villageIdiotRole = Role
         ]
     , _rules        = T.intercalate "\n"
         [ T.unwords
-            [ "If the village votes against the Village Idiot, his identity is revealed. At that"
+            [ "If the village votes against the Jester, his identity is revealed. At that"
             , "moment the Villagers understand their mistake and immediately let him be."
             ]
         , T.unwords
-            [ "The Village Idiot continues to play but may no longer vote, as what would the vote"
+            [ "The Jester continues to play but may no longer vote, as what would the vote"
             , "of an idiot be worth?"
             ]
         ]

@@ -54,7 +54,7 @@ allEngineTests =
     , testProperty "check devoted servant's turn does nothing unless revealed or passed"    prop_checkDevotedServantsTurnDoesNothingUnlessRevealedOrPassed
 
     , testProperty "check lynching lynches one player when consensus"                   prop_checkLynchingLynchesOnePlayerWhenConsensus
-    , testProperty "check lynching lynches no one when target is village idiot"         prop_checkLynchingLynchesNoOneWhenTargetIsVillageIdiot
+    , testProperty "check lynching lynches no one when target is jester"                prop_checkLynchingLynchesNoOneWhenTargetIsJester
     , testProperty "check lynching lynches scapegoat when conflicted"                   prop_checkLynchingLynchesScapegoatWhenConflicted
     , testProperty "check lynching lynches no one when conflicted and no scapegoats"    prop_checkLynchingLynchesNoOneWhenConflictedAndNoScapegoats
     , testProperty "check lynching resets votes"                                        prop_checkLynchingResetsVotes
@@ -212,18 +212,18 @@ prop_checkDevotedServantsTurnDoesNothingUnlessRevealedOrPassed (GameAtDevotedSer
 
 prop_checkLynchingLynchesOnePlayerWhenConsensus :: GameWithPassAtDevotedServantsTurn -> Property
 prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithPassAtDevotedServantsTurn game) =
-    isn't villageIdiot target
+    isn't jester target
     ==> length (run_ checkStage game ^.. players . traverse . dead) == 1
     where
         target = head $ getVoteResult game
 
-prop_checkLynchingLynchesNoOneWhenTargetIsVillageIdiot :: GameAtVillagesTurn -> Bool
-prop_checkLynchingLynchesNoOneWhenTargetIsVillageIdiot (GameAtVillagesTurn game) = do
-    let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (villageIdiot ^. name))) game (game ^. players)
+prop_checkLynchingLynchesNoOneWhenTargetIsJester :: GameAtVillagesTurn -> Bool
+prop_checkLynchingLynchesNoOneWhenTargetIsJester (GameAtVillagesTurn game) = do
+    let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (jester ^. name))) game (game ^. players)
 
     none (is dead) (run_ checkStage game' ^. players)
     where
-        villageIdiot = game ^?! players . villageIdiots
+        jester = game ^?! players . jesters
 
 prop_checkLynchingLynchesScapegoatWhenConflicted :: GameAtScapegoatsTurn -> Bool
 prop_checkLynchingLynchesScapegoatWhenConflicted (GameAtScapegoatsTurn game) =
@@ -242,8 +242,8 @@ prop_checkLynchingSetsAllowedVoters (GameWithLynchVotes game) =
     where
         game' = run_ checkStage game
         expectedAllowedVoters
-            | game' ^. villageIdiotRevealed = filter (isn't villageIdiot) $ game' ^. players
-            | otherwise                     = game' ^.. players . traverse . alive
+            | game' ^. jesterRevealed   = filter (isn't jester) $ game' ^. players
+            | otherwise                 = game' ^.. players . traverse . alive
 
 prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn :: GameWithAllowedVoters -> Bool
 prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn (GameWithAllowedVoters game) =
@@ -296,7 +296,7 @@ prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVi
     let devotedServantsName = game ^?! players . devotedServants . name
     let command             = passCommand devotedServantsName
 
-    isn't angel roleModel' && isn't devotedServant roleModel' && isn't villageIdiot roleModel'
+    isn't angel roleModel' && isn't devotedServant roleModel' && isn't jester roleModel'
         ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . wildChildren
     where
         roleModel' = game ^?! players . traverse . filteredBy name (fromJust $ game ^. roleModel)

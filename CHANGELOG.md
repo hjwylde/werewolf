@@ -5,6 +5,7 @@
 *Minor*
 
 * Renamed the Bear Tamer to Druid. ([#131](https://github.com/hjwylde/werewolf/issues/131))
+* Renamed the Village Idiot to Jester. ([#136](https://github.com/hjwylde/werewolf/issues/136))
 
 *Revisions*
 

@@ -18,8 +18,8 @@ module Game.Werewolf.Game (
     -- * Game
     Game,
     stage, round, players, events, boots, passes, allegianceChosen, allowedVoters, heal, healUsed,
-    poison, poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see,
-    villageIdiotRevealed, votes,
+    jesterRevealed, poison, poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see,
+    votes,
 
     Stage(..),
     _DefendersTurn, _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _ScapegoatsTurn,
@@ -82,25 +82,25 @@ import Prelude hiding (round)
 --   'Game.Werewolf.Engine.checkGameOver' will check to see if any of the win conditions are met and
 --   if so, advance the game's 'stage' to 'GameOver'.
 data Game = Game
-    { _stage                :: Stage
-    , _round                :: Int
-    , _players              :: [Player]
-    , _events               :: [Event]
-    , _boots                :: Map Text [Text]
-    , _allegianceChosen     :: Maybe Allegiance -- ^ Wolf-hound
-    , _allowedVoters        :: [Text]           -- ^ Scapegoat
-    , _heal                 :: Bool             -- ^ Witch
-    , _healUsed             :: Bool             -- ^ Witch
-    , _passes               :: [Text]           -- ^ Witch
-    , _poison               :: Maybe Text       -- ^ Witch
-    , _poisonUsed           :: Bool             -- ^ Witch
-    , _priorProtect         :: Maybe Text       -- ^ Defender
-    , _protect              :: Maybe Text       -- ^ Defender
-    , _roleModel            :: Maybe Text       -- ^ Wild-child
-    , _scapegoatBlamed      :: Bool             -- ^ Scapegoat
-    , _see                  :: Maybe Text       -- ^ Seer
-    , _villageIdiotRevealed :: Bool             -- ^ Village Idiot
-    , _votes                :: Map Text Text    -- ^ Villagers and Werewolves
+    { _stage            :: Stage
+    , _round            :: Int
+    , _players          :: [Player]
+    , _events           :: [Event]
+    , _boots            :: Map Text [Text]
+    , _allegianceChosen :: Maybe Allegiance -- ^ Wolf-hound
+    , _allowedVoters    :: [Text]           -- ^ Scapegoat
+    , _heal             :: Bool             -- ^ Witch
+    , _healUsed         :: Bool             -- ^ Witch
+    , _jesterRevealed   :: Bool             -- ^ Jester
+    , _passes           :: [Text]           -- ^ Witch
+    , _poison           :: Maybe Text       -- ^ Witch
+    , _poisonUsed       :: Bool             -- ^ Witch
+    , _priorProtect     :: Maybe Text       -- ^ Defender
+    , _protect          :: Maybe Text       -- ^ Defender
+    , _roleModel        :: Maybe Text       -- ^ Wild-child
+    , _scapegoatBlamed  :: Bool             -- ^ Scapegoat
+    , _see              :: Maybe Text       -- ^ Seer
+    , _votes            :: Map Text Text    -- ^ Villagers and Werewolves
     } deriving (Eq, Read, Show)
 
 -- | Most of these are fairly self-sufficient (the turn stages). 'Sunrise' and 'Sunset' are provided
@@ -203,6 +203,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _allowedVoters        = players ^.. names
             , _heal                 = False
             , _healUsed             = False
+            , _jesterRevealed       = False
             , _poison               = Nothing
             , _poisonUsed           = False
             , _priorProtect         = Nothing
@@ -210,7 +211,6 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _roleModel            = Nothing
             , _scapegoatBlamed      = False
             , _see                  = Nothing
-            , _villageIdiotRevealed = False
             , _votes                = Map.empty
             }
 

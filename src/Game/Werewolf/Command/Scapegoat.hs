@@ -33,8 +33,8 @@ chooseCommand callerName targetNames = Command $ do
     when (null targetNames)                 $ throwError [playerMustChooseAtLeastOneTargetMessage callerName]
     when (callerName `elem` targetNames)    $ throwError [playerCannotChooseSelfMessage callerName]
     forM_ targetNames $ validatePlayer callerName
-    whenM (use villageIdiotRevealed &&^ anyM isPlayerVillageIdiot targetNames) $
-        throwError [playerCannotChooseVillageIdiotMessage callerName]
+    whenM (use jesterRevealed &&^ anyM isPlayerJester targetNames) $
+        throwError [playerCannotChooseJesterMessage callerName]
 
     allowedVoters   .= targetNames
     scapegoatBlamed .= False

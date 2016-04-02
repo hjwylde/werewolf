@@ -67,10 +67,10 @@ The Villagers must lynch all of the Werewolves.
 
 * Defender
 * Druid
+* Jester
 * Scapegoat
 * Seer
 * Simple Villager
-* Village Idiot
 * Villager-Villager
 * Witch
 

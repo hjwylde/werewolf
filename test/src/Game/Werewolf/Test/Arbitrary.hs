@@ -19,10 +19,10 @@ module Game.Werewolf.Test.Arbitrary (
     GameOnSecondRound(..),
     GameWithAllegianceChosen(..), GameWithAllowedVoters(..), GameWithConflictingVote(..),
     GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
-    GameWithLynchVotes(..), GameWithMajorityVote(..), GameWithOneAllegianceAlive(..),
-    GameWithPassAtDevotedServantsTurn(..), GameWithPoison(..), GameWithProtect(..),
-    GameWithProtectAndDevourVotes(..), GameWithRoleModel(..), GameWithRoleModelAtVillagesTurn(..),
-    GameWithSee(..), GameWithVillageIdiotRevealedAtVillagesTurn(..),
+    GameWithJesterRevealedAtVillagesTurn(..), GameWithLynchVotes(..), GameWithMajorityVote(..),
+    GameWithOneAllegianceAlive(..), GameWithPassAtDevotedServantsTurn(..), GameWithPoison(..),
+    GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
+    GameWithRoleModelAtVillagesTurn(..), GameWithSee(..),
 
     -- ** Player
     arbitraryPlayerSet,
@@ -275,6 +275,26 @@ instance Arbitrary GameWithHeal where
 
         return $ GameWithHeal (run_ (apply command) game)
 
+newtype GameWithJesterRevealed = GameWithJesterRevealed Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithJesterRevealed where
+    arbitrary = do
+        game            <- arbitrary
+        let jestersName = game ^?! players . jesters . name
+        let game'       = game & jesterRevealed .~ True & allowedVoters %~ delete jestersName
+
+        return $ GameWithJesterRevealed game'
+
+newtype GameWithJesterRevealedAtVillagesTurn = GameWithJesterRevealedAtVillagesTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithJesterRevealedAtVillagesTurn where
+    arbitrary = do
+        (GameWithJesterRevealed game) <- arbitrary
+
+        return $ GameWithJesterRevealedAtVillagesTurn (game & stage .~ VillagesTurn)
+
 newtype GameWithLynchVotes = GameWithLynchVotes Game
     deriving (Eq, Show)
 
@@ -398,26 +418,6 @@ instance Arbitrary GameWithSee where
         (Blind command) <- arbitrarySeeCommand game'
 
         return $ GameWithSee (run_ (apply command) game')
-
-newtype GameWithVillageIdiotRevealed = GameWithVillageIdiotRevealed Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameWithVillageIdiotRevealed where
-    arbitrary = do
-        game                    <- arbitrary
-        let villageIdiotsName   = game ^?! players . villageIdiots . name
-        let game'               = game & villageIdiotRevealed .~ True & allowedVoters %~ delete villageIdiotsName
-
-        return $ GameWithVillageIdiotRevealed game'
-
-newtype GameWithVillageIdiotRevealedAtVillagesTurn = GameWithVillageIdiotRevealedAtVillagesTurn Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameWithVillageIdiotRevealedAtVillagesTurn where
-    arbitrary = do
-        (GameWithVillageIdiotRevealed game) <- arbitrary
-
-        return $ GameWithVillageIdiotRevealedAtVillagesTurn (game & stage .~ VillagesTurn)
 
 arbitraryPlayerSet :: Gen [Player]
 arbitraryPlayerSet = do

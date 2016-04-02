@@ -91,8 +91,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Lynching -> do
         getVoteResult >>= lynchVotees
 
-        allVoters       <- ifM (use villageIdiotRevealed)
-            (uses players $ filter (isn't villageIdiot))
+        allVoters       <- ifM (use jesterRevealed)
+            (uses players $ filter (isn't jester))
             (use players)
         allowedVoters   .= allVoters ^.. traverse . alive . name
 
@@ -187,10 +187,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
 lynchVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
 lynchVotees [votee]
-    | is villageIdiot votee = do
-        villageIdiotRevealed .= True
+    | is jester votee       = do
+        jesterRevealed .= True
 
-        tell [villageIdiotLynchedMessage $ votee ^. name]
+        tell [jesterLynchedMessage $ votee ^. name]
     | otherwise             = do
         killPlayer (votee ^. name)
         tell [playerLynchedMessage votee]
