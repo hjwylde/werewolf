@@ -2,6 +2,8 @@
 
 ### Upcoming
 
+### v0.5.1.0
+
 *Minor*
 
 * Renamed the Defender to Protector. ([#132](https://github.com/hjwylde/werewolf/issues/132))
