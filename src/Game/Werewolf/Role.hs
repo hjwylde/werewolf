@@ -28,7 +28,6 @@ module Game.Werewolf.Role (
 
     -- ** Instances
     allRoles, restrictedRoles,
-    allAllegiances,
 
     -- *** The Ambiguous
     -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
@@ -123,12 +122,6 @@ allRoles =
 --   @
 restrictedRoles :: [Role]
 restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
-
--- | A list containing all the allegiances defined in this file.
---
---   TODO (hjw): use reflection to get this list
-allAllegiances :: [Allegiance]
-allAllegiances = [Angel, Villagers, Werewolves]
 
 -- | /Who could dream of a better servant than one willing to give up her life for that of her/
 --   /masters? Don't rejoice too fast, as the devouring ambition within her could spell the end of/

@@ -85,7 +85,7 @@ instance Arbitrary Role where
     arbitrary = elements allRoles
 
 instance Arbitrary Allegiance where
-    arbitrary = elements allAllegiances
+    arbitrary = elements [Villagers, Werewolves]
 
 instance Arbitrary Text where
     arbitrary = T.pack <$> vectorOf 6 (elements ['a'..'z'])
