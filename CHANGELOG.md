@@ -9,6 +9,7 @@
 *Revisions*
 
 * Updated the Protector's description and rules. ([#132](https://github.com/hjwylde/werewolf/issues/132))
+* Improved the Enligsh used. ([#72](https://github.com/hjwylde/werewolf/issues/72))
 
 ### v0.5.0.0
 

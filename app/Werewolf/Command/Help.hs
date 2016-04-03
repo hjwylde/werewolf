@@ -161,7 +161,7 @@ rulesMessages mGame = map (T.intercalate "\n")
         "- The Seer wakes up and sees someone's allegiance."
       , whenRoleInPlay mGame wolfHoundRole
         "- (First round only) the Wolf-hound wakes up and chooses an allegiance."
-      , "- The Werewolves wake up and select a victim."
+      , "- The Werewolves wake up and vote to devour a victim."
       , whenRoleInPlay mGame witchRole
         "- The Witch wakes up and may heal the victim and/or poison someone."
       , "- The village wakes up and find the victim."
@@ -169,7 +169,7 @@ rulesMessages mGame = map (T.intercalate "\n")
         "- Ferina grunts if the Druid is next to a Werewolf."
       , "- The village votes to lynch a suspect."
       , whenRoleInPlay mGame devotedServantRole
-        "- The Devoted Servant may choose whether to reveal themselves and take on the role of their master."
+        "- (When someone is lynched) the Devoted Servant may choose whether to reveal themselves and take on the role of their master."
       , whenRoleInPlay mGame scapegoatRole
         "- (When the Scapegoat is blamed) the Scapegoat chooses whom may vote on the next day."
       , T.concat
@@ -202,11 +202,11 @@ helpMessages = map (T.intercalate "\n")
     ]
 
 whenPlayerHasRole :: Monoid m => Text -> Maybe Game -> Role -> m -> m
-whenPlayerHasRole _ Nothing _ m                   = m
+whenPlayerHasRole _ Nothing _ m                         = m
 whenPlayerHasRole callerName (Just game) role' m
-     | has (players . names . only callerName) game
-        && has (role . only role') player           = m
-    | otherwise                                     = mempty
+    | hasn't (players . names . only callerName) game   = mempty
+    | hasn't (role . only role') player                 = mempty
+    | otherwise                                         = m
      where
         player = game ^?! players . traverse . filteredBy name callerName
 
