@@ -48,7 +48,7 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    defenderRole, druidRole, jesterRole, scapegoatRole, seerRole, simpleVillagerRole,
+    druidRole, jesterRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole,
     villagerVillagerRole, witchRole,
 
     -- *** The Werewolves
@@ -102,10 +102,10 @@ makePrisms ''Allegiance
 allRoles :: [Role]
 allRoles =
     [ angelRole
-    , defenderRole
     , devotedServantRole
     , druidRole
     , jesterRole
+    , protectorRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
@@ -248,29 +248,6 @@ angelRole = Role
         ]
     }
 
--- | /This character can save the Villagers from the bite of the Werewolves./
---
---   Each night the Defender is called before the Werewolves to select a player deserving of his
---   protection. That player is safe during the night (and only that night) against the Werewolves.
---
---   The Defender may not protect the same person two nights in a row.
-defenderRole :: Role
-defenderRole = Role
-    { _name         = "Defender"
-    , _allegiance   = Villagers
-    , _balance      = 2
-    , _description  =
-        "This character can save the Villagers from the bite of the Werewolves."
-    , _rules        = T.intercalate "\n"
-        [ T.unwords
-            [ "Each night the Defender is called before the Werewolves to select a player deserving"
-            , "of his protection. That player is safe during the night (and only that night)"
-            , "against the Werewolves."
-            ]
-        , "The Defender may not protect the same person two nights in a row."
-        ]
-    }
-
 -- | /How honoured we are to be in the presence of such a noble leader. The return of the Druid/
 --   /marks an exceptional time in Fougères's history! Friend of the woodland creatures, practiced/
 --   /philosopher and now, with the help of Ferina their companion, a bane to the Werewolves/
@@ -295,6 +272,35 @@ druidRole = Role
     , _rules        = T.unwords
         [ "Each morning when Ferina wakes from her slumber she will be alert and cautious. If the"
         , "Druid is next to a Werewolf then Ferina will grunt in warning."
+        ]
+    }
+
+-- | /The Protector is one of the few pure of heart and altruistic Villagers. They are forever/
+--   /putting others needs above their own, standing guard at night against this terrifying foe./
+--   /Each night they fight against the Werewolves with naught but a sword and shield, potentially/
+--   /saving an innocents life./
+--
+--   Each night the Protector may choose a player deemed worthy of their protection. That player is
+--   safe for that night night (and only that night) against the Werewolves.
+--
+--   The Protector may not protect the same player two nights in a row.
+protectorRole :: Role
+protectorRole = Role
+    { _name         = "Protector"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = T.unwords
+        [ "The Protector is one of the few pure of heart and altruistic Villagers. They are forever"
+        , "putting others needs above their own, standing guard at night against this terrifying"
+        , "foe. Each night they fight against the Werewolves with naught but a sword and shield,"
+        , "potentially saving an innocents life."
+        ]
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "Each night the Protector may choose a player deemed worthy of their protection. That"
+            , "player is safe for that night night (and only that night) against the Werewolves."
+            ]
+        , "The Protector may not protect the same player two nights in a row."
         ]
     }
 

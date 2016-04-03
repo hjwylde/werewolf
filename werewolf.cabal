@@ -6,7 +6,8 @@ maintainer:     public@hjwylde.com
 homepage:       https://github.com/hjwylde/werewolf
 
 synopsis:       A game engine for playing werewolf within a chat client
-description:    This engine is based off of the party game Mafia, also known as Werewolf.
+description:    A game engine for playing werewolf within a chat client.
+                This engine is based off of the party game Mafia, also known as Werewolf.
 
 license:        BSD3
 license-file:   LICENSE
@@ -75,9 +76,9 @@ library
     exposed-modules:
         Game.Werewolf
         Game.Werewolf.Command
-        Game.Werewolf.Command.Defender
         Game.Werewolf.Command.DevotedServant
         Game.Werewolf.Command.Global
+        Game.Werewolf.Command.Protector
         Game.Werewolf.Command.Scapegoat
         Game.Werewolf.Command.Seer
         Game.Werewolf.Command.Status

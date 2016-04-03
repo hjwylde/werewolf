@@ -12,7 +12,7 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Game
     NewGame(..),
-    GameAtDefendersTurn(..), GameAtDevotedServantsTurn(..), GameAtGameOver(..),
+    GameAtDevotedServantsTurn(..), GameAtGameOver(..), GameAtProtectorsTurn(..),
     GameAtScapegoatsTurn(..), GameAtSeersTurn(..), GameAtSunrise(..), GameAtVillagesTurn(..),
     GameAtWerewolvesTurn(..), GameAtWildChildsTurn(..), GameAtWitchsTurn(..),
     GameAtWolfHoundsTurn(..),
@@ -49,9 +49,9 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import Game.Werewolf
-import Game.Werewolf.Command.Defender
 import Game.Werewolf.Command.DevotedServant as DevotedServant
 import Game.Werewolf.Command.Global
+import Game.Werewolf.Command.Protector
 import Game.Werewolf.Command.Scapegoat      as Scapegoat
 import Game.Werewolf.Command.Seer
 import Game.Werewolf.Command.Villager       as Villager
@@ -96,15 +96,6 @@ newtype NewGame = NewGame Game
 instance Arbitrary NewGame where
     arbitrary = NewGame . newGame <$> arbitraryPlayerSet
 
-newtype GameAtDefendersTurn = GameAtDefendersTurn Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameAtDefendersTurn where
-    arbitrary = do
-        game <- arbitrary
-
-        return $ GameAtDefendersTurn (game & stage .~ DefendersTurn)
-
 newtype GameAtDevotedServantsTurn = GameAtDevotedServantsTurn Game
     deriving (Eq, Show)
 
@@ -123,6 +114,15 @@ instance Arbitrary GameAtGameOver where
         game <- arbitrary
 
         return $ GameAtGameOver (game & stage .~ GameOver)
+
+newtype GameAtProtectorsTurn = GameAtProtectorsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameAtProtectorsTurn where
+    arbitrary = do
+        game <- arbitrary
+
+        return $ GameAtProtectorsTurn (game & stage .~ ProtectorsTurn)
 
 newtype GameAtScapegoatsTurn = GameAtScapegoatsTurn Game
     deriving (Eq, Show)
@@ -373,7 +373,7 @@ newtype GameWithProtect = GameWithProtect Game
 instance Arbitrary GameWithProtect where
     arbitrary = do
         game            <- arbitrary
-        let game'       = game & stage .~ DefendersTurn
+        let game'       = game & stage .~ ProtectorsTurn
         (Blind command) <- arbitraryProtectCommand game'
 
         return $ GameWithProtect (run_ (apply command) game')
@@ -433,7 +433,6 @@ arbitraryPlayerSet = do
 
 arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
-    DefendersTurn       -> arbitraryProtectCommand game
     DevotedServantsTurn -> oneof
         [ arbitraryDevotedServantPassCommand game
         , arbitraryRevealCommand game
@@ -441,6 +440,7 @@ arbitraryCommand game = case game ^. stage of
     FerinasGrunt        -> return $ Blind noopCommand
     GameOver            -> return $ Blind noopCommand
     Lynching            -> return $ Blind noopCommand
+    ProtectorsTurn      -> arbitraryProtectCommand game
     ScapegoatsTurn      -> arbitraryScapegoatChooseCommand game
     SeersTurn           -> arbitrarySeeCommand game
     Sunrise             -> return $ Blind noopCommand
@@ -507,13 +507,13 @@ arbitraryPoisonCommand game = do
 
 arbitraryProtectCommand :: Game -> Gen (Blind Command)
 arbitraryProtectCommand game = do
-    let defender    = game ^?! players . defenders
+    let protector    = game ^?! players . protectors
     -- TODO (hjw): add suchThat (/= priorProtect)
-    target          <- suchThat (arbitraryPlayer game) (defender /=)
+    target          <- suchThat (arbitraryPlayer game) (protector /=)
 
     return $ if isJust (game ^. protect)
         then Blind noopCommand
-        else Blind $ protectCommand (defender ^. name) (target ^. name)
+        else Blind $ protectCommand (protector ^. name) (target ^. name)
 
 arbitraryQuitCommand :: Game -> Gen (Blind Command)
 arbitraryQuitCommand game = do

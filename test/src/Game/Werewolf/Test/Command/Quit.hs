@@ -35,8 +35,8 @@ allQuitCommandTests =
     , testProperty "quit command clears heal used when caller is witch"                 prop_quitCommandClearsHealUsedWhenCallerIsWitch
     , testProperty "quit command clears poison when caller is witch"                    prop_quitCommandClearsPoisonWhenCallerIsWitch
     , testProperty "quit command clears poison used when caller is witch"               prop_quitCommandClearsPoisonUsedWhenCallerIsWitch
-    , testProperty "quit command clears prior protect when caller is defender"          prop_quitCommandClearsPriorProtectWhenCallerIsDefender
-    , testProperty "quit command clears protect when caller is defender"                prop_quitCommandClearsProtectWhenCallerIsDefender
+    , testProperty "quit command clears prior protect when caller is protector"         prop_quitCommandClearsPriorProtectWhenCallerIsProtector
+    , testProperty "quit command clears protect when caller is protector"               prop_quitCommandClearsProtectWhenCallerIsProtector
     , testProperty "quit command clears player's devour vote"                           prop_quitCommandClearsPlayersDevourVote
     , testProperty "quit command clears player's lynch vote"                            prop_quitCommandClearsPlayersLynchVote
     , testProperty "quit command clears role model when caller is wild-child"           prop_quitCommandClearsRoleModelWhenCallerIsWildChild
@@ -103,17 +103,17 @@ prop_quitCommandClearsPoisonUsedWhenCallerIsWitch (GameWithPoison game) = do
 
     not $ run_ (apply command) game ^. poisonUsed
 
-prop_quitCommandClearsPriorProtectWhenCallerIsDefender :: GameWithProtect -> Bool
-prop_quitCommandClearsPriorProtectWhenCallerIsDefender (GameWithProtect game) = do
-    let defender    = game ^?! players . defenders
-    let command     = quitCommand (defender ^. name)
+prop_quitCommandClearsPriorProtectWhenCallerIsProtector :: GameWithProtect -> Bool
+prop_quitCommandClearsPriorProtectWhenCallerIsProtector (GameWithProtect game) = do
+    let protector   = game ^?! players . protectors
+    let command     = quitCommand (protector ^. name)
 
     isNothing $ run_ (apply command) game ^. priorProtect
 
-prop_quitCommandClearsProtectWhenCallerIsDefender :: GameWithProtect -> Bool
-prop_quitCommandClearsProtectWhenCallerIsDefender (GameWithProtect game) = do
-    let defender    = game ^?! players . defenders
-    let command     = quitCommand (defender ^. name)
+prop_quitCommandClearsProtectWhenCallerIsProtector :: GameWithProtect -> Bool
+prop_quitCommandClearsProtectWhenCallerIsProtector (GameWithProtect game) = do
+    let protector   = game ^?! players . protectors
+    let command     = quitCommand (protector ^. name)
 
     isNothing $ run_ (apply command) game ^. protect
 

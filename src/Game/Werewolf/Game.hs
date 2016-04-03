@@ -22,7 +22,7 @@ module Game.Werewolf.Game (
     votes,
 
     Stage(..),
-    _DefendersTurn, _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _ScapegoatsTurn,
+    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _ProtectorsTurn, _ScapegoatsTurn,
     _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn,
     _WolfHoundsTurn,
 
@@ -95,8 +95,8 @@ data Game = Game
     , _passes           :: [Text]           -- ^ Witch
     , _poison           :: Maybe Text       -- ^ Witch
     , _poisonUsed       :: Bool             -- ^ Witch
-    , _priorProtect     :: Maybe Text       -- ^ Defender
-    , _protect          :: Maybe Text       -- ^ Defender
+    , _priorProtect     :: Maybe Text       -- ^ Protector
+    , _protect          :: Maybe Text       -- ^ Protector
     , _roleModel        :: Maybe Text       -- ^ Wild-child
     , _scapegoatBlamed  :: Bool             -- ^ Scapegoat
     , _see              :: Maybe Text       -- ^ Seer
@@ -109,7 +109,7 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = DefendersTurn | DevotedServantsTurn | FerinasGrunt | GameOver | Lynching
+data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | Lynching | ProtectorsTurn
             | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn
             | WildChildsTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
@@ -122,7 +122,7 @@ data Stage  = DefendersTurn | DevotedServantsTurn | FerinasGrunt | GameOver | Ly
 --   it was triggered. E.g., the 'DeovurEvent' occurs after the village wakes up rather than when
 --   the Werewolves' vote, this gives the Witch a chance to heal the victim.
 data Event  = DevourEvent Text  -- ^ Werewolves
-            | NoDevourEvent     -- ^ Defender, Werewolves and Witch
+            | NoDevourEvent     -- ^ Protector, Werewolves and Witch
             | PoisonEvent Text  -- ^ Witch
     deriving (Eq, Read, Show)
 
@@ -143,7 +143,7 @@ allStages =
     , WolfHoundsTurn
     , SeersTurn
     , WildChildsTurn
-    , DefendersTurn
+    , ProtectorsTurn
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise
@@ -161,7 +161,6 @@ stageCycle = cycle allStages
 --   One of the more complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
 --   the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
-stageAvailable game DefendersTurn       = has (players . defenders . alive) game
 stageAvailable game DevotedServantsTurn =
     has (players . devotedServants . alive) game
     && length (getVoteResult game) == 1
@@ -169,6 +168,7 @@ stageAvailable game DevotedServantsTurn =
 stageAvailable game FerinasGrunt        = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
 stageAvailable game Lynching            = Map.size (game ^. votes) > 0
+stageAvailable game ProtectorsTurn      = has (players . protectors . alive) game
 stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
 stageAvailable game SeersTurn           = has (players . seers . alive) game
 stageAvailable _ Sunrise                = True
