@@ -37,11 +37,12 @@ handle callerName tag = do
 
     game <- readGame tag
 
-    let command = case game ^. stage of
-            DevotedServantsTurn -> DevotedServant.passCommand callerName
-            WitchsTurn          -> Witch.passCommand callerName
-            -- TODO (hjw): throw an error
-            _                   -> undefined
+    command <- case game ^. stage of
+            DevotedServantsTurn -> return $ DevotedServant.passCommand callerName
+            WitchsTurn          -> return $ Witch.passCommand callerName
+            _                   -> exitWith failure
+                { messages = [playerCannotDoThatRightNowMessage callerName]
+                }
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

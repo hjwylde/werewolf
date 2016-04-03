@@ -77,7 +77,7 @@ failure = Response False []
 --
 --   The program always exits with success even if the response was a failure one. This is to
 --   distinguish between bad calls to the binary and bad commands to the werewolf engine.
-exitWith :: MonadIO m => Response -> m ()
+exitWith :: MonadIO m => Response -> m a
 exitWith response = liftIO $ T.putStrLn (T.decodeUtf8 $ encode response) >> Exit.exitSuccess
 
 -- | A message may be either public or private, indicated by it's @to@ field.
