@@ -124,7 +124,7 @@ newGameMessages game = concat
 newPlayersInGameMessage :: [Text] -> Message
 newPlayersInGameMessage playerNames = publicMessage $ T.concat
     [ "A new game of werewolf is starting with "
-    , T.intercalate ", " playerNames, "!"
+    , concatList playerNames, "!"
     ]
 
 newPlayerMessage :: Player -> Message
@@ -232,10 +232,10 @@ firstWerewolvesTurnMessages tos =
             [ "You feel restless, like an old curse is keeping you from sleep."
             , "It seems you're not the only one..."
             , packNames werewolfName
-            , if length tos == 2 then "is" else "are", "also emerging from their"
-            , if length tos == 2 then "home." else "homes."
+            , conjugateToBe (length tos - 1), "also emerging from their"
+            , tryPlural (length tos - 1) "home"
             ]
-        packNames werewolfName      = T.intercalate ", " (tos \\ [werewolfName])
+        packNames werewolfName      = concatList $ tos \\ [werewolfName]
 
 werewolvesTurnMessages :: [Text] -> [Message]
 werewolvesTurnMessages tos =
@@ -267,12 +267,12 @@ witchsTurnMessages game = concat
                 ]
             _               -> []
         healMessages
-            | not (game ^. healUsed)
-                && has (events . traverse . _DevourEvent) game  = [privateMessage witchsName "Would you like to `heal` them?"]
-            | otherwise                                         = []
+            | game ^. healUsed                                  = []
+            | hasn't (events . traverse . _DevourEvent) game    = []
+            | otherwise                                         = [privateMessage witchsName "Would you like to `heal` them?"]
         poisonMessages
-            | not (game ^. poisonUsed) = [privateMessage witchsName "Would you like to `poison` anyone?"]
-            | otherwise                = []
+            | game ^. poisonUsed    = []
+            | otherwise             = [privateMessage witchsName "Would you like to `poison` anyone?"]
 
 wolfHoundsTurnMessages :: Text -> [Message]
 wolfHoundsTurnMessages to =
@@ -308,11 +308,9 @@ gameOverMessages game
     where
         playerRolesMessage = publicMessage $ T.concat
             [ "As I know you're all wondering who lied to you, here's the role allocations: "
-            , T.intercalate ", "
-                (map
-                    (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"])
-                    (game ^. players)
-                    )
+            , concatList $ map
+                (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"])
+                (game ^. players)
             , "."
             ]
 
@@ -380,8 +378,8 @@ playerHasAlreadyVotedToBootMessage to targetName = privateMessage to $ T.concat
     ["You've already voted to boot ", targetName, "!"]
 
 circleMessage :: Text -> [Player] -> Message
-circleMessage to players = privateMessage to $ T.concat
-    [ "The players are sitting in the following order:\n"
+circleMessage to players = privateMessage to $ T.intercalate "\n"
+    [ "The players are sitting in the following order:"
     , T.intercalate " <-> " (map playerName (players ++ [head players]))
     ]
     where
@@ -422,7 +420,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat
     [ "The roles in play are "
-    , T.intercalate ", " $ map (\(role, count) ->
+    , concatList $ map (\(role, count) ->
         T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
         roleCounts
     , " for a total balance of ", T.pack $ show totalBalance, "."
@@ -437,18 +435,17 @@ playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
     where
         alivePlayersText = T.concat
             [ "The following players are still alive: "
-            , T.intercalate ", " (players ^.. traverse . alive . name), "."
+            , concatList $ players ^.. traverse . alive . name, "."
             ]
         deadPlayersText = T.concat
             [ "The following players are dead: "
-            , T.intercalate ", " (map playerNameWithRole (players ^.. traverse . dead)), "."
+            , concatList $ map playerNameWithRole (players ^.. traverse . dead), "."
             ]
         playerNameWithRole player = T.concat [player ^. name, " (", player ^. role . Role.name, ")"]
 
 waitingOnMessage :: Maybe Text -> [Text] -> Message
 waitingOnMessage mTo playerNames = Message mTo $ T.concat
-    [ "Waiting on ", T.intercalate ", " playerNames, "..."
-    ]
+    ["Waiting on ", concatList playerNames, "..."]
 
 angelJoinedVillagersMessage :: Message
 angelJoinedVillagersMessage = publicMessage $ T.unwords
@@ -478,10 +475,10 @@ devotedServantJoinedPackMessages devotedServantsName werewolfNames =
             ]
         packMessages
             | null werewolfNames    = []
-            | otherwise             = [T.unwords
-                [ "As you enter you see his pack", T.intercalate ", " werewolfNames
-                , "waiting for you."
-                ]]
+            | otherwise             =
+                [ T.unwords
+                    ["As you enter you see his pack", concatList werewolfNames , "waiting for you."]
+                ]
 
 ferinaGruntsMessage :: Message
 ferinaGruntsMessage = publicMessage $ T.unwords
@@ -495,7 +492,7 @@ playerCannotProtectSamePlayerTwiceInARowMessage to =
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message
 scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
-    [ "On the next day only", T.intercalate ", " allowedVoters, "shall be allowed to vote."
+    [ "On the next day only", concatList allowedVoters, "shall be allowed to vote."
     , "The town crier, realising how foolish it was to kill him, grants him this wish."
     ]
 
@@ -592,8 +589,8 @@ wildChildJoinedPackMessages wildChildsName werewolfNames =
         [ "The death of your role model is distressing."
         , "Without second thought you abandon the Villagers and run off into the woods,"
         , "towards your old home."
-        , "As you arrive you see the familiar faces of", T.intercalate ", " werewolfNames
-        , "waiting and happy to have you back."
+        , "As you arrive you see the familiar", tryPlural (length werewolfNames) "face", "of"
+        , concatList werewolfNames, "waiting and happy to have you back."
         ])
     : groupMessages werewolfNames (T.unwords
         [ wildChildsName, "the Wild-child scampers off into the woods."
@@ -627,3 +624,16 @@ article :: Role -> Text
 article role
     | role `elem` restrictedRoles   = "the"
     | otherwise                     = "a"
+
+concatList :: [Text] -> Text
+concatList []       = ""
+concatList [word]   = word
+concatList words    = T.unwords [T.intercalate ", " (init words), "and", last words]
+
+conjugateToBe :: Int -> Text
+conjugateToBe 1 = "is"
+conjugateToBe _ = "are"
+
+tryPlural :: Int -> Text -> Text
+tryPlural 1 word = word
+tryPlural _ word = T.snoc word 's'
