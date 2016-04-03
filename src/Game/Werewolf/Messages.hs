@@ -433,15 +433,18 @@ playersInGameMessage :: Text -> [Player] -> Message
 playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
     alivePlayersText : [deadPlayersText | any (is dead) players]
     where
-        alivePlayersText = T.concat
+        alivePlayers    = players ^.. traverse . alive
+        deadPlayers     = players ^.. traverse . dead
+
+        alivePlayersText            = T.concat
             [ "The following players are still alive: "
-            , concatList $ players ^.. traverse . alive . name, "."
+            , concatList $ map (\player -> if is villagerVillager player then playerNameWithRole player else player ^. name) alivePlayers, "."
             ]
-        deadPlayersText = T.concat
+        deadPlayersText             = T.concat
             [ "The following players are dead: "
-            , concatList $ map playerNameWithRole (players ^.. traverse . dead), "."
+            , concatList $ map playerNameWithRole deadPlayers, "."
             ]
-        playerNameWithRole player = T.concat [player ^. name, " (", player ^. role . Role.name, ")"]
+        playerNameWithRole player   = T.concat [player ^. name, " (", player ^. role . Role.name, ")"]
 
 waitingOnMessage :: Maybe Text -> [Text] -> Message
 waitingOnMessage mTo playerNames = Message mTo $ T.concat
