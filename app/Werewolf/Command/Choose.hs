@@ -56,4 +56,4 @@ handle callerName tag (Options args) = do
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game, messages)  -> writeGame tag game >> exitWith success { messages = messages }
+        Right (game, messages)  -> writeOrDeleteGame tag game >> exitWith success { messages = messages }

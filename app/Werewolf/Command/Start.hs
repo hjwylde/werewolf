@@ -65,7 +65,7 @@ handle callerName tag (Options extraRoles playerNames) = do
 
     case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game, messages)  -> writeGame tag game >> exitWith success { messages = messages }
+        Right (game, messages)  -> writeOrDeleteGame tag game >> exitWith success { messages = messages }
 
 randomExtraRoles :: MonadIO m => Int -> m [Role]
 randomExtraRoles n = liftIO . evalRandIO $ do
