@@ -166,7 +166,7 @@ stageMessages game = case game ^. stage of
     WolfHoundsTurn      -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
-        protectorsName       = players' ^?! protectors . name
+        protectorsName      = players' ^?! protectors . name
         devotedServantsName = players' ^?! devotedServants . name
         victimsName         = head (getVoteResult game) ^. name
         scapegoatsName      = players' ^?! scapegoats . name

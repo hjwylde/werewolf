@@ -6,6 +6,10 @@
 
 * Renamed the Defender to Protector. ([#132](https://github.com/hjwylde/werewolf/issues/132))
 
+*Revisions*
+
+* Updated the Protector's description and rules. ([#132](https://github.com/hjwylde/werewolf/issues/132))
+
 ### v0.5.0.0
 
 *Major*

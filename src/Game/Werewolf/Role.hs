@@ -275,26 +275,32 @@ druidRole = Role
         ]
     }
 
--- | /This character can save the Villagers from the bite of the Werewolves./
+-- | /The Protector is one of the few pure of heart and altruistic Villagers. They are forever/
+--   /putting others needs above their own, standing guard at night against this terrifying foe./
+--   /Each night they fight against the Werewolves with naught but a sword and shield, potentially/
+--   /saving an innocents life./
 --
---   Each night the Protector is called before the Werewolves to select a player deserving of his
---   protection. That player is safe during the night (and only that night) against the Werewolves.
+--   Each night the Protector may choose a player deemed worthy of their protection. That player is
+--   safe for that night night (and only that night) against the Werewolves.
 --
---   The Protector may not protect the same person two nights in a row.
+--   The Protector may not protect the same player two nights in a row.
 protectorRole :: Role
 protectorRole = Role
     { _name         = "Protector"
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  =
-        "This character can save the Villagers from the bite of the Werewolves."
+    , _description  = T.unwords
+        [ "The Protector is one of the few pure of heart and altruistic Villagers. They are forever"
+        , "putting others needs above their own, standing guard at night against this terrifying"
+        , "foe. Each night they fight against the Werewolves with naught but a sword and shield,"
+        , "potentially saving an innocents life."
+        ]
     , _rules        = T.intercalate "\n"
         [ T.unwords
-            [ "Each night the Protector is called before the Werewolves to select a player deserving"
-            , "of his protection. That player is safe during the night (and only that night)"
-            , "against the Werewolves."
+            [ "Each night the Protector may choose a player deemed worthy of their protection. That"
+            , "player is safe for that night night (and only that night) against the Werewolves."
             ]
-        , "The Protector may not protect the same person two nights in a row."
+        , "The Protector may not protect the same player two nights in a row."
         ]
     }
 
