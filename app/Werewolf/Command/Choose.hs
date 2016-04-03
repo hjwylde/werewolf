@@ -47,13 +47,14 @@ handle callerName tag (Options args) = do
 
     game <- readGame tag
 
-    let command = case game ^. stage of
-            ScapegoatsTurn  -> Scapegoat.chooseCommand callerName args
-            WildChildsTurn  -> WildChild.chooseCommand callerName (head args)
-            WolfHoundsTurn  -> WolfHound.chooseCommand callerName (head args)
-            -- TODO (hjw): throw an error
-            _               -> undefined
+    command <- case game ^. stage of
+            ScapegoatsTurn  -> return $ Scapegoat.chooseCommand callerName args
+            WildChildsTurn  -> return $ WildChild.chooseCommand callerName (head args)
+            WolfHoundsTurn  -> return $ WolfHound.chooseCommand callerName (head args)
+            _               -> exitWith failure
+                { messages = [playerCannotDoThatRightNowMessage callerName]
+                }
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game, messages)  -> writeGame tag game >> exitWith success { messages = messages }
+        Right (game, messages)  -> writeOrDeleteGame tag game >> exitWith success { messages = messages }

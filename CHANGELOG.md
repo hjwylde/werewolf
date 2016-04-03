@@ -5,6 +5,8 @@
 *Minor*
 
 * Renamed the Defender to Protector. ([#132](https://github.com/hjwylde/werewolf/issues/132))
+* Automatically delete the game file if the game is over. ([#100](https://github.com/hjwylde/werewolf/issues/100))
+* Added errors for using overloaded commands out of turn. ([#100](https://github.com/hjwylde/werewolf/issues/100))
 
 *Revisions*
 

@@ -44,12 +44,13 @@ handle callerName tag (Options targetName) = do
 
     game <- readGame tag
 
-    let command = case game ^. stage of
-            VillagesTurn    -> Villager.voteCommand callerName targetName
-            WerewolvesTurn  -> Werewolf.voteCommand callerName targetName
-            -- TODO (hjw): throw an error
-            _               -> undefined
+    command <- case game ^. stage of
+            VillagesTurn    -> return $ Villager.voteCommand callerName targetName
+            WerewolvesTurn  -> return $ Werewolf.voteCommand callerName targetName
+            _               -> exitWith failure
+                { messages = [playerCannotDoThatRightNowMessage callerName]
+                }
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
-        Right (game', messages) -> writeGame tag game' >> exitWith success { messages = messages }
+        Right (game', messages) -> writeOrDeleteGame tag game' >> exitWith success { messages = messages }

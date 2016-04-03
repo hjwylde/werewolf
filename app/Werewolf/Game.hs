@@ -17,7 +17,7 @@ module Werewolf.Game (
     startGame, createPlayers, padRoles,
 
     -- ** Working with an existing
-    filePath, readGame, writeGame, deleteGame, doesGameExist,
+    filePath, readGame, writeGame, deleteGame, writeOrDeleteGame, doesGameExist,
 ) where
 
 import Control.Lens         hiding (cons)
@@ -70,6 +70,11 @@ writeGame tag game = liftIO $ filePath tag >>= \tag -> do
 
 deleteGame :: MonadIO m => Text -> m ()
 deleteGame tag = liftIO $ filePath tag >>= removeFile
+
+writeOrDeleteGame :: MonadIO m => Text -> Game -> m ()
+writeOrDeleteGame tag game
+    | has (stage . _GameOver) game    = deleteGame tag
+    | otherwise                     = writeGame tag game
 
 doesGameExist :: MonadIO m => Text -> m Bool
 doesGameExist tag = liftIO $ filePath tag >>= doesFileExist
