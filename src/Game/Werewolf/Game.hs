@@ -150,8 +150,8 @@ allStages =
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise
-    , FerinasGrunt
     , HuntersTurn2
+    , FerinasGrunt
     , GameOver
     ]
 

@@ -28,6 +28,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command.Hunter    as Hunter
 import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
 import Game.Werewolf.Command.WolfHound as WolfHound
@@ -48,6 +49,8 @@ handle callerName tag (Options args) = do
     game <- readGame tag
 
     command <- case game ^. stage of
+            HuntersTurn1    -> return $ Hunter.chooseCommand callerName (head args)
+            HuntersTurn2    -> return $ Hunter.chooseCommand callerName (head args)
             OrphansTurn     -> return $ Orphan.chooseCommand callerName (head args)
             ScapegoatsTurn  -> return $ Scapegoat.chooseCommand callerName args
             WolfHoundsTurn  -> return $ WolfHound.chooseCommand callerName (head args)
