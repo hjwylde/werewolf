@@ -298,8 +298,8 @@ protectorRole = Role
     }
 
 -- | /Werewolves don't just spring up out of the ground! That's where dwarves come from. Clearly/
---   /someone is to blame for this affliction to Fougères. Ah! Unluckily, since no-one actually/
---   /knows who brought them here, the blame is always laid upon the Scapegoat./
+--   /someone is to blame for this affliction to Fougères. Unluckily for the Scapegoat, since/
+--   /no-one actually knows who brought them here, the blame is always laid upon them!/
 --
 --   If the village's vote ends in a tie, it's the Scapegoat who is eliminated instead of no-one.
 --
@@ -312,8 +312,9 @@ scapegoatRole = Role
     , _balance      = 0
     , _description  = T.unwords
         [ "Werewolves don't just spring up out of the ground! That's where dwarves come from."
-        , "Clearly someone is to blame for this affliction to Fougères. Ah! Unluckily, since no-one"
-        , "actually knows who brought them here, the blame is always laid upon the Scapegoat."
+        , "Clearly someone is to blame for this affliction to Fougères. Unluckily for the"
+        , "Scapegoat, since no-one actually knows who brought them here, the blame is always laid"
+        , "upon them!"
         ]
     , _rules        = T.intercalate "\n"
         [ T.unwords
