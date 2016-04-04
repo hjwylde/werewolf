@@ -92,6 +92,10 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
       , "- `reveal`"
       , "- `pass`"
       ]
+    , whenPlayerHasRole callerName mGame orphanRole
+      [ "Orphan commands:"
+      , "- `choose PLAYER`"
+      ]
     , whenPlayerHasRole callerName mGame protectorRole
       [ "Protector commands:"
       , "- `protect PLAYER`"
@@ -103,10 +107,6 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     , whenPlayerHasRole callerName mGame seerRole
       [ "Seer commands:"
       , "- `see PLAYER`"
-      ]
-    , whenPlayerHasRole callerName mGame wildChildRole
-      [ "Wild-child commands:"
-      , "- `choose PLAYER`"
       ]
     , whenPlayerHasRole callerName mGame witchRole
       [ "Witch commands:"
@@ -153,8 +153,8 @@ rulesMessages mGame = map (T.intercalate "\n")
       , whenRoleInPlay mGame angelRole
         "- (When the Angel is in play) the village votes to lynch a suspect."
       , "- The village falls asleep."
-      , whenRoleInPlay mGame wildChildRole
-        "- (First round only) the Wild-child wakes up and chooses a role model."
+      , whenRoleInPlay mGame orphanRole
+        "- (First round only) the Orphan wakes up and chooses a role model."
       , whenRoleInPlay mGame protectorRole
         "- The Protector wakes up and protects someone."
       , whenRoleInPlay mGame seerRole

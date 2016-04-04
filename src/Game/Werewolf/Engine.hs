@@ -95,6 +95,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
+    OrphansTurn -> do
+        whenM (has (players . orphans . dead) <$> get) advanceStage
+
+        whenM (isJust <$> use roleModel) advanceStage
+
     ProtectorsTurn -> do
         whenM (has (players . protectors . dead) <$> get) advanceStage
 
@@ -130,14 +135,14 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     Sunset -> do
         whenJustM (use roleModel) $ \roleModelsName -> do
-            wildChild <- findPlayerBy_ role wildChildRole
+            orphan <- findPlayerBy_ role orphanRole
 
-            whenM (isPlayerDead roleModelsName &&^ return (is alive wildChild) &&^ return (is villager wildChild)) $ do
+            whenM (isPlayerDead roleModelsName &&^ return (is alive orphan) &&^ return (is villager orphan)) $ do
                 aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
-                setPlayerAllegiance (wildChild ^. name) Werewolves
+                setPlayerAllegiance (orphan ^. name) Werewolves
 
-                tell $ wildChildJoinedPackMessages (wildChild ^. name) aliveWerewolfNames
+                tell $ orphanJoinedPackMessages (orphan ^. name) aliveWerewolfNames
 
         advanceStage
 
@@ -153,11 +158,6 @@ checkStage' = use stage >>= \stage' -> case stage' of
         votes .= Map.empty
 
         advanceStage
-
-    WildChildsTurn -> do
-        whenM (has (players . wildChildren . dead) <$> get) advanceStage
-
-        whenM (isJust <$> use roleModel) advanceStage
 
     WitchsTurn -> do
         whenM (has (players . witches . dead) <$> get) advanceStage

@@ -41,7 +41,7 @@ allEngineTests =
     , testProperty "check stage skips scapegoat's turn when no scapegoat"               prop_checkStageSkipsScapegoatsTurnWhenNoScapegoat
     , testProperty "check stage skips seer's turn when no seer"                         prop_checkStageSkipsSeersTurnWhenNoSeer
     , testProperty "check stage skips village's turn when allowed voters empty"         prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty
-    , testProperty "check stage skips wild-child's turn when no wild-child"             prop_checkStageSkipsWildChildsTurnWhenNoWildChild
+    , testProperty "check stage skips orphan's turn when no orphan"                     prop_checkStageSkipsOrphansTurnWhenNoOrphan
     , testProperty "check stage skips witch's turn when no witch"                       prop_checkStageSkipsWitchsTurnWhenNoWitch
     , testProperty "check stage skips wolf-hound's turn when no wolf-hound"             prop_checkStageSkipsWolfHoundsTurnWhenNoWolfHound
 
@@ -63,6 +63,10 @@ allEngineTests =
     , testProperty "check game over does nothing when angel dead but aligned with villagers"    prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers
     , testProperty "check game over does nothing when game over"                                prop_checkGameOverDoesNothingWhenGameOver
 
+    , testProperty "check orphan's turn advances to protector's turn"   prop_checkOrphansTurnAdvancesToProtectorsTurn
+    , testProperty "check orphan's turn advances when no orphan"        prop_checkOrphansTurnAdvancesWhenNoOrphan
+    , testProperty "check orphan's turn does nothing unless chosen"     prop_checkOrphansTurnDoesNothingUnlessRoleModelChosen
+
     , testProperty "check protector's turn advances to werewolves' turn"    prop_checkProtectorsTurnAdvancesToWerewolvesTurn
     , testProperty "check protector's turn advances when no protector"      prop_checkProtectorsTurnAdvancesWhenNoProtector
     , testProperty "check protector's turn does nothing unless protected"   prop_checkProtectorsTurnDoesNothingUnlessProtected
@@ -71,7 +75,7 @@ allEngineTests =
     , testProperty "check scapegoat's turn skips wolf-hound's turn when allegiance chosen"  prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen
     , testProperty "check scapegoat's turn does nothing while scapegoat blamed"             prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed
 
-    , testProperty "check seer's turn advances to wild-child's turn"    prop_checkSeersTurnAdvancesToWildChildsTurn
+    , testProperty "check seer's turn advances to orphan's turn"        prop_checkSeersTurnAdvancesToOrphansTurn
     , testProperty "check seer's turn advances when no seer"            prop_checkSeersTurnAdvancesWhenNoSeer
     , testProperty "check seer's turn resets sees"                      prop_checkSeersTurnResetsSee
     , testProperty "check seer's turn does nothing unless seen"         prop_checkSeersTurnDoesNothingUnlessSeen
@@ -79,7 +83,7 @@ allEngineTests =
     , testProperty "check sunrise increments round"         prop_checkSunriseIncrementsRound
     , testProperty "check sunrise sets angel's allegiance"  prop_checkSunriseSetsAngelsAllegiance
 
-    , testProperty "check sunset sets wild-child's allegiance when role model dead" prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead
+    , testProperty "check sunset sets orphan's allegiance when role model dead" prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead
 
     , testProperty "check villages' turn advances to devoted servant's turn"            prop_checkVillagesTurnAdvancesToDevotedServantsTurn
     , testProperty "check villages' turn skips devoted servant's turn when conflicted"  prop_checkVillagesTurnSkipsDevotedServantsTurnWhenConflicted
@@ -93,10 +97,6 @@ allEngineTests =
     , testProperty "check werewolves' turn resets protect"                              prop_checkWerewolvesTurnResetsProtect
     , testProperty "check werewolves' turn resets votes"                                prop_checkWerewolvesTurnResetsVotes
     , testProperty "check werewolves' turn does nothing unless all voted"               prop_checkWerewolvesTurnDoesNothingUnlessAllVoted
-
-    , testProperty "check wild-child's turn advances to protector's turn"   prop_checkWildChildsTurnAdvancesToProtectorsTurn
-    , testProperty "check wild-child's turn advances when no wild-child"    prop_checkWildChildsTurnAdvancesWhenNoWildChild
-    , testProperty "check wild-child's turn does nothing unless chosen"     prop_checkWildChildsTurnDoesNothingUnlessRoleModelChosen
 
     , testProperty "check witch's turn advances to villages' turn"              prop_checkWitchsTurnAdvancesToVillagesTurn
     , testProperty "check witch's turn advances when no witch"                  prop_checkWitchsTurnAdvancesWhenNoWitch
@@ -154,12 +154,12 @@ prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty (GameAtWitchsTurn game) =
     where
         game' = game & allowedVoters .~ []
 
-prop_checkStageSkipsWildChildsTurnWhenNoWildChild :: GameWithSee -> Bool
-prop_checkStageSkipsWildChildsTurnWhenNoWildChild (GameWithSee game) =
-    hasn't (stage . _WildChildsTurn) game'
+prop_checkStageSkipsOrphansTurnWhenNoOrphan :: GameWithSee -> Bool
+prop_checkStageSkipsOrphansTurnWhenNoOrphan (GameWithSee game) =
+    hasn't (stage . _OrphansTurn) game'
     where
-        wildChildsName  = game ^?! players . wildChildren . name
-        game'           = run_ (apply (quitCommand wildChildsName) >> checkStage) game
+        orphansName = game ^?! players . orphans . name
+        game'       = run_ (apply (quitCommand orphansName) >> checkStage) game
 
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
@@ -230,6 +230,22 @@ prop_checkLynchingSetsAllowedVoters (GameWithLynchVotes game) =
             | game' ^. jesterRevealed   = filter (isn't jester) $ game' ^. players
             | otherwise                 = game' ^.. players . traverse . alive
 
+prop_checkOrphansTurnAdvancesToProtectorsTurn :: GameAtOrphansTurn -> Property
+prop_checkOrphansTurnAdvancesToProtectorsTurn (GameAtOrphansTurn game) =
+    forAll (arbitraryOrphanChooseCommand game) $ \(Blind command) ->
+    has (stage . _ProtectorsTurn) (run_ (apply command >> checkStage) game)
+
+prop_checkOrphansTurnAdvancesWhenNoOrphan :: GameAtOrphansTurn -> Bool
+prop_checkOrphansTurnAdvancesWhenNoOrphan (GameAtOrphansTurn game) = do
+    let orphan  = game ^?! players . orphans
+    let command = quitCommand $ orphan ^. name
+
+    hasn't (stage . _OrphansTurn) (run_ (apply command >> checkStage) game)
+
+prop_checkOrphansTurnDoesNothingUnlessRoleModelChosen :: GameAtOrphansTurn -> Bool
+prop_checkOrphansTurnDoesNothingUnlessRoleModelChosen (GameAtOrphansTurn game) =
+    has (stage . _OrphansTurn) (run_ checkStage game)
+
 prop_checkProtectorsTurnAdvancesToWerewolvesTurn :: GameWithProtect -> Bool
 prop_checkProtectorsTurnAdvancesToWerewolvesTurn (GameWithProtect game) =
     has (stage . _WerewolvesTurn) (run_ checkStage game)
@@ -260,9 +276,9 @@ prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed :: GameAtScapegoatsTurn 
 prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed (GameAtScapegoatsTurn game) =
     has (stage . _ScapegoatsTurn) (run_ checkStage game)
 
-prop_checkSeersTurnAdvancesToWildChildsTurn :: GameWithSee -> Bool
-prop_checkSeersTurnAdvancesToWildChildsTurn (GameWithSee game) =
-    has (stage . _WildChildsTurn) (run_ checkStage game)
+prop_checkSeersTurnAdvancesToOrphansTurn :: GameWithSee -> Bool
+prop_checkSeersTurnAdvancesToOrphansTurn (GameWithSee game) =
+    has (stage . _OrphansTurn) (run_ checkStage game)
 
 prop_checkSeersTurnAdvancesWhenNoSeer :: GameAtSeersTurn -> Bool
 prop_checkSeersTurnAdvancesWhenNoSeer (GameAtSeersTurn game) = do
@@ -289,15 +305,15 @@ prop_checkSunriseSetsAngelsAllegiance (GameAtSunrise game) = do
 
     is villager $ game' ^?! players . angels
 
-prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
-prop_checkSunsetSetsWildChildsAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
+prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead :: GameWithRoleModelAtVillagesTurn -> Property
+prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
     let devotedServantsName = game ^?! players . devotedServants . name
     let command             = passCommand devotedServantsName
 
     isn't angel roleModel' && isn't devotedServant roleModel' && isn't jester roleModel'
-        ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . wildChildren
+        ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . orphans
     where
         roleModel' = game ^?! players . traverse . filteredBy name (fromJust $ game ^. roleModel)
 
@@ -373,22 +389,6 @@ prop_checkWerewolvesTurnDoesNothingUnlessAllVoted (GameAtWerewolvesTurn game) =
     has (stage . _WerewolvesTurn) (run_ checkStage game')
     where
         n = length (game ^.. players . werewolves) - 1
-
-prop_checkWildChildsTurnAdvancesToProtectorsTurn :: GameAtWildChildsTurn -> Property
-prop_checkWildChildsTurnAdvancesToProtectorsTurn (GameAtWildChildsTurn game) =
-    forAll (arbitraryWildChildChooseCommand game) $ \(Blind command) ->
-    has (stage . _ProtectorsTurn) (run_ (apply command >> checkStage) game)
-
-prop_checkWildChildsTurnAdvancesWhenNoWildChild :: GameAtWildChildsTurn -> Bool
-prop_checkWildChildsTurnAdvancesWhenNoWildChild (GameAtWildChildsTurn game) = do
-    let wildChild   = game ^?! players . wildChildren
-    let command     = quitCommand $ wildChild ^. name
-
-    hasn't (stage . _WildChildsTurn) (run_ (apply command >> checkStage) game)
-
-prop_checkWildChildsTurnDoesNothingUnlessRoleModelChosen :: GameAtWildChildsTurn -> Bool
-prop_checkWildChildsTurnDoesNothingUnlessRoleModelChosen (GameAtWildChildsTurn game) =
-    has (stage . _WildChildsTurn) (run_ checkStage game)
 
 prop_checkWitchsTurnAdvancesToVillagesTurn :: GameAtWitchsTurn -> Property
 prop_checkWitchsTurnAdvancesToVillagesTurn (GameAtWitchsTurn game) =

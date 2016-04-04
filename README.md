@@ -45,7 +45,7 @@ No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous 
 The Ambiguous are able to change allegiance throughout the game.
 
 * Devoted Servant
-* Wild-child
+* Orphan
 * Wolf-hound
 
 **The Loners:**

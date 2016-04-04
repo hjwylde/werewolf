@@ -34,7 +34,7 @@ allRevealCommandTests =
     , testProperty "reveal command sets caller's role"                      prop_revealCommandSetsCallersRole
     , testProperty "reveal command sets target's role"                      prop_revealCommandSetsTargetsRole
     , testProperty "reveal command resets role when jester"                 prop_revealCommandResetsRoleWhenJester
-    , testProperty "reveal command resets role when wild-child"             prop_revealCommandResetsRoleWhenWildChild
+    , testProperty "reveal command resets role when orphan"                 prop_revealCommandResetsRoleWhenOrphan
     , testProperty "reveal command resets role when witch"                  prop_revealCommandResetsRoleWhenWitch
     , testProperty "reveal command resets role when wolf-hound"             prop_revealCommandResetsRoleWhenWolfHound
     ]
@@ -101,8 +101,8 @@ prop_revealCommandResetsRoleWhenJester (GameAtDevotedServantsTurn game) = do
         targetsName = head (getVoteResult game) ^. name
         game'       = game & players . traverse . filteredBy name targetsName . role .~ jesterRole & jesterRevealed .~ True
 
-prop_revealCommandResetsRoleWhenWildChild :: GameAtDevotedServantsTurn -> Bool
-prop_revealCommandResetsRoleWhenWildChild (GameAtDevotedServantsTurn game) = do
+prop_revealCommandResetsRoleWhenOrphan :: GameAtDevotedServantsTurn -> Bool
+prop_revealCommandResetsRoleWhenOrphan (GameAtDevotedServantsTurn game) = do
     let devotedServantsName = game ^?! players . devotedServants . name
     let command             = revealCommand devotedServantsName
     let game''              = run_ (apply command) game'
@@ -110,7 +110,7 @@ prop_revealCommandResetsRoleWhenWildChild (GameAtDevotedServantsTurn game) = do
     isNothing $ game'' ^. roleModel
     where
         targetsName = head (getVoteResult game) ^. name
-        game'       = game & players . traverse . filteredBy name targetsName . role .~ wildChildRole & roleModel .~ Just targetsName
+        game'       = game & players . traverse . filteredBy name targetsName . role .~ orphanRole & roleModel .~ Just targetsName
 
 prop_revealCommandResetsRoleWhenWitch :: GameAtDevotedServantsTurn -> Bool
 prop_revealCommandResetsRoleWhenWitch (GameAtDevotedServantsTurn game) = do

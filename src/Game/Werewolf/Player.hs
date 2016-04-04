@@ -26,16 +26,16 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    angel, devotedServant, druid, jester, protector, scapegoat, seer, simpleVillager,
-    simpleWerewolf, villagerVillager, wildChild, witch, wolfHound,
+    angel, devotedServant, druid, jester, orphan, protector, scapegoat, seer, simpleVillager,
+    simpleWerewolf, villagerVillager, witch, wolfHound,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    angels, devotedServants, druids, jesters, protectors, scapegoats, seers, simpleVillagers,
-    simpleWerewolves, villagerVillagers, wildChildren, witches, wolfHounds,
+    angels, devotedServants, druids, jesters, orphans, protectors, scapegoats, seers,
+    simpleVillagers, simpleWerewolves, villagerVillagers, witches, wolfHounds,
     villagers, werewolves,
     alive, dead,
 
@@ -107,6 +107,14 @@ druid = role . only druidRole
 jester :: Traversal' Player ()
 jester = role . only jesterRole
 
+-- | The traversal of 'Player's with a 'orphanRole'.
+--
+-- @
+-- 'orphan' = 'role' . 'only' 'orphanRole'
+-- @
+orphan :: Traversal' Player ()
+orphan = role . only orphanRole
+
 -- | The traversal of 'Player's with a 'protectorRole'.
 --
 -- @
@@ -154,14 +162,6 @@ simpleWerewolf = role . only simpleWerewolfRole
 -- @
 villagerVillager :: Traversal' Player ()
 villagerVillager = role . only villagerVillagerRole
-
--- | The traversal of 'Player's with a 'wildChildRole'.
---
--- @
--- 'wildChild' = 'role' . 'only' 'wildChildRole'
--- @
-wildChild :: Traversal' Player ()
-wildChild = role . only wildChildRole
 
 -- | The traversal of 'Player's with a 'witchRole'.
 --
@@ -251,6 +251,14 @@ druids = traverse . filtered (is druid)
 jesters :: Traversable t => Traversal' (t Player) Player
 jesters = traverse . filtered (is jester)
 
+-- | This 'Traversal' provides the traversal of 'orphan' 'Player's.
+--
+-- @
+-- 'orphans' = 'traverse' . 'filtered' ('is' 'orphan')
+-- @
+orphans :: Traversable t => Traversal' (t Player) Player
+orphans = traverse . filtered (is orphan)
+
 -- | This 'Traversal' provides the traversal of 'protector' 'Player's.
 --
 -- @
@@ -298,14 +306,6 @@ simpleWerewolves = traverse . filtered (is simpleWerewolf)
 -- @
 villagerVillagers :: Traversable t => Traversal' (t Player) Player
 villagerVillagers = traverse . filtered (is villagerVillager)
-
--- | This 'Traversal' provides the traversal of 'wildChild' 'Player's.
---
--- @
--- 'wildChildren' = 'traverse' . 'filtered' ('is' 'wildChild')
--- @
-wildChildren :: Traversable t => Traversal' (t Player) Player
-wildChildren = traverse . filtered (is wildChild)
 
 -- | This 'Traversal' provides the traversal of 'witch' 'Player's.
 --

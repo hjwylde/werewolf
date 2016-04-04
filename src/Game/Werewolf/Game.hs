@@ -22,8 +22,8 @@ module Game.Werewolf.Game (
     votes,
 
     Stage(..),
-    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _ProtectorsTurn, _ScapegoatsTurn,
-    _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn, _WildChildsTurn, _WitchsTurn,
+    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _OrphansTurn, _ProtectorsTurn,
+    _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
     _WolfHoundsTurn,
 
     allStages,
@@ -68,7 +68,7 @@ import Prelude hiding (round)
 --
 --   Any further fields on the game are specific to one or more roles (and their respective turns!).
 --   Some of the additional fields are reset each round (e.g., the Seer's 'see') while others are
---   kept around for the whole game (e.g., the Wild-child's 'roleModel').
+--   kept around for the whole game (e.g., the Orphan's 'roleModel').
 --
 --   In order to advance a game's 'state', a 'Game.Werewolf.Command.Command' from a user needs to be
 --   received. Afterwards the following steps should be performed:
@@ -97,7 +97,7 @@ data Game = Game
     , _poisonUsed       :: Bool             -- ^ Witch
     , _priorProtect     :: Maybe Text       -- ^ Protector
     , _protect          :: Maybe Text       -- ^ Protector
-    , _roleModel        :: Maybe Text       -- ^ Wild-child
+    , _roleModel        :: Maybe Text       -- ^ Orphan
     , _scapegoatBlamed  :: Bool             -- ^ Scapegoat
     , _see              :: Maybe Text       -- ^ Seer
     , _votes            :: Map Text Text    -- ^ Villagers and Werewolves
@@ -109,9 +109,9 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | Lynching | ProtectorsTurn
-            | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn | WerewolvesTurn
-            | WildChildsTurn | WitchsTurn | WolfHoundsTurn
+data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | Lynching | OrphansTurn
+            | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
+            | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
 -- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
@@ -142,7 +142,7 @@ allStages =
     , Sunset
     , WolfHoundsTurn
     , SeersTurn
-    , WildChildsTurn
+    , OrphansTurn
     , ProtectorsTurn
     , WerewolvesTurn
     , WitchsTurn
@@ -177,8 +177,8 @@ stageAvailable game VillagesTurn        =
     (has (players . angels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)
 stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
-stageAvailable game WildChildsTurn      =
-    has (players . wildChildren . alive) game
+stageAvailable game OrphansTurn      =
+    has (players . orphans . alive) game
     && isNothing (game ^. roleModel)
 stageAvailable game WitchsTurn          =
     has (players . witches . alive) game

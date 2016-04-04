@@ -33,7 +33,7 @@ module Game.Werewolf.Role (
     -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
     --
     --   The Ambiguous are able to change allegiance throughout the game.
-    devotedServantRole, wildChildRole, wolfHoundRole,
+    devotedServantRole, orphanRole, wolfHoundRole,
 
     -- *** The Loners
     -- | The Loners look out for themselves and themselves alone.
@@ -104,13 +104,13 @@ allRoles =
     , devotedServantRole
     , druidRole
     , jesterRole
+    , orphanRole
     , protectorRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
     , simpleWerewolfRole
     , villagerVillagerRole
-    , wildChildRole
     , witchRole
     , wolfHoundRole
     ]
@@ -149,41 +149,37 @@ devotedServantRole = Role
         ]
     }
 
--- | /Abandoned in the woods by his parents at a young age, he was raised by wolves. As soon as he/
---   /learned how to walk on all fours, the Wild-child began to wander around Miller's Hollow. One/
---   /day, fascinated by an inhabitant of the village who was walking upright with grace and/
---   /presence, he made them his secret role model. He then decided to integrate himself into the/
---   /community of Miller's Hollow and entered, worried, in the village. The community was moved by/
---   /his frailty, adopted him, and welcomed him in their fold. What will become of him: honest/
---   /Villager or terrible Werewolf? For all of his life, the heart of the Wild-child will swing/
---   /between these two alternatives. May his model confirm him in his newfound humanity./
+-- | /Abandoned by their parents as a child, with no-one wanting to look after another mouth to/
+--   /feed, the Orphan was left to fend for themself. No-one looks twice at the Orphan and even/
+--   /fewer offer kindness towards the lonely child. One day however, one townsperson changes all/
+--   /this. He offers the Orphan food, water and a roof over his head. Grateful for his chairty and/
+--   /affection, the Orphan makes him their role model. Pray that no ill should befall their role/
+--   /model, for who knows in such an event whom, or what, the Orphan may turn to.../
 --
---   On the first night, the Wild-child may choose a player to become his role model. If during the
---   game the chosen player is eliminated, the Wild-child becomes a Werewolf. He will then wake up
---   the next night with his peers and will devour with them each night until the end of the game.
---   However for as long as the Wild-child's role model is alive, he remains a Villager.
-wildChildRole :: Role
-wildChildRole = Role
-    { _name         = "Wild-child"
+--   On the first night, the Orphan may choose a player to become his role model. If during the game
+--   the role model is eliminated, the Orphan becomes a Werewolf. He will then wake up the next
+--   night with his peers and will devour with them each night until the end of the game. However
+--   for as long as the Orphan's role model is alive, he remains a Villager.
+orphanRole :: Role
+orphanRole = Role
+    { _name         = "Orphan"
     , _allegiance   = Villagers
     , _balance      = -1
     , _description  = T.unwords
-        [ "Abandoned in the woods by his parents at a young age, he was raised by wolves. As soon"
-        , "as he learned how to walk on all fours, the Wild-child began to wander around Miller's"
-        , "Hollow. One day, fascinated by an inhabitant of the village who was walking upright"
-        , "with grace and presence, he made them his secret role model. He then decided to"
-        , "integrate himself into the community of Miller's Hollow and entered, worried, in the"
-        , "village. The community was moved by his frailty, adopted him, and welcomed him in their"
-        , "fold. What will become of him: honest Villager or terrible Werewolf? For all of his"
-        , "life, the heart of the Wild-child will swing between these two alternatives. May his"
-        , "model confirm him in his newfound humanity."
+        [ "Abandoned by their parents as a child, with no-one wanting to look after another mouth"
+        , "to feed, the Orphan was left to fend for themself. No-one looks twice at the Orphan and"
+        , "even fewer offer kindness towards the lonely child. One day however, one townsperson"
+        , "changes all this. He offers the Orphan food, water and a roof over his head. Grateful"
+        , "for his chairty and affection, the Orphan makes him their role model. Pray that no ill"
+        , "should befall their role model, for who knows in such an event whom, or what, the Orphan"
+        , "may turn to..."
         ]
     , _rules        = T.unwords
-        [ "On the first night, the Wild-child may choose a player to become his role model. If"
-        , "during the game the chosen player is eliminated, the Wild-child becomes a Werewolf. He"
-        , "will then wake up the next night with his peers and will devour with them each night"
-        , "until the end of the game.  However for as long as the Wild-child's role model is alive,"
-        , "he remains a Villager."
+        [ "On the first night, the Orphan may choose a player to become his role model. If during"
+        , "the game the role model is eliminated, the Orphan becomes a Werewolf. He will then wake"
+        , "up the next night with his peers and will devour with them each night until the end of"
+        , "the game. However for as long as the Orphan's role model is alive, he remains a"
+        , "Villager."
         ]
     }
 
