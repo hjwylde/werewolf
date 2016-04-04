@@ -166,13 +166,13 @@ stageMessages game = case game ^. stage of
     WolfHoundsTurn      -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
+        orphansName         = players' ^?! orphans . name
         protectorsName      = players' ^?! protectors . name
         devotedServantsName = players' ^?! devotedServants . name
         victimsName         = head (getVoteResult game) ^. name
         scapegoatsName      = players' ^?! scapegoats . name
         seersName           = players' ^?! seers . name
         aliveWerewolfNames  = players' ^.. werewolves . alive . name
-        orphansName         = players' ^?! orphans . name
         wolfHoundsName      = players' ^?! wolfHounds . name
 
 devotedServantsTurnMessages :: Text -> Text -> [Message]
@@ -500,7 +500,7 @@ orphanJoinedPackMessages orphansName werewolfNames =
         ])
     : groupMessages werewolfNames (T.unwords
         [ orphansName, "the Orphan scampers off into the woods."
-        , "Without his role model nothing is holding back his true, wolfish, nature."
+        , "Without their role model nothing is holding back their true, wolfish, nature."
         ])
 
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message

@@ -6,6 +6,10 @@
 
 * Renamed the Wild-child to Orphan. ([#128](https://github.com/hjwylde/werewolf/issues/128))
 
+*Revisions*
+
+* Updated the Orphan's description. ([#128](https://github.com/hjwylde/werewolf/issues/128))
+
 ### v0.5.1.0
 
 *Minor*
