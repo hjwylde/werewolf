@@ -80,7 +80,7 @@ removePlayer name' = do
         healUsed    .= False
         poison      .= Nothing
         poisonUsed  .= False
-    when (is wolfHound player)  $ allegianceChosen .= Nothing
+    when (is wolfHound player)  $ allegianceChosen .= True
 
 -- | Fudges the player's allegiance. This function is useful for roles such as the Orphan where
 --   they align themselves differently given some trigger.

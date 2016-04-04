@@ -129,7 +129,7 @@ prop_revealCommandResetsRoleWhenWolfHound (GameAtDevotedServantsTurn game) = do
     let command             = revealCommand devotedServantsName
     let game''              = run_ (apply command) game'
 
-    isNothing $ game'' ^. allegianceChosen
+    not $ game'' ^. allegianceChosen
     where
         targetsName = head (getVoteResult game) ^. name
-        game'       = game & players . traverse . filteredBy name targetsName . role .~ wolfHoundRole & allegianceChosen .~ Just Villagers
+        game'       = game & players . traverse . filteredBy name targetsName . role .~ wolfHoundRole & allegianceChosen .~ True

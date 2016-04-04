@@ -182,12 +182,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
     WolfHoundsTurn -> do
         whenM (has (players . wolfHounds . dead) <$> get) advanceStage
 
-        whenJustM (use allegianceChosen) $ \allegiance -> do
-            wolfHound <- findPlayerBy_ role wolfHoundRole
-
-            setPlayerAllegiance (wolfHound ^. name) allegiance
-
-            advanceStage
+        whenM (use allegianceChosen) advanceStage
 
 lynchVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
 lynchVotees [votee]

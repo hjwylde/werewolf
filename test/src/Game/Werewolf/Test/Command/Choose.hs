@@ -47,6 +47,7 @@ allChooseCommandTests =
     , testProperty "wolf-hound choose command errors when caller not wolf-hound"        prop_wolfHoundChooseCommandErrorsWhenCallerNotWolfHound
     , testProperty "wolf-hound choose command errors when allegiance does not exist"    prop_wolfHoundChooseCommandErrorsWhenAllegianceDoesNotExist
     , testProperty "wolf-hound choose command sets allegiance chosen"                   prop_wolfHoundChooseCommandSetsAllegianceChosen
+    , testProperty "wolf-hound choose command sets allegiance"                          prop_wolfHoundChooseCommandSetsAllegiance
 
     , testProperty "scapegoat choose command errors when game is over"              prop_scapegoatChooseCommandErrorsWhenGameIsOver
     , testProperty "scapegoat choose command errors when caller does not exist"     prop_scapegoatChooseCommandErrorsWhenCallerDoesNotExist
@@ -168,14 +169,21 @@ prop_wolfHoundChooseCommandErrorsWhenAllegianceDoesNotExist (GameAtWolfHoundsTur
         ==> verbose_runCommandErrors game command
 
 prop_wolfHoundChooseCommandSetsAllegianceChosen :: GameAtWolfHoundsTurn -> Property
-prop_wolfHoundChooseCommandSetsAllegianceChosen (GameAtWolfHoundsTurn game) = do
+prop_wolfHoundChooseCommandSetsAllegianceChosen (GameAtWolfHoundsTurn game) =
+    forAll (arbitraryWolfHoundChooseCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command) game
+
+        game' ^. allegianceChosen
+
+prop_wolfHoundChooseCommandSetsAllegiance :: GameAtWolfHoundsTurn -> Property
+prop_wolfHoundChooseCommandSetsAllegiance (GameAtWolfHoundsTurn game) = do
     let wolfHoundsName = game ^?! players . wolfHounds . name
 
     forAll (elements [Villagers, Werewolves]) $ \allegiance' -> do
         let command = WolfHound.chooseCommand wolfHoundsName (T.pack $ show allegiance')
         let game'   = run_ (apply command) game
 
-        fromJust (game' ^. allegianceChosen) === allegiance'
+        game' ^?! players . wolfHounds . role . allegiance === allegiance'
 
 prop_scapegoatChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_scapegoatChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =

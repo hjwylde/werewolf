@@ -73,7 +73,7 @@ prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound (GameWithAllegianceC
     let wolfHoundsName  = game ^?! players . wolfHounds . name
     let command         = quitCommand wolfHoundsName
 
-    isNothing $ run_ (apply command) game ^. allegianceChosen
+    run_ (apply command) game ^. allegianceChosen
 
 prop_quitCommandClearsHealWhenCallerIsWitch :: GameWithHeal -> Bool
 prop_quitCommandClearsHealWhenCallerIsWitch (GameWithHeal game) = do

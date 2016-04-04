@@ -110,7 +110,6 @@ allEngineTests =
 
     , testProperty "check wolf-hound's turn advances to seer's turn"                prop_checkWolfHoundsTurnAdvancesToSeersTurn
     , testProperty "check wolf-hound's turn advances when no wolf-hound"            prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
-    , testProperty "check wolf-hound's turn sets wolf-hound's allegiance"           prop_checkWolfHoundsTurnSetsWolfHoundsAllegiance
     , testProperty "check wolf-hound's turn does nothing unless allegiance chosen"  prop_checkWolfHoundsTurnDoesNothingUnlessAllegianceChosen
 
     , testProperty "start game uses given players"                              prop_startGameUsesGivenPlayers
@@ -265,12 +264,11 @@ prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn :: GameWithAllowedVoters -> Boo
 prop_checkScapegoatsTurnAdvancesToWolfHoundsTurn (GameWithAllowedVoters game) =
     has (stage . _WolfHoundsTurn) (run_ checkStage game)
 
-prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen :: GameWithAllowedVoters -> Property
-prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen (GameWithAllowedVoters game) =
-    forAll (elements [Villagers, Werewolves]) $ \allegiance -> do
-        let game' = game & allegianceChosen .~ Just allegiance
+prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen :: GameWithAllowedVoters -> Bool
+prop_checkScapegoatsTurnSkipsWolfHoundsTurnWhenAllegianceChosen (GameWithAllowedVoters game) = do
+    let game' = game & allegianceChosen .~ True
 
-        hasn't (stage . _WolfHoundsTurn) (run_ checkStage game')
+    hasn't (stage . _WolfHoundsTurn) (run_ checkStage game')
 
 prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed :: GameAtScapegoatsTurn -> Bool
 prop_checkScapegoatsTurnDoesNothingWhileScapegoatBlamed (GameAtScapegoatsTurn game) =
@@ -447,12 +445,6 @@ prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound (GameAtWolfHoundsTurn game) = do
     let command     = quitCommand $ wolfHound ^. name
 
     hasn't (stage . _WolfHoundsTurn) (run_ (apply command >> checkStage) game)
-
-prop_checkWolfHoundsTurnSetsWolfHoundsAllegiance :: GameWithAllegianceChosen -> Property
-prop_checkWolfHoundsTurnSetsWolfHoundsAllegiance (GameWithAllegianceChosen game) =
-    game' ^?! players . wolfHounds . role . allegiance === fromJust (game' ^. allegianceChosen)
-    where
-        game' = run_ checkStage game
 
 prop_checkWolfHoundsTurnDoesNothingUnlessAllegianceChosen :: GameAtWolfHoundsTurn -> Bool
 prop_checkWolfHoundsTurnDoesNothingUnlessAllegianceChosen (GameAtWolfHoundsTurn game) =

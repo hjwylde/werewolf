@@ -55,7 +55,6 @@ import           Data.Maybe
 import           Data.Text       (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role   hiding (name)
 
 import Prelude hiding (round)
 
@@ -87,13 +86,13 @@ data Game = Game
     , _players          :: [Player]
     , _events           :: [Event]
     , _boots            :: Map Text [Text]
-    , _allegianceChosen :: Maybe Allegiance -- ^ Wolf-hound
+    , _allegianceChosen :: Bool             -- ^ Wolf-hound
     , _allowedVoters    :: [Text]           -- ^ Scapegoat
     , _heal             :: Bool             -- ^ Witch
     , _healUsed         :: Bool             -- ^ Witch
     , _hunterKilled     :: Bool             -- ^ Hunter
     , _jesterRevealed   :: Bool             -- ^ Jester
-    , _passes           :: [Text]           -- ^ Witch
+    , _passes           :: [Text]           -- ^ Devoted Servant, Witch
     , _poison           :: Maybe Text       -- ^ Witch
     , _poisonUsed       :: Bool             -- ^ Witch
     , _priorProtect     :: Maybe Text       -- ^ Protector
@@ -191,7 +190,7 @@ stageAvailable game WitchsTurn          =
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
 stageAvailable game WolfHoundsTurn      =
     has (players . wolfHounds . alive) game
-    && isNothing (game ^. allegianceChosen)
+    && not (game ^. allegianceChosen)
 
 -- | Creates a new 'Game' with the given players. No validations are performed here, those are left
 --   to 'Game.Werewolf.Engine.startGame'.
@@ -205,7 +204,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _events               = []
             , _boots                = Map.empty
             , _passes               = []
-            , _allegianceChosen     = Nothing
+            , _allegianceChosen     = False
             , _allowedVoters        = players ^.. names
             , _heal                 = False
             , _healUsed             = False
