@@ -49,6 +49,12 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 
     Lynching            -> return ()
 
+    OrphansTurn      -> do
+        orphan <- findPlayerBy_ role orphanRole
+
+        tell [pingRoleMessage $ orphanRole ^. Role.name]
+        tell [pingPlayerMessage $ orphan ^. name]
+
     ProtectorsTurn      -> do
         protector <- findPlayerBy_ role protectorRole
 
@@ -83,12 +89,6 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
 
         tell [pingRoleMessage "Werewolves"]
         tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
-
-    WildChildsTurn      -> do
-        wildChild <- findPlayerBy_ role wildChildRole
-
-        tell [pingRoleMessage $ wildChildRole ^. Role.name]
-        tell [pingPlayerMessage $ wildChild ^. name]
 
     WitchsTurn          -> do
         witch <- findPlayerBy_ role witchRole

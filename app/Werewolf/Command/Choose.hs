@@ -28,8 +28,8 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
-import Game.Werewolf.Command.WildChild as WildChild
 import Game.Werewolf.Command.WolfHound as WolfHound
 
 import Werewolf.Game
@@ -48,8 +48,8 @@ handle callerName tag (Options args) = do
     game <- readGame tag
 
     command <- case game ^. stage of
+            OrphansTurn     -> return $ Orphan.chooseCommand callerName (head args)
             ScapegoatsTurn  -> return $ Scapegoat.chooseCommand callerName args
-            WildChildsTurn  -> return $ WildChild.chooseCommand callerName (head args)
             WolfHoundsTurn  -> return $ WolfHound.chooseCommand callerName (head args)
             _               -> exitWith failure
                 { messages = [playerCannotDoThatRightNowMessage callerName]

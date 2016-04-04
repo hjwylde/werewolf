@@ -24,16 +24,16 @@ module Game.Werewolf.Util (
     getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
-    isDevotedServantsTurn, isGameOver, isProtectorsTurn, isScapegoatsTurn, isSeersTurn, isSunrise,
-    isVillagesTurn, isWerewolvesTurn, isWildChildsTurn, isWitchsTurn, isWolfHoundsTurn,
+    isDevotedServantsTurn, isGameOver, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn,
+    isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
     hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDevotedServant, isPlayerJester, isPlayerProtector, isPlayerScapegoat, isPlayerSeer,
-    isPlayerWildChild, isPlayerWitch, isPlayerWolfHound,
+    isPlayerDevotedServant, isPlayerJester, isPlayerOrphan, isPlayerProtector, isPlayerScapegoat,
+    isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -69,11 +69,11 @@ removePlayer name' = do
     player <- findPlayerBy_ name name'
 
     when (is angel player)      $ setPlayerAllegiance name' Villagers
+    when (is orphan player)     $ roleModel .= Nothing
     when (is protector player)  $ do
         protect         .= Nothing
         priorProtect    .= Nothing
     when (is seer player)       $ see .= Nothing
-    when (is wildChild player)  $ roleModel .= Nothing
     when (is witch player)      $ do
         heal        .= False
         healUsed    .= False
@@ -81,7 +81,7 @@ removePlayer name' = do
         poisonUsed  .= False
     when (is wolfHound player)  $ allegianceChosen .= Nothing
 
--- | Fudges the player's allegiance. This function is useful for roles such as the Wild-child where
+-- | Fudges the player's allegiance. This function is useful for roles such as the Orphan where
 --   they align themselves differently given some trigger.
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
 setPlayerAllegiance name' allegiance' = modify $ players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
@@ -125,6 +125,9 @@ isDevotedServantsTurn = has (stage . _DevotedServantsTurn) <$> get
 isGameOver :: MonadState Game m => m Bool
 isGameOver = has (stage . _GameOver) <$> get
 
+isOrphansTurn :: MonadState Game m => m Bool
+isOrphansTurn = has (stage . _OrphansTurn) <$> get
+
 isProtectorsTurn :: MonadState Game m => m Bool
 isProtectorsTurn = has (stage . _ProtectorsTurn) <$> get
 
@@ -142,9 +145,6 @@ isVillagesTurn = has (stage . _VillagesTurn) <$> get
 
 isWerewolvesTurn :: MonadState Game m => m Bool
 isWerewolvesTurn = has (stage . _WerewolvesTurn) <$> get
-
-isWildChildsTurn :: MonadState Game m => m Bool
-isWildChildsTurn = has (stage . _WildChildsTurn) <$> get
 
 isWitchsTurn :: MonadState Game m => m Bool
 isWitchsTurn = has (stage . _WitchsTurn) <$> get
@@ -173,6 +173,9 @@ isPlayerDevotedServant name' = is devotedServant <$> findPlayerBy_ name name'
 isPlayerJester :: MonadState Game m => Text -> m Bool
 isPlayerJester name' = is jester <$> findPlayerBy_ name name'
 
+isPlayerOrphan :: MonadState Game m => Text -> m Bool
+isPlayerOrphan name' = is orphan <$> findPlayerBy_ name name'
+
 isPlayerProtector :: MonadState Game m => Text -> m Bool
 isPlayerProtector name' = is protector <$> findPlayerBy_ name name'
 
@@ -181,9 +184,6 @@ isPlayerScapegoat name' = is scapegoat <$> findPlayerBy_ name name'
 
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name' = is seer <$> findPlayerBy_ name name'
-
-isPlayerWildChild :: MonadState Game m => Text -> m Bool
-isPlayerWildChild name' = is wildChild <$> findPlayerBy_ name name'
 
 isPlayerWitch :: MonadState Game m => Text -> m Bool
 isPlayerWitch name' = is witch <$> findPlayerBy_ name name'

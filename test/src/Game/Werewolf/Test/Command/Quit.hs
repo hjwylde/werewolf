@@ -39,7 +39,7 @@ allQuitCommandTests =
     , testProperty "quit command clears protect when caller is protector"               prop_quitCommandClearsProtectWhenCallerIsProtector
     , testProperty "quit command clears player's devour vote"                           prop_quitCommandClearsPlayersDevourVote
     , testProperty "quit command clears player's lynch vote"                            prop_quitCommandClearsPlayersLynchVote
-    , testProperty "quit command clears role model when caller is wild-child"           prop_quitCommandClearsRoleModelWhenCallerIsWildChild
+    , testProperty "quit command clears role model when caller is orphan"               prop_quitCommandClearsRoleModelWhenCallerIsOrphan
     , testProperty "quit command sets angel's allegiance when caller is angel"          prop_quitCommandSetsAngelsAllegianceWhenCallerIsAngel
     ]
 
@@ -131,10 +131,10 @@ prop_quitCommandClearsPlayersLynchVote (GameWithLynchVotes game) =
 
         isNothing $ run_ (apply command) game ^. votes . at (caller ^. name)
 
-prop_quitCommandClearsRoleModelWhenCallerIsWildChild :: GameWithRoleModel -> Bool
-prop_quitCommandClearsRoleModelWhenCallerIsWildChild (GameWithRoleModel game) = do
-    let wildChild   = game ^?! players . wildChildren
-    let command     = quitCommand (wildChild ^. name)
+prop_quitCommandClearsRoleModelWhenCallerIsOrphan :: GameWithRoleModel -> Bool
+prop_quitCommandClearsRoleModelWhenCallerIsOrphan (GameWithRoleModel game) = do
+    let orphan  = game ^?! players . orphans
+    let command = quitCommand (orphan ^. name)
 
     isNothing $ run_ (apply command) game ^. roleModel
 

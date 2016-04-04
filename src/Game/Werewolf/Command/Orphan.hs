@@ -1,15 +1,15 @@
 {-|
-Module      : Game.Werewolf.Command.WildChild
-Description : Wild-child commands.
+Module      : Game.Werewolf.Command.Orphan
+Description : Orphan commands.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Wild-child commands.
+Orphan commands.
 -}
 
-module Game.Werewolf.Command.WildChild (
+module Game.Werewolf.Command.Orphan (
     -- * Commands
     chooseCommand,
 ) where
@@ -27,9 +27,9 @@ import Game.Werewolf.Util
 chooseCommand :: Text -> Text -> Command
 chooseCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM (isPlayerWildChild callerName)  $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWildChildsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
-    when (callerName == targetName)         $ throwError [playerCannotChooseSelfMessage callerName]
+    unlessM (isPlayerOrphan callerName) $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isOrphansTurn               $ throwError [playerCannotDoThatRightNowMessage callerName]
+    when (callerName == targetName)     $ throwError [playerCannotChooseSelfMessage callerName]
     validatePlayer callerName targetName
 
     roleModel .= Just targetName

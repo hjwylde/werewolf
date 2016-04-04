@@ -19,8 +19,8 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import Game.Werewolf
+import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
-import Game.Werewolf.Command.WildChild as WildChild
 import Game.Werewolf.Command.WolfHound as WolfHound
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
@@ -30,23 +30,23 @@ import Test.Tasty.QuickCheck
 
 allChooseCommandTests :: [TestTree]
 allChooseCommandTests =
-    [ testProperty "wolf-hound choose command errors when game is over"                 prop_wolfHoundChooseCommandErrorsWhenGameIsOver
+    [ testProperty "orphan choose command errors when game is over"             prop_orphanChooseCommandErrorsWhenGameIsOver
+    , testProperty "orphan choose command errors when caller does not exist"    prop_orphanChooseCommandErrorsWhenCallerDoesNotExist
+    , testProperty "orphan choose command errors when target does not exist"    prop_orphanChooseCommandErrorsWhenTargetDoesNotExist
+    , testProperty "orphan choose command errors when caller is dead"           prop_orphanChooseCommandErrorsWhenCallerIsDead
+    , testProperty "orphan choose command errors when target is dead"           prop_orphanChooseCommandErrorsWhenTargetIsDead
+    , testProperty "orphan choose command errors when target is caller"         prop_orphanChooseCommandErrorsWhenTargetIsCaller
+    , testProperty "orphan choose command errors when not orphan's turn"        prop_orphanChooseCommandErrorsWhenNotOrphansTurn
+    , testProperty "orphan choose command errors when caller not orphan"        prop_orphanChooseCommandErrorsWhenCallerNotOrphan
+    , testProperty "orphan choose command sets role model"                      prop_orphanChooseCommandSetsRoleModel
+
+    , testProperty "wolf-hound choose command errors when game is over"                 prop_wolfHoundChooseCommandErrorsWhenGameIsOver
     , testProperty "wolf-hound choose command errors when caller does not exist"        prop_wolfHoundChooseCommandErrorsWhenCallerDoesNotExist
     , testProperty "wolf-hound choose command errors when caller is dead"               prop_wolfHoundChooseCommandErrorsWhenCallerIsDead
     , testProperty "wolf-hound choose command errors when not wolf-hound's turn"        prop_wolfHoundChooseCommandErrorsWhenNotWolfHoundsTurn
     , testProperty "wolf-hound choose command errors when caller not wolf-hound"        prop_wolfHoundChooseCommandErrorsWhenCallerNotWolfHound
     , testProperty "wolf-hound choose command errors when allegiance does not exist"    prop_wolfHoundChooseCommandErrorsWhenAllegianceDoesNotExist
     , testProperty "wolf-hound choose command sets allegiance chosen"                   prop_wolfHoundChooseCommandSetsAllegianceChosen
-
-    , testProperty "wild-child choose command errors when game is over"             prop_wildChildChooseCommandErrorsWhenGameIsOver
-    , testProperty "wild-child choose command errors when caller does not exist"    prop_wildChildChooseCommandErrorsWhenCallerDoesNotExist
-    , testProperty "wild-child choose command errors when target does not exist"    prop_wildChildChooseCommandErrorsWhenTargetDoesNotExist
-    , testProperty "wild-child choose command errors when caller is dead"           prop_wildChildChooseCommandErrorsWhenCallerIsDead
-    , testProperty "wild-child choose command errors when target is dead"           prop_wildChildChooseCommandErrorsWhenTargetIsDead
-    , testProperty "wild-child choose command errors when target is caller"         prop_wildChildChooseCommandErrorsWhenTargetIsCaller
-    , testProperty "wild-child choose command errors when not wild-child's turn"    prop_wildChildChooseCommandErrorsWhenNotWildChildsTurn
-    , testProperty "wild-child choose command errors when caller not wild-child"    prop_wildChildChooseCommandErrorsWhenCallerNotWildChild
-    , testProperty "wild-child choose command sets role model"                      prop_wildChildChooseCommandSetsRoleModel
 
     , testProperty "scapegoat choose command errors when game is over"              prop_scapegoatChooseCommandErrorsWhenGameIsOver
     , testProperty "scapegoat choose command errors when caller does not exist"     prop_scapegoatChooseCommandErrorsWhenCallerDoesNotExist
@@ -57,6 +57,76 @@ allChooseCommandTests =
     , testProperty "scapegoat choose command sets allowed voters"                   prop_scapegoatChooseCommandSetsAllowedVoters
     , testProperty "scapegoat choose command resets scapegoat blamed"               prop_scapegoatChooseCommandResetsScapegoatBlamed
     ]
+
+prop_orphanChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
+prop_orphanChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
+    forAll (arbitraryOrphanChooseCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_orphanChooseCommandErrorsWhenCallerDoesNotExist :: GameAtOrphansTurn -> Player -> Property
+prop_orphanChooseCommandErrorsWhenCallerDoesNotExist (GameAtOrphansTurn game) caller =
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = Orphan.chooseCommand (caller ^. name) (target ^. name)
+
+        not (doesPlayerExist (caller ^. name) game)
+            ==> verbose_runCommandErrors game command
+
+prop_orphanChooseCommandErrorsWhenTargetDoesNotExist :: GameAtOrphansTurn -> Player -> Property
+prop_orphanChooseCommandErrorsWhenTargetDoesNotExist (GameAtOrphansTurn game) target = do
+    let orphan  = game ^?! players . orphans
+    let command = Orphan.chooseCommand (orphan ^. name) (target ^. name)
+
+    not (doesPlayerExist (target ^. name) game)
+        ==> verbose_runCommandErrors game command
+
+prop_orphanChooseCommandErrorsWhenCallerIsDead :: GameAtOrphansTurn -> Property
+prop_orphanChooseCommandErrorsWhenCallerIsDead (GameAtOrphansTurn game) = do
+    let orphan  = game ^?! players . orphans
+    let game'   = killPlayer (orphan ^. name) game
+
+    forAll (arbitraryPlayer game') $ \target -> do
+        let command = Orphan.chooseCommand (orphan ^. name) (target ^. name)
+
+        verbose_runCommandErrors game' command
+
+prop_orphanChooseCommandErrorsWhenTargetIsDead :: GameAtOrphansTurn -> Property
+prop_orphanChooseCommandErrorsWhenTargetIsDead (GameAtOrphansTurn game) = do
+    let orphan = game ^?! players . orphans
+
+    forAll (arbitraryPlayer game) $ \target -> do
+        let game'   = killPlayer (target ^. name) game
+        let command = Orphan.chooseCommand (orphan ^. name) (target ^. name)
+
+        verbose_runCommandErrors game' command
+
+prop_orphanChooseCommandErrorsWhenTargetIsCaller :: GameAtOrphansTurn -> Property
+prop_orphanChooseCommandErrorsWhenTargetIsCaller (GameAtOrphansTurn game) = do
+    let orphan  = game ^?! players . orphans
+    let command = Orphan.chooseCommand (orphan ^. name) (orphan ^. name)
+
+    verbose_runCommandErrors game command
+
+prop_orphanChooseCommandErrorsWhenNotOrphansTurn :: Game -> Property
+prop_orphanChooseCommandErrorsWhenNotOrphansTurn game =
+    hasn't (stage . _OrphansTurn) game
+    ==> forAll (arbitraryOrphanChooseCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_orphanChooseCommandErrorsWhenCallerNotOrphan :: GameAtOrphansTurn -> Property
+prop_orphanChooseCommandErrorsWhenCallerNotOrphan (GameAtOrphansTurn game) =
+    forAll (suchThat (arbitraryPlayer game) (isn't orphan)) $ \caller ->
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = Orphan.chooseCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
+
+prop_orphanChooseCommandSetsRoleModel :: GameAtOrphansTurn -> Property
+prop_orphanChooseCommandSetsRoleModel (GameAtOrphansTurn game) = do
+    let orphan = game ^?! players . orphans
+
+    forAll (suchThat (arbitraryPlayer game) (orphan /=)) $ \target -> do
+        let command = Orphan.chooseCommand (orphan ^. name) (target ^. name)
+        let game'   = run_ (apply command) game
+
+        fromJust (game' ^. roleModel) === target ^. name
 
 prop_wolfHoundChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_wolfHoundChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -106,76 +176,6 @@ prop_wolfHoundChooseCommandSetsAllegianceChosen (GameAtWolfHoundsTurn game) = do
         let game'   = run_ (apply command) game
 
         fromJust (game' ^. allegianceChosen) === allegiance'
-
-prop_wildChildChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
-prop_wildChildChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
-    forAll (arbitraryWildChildChooseCommand game) $ verbose_runCommandErrors game . getBlind
-
-prop_wildChildChooseCommandErrorsWhenCallerDoesNotExist :: GameAtWildChildsTurn -> Player -> Property
-prop_wildChildChooseCommandErrorsWhenCallerDoesNotExist (GameAtWildChildsTurn game) caller =
-    forAll (arbitraryPlayer game) $ \target -> do
-        let command = WildChild.chooseCommand (caller ^. name) (target ^. name)
-
-        not (doesPlayerExist (caller ^. name) game)
-            ==> verbose_runCommandErrors game command
-
-prop_wildChildChooseCommandErrorsWhenTargetDoesNotExist :: GameAtWildChildsTurn -> Player -> Property
-prop_wildChildChooseCommandErrorsWhenTargetDoesNotExist (GameAtWildChildsTurn game) target = do
-    let wildChild   = game ^?! players . wildChildren
-    let command     = WildChild.chooseCommand (wildChild ^. name) (target ^. name)
-
-    not (doesPlayerExist (target ^. name) game)
-        ==> verbose_runCommandErrors game command
-
-prop_wildChildChooseCommandErrorsWhenCallerIsDead :: GameAtWildChildsTurn -> Property
-prop_wildChildChooseCommandErrorsWhenCallerIsDead (GameAtWildChildsTurn game) = do
-    let wildChild   = game ^?! players . wildChildren
-    let game'       = killPlayer (wildChild ^. name) game
-
-    forAll (arbitraryPlayer game') $ \target -> do
-        let command = WildChild.chooseCommand (wildChild ^. name) (target ^. name)
-
-        verbose_runCommandErrors game' command
-
-prop_wildChildChooseCommandErrorsWhenTargetIsDead :: GameAtWildChildsTurn -> Property
-prop_wildChildChooseCommandErrorsWhenTargetIsDead (GameAtWildChildsTurn game) = do
-    let wildChild = game ^?! players . wildChildren
-
-    forAll (arbitraryPlayer game) $ \target -> do
-        let game'   = killPlayer (target ^. name) game
-        let command = WildChild.chooseCommand (wildChild ^. name) (target ^. name)
-
-        verbose_runCommandErrors game' command
-
-prop_wildChildChooseCommandErrorsWhenTargetIsCaller :: GameAtWildChildsTurn -> Property
-prop_wildChildChooseCommandErrorsWhenTargetIsCaller (GameAtWildChildsTurn game) = do
-    let wildChild   = game ^?! players . wildChildren
-    let command     = WildChild.chooseCommand (wildChild ^. name) (wildChild ^. name)
-
-    verbose_runCommandErrors game command
-
-prop_wildChildChooseCommandErrorsWhenNotWildChildsTurn :: Game -> Property
-prop_wildChildChooseCommandErrorsWhenNotWildChildsTurn game =
-    hasn't (stage . _WildChildsTurn) game
-    ==> forAll (arbitraryWildChildChooseCommand game) $ verbose_runCommandErrors game . getBlind
-
-prop_wildChildChooseCommandErrorsWhenCallerNotWildChild :: GameAtWildChildsTurn -> Property
-prop_wildChildChooseCommandErrorsWhenCallerNotWildChild (GameAtWildChildsTurn game) =
-    forAll (suchThat (arbitraryPlayer game) (isn't wildChild)) $ \caller ->
-    forAll (arbitraryPlayer game) $ \target -> do
-        let command = WildChild.chooseCommand (caller ^. name) (target ^. name)
-
-        verbose_runCommandErrors game command
-
-prop_wildChildChooseCommandSetsRoleModel :: GameAtWildChildsTurn -> Property
-prop_wildChildChooseCommandSetsRoleModel (GameAtWildChildsTurn game) = do
-    let wildChild = game ^?! players . wildChildren
-
-    forAll (suchThat (arbitraryPlayer game) (wildChild /=)) $ \target -> do
-        let command = WildChild.chooseCommand (wildChild ^. name) (target ^. name)
-        let game'   = run_ (apply command) game
-
-        fromJust (game' ^. roleModel) === target ^. name
 
 prop_scapegoatChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_scapegoatChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =

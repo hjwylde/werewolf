@@ -33,7 +33,7 @@ module Game.Werewolf.Role (
     -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
     --
     --   The Ambiguous are able to change allegiance throughout the game.
-    devotedServantRole, wildChildRole, wolfHoundRole,
+    devotedServantRole, orphanRole, wolfHoundRole,
 
     -- *** The Loners
     -- | The Loners look out for themselves and themselves alone.
@@ -104,13 +104,13 @@ allRoles =
     , devotedServantRole
     , druidRole
     , jesterRole
+    , orphanRole
     , protectorRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
     , simpleWerewolfRole
     , villagerVillagerRole
-    , wildChildRole
     , witchRole
     , wolfHoundRole
     ]
@@ -150,39 +150,39 @@ devotedServantRole = Role
     }
 
 -- | /Abandoned in the woods by his parents at a young age, he was raised by wolves. As soon as he/
---   /learned how to walk on all fours, the Wild-child began to wander around Miller's Hollow. One/
+--   /learned how to walk on all fours, the Orphan began to wander around Miller's Hollow. One/
 --   /day, fascinated by an inhabitant of the village who was walking upright with grace and/
 --   /presence, he made them his secret role model. He then decided to integrate himself into the/
 --   /community of Miller's Hollow and entered, worried, in the village. The community was moved by/
 --   /his frailty, adopted him, and welcomed him in their fold. What will become of him: honest/
---   /Villager or terrible Werewolf? For all of his life, the heart of the Wild-child will swing/
+--   /Villager or terrible Werewolf? For all of his life, the heart of the Orphan will swing/
 --   /between these two alternatives. May his model confirm him in his newfound humanity./
 --
---   On the first night, the Wild-child may choose a player to become his role model. If during the
---   game the chosen player is eliminated, the Wild-child becomes a Werewolf. He will then wake up
+--   On the first night, the Orphan may choose a player to become his role model. If during the
+--   game the chosen player is eliminated, the Orphan becomes a Werewolf. He will then wake up
 --   the next night with his peers and will devour with them each night until the end of the game.
---   However for as long as the Wild-child's role model is alive, he remains a Villager.
-wildChildRole :: Role
-wildChildRole = Role
-    { _name         = "Wild-child"
+--   However for as long as the Orphan's role model is alive, he remains a Villager.
+orphanRole :: Role
+orphanRole = Role
+    { _name         = "Orphan"
     , _allegiance   = Villagers
     , _balance      = -1
     , _description  = T.unwords
         [ "Abandoned in the woods by his parents at a young age, he was raised by wolves. As soon"
-        , "as he learned how to walk on all fours, the Wild-child began to wander around Miller's"
+        , "as he learned how to walk on all fours, the Orphan began to wander around Miller's"
         , "Hollow. One day, fascinated by an inhabitant of the village who was walking upright"
         , "with grace and presence, he made them his secret role model. He then decided to"
         , "integrate himself into the community of Miller's Hollow and entered, worried, in the"
         , "village. The community was moved by his frailty, adopted him, and welcomed him in their"
         , "fold. What will become of him: honest Villager or terrible Werewolf? For all of his"
-        , "life, the heart of the Wild-child will swing between these two alternatives. May his"
+        , "life, the heart of the Orphan will swing between these two alternatives. May his"
         , "model confirm him in his newfound humanity."
         ]
     , _rules        = T.unwords
-        [ "On the first night, the Wild-child may choose a player to become his role model. If"
-        , "during the game the chosen player is eliminated, the Wild-child becomes a Werewolf. He"
+        [ "On the first night, the Orphan may choose a player to become his role model. If"
+        , "during the game the chosen player is eliminated, the Orphan becomes a Werewolf. He"
         , "will then wake up the next night with his peers and will devour with them each night"
-        , "until the end of the game.  However for as long as the Wild-child's role model is alive,"
+        , "until the end of the game.  However for as long as the Orphan's role model is alive,"
         , "he remains a Villager."
         ]
     }
