@@ -18,13 +18,13 @@ module Game.Werewolf.Game (
     -- * Game
     Game,
     stage, round, players, events, boots, passes, allegianceChosen, allowedVoters, heal, healUsed,
-    jesterRevealed, poison, poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see,
-    votes,
+    hunterKilled, jesterRevealed, poison, poisonUsed, priorProtect, protect, roleModel,
+    scapegoatBlamed, see, votes,
 
     Stage(..),
-    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _OrphansTurn, _ProtectorsTurn,
-    _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
-    _WolfHoundsTurn,
+    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching,
+    _OrphansTurn, _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn,
+    _WerewolvesTurn, _WitchsTurn, _WolfHoundsTurn,
 
     allStages,
     stageCycle, stageAvailable,
@@ -91,6 +91,7 @@ data Game = Game
     , _allowedVoters    :: [Text]           -- ^ Scapegoat
     , _heal             :: Bool             -- ^ Witch
     , _healUsed         :: Bool             -- ^ Witch
+    , _hunterKilled     :: Bool             -- ^ Hunter
     , _jesterRevealed   :: Bool             -- ^ Jester
     , _passes           :: [Text]           -- ^ Witch
     , _poison           :: Maybe Text       -- ^ Witch
@@ -109,11 +110,12 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | Lynching | OrphansTurn
-            | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
-            | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
+data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching
+            | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
+            | VillagesTurn | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
+-- TODO (hjw): remove events
 -- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
 --   'Game.Werewolf.Engine.checkStage', while an event's specific behaviour is defined by
 --   'Game.Werewolf.Engine.eventAvailable' and 'Game.Werewolf.Engine.applyEvent'.
@@ -138,6 +140,7 @@ allStages =
     [ VillagesTurn
     , DevotedServantsTurn
     , Lynching
+    , HuntersTurn1
     , ScapegoatsTurn
     , Sunset
     , WolfHoundsTurn
@@ -148,6 +151,7 @@ allStages =
     , WitchsTurn
     , Sunrise
     , FerinasGrunt
+    , HuntersTurn2
     , GameOver
     ]
 
@@ -167,6 +171,8 @@ stageAvailable game DevotedServantsTurn =
     && isn't devotedServant (head $ getVoteResult game)
 stageAvailable game FerinasGrunt        = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
+stageAvailable game HuntersTurn1        = game ^. hunterKilled
+stageAvailable game HuntersTurn2        = game ^. hunterKilled
 stageAvailable game Lynching            = Map.size (game ^. votes) > 0
 stageAvailable game ProtectorsTurn      = has (players . protectors . alive) game
 stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
@@ -203,6 +209,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _allowedVoters        = players ^.. names
             , _heal                 = False
             , _healUsed             = False
+            , _hunterKilled         = False
             , _jesterRevealed       = False
             , _poison               = Nothing
             , _poisonUsed           = False

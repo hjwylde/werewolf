@@ -51,6 +51,7 @@ import qualified Data.Text       as T
 import Game.Werewolf
 import Game.Werewolf.Command.DevotedServant as DevotedServant
 import Game.Werewolf.Command.Global
+import Game.Werewolf.Command.Hunter         as Hunter
 import Game.Werewolf.Command.Orphan         as Orphan
 import Game.Werewolf.Command.Protector
 import Game.Werewolf.Command.Scapegoat      as Scapegoat
@@ -439,6 +440,8 @@ arbitraryCommand game = case game ^. stage of
         ]
     FerinasGrunt        -> return $ Blind noopCommand
     GameOver            -> return $ Blind noopCommand
+    HuntersTurn1        -> arbitraryHunterChooseCommand game
+    HuntersTurn2        -> arbitraryHunterChooseCommand game
     Lynching            -> return $ Blind noopCommand
     OrphansTurn         -> arbitraryOrphanChooseCommand game
     ProtectorsTurn      -> arbitraryProtectCommand game
@@ -454,6 +457,13 @@ arbitraryCommand game = case game ^. stage of
         , arbitraryPoisonCommand game
         ]
     WolfHoundsTurn      -> arbitraryWolfHoundChooseCommand game
+
+arbitraryHunterChooseCommand :: Game -> Gen (Blind Command)
+arbitraryHunterChooseCommand game = do
+    let hunter  = game ^?! players . hunters
+    target      <- arbitraryPlayer game
+
+    return . Blind $ Hunter.chooseCommand (hunter ^. name) (target ^. name)
 
 arbitraryOrphanChooseCommand :: Game -> Gen (Blind Command)
 arbitraryOrphanChooseCommand game = do

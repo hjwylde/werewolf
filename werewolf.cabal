@@ -78,6 +78,7 @@ library
         Game.Werewolf.Command
         Game.Werewolf.Command.DevotedServant
         Game.Werewolf.Command.Global
+        Game.Werewolf.Command.Hunter
         Game.Werewolf.Command.Orphan
         Game.Werewolf.Command.Protector
         Game.Werewolf.Command.Scapegoat

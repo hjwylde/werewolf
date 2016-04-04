@@ -24,16 +24,17 @@ module Game.Werewolf.Util (
     getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
-    isDevotedServantsTurn, isGameOver, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn,
-    isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
+    isDevotedServantsTurn, isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn,
+    isScapegoatsTurn, isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+    isWolfHoundsTurn,
     hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDevotedServant, isPlayerJester, isPlayerOrphan, isPlayerProtector, isPlayerScapegoat,
-    isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
+    isPlayerDevotedServant, isPlayerHunter, isPlayerJester, isPlayerOrphan, isPlayerProtector,
+    isPlayerScapegoat, isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -125,6 +126,12 @@ isDevotedServantsTurn = has (stage . _DevotedServantsTurn) <$> get
 isGameOver :: MonadState Game m => m Bool
 isGameOver = has (stage . _GameOver) <$> get
 
+isHuntersTurn :: MonadState Game m => m Bool
+isHuntersTurn = orM
+    [ has (stage . _HuntersTurn1) <$> get
+    , has (stage . _HuntersTurn2) <$> get
+    ]
+
 isOrphansTurn :: MonadState Game m => m Bool
 isOrphansTurn = has (stage . _OrphansTurn) <$> get
 
@@ -169,6 +176,9 @@ doesPlayerExist name = gets $ Game.doesPlayerExist name
 
 isPlayerDevotedServant :: MonadState Game m => Text -> m Bool
 isPlayerDevotedServant name' = is devotedServant <$> findPlayerBy_ name name'
+
+isPlayerHunter :: MonadState Game m => Text -> m Bool
+isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'
 
 isPlayerJester :: MonadState Game m => Text -> m Bool
 isPlayerJester name' = is jester <$> findPlayerBy_ name name'
