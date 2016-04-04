@@ -71,7 +71,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (has (players . devotedServants . dead) <$> get) advanceStage
 
         whenM (has devotedServants <$> getVoteResult)   advanceStage
-        whenM (has devotedServants <$> getPassers)      advanceStage
+        whenM (use passed)                              advanceStage
 
     FerinasGrunt -> do
         druid       <- findPlayerBy_ role druidRole
@@ -177,7 +177,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
             heal    .= False
 
         whenM (use healUsed &&^ use poisonUsed) advanceStage
-        whenM (has witches <$> getPassers)      advanceStage
+        whenM (use passed)                      advanceStage
 
     WolfHoundsTurn -> do
         whenM (has (players . wolfHounds . dead) <$> get) advanceStage
@@ -216,7 +216,7 @@ advanceStage = do
 
     stage   .= nextStage
     boots   .= Map.empty
-    passes  .= []
+    passed  .= False
     see     .= Nothing
 
     tell . stageMessages =<< get

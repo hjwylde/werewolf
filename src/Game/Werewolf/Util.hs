@@ -20,8 +20,8 @@ module Game.Werewolf.Util (
     killPlayer, removePlayer, setPlayerAllegiance, setPlayerRole,
 
     -- ** Searches
-    findPlayerBy_, getAdjacentAlivePlayers, getPassers, getPlayerVote,
-    getAllowedVoters, getPendingVoters, getVoteResult,
+    findPlayerBy_, getAdjacentAlivePlayers, getPlayerVote, getAllowedVoters, getPendingVoters,
+    getVoteResult,
 
     -- ** Queries
     isDevotedServantsTurn, isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn,
@@ -64,8 +64,7 @@ removePlayer :: MonadState Game m => Text -> m ()
 removePlayer name' = do
     killPlayer name'
 
-    passes  %= delete name'
-    votes   %= Map.delete name'
+    votes %= Map.delete name'
 
     player <- findPlayerBy_ name name'
 
@@ -104,9 +103,6 @@ getAdjacentAlivePlayers name' = do
     where
         adjacentElements 0 list     = last list : take 2 list
         adjacentElements index list = take 3 $ drop (index - 1) (cycle list)
-
-getPassers :: MonadState Game m => m [Player]
-getPassers = mapM (findPlayerBy_ name) =<< use passes
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = use $ votes . at playerName

@@ -106,7 +106,7 @@ allEngineTests =
     , testProperty "check witch's turn does nothing unless actioned or passed"  prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed
     , testProperty "check witch's turn resets heal"                             prop_checkWitchsTurnResetsHeal
     , testProperty "check witch's turn resets poison"                           prop_checkWitchsTurnResetsPoison
-    , testProperty "check witch's turn clears passes"                           prop_checkWitchsTurnClearsPasses
+    , testProperty "check witch's turn clears passed"                           prop_checkWitchsTurnClearsPassed
 
     , testProperty "check wolf-hound's turn advances to seer's turn"                prop_checkWolfHoundsTurnAdvancesToSeersTurn
     , testProperty "check wolf-hound's turn advances when no wolf-hound"            prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound
@@ -412,32 +412,44 @@ prop_checkWitchsTurnKillsOnePlayerWhenPoisoned (GameWithPoison game) =
 
 prop_checkWitchsTurnDoesNothingWhenPassed :: GameAtWitchsTurn -> Property
 prop_checkWitchsTurnDoesNothingWhenPassed (GameAtWitchsTurn game) =
-    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
-    none (is dead) $ run_ (apply command >> checkStage) game ^. players
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command >> checkStage) game
+
+        none (is dead) $ game' ^. players
 
 prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed :: GameAtWitchsTurn -> Bool
-prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed (GameAtWitchsTurn game) =
-    has (stage . _WitchsTurn) (run_ checkStage game)
+prop_checkWitchsTurnDoesNothingUnlessActionedOrPassed (GameAtWitchsTurn game) = do
+    let game' = run_ checkStage game
+
+    has (stage . _WitchsTurn) game'
 
 prop_checkWitchsTurnResetsHeal :: GameWithHeal -> Property
 prop_checkWitchsTurnResetsHeal (GameWithHeal game) =
-    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
-    not $ run_ (apply command >> checkStage) game ^. heal
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command >> checkStage) game
+
+        not $ game' ^. heal
 
 prop_checkWitchsTurnResetsPoison :: GameWithPoison -> Property
 prop_checkWitchsTurnResetsPoison (GameWithPoison game) =
-    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
-    isNothing $ run_ (apply command >> checkStage) game ^. poison
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command >> checkStage) game
 
-prop_checkWitchsTurnClearsPasses :: GameAtWitchsTurn -> Property
-prop_checkWitchsTurnClearsPasses (GameAtWitchsTurn game) =
-    forAll (arbitraryWitchPassCommand game) $ \(Blind command) ->
-    null $ run_ (apply command >> checkStage) game ^. passes
+        isNothing $ game' ^. poison
+
+prop_checkWitchsTurnClearsPassed :: GameAtWitchsTurn -> Property
+prop_checkWitchsTurnClearsPassed (GameAtWitchsTurn game) =
+    forAll (arbitraryWitchPassCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command >> checkStage) game
+
+        not $ game' ^. passed
 
 prop_checkWolfHoundsTurnAdvancesToSeersTurn :: GameAtWolfHoundsTurn -> Property
 prop_checkWolfHoundsTurnAdvancesToSeersTurn (GameAtWolfHoundsTurn game) =
-    forAll (arbitraryWolfHoundChooseCommand game) $ \(Blind command) ->
-    has (stage . _SeersTurn) (run_ (apply command >> checkStage) game)
+    forAll (arbitraryWolfHoundChooseCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command >> checkStage) game
+
+        has (stage . _SeersTurn) game'
 
 prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound :: GameAtWolfHoundsTurn -> Bool
 prop_checkWolfHoundsTurnAdvancesWhenNoWolfHound (GameAtWolfHoundsTurn game) = do

@@ -34,7 +34,7 @@ passCommand :: Text -> Command
 passCommand callerName = Command $ do
     validateCommand callerName
 
-    passes %= nub . cons callerName
+    passed .= True
 
 revealCommand :: Text -> Command
 revealCommand callerName = Command $ do
