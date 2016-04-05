@@ -44,7 +44,7 @@ module Game.Werewolf.Messages (
     angelJoinedVillagersMessage,
 
     -- * Devoted Servant's turn messages
-    devotedServantRevealedMessage, devotedServantJoinedPackMessages,
+    devotedServantRevealedMessage, roleTakenMessage, devotedServantJoinedPackMessages,
 
     -- * Druid's turn messages
     ferinaGruntsMessage,
@@ -474,9 +474,15 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
 
 devotedServantRevealedMessage :: Text -> Message
 devotedServantRevealedMessage devotedServantsName = publicMessage $ T.unwords
-    [ devotedServantsName, "stands up in horror."
-    , "Determined to not let their master's abilities be lost forever,"
-    , "she selflessly takes on their role."
+    [ "Determined to not let their master's abilities be lost forever,"
+    , devotedServantsName, "the Devoted Servant selflessly takes on their role."
+    ]
+
+roleTakenMessage :: Text -> Role -> Message
+roleTakenMessage to role = privateMessage to $ T.intercalate "\n"
+    [ T.concat ["You've taken on the role of ", article role, " ", role ^. Role.name, "."]
+    , role ^. description
+    , role ^. rules
     ]
 
 devotedServantJoinedPackMessages :: Text -> [Text] -> [Message]
