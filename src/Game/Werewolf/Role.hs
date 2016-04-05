@@ -33,7 +33,7 @@ module Game.Werewolf.Role (
     -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
     --
     --   The Ambiguous are able to change allegiance throughout the game.
-    orphanRole,
+    orphanRole, villageDrunkRole,
 
     -- *** The Loners
     -- | The Loners look out for themselves and themselves alone.
@@ -111,6 +111,7 @@ allRoles =
     , simpleVillagerRole
     , simpleWerewolfRole
     , trueVillagerRole
+    , villageDrunkRole
     , witchRole
     ]
 
@@ -150,6 +151,37 @@ orphanRole = Role
         [ "On the first night, the Orphan chooses a player to become their role model. So long as"
         , "the role model is alive, the Orphan is a Villager. If however the role model is"
         , "eliminated, then the Orphan becomes a Werewolf."
+        ]
+    }
+
+-- | /Hah, maybe not as liked as the Jester, but the Drunk sure does their fair share of stupid/
+--   /things in the night! No-one knows if they even actually make it home; sometimes people see/
+--   /them sleeping outside the Blacksmith's home, others say they see them wandering towards the/
+--   /woods. It's pointless quizzing the Village Drunk in the, morning about their doings; they can/
+--   /never remember what they did!/
+--
+--   The Village Drunk is randomly assigned an alignment at the start, either Villagers or
+--   Werewolves. However, they are not told to which allegiance they belong.
+--
+--   On the third night the Village Drunk sobers up and is informed of their role.
+villageDrunkRole :: Role
+villageDrunkRole = Role
+    { _name         = "Village Drunk"
+    , _allegiance   = undefined
+    , _balance      = -1
+    , _description  = T.unwords
+        [ "Hah, maybe not as liked as the Jester, but the Drunk sure does their fair share of"
+        , "stupid things in the night! No-one knows if they even actually make it home; sometimes"
+        , "people see them sleeping outside the Blacksmith's home, others say they see them"
+        , "wandering towards the woods. It's pointless quizzing the Village Drunk in the, morning"
+        , "about their doings; they can never remember what they did!"
+        ]
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "The Village Drunk is randomly assigned an alignment at the start, either Villagers"
+            , "or Werewolves. However, they are not told to which allegiance they belong."
+            ]
+        , "On the third night the Village Drunk sobers up and is informed of their role."
         ]
     }
 
