@@ -21,15 +21,16 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf          hiding (killPlayer)
+import Game.Werewolf          hiding (doesPlayerExist, killPlayer)
 import Game.Werewolf.Messages
 import Game.Werewolf.Util
 
 chooseCommand :: Text -> Text -> Command
 chooseCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerHunter callerName) $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isHuntersTurn               $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM isGameOver                        $ throwError [gameIsOverMessage callerName]
+    unlessM (doesPlayerExist callerName)    $ throwError [playerDoesNotExistMessage callerName callerName]
+    unlessM (isPlayerHunter callerName)     $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isHuntersTurn                   $ throwError [playerCannotDoThatRightNowMessage callerName]
     validatePlayer callerName targetName
 
     target <- findPlayerBy_ name targetName

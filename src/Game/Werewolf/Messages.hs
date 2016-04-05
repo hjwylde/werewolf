@@ -192,7 +192,7 @@ devotedServantsTurnMessages to victimsName =
 
 huntersTurnMessages :: Text -> [Message]
 huntersTurnMessages huntersName =
-    [ publicMessage $ T.unwords ["Just before", huntersName, "is struck down he lets off a shot."]
+    [ publicMessage $ T.unwords ["Just before", huntersName, "was struck down he let off a shot."]
     , privateMessage huntersName "Whom do you `choose` to kill with your last shot?"
     ]
 
