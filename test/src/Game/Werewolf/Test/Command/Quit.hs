@@ -5,8 +5,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Game.Werewolf.Test.Command.Quit (
     -- * Tests
     allQuitCommandTests,
