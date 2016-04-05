@@ -23,6 +23,7 @@ import Game.Werewolf
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Engine.Angel
 import Game.Werewolf.Test.Engine.DevotedServant
+import Game.Werewolf.Test.Engine.Hunter
 import Game.Werewolf.Test.Engine.Lynching
 import Game.Werewolf.Test.Engine.Orphan
 import Game.Werewolf.Test.Engine.Protector
@@ -44,6 +45,7 @@ allEngineTests :: [TestTree]
 allEngineTests = concat
     [ allAngelEngineTests
     , allDevotedServantEngineTests
+    , allHunterEngineTests
     , allLynchingEngineTests
     , allOrphanEngineTests
     , allProtectorEngineTests

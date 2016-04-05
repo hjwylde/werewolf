@@ -138,6 +138,7 @@ test-suite werewolf-test
         Game.Werewolf.Test.Engine
         Game.Werewolf.Test.Engine.Angel
         Game.Werewolf.Test.Engine.DevotedServant
+        Game.Werewolf.Test.Engine.Hunter
         Game.Werewolf.Test.Engine.Lynching
         Game.Werewolf.Test.Engine.Orphan
         Game.Werewolf.Test.Engine.Protector
