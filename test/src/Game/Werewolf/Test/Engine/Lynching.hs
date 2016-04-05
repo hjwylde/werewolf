@@ -35,8 +35,11 @@ allLynchingEngineTests =
     , testProperty "check lynching sets allowed voters"                                 prop_checkLynchingSetsAllowedVoters
     ]
 
-prop_checkStageSkipsLynchingWhenNoVotes :: Game -> Bool
-prop_checkStageSkipsLynchingWhenNoVotes _ = undefined
+prop_checkStageSkipsLynchingWhenNoVotes :: GameWithNoAllowedVotersAtVillagesTurn -> Bool
+prop_checkStageSkipsLynchingWhenNoVotes (GameWithNoAllowedVotersAtVillagesTurn game) = do
+    let game' = run_ checkStage game
+
+    hasn't (stage . _Lynching) game'
 
 prop_checkLynchingLynchesOnePlayerWhenConsensus :: GameWithPassAtDevotedServantsTurn -> Property
 prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithPassAtDevotedServantsTurn game) =

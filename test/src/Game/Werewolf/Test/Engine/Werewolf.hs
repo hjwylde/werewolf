@@ -37,8 +37,12 @@ allWerewolfEngineTests =
     , testProperty "check werewolves' turn does nothing unless all voted"               prop_checkWerewolvesTurnDoesNothingUnlessAllVoted
     ]
 
-prop_checkStageSkipsWerewolvesTurnWhenNoWerewolves :: Game -> Bool
-prop_checkStageSkipsWerewolvesTurnWhenNoWerewolves _ = undefined
+prop_checkStageSkipsWerewolvesTurnWhenNoWerewolves :: GameWithNoWerewolvesAtProtectorsTurn -> Property
+prop_checkStageSkipsWerewolvesTurnWhenNoWerewolves (GameWithNoWerewolvesAtProtectorsTurn game) =
+    forAll (arbitraryProtectCommand game) $ \(Blind command) -> do
+        let game' = run_ (apply command) game
+
+        hasn't (stage . _WerewolvesTurn) game'
 
 prop_checkWerewolvesTurnAdvancesToWitchsTurn :: GameWithDevourVotes -> Property
 prop_checkWerewolvesTurnAdvancesToWitchsTurn (GameWithDevourVotes game) =

@@ -20,6 +20,7 @@ module Game.Werewolf.Test.Arbitrary (
     GameWithAllegianceChosen(..), GameWithAllowedVoters(..), GameWithConflictingVote(..),
     GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
     GameWithJesterRevealedAtVillagesTurn(..), GameWithLynchVotes(..), GameWithMajorityVote(..),
+    GameWithNoAllowedVotersAtVillagesTurn(..), GameWithNoWerewolvesAtProtectorsTurn(..),
     GameWithOneAllegianceAlive(..), GameWithPassAtDevotedServantsTurn(..), GameWithPoison(..),
     GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
     GameWithRoleModelAtVillagesTurn(..), GameWithSee(..),
@@ -323,6 +324,26 @@ instance Arbitrary GameWithMajorityVoteAtDevotedServantsTurn where
         (GameWithMajorityVote game) <- arbitrary
 
         return . GameWithMajorityVoteAtDevotedServantsTurn $ run_ checkStage game
+
+newtype GameWithNoAllowedVotersAtVillagesTurn = GameWithNoAllowedVotersAtVillagesTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithNoAllowedVotersAtVillagesTurn where
+    arbitrary = do
+        (GameAtVillagesTurn game) <- arbitrary
+
+        return $ GameWithNoAllowedVotersAtVillagesTurn (game & allowedVoters .~ [])
+
+newtype GameWithNoWerewolvesAtProtectorsTurn = GameWithNoWerewolvesAtProtectorsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithNoWerewolvesAtProtectorsTurn where
+    arbitrary = do
+        (GameAtProtectorsTurn game) <- arbitrary
+        let werewolfNames           = game ^.. players . werewolves . name
+        let game'                   = foldr killPlayer game werewolfNames
+
+        return $ GameWithNoWerewolvesAtProtectorsTurn game'
 
 newtype GameWithOneAllegianceAlive = GameWithOneAllegianceAlive Game
     deriving (Eq, Show)
