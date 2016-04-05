@@ -19,6 +19,7 @@ import           Data.Text  (Text)
 import qualified Data.Text  as T
 
 import Game.Werewolf
+import Game.Werewolf.Command.Hunter    as Hunter
 import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
 import Game.Werewolf.Command.WolfHound as WolfHound
@@ -30,7 +31,16 @@ import Test.Tasty.QuickCheck
 
 allChooseCommandTests :: [TestTree]
 allChooseCommandTests =
-    [ testProperty "orphan choose command errors when game is over"             prop_orphanChooseCommandErrorsWhenGameIsOver
+    [ testProperty "hunter choose command errors when game is over"                 prop_hunterChooseCommandErrorsWhenGameIsOver
+    , testProperty "hunter choose command errors when caller does not exist"        prop_hunterChooseCommandErrorsWhenCallerDoesNotExist
+    , testProperty "hunter choose command errors when any target does not exist"    prop_hunterChooseCommandErrorsWhenTargetDoesNotExist
+    , testProperty "hunter choose command errors when any target is dead"           prop_hunterChooseCommandErrorsWhenTargetIsDead
+    , testProperty "hunter choose command errors when not hunter's turn"            prop_hunterChooseCommandErrorsWhenNotHuntersTurn
+    , testProperty "hunter choose command errors when caller not hunter"            prop_hunterChooseCommandErrorsWhenCallerNotHunter
+    , testProperty "hunter choose command kills target"                             prop_hunterChooseCommandKillsTarget
+    , testProperty "hunter choose command sets hunter retaliated"                   prop_hunterChooseCommandSetsHunterRetaliated
+
+    , testProperty "orphan choose command errors when game is over"             prop_orphanChooseCommandErrorsWhenGameIsOver
     , testProperty "orphan choose command errors when caller does not exist"    prop_orphanChooseCommandErrorsWhenCallerDoesNotExist
     , testProperty "orphan choose command errors when target does not exist"    prop_orphanChooseCommandErrorsWhenTargetDoesNotExist
     , testProperty "orphan choose command errors when caller is dead"           prop_orphanChooseCommandErrorsWhenCallerIsDead
@@ -58,6 +68,69 @@ allChooseCommandTests =
     , testProperty "scapegoat choose command sets allowed voters"                   prop_scapegoatChooseCommandSetsAllowedVoters
     , testProperty "scapegoat choose command resets scapegoat blamed"               prop_scapegoatChooseCommandResetsScapegoatBlamed
     ]
+
+prop_hunterChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
+prop_hunterChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
+    forAll (arbitraryHunterChooseCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_hunterChooseCommandErrorsWhenCallerDoesNotExist :: GameAtHuntersTurn -> Player -> Property
+prop_hunterChooseCommandErrorsWhenCallerDoesNotExist (GameAtHuntersTurn game) caller =
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = Hunter.chooseCommand (caller ^. name) (target ^. name)
+
+        not (doesPlayerExist (caller ^. name) game)
+            ==> verbose_runCommandErrors game command
+
+prop_hunterChooseCommandErrorsWhenTargetDoesNotExist :: GameAtHuntersTurn -> Player -> Property
+prop_hunterChooseCommandErrorsWhenTargetDoesNotExist (GameAtHuntersTurn game) target = do
+    let hunter  = game ^?! players . hunters
+    let command = Hunter.chooseCommand (hunter ^. name) (target ^. name)
+
+    not (doesPlayerExist (target ^. name) game)
+        ==> verbose_runCommandErrors game command
+
+prop_hunterChooseCommandErrorsWhenTargetIsDead :: GameAtHuntersTurn -> Property
+prop_hunterChooseCommandErrorsWhenTargetIsDead (GameAtHuntersTurn game) = do
+    let hunter = game ^?! players . hunters
+
+    forAll (arbitraryPlayer game) $ \target -> do
+        let game'   = killPlayer (target ^. name) game
+        let command = Hunter.chooseCommand (hunter ^. name) (target ^. name)
+
+        verbose_runCommandErrors game' command
+
+prop_hunterChooseCommandErrorsWhenNotHuntersTurn :: Game -> Property
+prop_hunterChooseCommandErrorsWhenNotHuntersTurn game =
+    hasn't (stage . _HuntersTurn1) game && hasn't (stage . _HuntersTurn2) game
+    ==> forAll (arbitraryHunterChooseCommand game) $ verbose_runCommandErrors game . getBlind
+
+prop_hunterChooseCommandErrorsWhenCallerNotHunter :: GameAtHuntersTurn -> Property
+prop_hunterChooseCommandErrorsWhenCallerNotHunter (GameAtHuntersTurn game) =
+    forAll (suchThat (arbitraryPlayer game) (isn't hunter)) $ \caller ->
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = Hunter.chooseCommand (caller ^. name) (target ^. name)
+
+        verbose_runCommandErrors game command
+
+prop_hunterChooseCommandKillsTarget :: GameAtHuntersTurn -> Property
+prop_hunterChooseCommandKillsTarget (GameAtHuntersTurn game) = do
+    let hunter = game ^?! players . hunters
+
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = Hunter.chooseCommand (hunter ^. name) (target ^. name)
+        let game'   = run_ (apply command) game
+
+        is dead $ game' ^?! players . traverse . filteredBy name (target ^. name)
+
+prop_hunterChooseCommandSetsHunterRetaliated :: GameAtHuntersTurn -> Property
+prop_hunterChooseCommandSetsHunterRetaliated (GameAtHuntersTurn game) = do
+    let hunter = game ^?! players . hunters
+
+    forAll (arbitraryPlayer game) $ \target -> do
+        let command = Hunter.chooseCommand (hunter ^. name) (target ^. name)
+        let game'   = run_ (apply command) game
+
+        game' ^. hunterRetaliated
 
 prop_orphanChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_orphanChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =

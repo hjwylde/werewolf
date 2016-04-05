@@ -12,7 +12,7 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Game
     NewGame(..),
-    GameAtDevotedServantsTurn(..), GameAtGameOver(..), GameAtOrphansTurn(..),
+    GameAtDevotedServantsTurn(..), GameAtGameOver(..), GameAtHuntersTurn(..), GameAtOrphansTurn(..),
     GameAtProtectorsTurn(..), GameAtScapegoatsTurn(..), GameAtSeersTurn(..), GameAtSunrise(..),
     GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWitchsTurn(..),
     GameAtWolfHoundsTurn(..),
@@ -31,11 +31,11 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
 
     -- ** Command
-    arbitraryCommand, arbitraryOrphanChooseCommand, arbitraryWolfHoundChooseCommand,
-    arbitraryScapegoatChooseCommand, arbitraryHealCommand, arbitraryDevotedServantPassCommand,
-    arbitraryWitchPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
-    arbitraryQuitCommand, arbitraryRevealCommand, arbitrarySeeCommand, arbitraryWerewolfVoteCommand,
-    arbitraryVillagerVoteCommand,
+    arbitraryCommand, arbitraryHunterChooseCommand, arbitraryOrphanChooseCommand,
+    arbitraryWolfHoundChooseCommand, arbitraryScapegoatChooseCommand, arbitraryHealCommand,
+    arbitraryDevotedServantPassCommand, arbitraryWitchPassCommand, arbitraryPoisonCommand,
+    arbitraryProtectCommand, arbitraryQuitCommand, arbitraryRevealCommand, arbitrarySeeCommand,
+    arbitraryWerewolfVoteCommand, arbitraryVillagerVoteCommand,
     runArbitraryCommands,
 
     -- ** Player
@@ -117,8 +117,15 @@ instance Arbitrary GameAtGameOver where
 
         return $ GameAtGameOver (game & stage .~ GameOver)
 
-newtype GameAtProtectorsTurn = GameAtProtectorsTurn Game
+newtype GameAtHuntersTurn = GameAtHuntersTurn Game
     deriving (Eq, Show)
+
+instance Arbitrary GameAtHuntersTurn where
+    arbitrary = do
+        game <- arbitrary
+        turn <- elements [HuntersTurn1, HuntersTurn2]
+
+        return $ GameAtHuntersTurn (game & stage .~ turn)
 
 newtype GameAtOrphansTurn = GameAtOrphansTurn Game
     deriving (Eq, Show)
@@ -128,6 +135,9 @@ instance Arbitrary GameAtOrphansTurn where
         game <- arbitrary
 
         return $ GameAtOrphansTurn (game & stage .~ OrphansTurn)
+
+newtype GameAtProtectorsTurn = GameAtProtectorsTurn Game
+    deriving (Eq, Show)
 
 instance Arbitrary GameAtProtectorsTurn where
     arbitrary = do
