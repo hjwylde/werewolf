@@ -34,7 +34,7 @@ passCommand :: Text -> Command
 passCommand callerName = Command $ do
     validateCommand callerName
 
-    passes %= nub . cons callerName
+    passed .= True
 
 revealCommand :: Text -> Command
 revealCommand callerName = Command $ do
@@ -67,5 +67,5 @@ resetRole callerName role
 
         tell $ devotedServantJoinedPackMessages callerName (aliveWerewolfNames \\ [callerName])
     | role == witchRole             = healUsed .= False >> poisonUsed .= False
-    | role == wolfHoundRole         = allegianceChosen .= Nothing
+    | role == wolfHoundRole         = allegianceChosen .= False
     | otherwise                     = return ()

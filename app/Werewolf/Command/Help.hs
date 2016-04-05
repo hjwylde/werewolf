@@ -92,6 +92,10 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
       , "- `reveal`"
       , "- `pass`"
       ]
+    , whenPlayerHasRole callerName mGame hunterRole
+      [ "Hunter commands:"
+      , "- `choose PLAYER`"
+      ]
     , whenPlayerHasRole callerName mGame orphanRole
       [ "Orphan commands:"
       , "- `choose PLAYER`"
@@ -165,11 +169,15 @@ rulesMessages mGame = map (T.intercalate "\n")
       , whenRoleInPlay mGame witchRole
         "- The Witch wakes up and may heal the victim and/or poison someone."
       , "- The village wakes up and find the victim."
+      , whenRoleInPlay mGame hunterRole
+        "- (When the Hunter is killed) the Hunter chooses someone to shoot."
       , whenRoleInPlay mGame druidRole
         "- Ferina grunts if the Druid is next to a Werewolf."
       , "- The village votes to lynch a suspect."
       , whenRoleInPlay mGame devotedServantRole
         "- (When someone is lynched) the Devoted Servant may choose whether to reveal themselves and take on the role of their master."
+      , whenRoleInPlay mGame hunterRole
+        "- (When the Hunter is killed) the Hunter chooses someone to shoot."
       , whenRoleInPlay mGame scapegoatRole
         "- (When the Scapegoat is blamed) the Scapegoat chooses whom may vote on the next day."
       , T.concat

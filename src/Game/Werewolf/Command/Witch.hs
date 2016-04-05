@@ -22,7 +22,6 @@ import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State  hiding (state)
 
-import Data.List
 import Data.Text (Text)
 
 import Game.Werewolf
@@ -42,7 +41,7 @@ passCommand :: Text -> Command
 passCommand callerName = Command $ do
     validateCommand callerName
 
-    passes %= nub . cons callerName
+    passed .= True
 
 poisonCommand :: Text -> Text -> Command
 poisonCommand callerName targetName = Command $ do

@@ -20,20 +20,21 @@ module Game.Werewolf.Util (
     killPlayer, removePlayer, setPlayerAllegiance, setPlayerRole,
 
     -- ** Searches
-    findPlayerBy_, getAdjacentAlivePlayers, getPassers, getPlayerVote,
-    getAllowedVoters, getPendingVoters, getVoteResult,
+    findPlayerBy_, getAdjacentAlivePlayers, getPlayerVote, getAllowedVoters, getPendingVoters,
+    getVoteResult,
 
     -- ** Queries
-    isDevotedServantsTurn, isGameOver, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn,
-    isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
+    isDevotedServantsTurn, isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn,
+    isScapegoatsTurn, isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+    isWolfHoundsTurn,
     hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDevotedServant, isPlayerJester, isPlayerOrphan, isPlayerProtector, isPlayerScapegoat,
-    isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
+    isPlayerDevotedServant, isPlayerHunter, isPlayerJester, isPlayerOrphan, isPlayerProtector,
+    isPlayerScapegoat, isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -63,8 +64,7 @@ removePlayer :: MonadState Game m => Text -> m ()
 removePlayer name' = do
     killPlayer name'
 
-    passes  %= delete name'
-    votes   %= Map.delete name'
+    votes %= Map.delete name'
 
     player <- findPlayerBy_ name name'
 
@@ -79,7 +79,7 @@ removePlayer name' = do
         healUsed    .= False
         poison      .= Nothing
         poisonUsed  .= False
-    when (is wolfHound player)  $ allegianceChosen .= Nothing
+    when (is wolfHound player)  $ allegianceChosen .= True
 
 -- | Fudges the player's allegiance. This function is useful for roles such as the Orphan where
 --   they align themselves differently given some trigger.
@@ -104,9 +104,6 @@ getAdjacentAlivePlayers name' = do
         adjacentElements 0 list     = last list : take 2 list
         adjacentElements index list = take 3 $ drop (index - 1) (cycle list)
 
-getPassers :: MonadState Game m => m [Player]
-getPassers = mapM (findPlayerBy_ name) =<< use passes
-
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = use $ votes . at playerName
 
@@ -124,6 +121,12 @@ isDevotedServantsTurn = has (stage . _DevotedServantsTurn) <$> get
 
 isGameOver :: MonadState Game m => m Bool
 isGameOver = has (stage . _GameOver) <$> get
+
+isHuntersTurn :: MonadState Game m => m Bool
+isHuntersTurn = orM
+    [ has (stage . _HuntersTurn1) <$> get
+    , has (stage . _HuntersTurn2) <$> get
+    ]
 
 isOrphansTurn :: MonadState Game m => m Bool
 isOrphansTurn = has (stage . _OrphansTurn) <$> get
@@ -169,6 +172,9 @@ doesPlayerExist name = gets $ Game.doesPlayerExist name
 
 isPlayerDevotedServant :: MonadState Game m => Text -> m Bool
 isPlayerDevotedServant name' = is devotedServant <$> findPlayerBy_ name name'
+
+isPlayerHunter :: MonadState Game m => Text -> m Bool
+isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'
 
 isPlayerJester :: MonadState Game m => Text -> m Bool
 isPlayerJester name' = is jester <$> findPlayerBy_ name name'

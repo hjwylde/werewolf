@@ -12,7 +12,7 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Game
     NewGame(..),
-    GameAtDevotedServantsTurn(..), GameAtGameOver(..), GameAtOrphansTurn(..),
+    GameAtDevotedServantsTurn(..), GameAtGameOver(..), GameAtHuntersTurn(..), GameAtOrphansTurn(..),
     GameAtProtectorsTurn(..), GameAtScapegoatsTurn(..), GameAtSeersTurn(..), GameAtSunrise(..),
     GameAtVillagesTurn(..), GameAtWerewolvesTurn(..), GameAtWitchsTurn(..),
     GameAtWolfHoundsTurn(..),
@@ -20,6 +20,7 @@ module Game.Werewolf.Test.Arbitrary (
     GameWithAllegianceChosen(..), GameWithAllowedVoters(..), GameWithConflictingVote(..),
     GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
     GameWithJesterRevealedAtVillagesTurn(..), GameWithLynchVotes(..), GameWithMajorityVote(..),
+    GameWithNoAllowedVotersAtVillagesTurn(..), GameWithNoWerewolvesAtProtectorsTurn(..),
     GameWithOneAllegianceAlive(..), GameWithPassAtDevotedServantsTurn(..), GameWithPoison(..),
     GameWithProtect(..), GameWithProtectAndDevourVotes(..), GameWithRoleModel(..),
     GameWithRoleModelAtVillagesTurn(..), GameWithSee(..),
@@ -30,11 +31,11 @@ module Game.Werewolf.Test.Arbitrary (
     -- * Contextual arbitraries
 
     -- ** Command
-    arbitraryCommand, arbitraryOrphanChooseCommand, arbitraryWolfHoundChooseCommand,
-    arbitraryScapegoatChooseCommand, arbitraryHealCommand, arbitraryDevotedServantPassCommand,
-    arbitraryWitchPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
-    arbitraryQuitCommand, arbitraryRevealCommand, arbitrarySeeCommand, arbitraryWerewolfVoteCommand,
-    arbitraryVillagerVoteCommand,
+    arbitraryCommand, arbitraryHunterChooseCommand, arbitraryOrphanChooseCommand,
+    arbitraryWolfHoundChooseCommand, arbitraryScapegoatChooseCommand, arbitraryHealCommand,
+    arbitraryDevotedServantPassCommand, arbitraryWitchPassCommand, arbitraryPoisonCommand,
+    arbitraryProtectCommand, arbitraryQuitCommand, arbitraryRevealCommand, arbitrarySeeCommand,
+    arbitraryWerewolfVoteCommand, arbitraryVillagerVoteCommand,
     runArbitraryCommands,
 
     -- ** Player
@@ -51,6 +52,7 @@ import qualified Data.Text       as T
 import Game.Werewolf
 import Game.Werewolf.Command.DevotedServant as DevotedServant
 import Game.Werewolf.Command.Global
+import Game.Werewolf.Command.Hunter         as Hunter
 import Game.Werewolf.Command.Orphan         as Orphan
 import Game.Werewolf.Command.Protector
 import Game.Werewolf.Command.Scapegoat      as Scapegoat
@@ -115,8 +117,15 @@ instance Arbitrary GameAtGameOver where
 
         return $ GameAtGameOver (game & stage .~ GameOver)
 
-newtype GameAtProtectorsTurn = GameAtProtectorsTurn Game
+newtype GameAtHuntersTurn = GameAtHuntersTurn Game
     deriving (Eq, Show)
+
+instance Arbitrary GameAtHuntersTurn where
+    arbitrary = do
+        game <- arbitrary
+        turn <- elements [HuntersTurn1, HuntersTurn2]
+
+        return $ GameAtHuntersTurn (game & stage .~ turn)
 
 newtype GameAtOrphansTurn = GameAtOrphansTurn Game
     deriving (Eq, Show)
@@ -126,6 +135,9 @@ instance Arbitrary GameAtOrphansTurn where
         game <- arbitrary
 
         return $ GameAtOrphansTurn (game & stage .~ OrphansTurn)
+
+newtype GameAtProtectorsTurn = GameAtProtectorsTurn Game
+    deriving (Eq, Show)
 
 instance Arbitrary GameAtProtectorsTurn where
     arbitrary = do
@@ -323,6 +335,26 @@ instance Arbitrary GameWithMajorityVoteAtDevotedServantsTurn where
 
         return . GameWithMajorityVoteAtDevotedServantsTurn $ run_ checkStage game
 
+newtype GameWithNoAllowedVotersAtVillagesTurn = GameWithNoAllowedVotersAtVillagesTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithNoAllowedVotersAtVillagesTurn where
+    arbitrary = do
+        (GameAtVillagesTurn game) <- arbitrary
+
+        return $ GameWithNoAllowedVotersAtVillagesTurn (game & allowedVoters .~ [])
+
+newtype GameWithNoWerewolvesAtProtectorsTurn = GameWithNoWerewolvesAtProtectorsTurn Game
+    deriving (Eq, Show)
+
+instance Arbitrary GameWithNoWerewolvesAtProtectorsTurn where
+    arbitrary = do
+        (GameAtProtectorsTurn game) <- arbitrary
+        let werewolfNames           = game ^.. players . werewolves . name
+        let game'                   = foldr killPlayer game werewolfNames
+
+        return $ GameWithNoWerewolvesAtProtectorsTurn game'
+
 newtype GameWithOneAllegianceAlive = GameWithOneAllegianceAlive Game
     deriving (Eq, Show)
 
@@ -439,6 +471,8 @@ arbitraryCommand game = case game ^. stage of
         ]
     FerinasGrunt        -> return $ Blind noopCommand
     GameOver            -> return $ Blind noopCommand
+    HuntersTurn1        -> arbitraryHunterChooseCommand game
+    HuntersTurn2        -> arbitraryHunterChooseCommand game
     Lynching            -> return $ Blind noopCommand
     OrphansTurn         -> arbitraryOrphanChooseCommand game
     ProtectorsTurn      -> arbitraryProtectCommand game
@@ -454,6 +488,13 @@ arbitraryCommand game = case game ^. stage of
         , arbitraryPoisonCommand game
         ]
     WolfHoundsTurn      -> arbitraryWolfHoundChooseCommand game
+
+arbitraryHunterChooseCommand :: Game -> Gen (Blind Command)
+arbitraryHunterChooseCommand game = do
+    let hunter  = game ^?! players . hunters
+    target      <- arbitraryPlayer game
+
+    return . Blind $ Hunter.chooseCommand (hunter ^. name) (target ^. name)
 
 arbitraryOrphanChooseCommand :: Game -> Gen (Blind Command)
 arbitraryOrphanChooseCommand game = do

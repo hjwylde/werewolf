@@ -78,6 +78,7 @@ library
         Game.Werewolf.Command
         Game.Werewolf.Command.DevotedServant
         Game.Werewolf.Command.Global
+        Game.Werewolf.Command.Hunter
         Game.Werewolf.Command.Orphan
         Game.Werewolf.Command.Protector
         Game.Werewolf.Command.Scapegoat
@@ -135,6 +136,18 @@ test-suite werewolf-test
         Game.Werewolf.Test.Command.See
         Game.Werewolf.Test.Command.Vote
         Game.Werewolf.Test.Engine
+        Game.Werewolf.Test.Engine.Angel
+        Game.Werewolf.Test.Engine.DevotedServant
+        Game.Werewolf.Test.Engine.Hunter
+        Game.Werewolf.Test.Engine.Lynching
+        Game.Werewolf.Test.Engine.Orphan
+        Game.Werewolf.Test.Engine.Protector
+        Game.Werewolf.Test.Engine.Scapegoat
+        Game.Werewolf.Test.Engine.Seer
+        Game.Werewolf.Test.Engine.Village
+        Game.Werewolf.Test.Engine.Werewolf
+        Game.Werewolf.Test.Engine.Witch
+        Game.Werewolf.Test.Engine.WolfHound
         Game.Werewolf.Test.Game
         Game.Werewolf.Test.Player
         Game.Werewolf.Test.Util

@@ -71,7 +71,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (has (players . devotedServants . dead) <$> get) advanceStage
 
         whenM (has devotedServants <$> getVoteResult)   advanceStage
-        whenM (has devotedServants <$> getPassers)      advanceStage
+        whenM (use passed)                              advanceStage
 
     FerinasGrunt -> do
         druid       <- findPlayerBy_ role druidRole
@@ -82,6 +82,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     GameOver -> return ()
+
+    HuntersTurn1 -> whenM (use hunterRetaliated) advanceStage
+
+    HuntersTurn2 -> whenM (use hunterRetaliated) advanceStage
 
     Lynching -> do
         getVoteResult >>= lynchVotees
@@ -173,17 +177,12 @@ checkStage' = use stage >>= \stage' -> case stage' of
             heal    .= False
 
         whenM (use healUsed &&^ use poisonUsed) advanceStage
-        whenM (has witches <$> getPassers)      advanceStage
+        whenM (use passed)                      advanceStage
 
     WolfHoundsTurn -> do
         whenM (has (players . wolfHounds . dead) <$> get) advanceStage
 
-        whenJustM (use allegianceChosen) $ \allegiance -> do
-            wolfHound <- findPlayerBy_ role wolfHoundRole
-
-            setPlayerAllegiance (wolfHound ^. name) allegiance
-
-            advanceStage
+        whenM (use allegianceChosen) advanceStage
 
 lynchVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
 lynchVotees [votee]
@@ -217,7 +216,7 @@ advanceStage = do
 
     stage   .= nextStage
     boots   .= Map.empty
-    passes  .= []
+    passed  .= False
     see     .= Nothing
 
     tell . stageMessages =<< get

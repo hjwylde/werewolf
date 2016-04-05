@@ -49,6 +49,9 @@ module Game.Werewolf.Messages (
     -- * Druid's turn messages
     ferinaGruntsMessage,
 
+    -- * Hunter's turn messages
+    playerShotMessage,
+
     -- * Orphan's turn messages
     orphanJoinedPackMessages,
 
@@ -149,6 +152,8 @@ stageMessages game = case game ^. stage of
     DevotedServantsTurn -> devotedServantsTurnMessages devotedServantsName victimsName
     FerinasGrunt        -> []
     GameOver            -> []
+    HuntersTurn1        -> huntersTurnMessages huntersName
+    HuntersTurn2        -> huntersTurnMessages huntersName
     Lynching            -> []
     OrphansTurn         -> orphansTurnMessages orphansName
     ProtectorsTurn      -> protectorsTurnMessages protectorsName
@@ -166,10 +171,11 @@ stageMessages game = case game ^. stage of
     WolfHoundsTurn      -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
-        orphansName         = players' ^?! orphans . name
-        protectorsName      = players' ^?! protectors . name
         devotedServantsName = players' ^?! devotedServants . name
         victimsName         = head (getVoteResult game) ^. name
+        huntersName         = players' ^?! hunters . name
+        orphansName         = players' ^?! orphans . name
+        protectorsName      = players' ^?! protectors . name
         scapegoatsName      = players' ^?! scapegoats . name
         seersName           = players' ^?! seers . name
         aliveWerewolfNames  = players' ^.. werewolves . alive . name
@@ -182,6 +188,12 @@ devotedServantsTurnMessages to victimsName =
         [ "Would you like to `reveal` yourself and take on ", victimsName, "'s role?"
         , " (Or you can type `pass`.)"
         ]
+    ]
+
+huntersTurnMessages :: Text -> [Message]
+huntersTurnMessages huntersName =
+    [ publicMessage $ T.unwords ["Just before", huntersName, "was struck down he let off a shot."]
+    , privateMessage huntersName "Whom do you `choose` to kill with your last shot?"
     ]
 
 orphansTurnMessages :: Text -> [Message]
@@ -405,6 +417,8 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn DevotedServantsTurn    = "Devoted Servant's"
         showTurn FerinasGrunt           = undefined
         showTurn GameOver               = undefined
+        showTurn HuntersTurn1           = "Hunter's"
+        showTurn HuntersTurn2           = "Hunter's"
         showTurn Lynching               = undefined
         showTurn OrphansTurn            = "Orphan's"
         showTurn ProtectorsTurn         = "Protector's"
@@ -488,6 +502,15 @@ ferinaGruntsMessage = publicMessage $ T.unwords
     [ "Ferina wakes from her slumber, disturbed and on edge."
     , "She loudly grunts as she smells danger."
     ]
+
+playerShotMessage :: Player -> Message
+playerShotMessage target = publicMessage $ T.unwords
+    [ targetName, "the", targetRole, "slumps down to the ground, hands clutching at their chest"
+    , "while blood slips between their fingers and pools around them."
+    ]
+    where
+        targetName = target ^. name
+        targetRole = target ^. role . Role.name
 
 orphanJoinedPackMessages :: Text -> [Text] -> [Message]
 orphanJoinedPackMessages orphansName werewolfNames =

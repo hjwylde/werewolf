@@ -9,7 +9,9 @@ Maintainer  : public@hjwylde.com
 Status commands.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 
 module Game.Werewolf.Command.Status (
     -- * Commands
@@ -37,70 +39,44 @@ circleCommand callerName includeDead = Command $ do
 
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    DevotedServantsTurn -> do
-        devotedServant <- findPlayerBy_ role devotedServantRole
-
-        tell [pingRoleMessage $ devotedServantRole ^. Role.name]
-        tell [pingPlayerMessage $ devotedServant ^. name]
-
+    DevotedServantsTurn -> pingRole devotedServantRole
     FerinasGrunt        -> return ()
-
     GameOver            -> tell [gameIsOverMessage callerName]
-
+    HuntersTurn1        -> pingRole hunterRole
+    HuntersTurn2        -> pingRole hunterRole
     Lynching            -> return ()
-
-    OrphansTurn      -> do
-        orphan <- findPlayerBy_ role orphanRole
-
-        tell [pingRoleMessage $ orphanRole ^. Role.name]
-        tell [pingPlayerMessage $ orphan ^. name]
-
-    ProtectorsTurn      -> do
-        protector <- findPlayerBy_ role protectorRole
-
-        tell [pingRoleMessage $ protectorRole ^. Role.name]
-        tell [pingPlayerMessage $ protector ^. name]
-
-    ScapegoatsTurn      -> do
-        scapegoat <- findPlayerBy_ role scapegoatRole
-
-        tell [pingRoleMessage $ scapegoatRole ^. Role.name]
-        tell [pingPlayerMessage $ scapegoat ^. name]
-
-    SeersTurn           -> do
-        seer <- findPlayerBy_ role seerRole
-
-        tell [pingRoleMessage $ seerRole ^. Role.name]
-        tell [pingPlayerMessage $ seer ^. name]
-
+    OrphansTurn         -> pingRole orphanRole
+    ProtectorsTurn      -> pingRole protectorRole
+    ScapegoatsTurn      -> pingRole scapegoatRole
+    SeersTurn           -> pingRole seerRole
     Sunrise             -> return ()
-
     Sunset              -> return ()
+    VillagesTurn        -> pingVillagers
+    WerewolvesTurn      -> pingWerewolves
+    WitchsTurn          -> pingRole witchRole
+    WolfHoundsTurn      -> pingRole wolfHoundRole
 
-    VillagesTurn        -> do
-        allowedVoterNames <- use allowedVoters
-        pendingVoterNames <- toListOf names <$> getPendingVoters
+pingRole :: (MonadState Game m, MonadWriter [Message] m) => Role -> m ()
+pingRole role' = do
+    player <- findPlayerBy_ role role'
 
-        tell [waitingOnMessage Nothing $ allowedVoterNames `intersect` pendingVoterNames]
-        tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
+    tell [pingRoleMessage $ role' ^. Role.name]
+    tell [pingPlayerMessage $ player ^. name]
 
-    WerewolvesTurn      -> do
-        pendingVoters <- getPendingVoters
+pingVillagers :: (MonadState Game m, MonadWriter [Message] m) => m ()
+pingVillagers = do
+    allowedVoterNames <- use allowedVoters
+    pendingVoterNames <- toListOf names <$> getPendingVoters
 
-        tell [pingRoleMessage "Werewolves"]
-        tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
+    tell [waitingOnMessage Nothing $ allowedVoterNames `intersect` pendingVoterNames]
+    tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
 
-    WitchsTurn          -> do
-        witch <- findPlayerBy_ role witchRole
+pingWerewolves :: (MonadState Game m, MonadWriter [Message] m) => m ()
+pingWerewolves = do
+    pendingVoters <- getPendingVoters
 
-        tell [pingRoleMessage $ witchRole ^. Role.name]
-        tell [pingPlayerMessage $ witch ^. name]
-
-    WolfHoundsTurn      -> do
-        wolfHound <- findPlayerBy_ role wolfHoundRole
-
-        tell [pingRoleMessage $ wolfHoundRole ^. Role.name]
-        tell [pingPlayerMessage $ wolfHound ^. name]
+    tell [pingRoleMessage "Werewolves"]
+    tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of

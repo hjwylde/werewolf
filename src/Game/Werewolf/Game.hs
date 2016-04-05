@@ -17,14 +17,14 @@ It also has a few additional functions for manipulating and querying the game st
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, events, boots, passes, allegianceChosen, allowedVoters, heal, healUsed,
-    jesterRevealed, poison, poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed, see,
-    votes,
+    stage, round, players, events, boots, allegianceChosen, allowedVoters, heal, healUsed,
+    hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
+    scapegoatBlamed, see, votes,
 
     Stage(..),
-    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _Lynching, _OrphansTurn, _ProtectorsTurn,
-    _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
-    _WolfHoundsTurn,
+    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching,
+    _OrphansTurn, _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn,
+    _WerewolvesTurn, _WitchsTurn, _WolfHoundsTurn,
 
     allStages,
     stageCycle, stageAvailable,
@@ -55,7 +55,6 @@ import           Data.Maybe
 import           Data.Text       (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role   hiding (name)
 
 import Prelude hiding (round)
 
@@ -87,12 +86,13 @@ data Game = Game
     , _players          :: [Player]
     , _events           :: [Event]
     , _boots            :: Map Text [Text]
-    , _allegianceChosen :: Maybe Allegiance -- ^ Wolf-hound
+    , _allegianceChosen :: Bool             -- ^ Wolf-hound
     , _allowedVoters    :: [Text]           -- ^ Scapegoat
     , _heal             :: Bool             -- ^ Witch
     , _healUsed         :: Bool             -- ^ Witch
+    , _hunterRetaliated :: Bool             -- ^ Hunter
     , _jesterRevealed   :: Bool             -- ^ Jester
-    , _passes           :: [Text]           -- ^ Witch
+    , _passed           :: Bool             -- ^ Devoted Servant, Witch
     , _poison           :: Maybe Text       -- ^ Witch
     , _poisonUsed       :: Bool             -- ^ Witch
     , _priorProtect     :: Maybe Text       -- ^ Protector
@@ -109,11 +109,12 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | Lynching | OrphansTurn
-            | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
-            | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
+data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching
+            | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
+            | VillagesTurn | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
+-- TODO (hjw): remove events
 -- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
 --   'Game.Werewolf.Engine.checkStage', while an event's specific behaviour is defined by
 --   'Game.Werewolf.Engine.eventAvailable' and 'Game.Werewolf.Engine.applyEvent'.
@@ -138,6 +139,7 @@ allStages =
     [ VillagesTurn
     , DevotedServantsTurn
     , Lynching
+    , HuntersTurn1
     , ScapegoatsTurn
     , Sunset
     , WolfHoundsTurn
@@ -147,6 +149,7 @@ allStages =
     , WerewolvesTurn
     , WitchsTurn
     , Sunrise
+    , HuntersTurn2
     , FerinasGrunt
     , GameOver
     ]
@@ -167,6 +170,12 @@ stageAvailable game DevotedServantsTurn =
     && isn't devotedServant (head $ getVoteResult game)
 stageAvailable game FerinasGrunt        = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
+stageAvailable game HuntersTurn1        =
+    has (players . hunters . dead) game
+    && not (game ^. hunterRetaliated)
+stageAvailable game HuntersTurn2        =
+    has (players . hunters . dead) game
+    && not (game ^. hunterRetaliated)
 stageAvailable game Lynching            = Map.size (game ^. votes) > 0
 stageAvailable game ProtectorsTurn      = has (players . protectors . alive) game
 stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
@@ -185,7 +194,7 @@ stageAvailable game WitchsTurn          =
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
 stageAvailable game WolfHoundsTurn      =
     has (players . wolfHounds . alive) game
-    && isNothing (game ^. allegianceChosen)
+    && not (game ^. allegianceChosen)
 
 -- | Creates a new 'Game' with the given players. No validations are performed here, those are left
 --   to 'Game.Werewolf.Engine.startGame'.
@@ -198,11 +207,12 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _players              = players
             , _events               = []
             , _boots                = Map.empty
-            , _passes               = []
-            , _allegianceChosen     = Nothing
+            , _passed               = False
+            , _allegianceChosen     = False
             , _allowedVoters        = players ^.. names
             , _heal                 = False
             , _healUsed             = False
+            , _hunterRetaliated     = False
             , _jesterRevealed       = False
             , _poison               = Nothing
             , _poisonUsed           = False

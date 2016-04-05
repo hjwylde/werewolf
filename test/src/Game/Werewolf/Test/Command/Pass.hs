@@ -5,8 +5,6 @@ License     : BSD3
 Maintainer  : public@hjwylde.com
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Game.Werewolf.Test.Command.Pass (
     -- * Tests
     allPassCommandTests,
@@ -29,13 +27,13 @@ allPassCommandTests =
     , testProperty "devoted servant pass command errors when caller does not exist"         prop_devotedServantPassCommandErrorsWhenCallerDoesNotExist
     , testProperty "devoted servant pass command errors when caller is dead"                prop_devotedServantPassCommandErrorsWhenCallerIsDead
     , testProperty "devoted servant pass command errors when not devoted servant's turn"    prop_devotedServantPassCommandErrorsWhenNotDevotedServantsTurn
-    , testProperty "devoted servant pass command updates passes"                            prop_devotedServantPassCommandUpdatesPasses
+    , testProperty "devoted servant pass command sets passed"                               prop_devotedServantPassCommandSetsPassed
 
     , testProperty "witch pass command errors when game is over"            prop_witchPassCommandErrorsWhenGameIsOver
     , testProperty "witch pass command errors when caller does not exist"   prop_witchPassCommandErrorsWhenCallerDoesNotExist
     , testProperty "witch pass command errors when caller is dead"          prop_witchPassCommandErrorsWhenCallerIsDead
     , testProperty "witch pass command errors when not witch's turn"        prop_witchPassCommandErrorsWhenNotWitchsTurn
-    , testProperty "witch pass command updates passes"                      prop_witchPassCommandUpdatesPasses
+    , testProperty "witch pass command sets passed"                         prop_witchPassCommandSetsPassed
     ]
 
 prop_devotedServantPassCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -60,12 +58,12 @@ prop_devotedServantPassCommandErrorsWhenNotDevotedServantsTurn game =
     hasn't (stage . _DevotedServantsTurn) game
     ==> forAll (arbitraryDevotedServantPassCommand game) $ verbose_runCommandErrors game . getBlind
 
-prop_devotedServantPassCommandUpdatesPasses :: GameAtDevotedServantsTurn -> Property
-prop_devotedServantPassCommandUpdatesPasses (GameAtDevotedServantsTurn game) =
+prop_devotedServantPassCommandSetsPassed :: GameAtDevotedServantsTurn -> Property
+prop_devotedServantPassCommandSetsPassed (GameAtDevotedServantsTurn game) =
     forAll (arbitraryDevotedServantPassCommand game) $ \(Blind command) -> do
         let game' = run_ (apply command) game
 
-        length (game' ^. passes) == 1
+        game' ^. passed
 
 prop_witchPassCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_witchPassCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -89,9 +87,9 @@ prop_witchPassCommandErrorsWhenNotWitchsTurn game =
     hasn't (stage . _WitchsTurn) game
     ==> forAll (arbitraryWitchPassCommand game) $ verbose_runCommandErrors game . getBlind
 
-prop_witchPassCommandUpdatesPasses :: GameAtWitchsTurn -> Property
-prop_witchPassCommandUpdatesPasses (GameAtWitchsTurn game) =
+prop_witchPassCommandSetsPassed :: GameAtWitchsTurn -> Property
+prop_witchPassCommandSetsPassed (GameAtWitchsTurn game) =
     forAll (arbitraryWitchPassCommand game) $ \(Blind command) -> do
         let game' = run_ (apply command) game
 
-        length (game' ^. passes) == 1
+        game' ^. passed

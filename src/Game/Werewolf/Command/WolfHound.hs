@@ -35,8 +35,11 @@ chooseCommand callerName allegianceName = Command $ do
     unlessM isWolfHoundsTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]
     when (isNothing mAllegiance)            $ throwError [allegianceDoesNotExistMessage callerName allegianceName]
 
-    allegianceChosen .= mAllegiance
+    setPlayerAllegiance callerName allegiance
+
+    allegianceChosen .= True
     where
+        allegiance  = fromJust mAllegiance
         mAllegiance = case T.toLower allegianceName of
             "villagers"     -> Just Villagers
             "werewolves"    -> Just Werewolves
