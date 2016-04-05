@@ -18,7 +18,7 @@ module Game.Werewolf.Game (
     -- * Game
     Game,
     stage, round, players, events, boots, allegianceChosen, allowedVoters, heal, healUsed,
-    hunterKilled, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
+    hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
     scapegoatBlamed, see, votes,
 
     Stage(..),
@@ -90,7 +90,7 @@ data Game = Game
     , _allowedVoters    :: [Text]           -- ^ Scapegoat
     , _heal             :: Bool             -- ^ Witch
     , _healUsed         :: Bool             -- ^ Witch
-    , _hunterKilled     :: Bool             -- ^ Hunter
+    , _hunterRetaliated :: Bool             -- ^ Hunter
     , _jesterRevealed   :: Bool             -- ^ Jester
     , _passed           :: Bool             -- ^ Devoted Servant, Witch
     , _poison           :: Maybe Text       -- ^ Witch
@@ -170,8 +170,12 @@ stageAvailable game DevotedServantsTurn =
     && isn't devotedServant (head $ getVoteResult game)
 stageAvailable game FerinasGrunt        = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
-stageAvailable game HuntersTurn1        = game ^. hunterKilled
-stageAvailable game HuntersTurn2        = game ^. hunterKilled
+stageAvailable game HuntersTurn1        =
+    has (players . hunters . dead) game
+    && not (game ^. hunterRetaliated)
+stageAvailable game HuntersTurn2        =
+    has (players . hunters . dead) game
+    && not (game ^. hunterRetaliated)
 stageAvailable game Lynching            = Map.size (game ^. votes) > 0
 stageAvailable game ProtectorsTurn      = has (players . protectors . alive) game
 stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
@@ -208,7 +212,7 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _allowedVoters        = players ^.. names
             , _heal                 = False
             , _healUsed             = False
-            , _hunterKilled         = False
+            , _hunterRetaliated     = False
             , _jesterRevealed       = False
             , _poison               = Nothing
             , _poisonUsed           = False

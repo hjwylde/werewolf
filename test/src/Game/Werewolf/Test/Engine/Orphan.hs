@@ -66,7 +66,7 @@ prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead (GameWithRoleModelAtVilla
     let devotedServantsName = game ^?! players . devotedServants . name
     let command             = passCommand devotedServantsName
 
-    isn't angel roleModel' && isn't devotedServant roleModel' && isn't jester roleModel'
+    isn't angel roleModel' && isn't devotedServant roleModel' && isn't jester roleModel' && isn't hunter roleModel'
         ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . orphans
     where
         roleModel' = game ^?! players . traverse . filteredBy name (fromJust $ game ^. roleModel)

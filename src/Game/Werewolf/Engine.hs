@@ -83,9 +83,9 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
     GameOver -> return ()
 
-    HuntersTurn1 -> unlessM (use hunterKilled) advanceStage
+    HuntersTurn1 -> whenM (use hunterRetaliated) advanceStage
 
-    HuntersTurn2 -> unlessM (use hunterKilled) advanceStage
+    HuntersTurn2 -> whenM (use hunterRetaliated) advanceStage
 
     Lynching -> do
         getVoteResult >>= lynchVotees

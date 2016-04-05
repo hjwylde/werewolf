@@ -32,7 +32,7 @@ allGameTests =
     , testProperty "new game starts with allowed voters full"               prop_newGameStartsWithAllowedVotersFull
     , testProperty "new game starts with heal false"                        prop_newGameStartsWithHealFalse
     , testProperty "new game starts with heal used false"                   prop_newGameStartsWithHealUsedFalse
-    , testProperty "new game starts with hunter killed false"               prop_newGameStartsWithHunterKilledFalse
+    , testProperty "new game starts with hunter retaliated false"           prop_newGameStartsWithHunterRetaliatedFalse
     , testProperty "new game starts with jester revealed false"             prop_newGameStartsWithJesterRevealedFalse
     , testProperty "new game starts with passed false"                      prop_newGameStartsWithPassedFalse
     , testProperty "new game starts with no poison"                         prop_newGameStartsWithNoPoison
@@ -79,8 +79,8 @@ prop_newGameStartsWithHealFalse players = not $ newGame players ^. heal
 prop_newGameStartsWithHealUsedFalse :: [Player] -> Bool
 prop_newGameStartsWithHealUsedFalse players = not $ newGame players ^. healUsed
 
-prop_newGameStartsWithHunterKilledFalse :: [Player] -> Bool
-prop_newGameStartsWithHunterKilledFalse players = not $ newGame players ^. hunterKilled
+prop_newGameStartsWithHunterRetaliatedFalse :: [Player] -> Bool
+prop_newGameStartsWithHunterRetaliatedFalse players = not $ newGame players ^. hunterRetaliated
 
 prop_newGameStartsWithJesterRevealedFalse :: [Player] -> Bool
 prop_newGameStartsWithJesterRevealedFalse players = not $ newGame players ^. jesterRevealed

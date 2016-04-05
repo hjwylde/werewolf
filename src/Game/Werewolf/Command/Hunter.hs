@@ -37,4 +37,4 @@ chooseCommand callerName targetName = Command $ do
     tell [playerShotMessage target]
     killPlayer targetName
 
-    hunterKilled .= False
+    hunterRetaliated .= True
