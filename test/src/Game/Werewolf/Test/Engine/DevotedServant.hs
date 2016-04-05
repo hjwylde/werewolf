@@ -40,7 +40,7 @@ prop_checkStageSkipsDevotedServantsTurnWhenNoDevotedServant (GameWithMajorityVot
 prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn :: GameAtDevotedServantsTurn -> Property
 prop_checkDevotedServantsTurnAdvancesToWolfHoundsTurn (GameAtDevotedServantsTurn game) = do
     forAll (arbitraryCommand game) $ \(Blind command) ->
-        isn't angel target && isn't wolfHound target
+        isn't angel target && isn't hunter target && isn't wolfHound target
         ==> has (stage . _WolfHoundsTurn) (run_ (apply command >> checkStage) game)
     where
         target = head $ getVoteResult game
