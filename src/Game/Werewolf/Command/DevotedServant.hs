@@ -49,6 +49,7 @@ revealCommand callerName = Command $ do
     setPlayerRole targetName devotedServantRole
 
     tell [devotedServantRevealedMessage callerName]
+    tell [roleTakenMessage callerName targetRole]
 
     resetRole callerName targetRole
 

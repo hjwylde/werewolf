@@ -10,6 +10,7 @@
 *Revisions*
 
 * Updated the Orphan's description. ([#128](https://github.com/hjwylde/werewolf/issues/128))
+* Added role taken message for the Devoted Servant. ([#157](https://github.com/hjwylde/werewolf/issues/157))
 
 ### v0.5.1.0
 
