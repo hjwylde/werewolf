@@ -195,7 +195,7 @@ wolfHoundRole :: Role
 wolfHoundRole = Role
     { _name         = "Wolf-hound"
     , _allegiance   = Villagers
-    , _balance      = -1
+    , _balance      = -2
     , _description  = T.unwords
         [ "All dogs know in the depths of their soul that their ancestors were wolves and that it's"
         , "mankind who has kept them in the state of childishness and fear, the faithful and"
