@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Revisions*
+
+* Changed the Druid's balance to 3. ([#165](https://github.com/hjwylde/werewolf/issues/165))
+
 ### v0.5.2.0
 
 *Minor*

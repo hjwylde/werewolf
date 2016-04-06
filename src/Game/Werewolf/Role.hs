@@ -250,7 +250,7 @@ druidRole :: Role
 druidRole = Role
     { _name         = "Druid"
     , _allegiance   = Villagers
-    , _balance      = 2
+    , _balance      = 3
     , _description  = T.unwords
         [ "How honoured we are to be in the presence of such a noble leader. The return of the"
         , "Druid marks an exceptional time in Fougères's history! Friend of the woodland creatures,"
