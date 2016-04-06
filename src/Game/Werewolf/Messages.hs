@@ -505,11 +505,13 @@ playerCannotChooseJesterMessage to =
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
-    [ targetName, " is aligned with the ", T.pack $ show allegiance', "."
-    ]
+    [targetName, " is aligned with the ", allegiance', "."]
     where
         targetName  = target ^. name
-        allegiance' = target ^. role . allegiance
+        allegiance' = case target ^. role . allegiance of
+            FallenAngel -> "Fallen Angel"
+            Villagers   -> "Villagers"
+            Werewolves  -> "Werewolves"
 
 playerMadeLynchVoteMessage :: Text -> Text -> Message
 playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat

@@ -24,8 +24,8 @@ import Control.Lens         hiding (cons)
 import Control.Monad.Except
 import Control.Monad.Random
 
-import Data.List.Extra
-import Data.Text       (Text)
+import           Data.List.Extra
+import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import Game.Werewolf
