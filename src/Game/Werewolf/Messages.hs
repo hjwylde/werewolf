@@ -215,9 +215,9 @@ firstVillagesTurnMessages :: [Message]
 firstVillagesTurnMessages = fallenAngelInPlayMessage : villagesTurnMessages
     where
         fallenAngelInPlayMessage = publicMessage $ T.unwords
-            [ "Alas, again I regrettably yield advice: an Angelic menace walks among you."
+            [ "Alas, again I regrettably yield advice: an angelic menace walks among you."
             , "Do not cast your votes lightly,"
-            , "for he will relish in this opportunity to be free from his terrible nightmare."
+            , "for they will relish in this opportunity to be free from their terrible nightmare."
             ]
 
 villagesTurnMessages :: [Message]
@@ -284,7 +284,7 @@ gameOverMessages game
         [ [publicMessage "You should have heeded my warning, for now the Fallen Angel has been set free!"]
         , [publicMessage "The game is over! The Fallen Angel has won."]
         , [playerRolesMessage]
-        , playerWonMessages
+        , [playerWonMessage $ game ^?! players . fallenAngels . name]
         , playerLostMessages
         ]
     | hasVillagersWon game      = concat
@@ -456,10 +456,9 @@ ferinaGruntsMessage = publicMessage $ T.unwords
 
 fallenAngelJoinedVillagersMessage :: Message
 fallenAngelJoinedVillagersMessage = publicMessage $ T.unwords
-    [ "You hear the Fallen Angel wrought with anger off in the distance."
-    , "He failed to attract the discriminatory vote of the village"
-    , "or the devouring vindictiveness of the lycanthropes."
-    , "Now he is stuck here, doomed forever to live out a mortal life as a Villager."
+    [ "You hear the Fallen Angel wrought with anger off in the distance. They failed to attract the"
+    , "prejudiced vote of the village to leave this world. Now they are stuck here, doomed forever"
+    , "to live out a mortal life as a Villager."
     ]
 
 playerShotMessage :: Player -> Message
