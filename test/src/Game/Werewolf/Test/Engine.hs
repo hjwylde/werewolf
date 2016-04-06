@@ -21,7 +21,7 @@ import Data.List.Extra
 
 import Game.Werewolf
 import Game.Werewolf.Test.Arbitrary
-import Game.Werewolf.Test.Engine.Angel
+import Game.Werewolf.Test.Engine.FallenAngel
 import Game.Werewolf.Test.Engine.Hunter
 import Game.Werewolf.Test.Engine.Lynching
 import Game.Werewolf.Test.Engine.Orphan
@@ -42,7 +42,7 @@ import Test.Tasty.QuickCheck
 
 allEngineTests :: [TestTree]
 allEngineTests = concat
-    [ allAngelEngineTests
+    [ allFallenAngelEngineTests
     , allHunterEngineTests
     , allLynchingEngineTests
     , allOrphanEngineTests
@@ -60,10 +60,10 @@ allEngineTests = concat
 
 allGameOverTests :: [TestTree]
 allGameOverTests =
-    [ testProperty "check game over advances stage when one allegiance alive"                   prop_checkGameOverAdvancesStageWhenOneAllegianceAlive
-    , testProperty "check game over advances stage when after first round and angel dead"       prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead
-    , testProperty "check game over does nothing when angel dead but aligned with villagers"    prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers
-    , testProperty "check game over does nothing when game over"                                prop_checkGameOverDoesNothingWhenGameOver
+    [ testProperty "check game over advances stage when one allegiance alive"                       prop_checkGameOverAdvancesStageWhenOneAllegianceAlive
+    , testProperty "check game over advances stage when after first round and fallen angel dead"    prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndFallenAngelDead
+    , testProperty "check game over does nothing when fallen angel dead but aligned with villagers" prop_checkGameOverDoesNothingWhenFallenAngelDeadButAlignedWithVillagers
+    , testProperty "check game over does nothing when game over"                                    prop_checkGameOverDoesNothingWhenGameOver
     ]
 
 allStartGameTests :: [TestTree]
@@ -91,17 +91,17 @@ prop_checkGameOverDoesNothingWhenGameOver (GameAtGameOver game) =
 --    length (nub . map (view $ role . allegiance) . filterAlive $ game ^. players) > 1
 --    ==> not . is gameOver $ run_ checkGameOver game
 
-prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead :: GameOnSecondRound -> Bool
-prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndAngelDead (GameOnSecondRound game) = do
-    let angelsName  = game ^?! players . angels . name
-    let game'       = killPlayer angelsName game
+prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndFallenAngelDead :: GameOnSecondRound -> Bool
+prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndFallenAngelDead (GameOnSecondRound game) = do
+    let fallenAngelsName    = game ^?! players . fallenAngels . name
+    let game'               = killPlayer fallenAngelsName game
 
     has (stage . _GameOver) $ run_ checkGameOver game'
 
-prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers :: GameOnSecondRound -> Bool
-prop_checkGameOverDoesNothingWhenAngelDeadButAlignedWithVillagers (GameOnSecondRound game) = do
-    let angelsName  = game ^?! players . angels . name
-    let game'       = killPlayer angelsName game & players . traverse . filteredBy name angelsName . role . allegiance .~ Villagers
+prop_checkGameOverDoesNothingWhenFallenAngelDeadButAlignedWithVillagers :: GameOnSecondRound -> Bool
+prop_checkGameOverDoesNothingWhenFallenAngelDeadButAlignedWithVillagers (GameOnSecondRound game) = do
+    let fallenAngelsName    = game ^?! players . fallenAngels . name
+    let game'               = killPlayer fallenAngelsName game & players . traverse . filteredBy name fallenAngelsName . role . allegiance .~ Villagers
 
     hasn't (stage . _GameOver) $ run_ checkGameOver game'
 

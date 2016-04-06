@@ -43,7 +43,7 @@ module Game.Werewolf.Game (
     -- ** Queries
     isFirstRound,
     doesPlayerExist,
-    hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
+    hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
 
 import Control.Lens hiding (isn't)
@@ -160,8 +160,8 @@ stageCycle = cycle allStages
 -- | Checks whether the stage is available for the given 'Game'. Most often this just involves
 --   checking if there is an applicable role alive, but sometimes it is more complex.
 --
---   One of the more complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
---   the 'VillagesTurn' is available on the first day rather than only after the first night.
+--   One of the more complex checks here is for the 'VillagesTurn'. If the Fallen Angel is in play,
+--   then the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
 stageAvailable game FerinasGrunt        = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
@@ -178,7 +178,7 @@ stageAvailable game SeersTurn           = has (players . seers . alive) game
 stageAvailable _ Sunrise                = True
 stageAvailable _ Sunset                 = True
 stageAvailable game VillagesTurn        =
-    (has (players . angels . alive) game || not (isFirstRound game))
+    (has (players . fallenAngels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)
 stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
 stageAvailable game OrphansTurn      =
@@ -257,17 +257,17 @@ doesPlayerExist name = has $ players . names . only name
 
 -- | Queries whether anyone has won.
 hasAnyoneWon :: Game -> Bool
-hasAnyoneWon game = any ($ game) [hasAngelWon, hasVillagersWon, hasWerewolvesWon]
+hasAnyoneWon game = any ($ game) [hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon]
 
--- | Queries whether the Angel has won. The Angel wins if they manage to get themselves killed on
---   the first round.
+-- | Queries whether the Fallen Angel has won. The Fallen Angel wins if they manage to get
+--   themselves killed on the first round.
 --
---   N.B., we check that the Angel isn't a 'villager' as the Angel's role is altered if they don't
---   win.
-hasAngelWon :: Game -> Bool
-hasAngelWon game = has (players . angels) game && is dead angel && isn't villager angel
+--   N.B., we check that the Fallen Angel isn't a 'villager' as the Fallen Angel's role is altered
+--   if they don't win.
+hasFallenAngelWon :: Game -> Bool
+hasFallenAngelWon game = has (players . fallenAngels) game && is dead fallenAngel && isn't villager fallenAngel
     where
-        angel = game ^?! players . angels
+        fallenAngel = game ^?! players . fallenAngels
 
 -- | Queries whether the 'Villagers' have won. The 'Villagers' win if they are the only players
 --   surviving.

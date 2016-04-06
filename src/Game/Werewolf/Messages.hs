@@ -40,11 +40,11 @@ module Game.Werewolf.Messages (
     -- * Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
 
-    -- * Angel's turn messages
-    angelJoinedVillagersMessage,
-
     -- * Druid's turn messages
     ferinaGruntsMessage,
+
+    -- * Fallen Angel's turn messages
+    fallenAngelJoinedVillagersMessage,
 
     -- * Hunter's turn messages
     playerShotMessage,
@@ -212,12 +212,12 @@ nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the village is asleep."
 
 firstVillagesTurnMessages :: [Message]
-firstVillagesTurnMessages = angelInPlayMessage : villagesTurnMessages
+firstVillagesTurnMessages = fallenAngelInPlayMessage : villagesTurnMessages
     where
-        angelInPlayMessage = publicMessage $ T.unwords
+        fallenAngelInPlayMessage = publicMessage $ T.unwords
             [ "Alas, again I regrettably yield advice: an angelic menace walks among you."
             , "Do not cast your votes lightly,"
-            , "for he will relish in this opportunity to be free from his terrible nightmare."
+            , "for they will relish in this opportunity to be free from their terrible nightmare."
             ]
 
 villagesTurnMessages :: [Message]
@@ -280,21 +280,21 @@ wolfHoundsTurnMessages to =
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
-    | hasAngelWon game      = concat
-        [ [publicMessage "You should have heeded my warning, for now the Angel has been set free!"]
-        , [publicMessage "The game is over! The Angel has won."]
+    | hasFallenAngelWon game    = concat
+        [ [publicMessage "You should have heeded my warning, for now the Fallen Angel has been set free!"]
+        , [publicMessage "The game is over! The Fallen Angel has won."]
         , [playerRolesMessage]
-        , playerWonMessages
+        , [playerWonMessage $ game ^?! players . fallenAngels . name]
         , playerLostMessages
         ]
-    | hasVillagersWon game  = concat
+    | hasVillagersWon game      = concat
         [ [publicMessage "The game is over! The Villagers have won."]
         , [playerRolesMessage]
         , playerWonMessages
         , playerContributedMessages
         , playerLostMessages
         ]
-    | hasWerewolvesWon game = concat
+    | hasWerewolvesWon game     = concat
         [ [publicMessage "The game is over! The Werewolves have won."]
         , [playerRolesMessage]
         , playerWonMessages
@@ -312,10 +312,10 @@ gameOverMessages game
             ]
 
         winningAllegiance
-            | hasAngelWon game      = Angel
-            | hasVillagersWon game  = Villagers
-            | hasWerewolvesWon game = Werewolves
-            | otherwise             = undefined
+            | hasFallenAngelWon game    = FallenAngel
+            | hasVillagersWon game      = Villagers
+            | hasWerewolvesWon game     = Werewolves
+            | otherwise                 = undefined
 
         winningPlayers  = game ^.. players . traverse . filteredBy (role . allegiance) winningAllegiance
         losingPlayers   = game ^. players \\ winningPlayers
@@ -448,18 +448,17 @@ waitingOnMessage :: Maybe Text -> [Text] -> Message
 waitingOnMessage mTo playerNames = Message mTo $ T.concat
     ["Waiting on ", concatList playerNames, "..."]
 
-angelJoinedVillagersMessage :: Message
-angelJoinedVillagersMessage = publicMessage $ T.unwords
-    [ "You hear the Angel wrought with anger off in the distance."
-    , "He failed to attract the discriminatory vote of the village"
-    , "or the devouring vindictiveness of the lycanthropes."
-    , "Now he is stuck here, doomed forever to live out a mortal life as a Villager."
-    ]
-
 ferinaGruntsMessage :: Message
 ferinaGruntsMessage = publicMessage $ T.unwords
     [ "Ferina wakes from her slumber, disturbed and on edge."
     , "She loudly grunts as she smells danger."
+    ]
+
+fallenAngelJoinedVillagersMessage :: Message
+fallenAngelJoinedVillagersMessage = publicMessage $ T.unwords
+    [ "You hear the Fallen Angel wrought with anger off in the distance. They failed to attract the"
+    , "prejudiced vote of the village to leave this world. Now they are stuck here, doomed forever"
+    , "to live out a mortal life as a Villager."
     ]
 
 playerShotMessage :: Player -> Message
@@ -505,11 +504,13 @@ playerCannotChooseJesterMessage to =
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
-    [ targetName, " is aligned with the ", T.pack $ show allegiance', "."
-    ]
+    [targetName, " is aligned with the ", allegiance', "."]
     where
         targetName  = target ^. name
-        allegiance' = target ^. role . allegiance
+        allegiance' = case target ^. role . allegiance of
+            FallenAngel -> "Fallen Angel"
+            Villagers   -> "Villagers"
+            Werewolves  -> "Werewolves"
 
 playerMadeLynchVoteMessage :: Text -> Text -> Message
 playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat

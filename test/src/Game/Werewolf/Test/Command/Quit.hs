@@ -24,21 +24,21 @@ import Test.Tasty.QuickCheck
 
 allQuitCommandTests :: [TestTree]
 allQuitCommandTests =
-    [ testProperty "quit command errors when game is over"                              prop_quitCommandErrorsWhenGameIsOver
-    , testProperty "quit command errors when caller does not exist"                     prop_quitCommandErrorsWhenCallerDoesNotExist
-    , testProperty "quit command errors when caller is dead"                            prop_quitCommandErrorsWhenCallerIsDead
-    , testProperty "quit command kills player"                                          prop_quitCommandKillsPlayer
-    , testProperty "quit command clears allegiance chosen when caller is wolf-hound"    prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound
-    , testProperty "quit command clears heal when caller is witch"                      prop_quitCommandClearsHealWhenCallerIsWitch
-    , testProperty "quit command clears heal used when caller is witch"                 prop_quitCommandClearsHealUsedWhenCallerIsWitch
-    , testProperty "quit command clears poison when caller is witch"                    prop_quitCommandClearsPoisonWhenCallerIsWitch
-    , testProperty "quit command clears poison used when caller is witch"               prop_quitCommandClearsPoisonUsedWhenCallerIsWitch
-    , testProperty "quit command clears prior protect when caller is protector"         prop_quitCommandClearsPriorProtectWhenCallerIsProtector
-    , testProperty "quit command clears protect when caller is protector"               prop_quitCommandClearsProtectWhenCallerIsProtector
-    , testProperty "quit command clears player's devour vote"                           prop_quitCommandClearsPlayersDevourVote
-    , testProperty "quit command clears player's lynch vote"                            prop_quitCommandClearsPlayersLynchVote
-    , testProperty "quit command clears role model when caller is orphan"               prop_quitCommandClearsRoleModelWhenCallerIsOrphan
-    , testProperty "quit command sets angel's allegiance when caller is angel"          prop_quitCommandSetsAngelsAllegianceWhenCallerIsAngel
+    [ testProperty "quit command errors when game is over"                                      prop_quitCommandErrorsWhenGameIsOver
+    , testProperty "quit command errors when caller does not exist"                             prop_quitCommandErrorsWhenCallerDoesNotExist
+    , testProperty "quit command errors when caller is dead"                                    prop_quitCommandErrorsWhenCallerIsDead
+    , testProperty "quit command kills player"                                                  prop_quitCommandKillsPlayer
+    , testProperty "quit command clears allegiance chosen when caller is wolf-hound"            prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound
+    , testProperty "quit command clears heal when caller is witch"                              prop_quitCommandClearsHealWhenCallerIsWitch
+    , testProperty "quit command clears heal used when caller is witch"                         prop_quitCommandClearsHealUsedWhenCallerIsWitch
+    , testProperty "quit command clears poison when caller is witch"                            prop_quitCommandClearsPoisonWhenCallerIsWitch
+    , testProperty "quit command clears poison used when caller is witch"                       prop_quitCommandClearsPoisonUsedWhenCallerIsWitch
+    , testProperty "quit command clears prior protect when caller is protector"                 prop_quitCommandClearsPriorProtectWhenCallerIsProtector
+    , testProperty "quit command clears protect when caller is protector"                       prop_quitCommandClearsProtectWhenCallerIsProtector
+    , testProperty "quit command clears player's devour vote"                                   prop_quitCommandClearsPlayersDevourVote
+    , testProperty "quit command clears player's lynch vote"                                    prop_quitCommandClearsPlayersLynchVote
+    , testProperty "quit command clears role model when caller is orphan"                       prop_quitCommandClearsRoleModelWhenCallerIsOrphan
+    , testProperty "quit command sets fallen angel's allegiance when caller is fallen angel"    prop_quitCommandSetsFallenAngelsAllegianceWhenCallerIsFallenAngel
     ]
 
 prop_quitCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -136,10 +136,10 @@ prop_quitCommandClearsRoleModelWhenCallerIsOrphan (GameWithRoleModel game) = do
 
     isNothing $ run_ (apply command) game ^. roleModel
 
-prop_quitCommandSetsAngelsAllegianceWhenCallerIsAngel :: Game -> Bool
-prop_quitCommandSetsAngelsAllegianceWhenCallerIsAngel game = do
-    let angelsName  = game ^?! players . angels . name
-    let command     = quitCommand angelsName
-    let game'       = run_ (apply command) game
+prop_quitCommandSetsFallenAngelsAllegianceWhenCallerIsFallenAngel :: Game -> Bool
+prop_quitCommandSetsFallenAngelsAllegianceWhenCallerIsFallenAngel game = do
+    let fallenAngelsName    = game ^?! players . fallenAngels . name
+    let command             = quitCommand fallenAngelsName
+    let game'               = run_ (apply command) game
 
-    is villager $ game' ^?! players . angels
+    is villager $ game' ^?! players . fallenAngels

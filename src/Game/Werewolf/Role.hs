@@ -24,7 +24,7 @@ module Game.Werewolf.Role (
     name, allegiance, balance, description, rules,
 
     Allegiance(..),
-    _Angel, _Villagers, _Werewolves,
+    _FallenAngel, _Villagers, _Werewolves,
 
     -- ** Instances
     allRoles, restrictedRoles,
@@ -39,7 +39,7 @@ module Game.Werewolf.Role (
     -- | The Loners look out for themselves and themselves alone.
 
     --   The Loners must complete their own objective.
-    angelRole,
+    fallenAngelRole,
 
     -- *** The Villagers
     -- | Fraught with fear of the unseen enemy, the Villagers must work together to determine the
@@ -87,7 +87,7 @@ data Role = Role
     } deriving (Read, Show)
 
 -- | The Loner allegiances are seldom used, rather they are present for correctness.
-data Allegiance = Angel | Villagers | Werewolves
+data Allegiance = FallenAngel | Villagers | Werewolves
     deriving (Eq, Read, Show)
 
 makeLenses ''Role
@@ -100,8 +100,8 @@ makePrisms ''Allegiance
 -- | A list containing all the roles defined in this file.
 allRoles :: [Role]
 allRoles =
-    [ angelRole
-    , druidRole
+    [ druidRole
+    , fallenAngelRole
     , hunterRole
     , jesterRole
     , orphanRole
@@ -181,32 +181,37 @@ wolfHoundRole = Role
         ]
     }
 
--- | /The muddy life of a village infested with evil creatures repulses him; he wishes to believe/
---   /he's the victim of a terrible nightmare, in order to finally wake up in his comfortable bed./
+-- | /Long ago during the War in Heaven, angels fell from the sky as one by one those that followed/
+--   /Lucifer were defeated. The Fallen Angel was one such being and is now one of the few angels/
+--   /left on Earth. For centuries they have lived amongst mortal Villagers as punishment for their/
+--   /sins and wrongdoings. Nothing is worse punishment for them, the Fallen Angel yearns for death/
+--   /to once again be free!
 --
---   When the Angel is in play, the game always begins with the village's debate followed by an
---   elimination vote, and then the first night.
+--   When the Fallen Angel is in play, the game always begins with the village's vote and then the
+--   first night.
 --
---   The Angel wins if he manages to get eliminated on the first round (day or night).
---   If he fails, then he becomes a Simple Villager for the rest of the game.
-angelRole :: Role
-angelRole = Role
-    { _name         = "Angel"
-    , _allegiance   = Angel
+--   The Fallen Angel wins if they manage to get eliminated on the first round (day or night). If
+--   they fail, then they become a Simple Villager for the rest of the game.
+fallenAngelRole :: Role
+fallenAngelRole = Role
+    { _name         = "Fallen Angel"
+    , _allegiance   = FallenAngel
     , _balance      = 0
     , _description  = T.unwords
-        [ "The muddy life of a village infested with evil creatures repulses him; he wishes to"
-        , "believe he's the victim of a terrible nightmare, in order to finally wake up in his"
-        , "comfortable bed."
+        [ "Long ago during the War in Heaven, angels fell from the sky as one by one those that"
+        , "followed Lucifer were defeated. The Fallen Angel was one such being and is now one of"
+        , "the few angels left on Earth. For centuries they have lived amongst mortal Villagers as"
+        , "punishment for their sins and wrongdoings. Nothing is worse punishment for them, the"
+        , "Fallen Angel yearns for death to once again be free!"
         ]
     , _rules        = T.intercalate "\n"
         [ T.unwords
-            [ "When the Angel is in play, the game always begins with the village's debate followed"
-            , "by an elimination vote, and then the first night."
+            [ "When the Fallen Angel is in play, the game always begins with the village's vote and"
+            , "then the first night."
             ]
         , T.unwords
-            [ "The Angel wins if he manages to get eliminated on the first round (day or night). If"
-            , "he fails, then he becomes a Simple Villager for the rest of the game."
+            [ "The Fallen Angel wins if they manage to get eliminated on the first round (day or"
+            , "night). If they fail, then they become a Simple Villager for the rest of the game."
             ]
         ]
     }

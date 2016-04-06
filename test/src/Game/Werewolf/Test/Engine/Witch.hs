@@ -40,7 +40,7 @@ allWitchEngineTests =
 
 prop_checkStageSkipsWitchsTurnWhenNoWitch :: GameWithDevourVotes -> Property
 prop_checkStageSkipsWitchsTurnWhenNoWitch (GameWithDevourVotes game) =
-    null (run_ checkStage game' ^.. players . angels . dead)
+    null (run_ checkStage game' ^.. players . fallenAngels . dead)
     ==> hasn't (stage . _WitchsTurn) game'
     where
         witchsName  = game ^?! players . witches . name

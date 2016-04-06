@@ -34,8 +34,8 @@ import           Data.Text       (Text)
 import qualified Data.Text       as T
 
 import           Game.Werewolf.Game     hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
-                                         getVoteResult, hasAngelWon, hasAnyoneWon, hasVillagersWon,
-                                         hasWerewolvesWon, killPlayer)
+                                         getVoteResult, hasAnyoneWon, hasFallenAngelWon,
+                                         hasVillagersWon, hasWerewolvesWon, killPlayer)
 import           Game.Werewolf.Messages
 import           Game.Werewolf.Player
 import           Game.Werewolf.Response
@@ -123,11 +123,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
-        whenJustM (preuse $ players . angels . alive) $ \angel ->
-            unless (is villager angel) $ do
-                tell [angelJoinedVillagersMessage]
+        whenJustM (preuse $ players . fallenAngels . alive) $ \fallenAngel ->
+            unless (is villager fallenAngel) $ do
+                tell [fallenAngelJoinedVillagersMessage]
 
-                setPlayerAllegiance (angel ^. name) Villagers
+                setPlayerAllegiance (fallenAngel ^. name) Villagers
 
         advanceStage
 

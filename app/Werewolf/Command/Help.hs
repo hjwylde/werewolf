@@ -146,11 +146,11 @@ rulesMessages mGame = map (T.intercalate "\n")
     , filter (/= "") [ T.concat
         [ "Each player is informed of their role (see `help roles` for a list) at the start of the"
         , "game. A game begins at night and follows a standard cycle."
-        , whenRoleInPlay mGame angelRole
-          " (N.B., when the Angel is in play the game begins with the village vote.)"
+        , whenRoleInPlay mGame fallenAngelRole
+          " (N.B., when the Fallen Angel is in play the game begins with the village vote.)"
         ]
-      , whenRoleInPlay mGame angelRole
-        "- (When the Angel is in play) the village votes to lynch a suspect."
+      , whenRoleInPlay mGame fallenAngelRole
+        "- (When the Fallen Angel is in play) the village votes to lynch a suspect."
       , "- The village falls asleep."
       , whenRoleInPlay mGame orphanRole
         "- (First round only) the Orphan wakes up and chooses a role model."
@@ -175,7 +175,7 @@ rulesMessages mGame = map (T.intercalate "\n")
         "- (When the Scapegoat is blamed) the Scapegoat chooses whom may vote on the next day."
       , T.concat
         [ "The game is over when only Villagers or Werewolves are left alive"
-        , ifRoleInPlay mGame angelRole
+        , ifRoleInPlay mGame fallenAngelRole
           ", or when one of the Loners completes their own objective."
           "."
         ]

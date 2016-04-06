@@ -22,37 +22,37 @@ import Test.Tasty.QuickCheck
 
 allGameTests :: [TestTree]
 allGameTests =
-    [ testProperty "new game starts at village's turn when angel in play"   prop_newGameStartsAtVillagesTurnWhenAngelInPlay
-    , testProperty "new game starts at sunset when no angel in play"        prop_newGameStartsAtSunsetWhenNoAngelInPlay
-    , testProperty "new game starts on first round"                         prop_newGameStartsOnFirstRound
-    , testProperty "new game uses given players"                            prop_newGameUsesGivenPlayers
-    , testProperty "new game starts with events empty"                      prop_newGameStartsWithEventsEmpty
-    , testProperty "new game starts with boots empty"                       prop_newGameStartsWithBootsEmpty
-    , testProperty "new game starts with allegiance chosen false"           prop_newGameStartsWithAllegianceChosenFalse
-    , testProperty "new game starts with allowed voters full"               prop_newGameStartsWithAllowedVotersFull
-    , testProperty "new game starts with heal false"                        prop_newGameStartsWithHealFalse
-    , testProperty "new game starts with heal used false"                   prop_newGameStartsWithHealUsedFalse
-    , testProperty "new game starts with hunter retaliated false"           prop_newGameStartsWithHunterRetaliatedFalse
-    , testProperty "new game starts with jester revealed false"             prop_newGameStartsWithJesterRevealedFalse
-    , testProperty "new game starts with passed false"                      prop_newGameStartsWithPassedFalse
-    , testProperty "new game starts with no poison"                         prop_newGameStartsWithNoPoison
-    , testProperty "new game starts with poison used false"                 prop_newGameStartsWithPoisonUsedFalse
-    , testProperty "new game starts with no prior protect"                  prop_newGameStartsWithNoPriorProtect
-    , testProperty "new game starts with no protect"                        prop_newGameStartsWithNoProtect
-    , testProperty "new game starts with no role model"                     prop_newGameStartsWithNoRoleModel
-    , testProperty "new game starts with scapegoat blamed false"            prop_newGameStartsWithScapegoatBlamedFalse
-    , testProperty "new game starts with no see"                            prop_newGameStartsWithNoSee
-    , testProperty "new game starts with votes empty"                       prop_newGameStartsWithVotesEmpty
+    [ testProperty "new game starts at village's turn when fallen angel in play"    prop_newGameStartsAtVillagesTurnWhenFallenAngelInPlay
+    , testProperty "new game starts at sunset when no fallen angel in play"         prop_newGameStartsAtSunsetWhenNoFallenAngelInPlay
+    , testProperty "new game starts on first round"                                 prop_newGameStartsOnFirstRound
+    , testProperty "new game uses given players"                                    prop_newGameUsesGivenPlayers
+    , testProperty "new game starts with events empty"                              prop_newGameStartsWithEventsEmpty
+    , testProperty "new game starts with boots empty"                               prop_newGameStartsWithBootsEmpty
+    , testProperty "new game starts with allegiance chosen false"                   prop_newGameStartsWithAllegianceChosenFalse
+    , testProperty "new game starts with allowed voters full"                       prop_newGameStartsWithAllowedVotersFull
+    , testProperty "new game starts with heal false"                                prop_newGameStartsWithHealFalse
+    , testProperty "new game starts with heal used false"                           prop_newGameStartsWithHealUsedFalse
+    , testProperty "new game starts with hunter retaliated false"                   prop_newGameStartsWithHunterRetaliatedFalse
+    , testProperty "new game starts with jester revealed false"                     prop_newGameStartsWithJesterRevealedFalse
+    , testProperty "new game starts with passed false"                              prop_newGameStartsWithPassedFalse
+    , testProperty "new game starts with no poison"                                 prop_newGameStartsWithNoPoison
+    , testProperty "new game starts with poison used false"                         prop_newGameStartsWithPoisonUsedFalse
+    , testProperty "new game starts with no prior protect"                          prop_newGameStartsWithNoPriorProtect
+    , testProperty "new game starts with no protect"                                prop_newGameStartsWithNoProtect
+    , testProperty "new game starts with no role model"                             prop_newGameStartsWithNoRoleModel
+    , testProperty "new game starts with scapegoat blamed false"                    prop_newGameStartsWithScapegoatBlamedFalse
+    , testProperty "new game starts with no see"                                    prop_newGameStartsWithNoSee
+    , testProperty "new game starts with votes empty"                               prop_newGameStartsWithVotesEmpty
     ]
 
-prop_newGameStartsAtVillagesTurnWhenAngelInPlay :: [Player] -> Property
-prop_newGameStartsAtVillagesTurnWhenAngelInPlay players =
-    has angels players
+prop_newGameStartsAtVillagesTurnWhenFallenAngelInPlay :: [Player] -> Property
+prop_newGameStartsAtVillagesTurnWhenFallenAngelInPlay players =
+    has fallenAngels players
     ==> has (stage . _VillagesTurn) (newGame players)
 
-prop_newGameStartsAtSunsetWhenNoAngelInPlay :: [Player] -> Property
-prop_newGameStartsAtSunsetWhenNoAngelInPlay players =
-    hasn't angels players
+prop_newGameStartsAtSunsetWhenNoFallenAngelInPlay :: [Player] -> Property
+prop_newGameStartsAtSunsetWhenNoFallenAngelInPlay players =
+    hasn't fallenAngels players
     ==> has (stage . _Sunset) (newGame players)
 
 prop_newGameStartsOnFirstRound :: [Player] -> Bool

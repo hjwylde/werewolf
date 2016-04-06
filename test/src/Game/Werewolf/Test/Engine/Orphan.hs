@@ -62,7 +62,7 @@ prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead :: GameWithRoleModelAtVil
 prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
-    isn't angel roleModel' && isn't hunter roleModel' && isn't jester roleModel'
+    isn't fallenAngel roleModel' && isn't hunter roleModel' && isn't jester roleModel'
         ==> is werewolf $ run_ checkStage game' ^?! players . orphans
     where
         roleModel' = game ^?! players . traverse . filteredBy name (fromJust $ game ^. roleModel)

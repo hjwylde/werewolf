@@ -39,7 +39,7 @@ prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty (GameAtWitchsTurn game) =
 
 --prop_checkVillagesTurnAdvancesToDevotedServantsTurn :: GameWithMajorityVote -> Property
 --prop_checkVillagesTurnAdvancesToDevotedServantsTurn (GameWithMajorityVote game) =
---    isn't angel target && isn't devotedServant target
+--    isn't fallenAngel target && isn't devotedServant target
 --    ==> has (stage . _DevotedServantsTurn) (run_ checkStage game)
 --    where
 --        target = head $ getVoteResult game
