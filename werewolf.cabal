@@ -40,7 +40,6 @@ executable werewolf
         Werewolf.Command.Poison
         Werewolf.Command.Protect
         Werewolf.Command.Quit
-        Werewolf.Command.Reveal
         Werewolf.Command.See
         Werewolf.Command.Start
         Werewolf.Command.Status
@@ -76,7 +75,6 @@ library
     exposed-modules:
         Game.Werewolf
         Game.Werewolf.Command
-        Game.Werewolf.Command.DevotedServant
         Game.Werewolf.Command.Global
         Game.Werewolf.Command.Hunter
         Game.Werewolf.Command.Orphan
@@ -132,12 +130,10 @@ test-suite werewolf-test
         Game.Werewolf.Test.Command.Poison
         Game.Werewolf.Test.Command.Protect
         Game.Werewolf.Test.Command.Quit
-        Game.Werewolf.Test.Command.Reveal
         Game.Werewolf.Test.Command.See
         Game.Werewolf.Test.Command.Vote
         Game.Werewolf.Test.Engine
         Game.Werewolf.Test.Engine.Angel
-        Game.Werewolf.Test.Engine.DevotedServant
         Game.Werewolf.Test.Engine.Hunter
         Game.Werewolf.Test.Engine.Lynching
         Game.Werewolf.Test.Engine.Orphan

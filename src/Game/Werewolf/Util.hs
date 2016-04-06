@@ -17,24 +17,23 @@ module Game.Werewolf.Util (
     -- * Game
 
     -- ** Manipulations
-    killPlayer, removePlayer, setPlayerAllegiance, setPlayerRole,
+    killPlayer, removePlayer, setPlayerAllegiance,
 
     -- ** Searches
     findPlayerBy_, getAdjacentAlivePlayers, getPlayerVote, getAllowedVoters, getPendingVoters,
     getVoteResult,
 
     -- ** Queries
-    isDevotedServantsTurn, isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn,
-    isScapegoatsTurn, isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-    isWolfHoundsTurn,
+    isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn, isSeersTurn,
+    isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
     hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDevotedServant, isPlayerHunter, isPlayerJester, isPlayerOrphan, isPlayerProtector,
-    isPlayerScapegoat, isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
+    isPlayerHunter, isPlayerJester, isPlayerOrphan, isPlayerProtector, isPlayerScapegoat,
+    isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -86,11 +85,6 @@ removePlayer name' = do
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
 setPlayerAllegiance name' allegiance' = modify $ players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
 
--- | Fudges the player's role. This function is useful for roles such as the Devoted Servant where
---   they take on a different role.
-setPlayerRole :: MonadState Game m => Text -> Role -> m ()
-setPlayerRole name' role' = modify $ players . traverse . filteredBy name name' . role .~ role'
-
 findPlayerBy_ :: (Eq a, MonadState Game m) => Lens' Player a -> a -> m Player
 findPlayerBy_ lens value = fromJust <$> preuse (players . traverse . filteredBy lens value)
 
@@ -115,9 +109,6 @@ getPendingVoters = gets Game.getPendingVoters
 
 getVoteResult :: MonadState Game m => m [Player]
 getVoteResult = gets Game.getVoteResult
-
-isDevotedServantsTurn :: MonadState Game m => m Bool
-isDevotedServantsTurn = has (stage . _DevotedServantsTurn) <$> get
 
 isGameOver :: MonadState Game m => m Bool
 isGameOver = has (stage . _GameOver) <$> get
@@ -169,9 +160,6 @@ hasWerewolvesWon = gets Game.hasWerewolvesWon
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = gets $ Game.doesPlayerExist name
-
-isPlayerDevotedServant :: MonadState Game m => Text -> m Bool
-isPlayerDevotedServant name' = is devotedServant <$> findPlayerBy_ name name'
 
 isPlayerHunter :: MonadState Game m => Text -> m Bool
 isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'

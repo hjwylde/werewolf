@@ -41,8 +41,8 @@ prop_checkStageSkipsLynchingWhenNoVotes (GameWithNoAllowedVotersAtVillagesTurn g
 
     hasn't (stage . _Lynching) game'
 
-prop_checkLynchingLynchesOnePlayerWhenConsensus :: GameWithPassAtDevotedServantsTurn -> Property
-prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithPassAtDevotedServantsTurn game) =
+prop_checkLynchingLynchesOnePlayerWhenConsensus :: GameWithMajorityVote -> Property
+prop_checkLynchingLynchesOnePlayerWhenConsensus (GameWithMajorityVote game) =
     isn't jester target
     ==> length (run_ checkStage game ^.. players . traverse . dead) == 1
     where
@@ -71,12 +71,9 @@ prop_checkLynchingLynchesNoOneWhenConflictedAndNoScapegoats game =
         game'           = killPlayer scapegoatsName game & stage .~ VillagesTurn
         n               = length $ game' ^. players
 
-prop_checkLynchingResetsVotes :: GameWithPassAtDevotedServantsTurn -> Property
-prop_checkLynchingResetsVotes (GameWithPassAtDevotedServantsTurn game) =
-    isn't devotedServant target
-    ==> Map.null $ run_ checkStage game ^. votes
-    where
-        target = head $ getVoteResult game
+prop_checkLynchingResetsVotes :: GameWithMajorityVote -> Bool
+prop_checkLynchingResetsVotes (GameWithMajorityVote game) =
+    Map.null $ run_ checkStage game ^. votes
 
 prop_checkLynchingSetsAllowedVoters :: GameWithLynchVotes -> Property
 prop_checkLynchingSetsAllowedVoters (GameWithLynchVotes game) =

@@ -32,8 +32,8 @@ allSeerEngineTests =
     , testProperty "check seer's turn does nothing unless seen"         prop_checkSeersTurnDoesNothingUnlessSeen
     ]
 
-prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithPassAtDevotedServantsTurn -> Bool
-prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithPassAtDevotedServantsTurn game) =
+prop_checkStageSkipsSeersTurnWhenNoSeer :: GameWithMajorityVote -> Bool
+prop_checkStageSkipsSeersTurnWhenNoSeer (GameWithMajorityVote game) =
     hasn't (stage . _SeersTurn) game'
     where
         seersName   = game ^?! players . seers . name

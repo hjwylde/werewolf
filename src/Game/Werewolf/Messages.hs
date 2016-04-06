@@ -43,9 +43,6 @@ module Game.Werewolf.Messages (
     -- * Angel's turn messages
     angelJoinedVillagersMessage,
 
-    -- * Devoted Servant's turn messages
-    devotedServantRevealedMessage, roleTakenMessage, devotedServantJoinedPackMessages,
-
     -- * Druid's turn messages
     ferinaGruntsMessage,
 
@@ -149,30 +146,27 @@ villagerVillagerMessage name = publicMessage $ T.unwords
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
-    DevotedServantsTurn -> devotedServantsTurnMessages devotedServantsName victimsName
-    FerinasGrunt        -> []
-    GameOver            -> []
-    HuntersTurn1        -> huntersTurnMessages huntersName
-    HuntersTurn2        -> huntersTurnMessages huntersName
-    Lynching            -> []
-    OrphansTurn         -> orphansTurnMessages orphansName
-    ProtectorsTurn      -> protectorsTurnMessages protectorsName
-    ScapegoatsTurn      -> scapegoatsTurnMessages scapegoatsName
-    SeersTurn           -> seersTurnMessages seersName
-    Sunrise             -> [sunriseMessage]
-    Sunset              -> [nightFallsMessage]
-    VillagesTurn        -> if isFirstRound game
+    FerinasGrunt    -> []
+    GameOver        -> []
+    HuntersTurn1    -> huntersTurnMessages huntersName
+    HuntersTurn2    -> huntersTurnMessages huntersName
+    Lynching        -> []
+    OrphansTurn     -> orphansTurnMessages orphansName
+    ProtectorsTurn  -> protectorsTurnMessages protectorsName
+    ScapegoatsTurn  -> scapegoatsTurnMessages scapegoatsName
+    SeersTurn       -> seersTurnMessages seersName
+    Sunrise         -> [sunriseMessage]
+    Sunset          -> [nightFallsMessage]
+    VillagesTurn    -> if isFirstRound game
         then firstVillagesTurnMessages
         else villagesTurnMessages
-    WerewolvesTurn      -> if isFirstRound game
+    WerewolvesTurn  -> if isFirstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
-    WitchsTurn          -> witchsTurnMessages game
-    WolfHoundsTurn      -> wolfHoundsTurnMessages wolfHoundsName
+    WitchsTurn      -> witchsTurnMessages game
+    WolfHoundsTurn  -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
-        devotedServantsName = players' ^?! devotedServants . name
-        victimsName         = head (getVoteResult game) ^. name
         huntersName         = players' ^?! hunters . name
         orphansName         = players' ^?! orphans . name
         protectorsName      = players' ^?! protectors . name
@@ -180,15 +174,6 @@ stageMessages game = case game ^. stage of
         seersName           = players' ^?! seers . name
         aliveWerewolfNames  = players' ^.. werewolves . alive . name
         wolfHoundsName      = players' ^?! wolfHounds . name
-
-devotedServantsTurnMessages :: Text -> Text -> [Message]
-devotedServantsTurnMessages to victimsName =
-    [ publicMessage "The Devoted Servant ponders."
-    , privateMessage to $ T.concat
-        [ "Would you like to `reveal` yourself and take on ", victimsName, "'s role?"
-        , " (Or you can type `pass`.)"
-        ]
-    ]
 
 huntersTurnMessages :: Text -> [Message]
 huntersTurnMessages huntersName =
@@ -414,22 +399,21 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
     ]]
     where
         showTurn :: Stage -> Text
-        showTurn DevotedServantsTurn    = "Devoted Servant's"
-        showTurn FerinasGrunt           = undefined
-        showTurn GameOver               = undefined
-        showTurn HuntersTurn1           = "Hunter's"
-        showTurn HuntersTurn2           = "Hunter's"
-        showTurn Lynching               = undefined
-        showTurn OrphansTurn            = "Orphan's"
-        showTurn ProtectorsTurn         = "Protector's"
-        showTurn ScapegoatsTurn         = "Scapegoat's"
-        showTurn SeersTurn              = "Seer's"
-        showTurn Sunrise                = undefined
-        showTurn Sunset                 = undefined
-        showTurn VillagesTurn           = "village's"
-        showTurn WerewolvesTurn         = "Werewolves'"
-        showTurn WitchsTurn             = "Witch's"
-        showTurn WolfHoundsTurn         = "Wolf-hound's"
+        showTurn FerinasGrunt   = undefined
+        showTurn GameOver       = undefined
+        showTurn HuntersTurn1   = "Hunter's"
+        showTurn HuntersTurn2   = "Hunter's"
+        showTurn Lynching       = undefined
+        showTurn OrphansTurn    = "Orphan's"
+        showTurn ProtectorsTurn = "Protector's"
+        showTurn ScapegoatsTurn = "Scapegoat's"
+        showTurn SeersTurn      = "Seer's"
+        showTurn Sunrise        = undefined
+        showTurn Sunset         = undefined
+        showTurn VillagesTurn   = "village's"
+        showTurn WerewolvesTurn = "Werewolves'"
+        showTurn WitchsTurn     = "Witch's"
+        showTurn WolfHoundsTurn = "Wolf-hound's"
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat
@@ -471,37 +455,6 @@ angelJoinedVillagersMessage = publicMessage $ T.unwords
     , "or the devouring vindictiveness of the lycanthropes."
     , "Now he is stuck here, doomed forever to live out a mortal life as a Villager."
     ]
-
-devotedServantRevealedMessage :: Text -> Message
-devotedServantRevealedMessage devotedServantsName = publicMessage $ T.unwords
-    [ "Determined to not let their master's abilities be lost forever,"
-    , devotedServantsName, "the Devoted Servant selflessly takes on their role."
-    ]
-
-roleTakenMessage :: Text -> Role -> Message
-roleTakenMessage to role = privateMessage to $ T.intercalate "\n"
-    [ T.concat ["You've taken on the role of ", article role, " ", role ^. Role.name, "."]
-    , role ^. description
-    , role ^. rules
-    ]
-
-devotedServantJoinedPackMessages :: Text -> [Text] -> [Message]
-devotedServantJoinedPackMessages devotedServantsName werewolfNames =
-    privateMessage devotedServantsName (T.unwords $ masterWasWerewolfMessage:packMessages)
-    : groupMessages werewolfNames (T.unwords
-        [ devotedServantsName, "heads towards the woods in search of his master's home and family."
-        ])
-    where
-        masterWasWerewolfMessage = T.unwords
-            [ "Upon learning your master was a Werewolf,"
-            , "you head towards the woods to learn more about his home and family."
-            ]
-        packMessages
-            | null werewolfNames    = []
-            | otherwise             =
-                [ T.unwords
-                    ["As you enter you see his pack", concatList werewolfNames , "waiting for you."]
-                ]
 
 ferinaGruntsMessage :: Message
 ferinaGruntsMessage = publicMessage $ T.unwords

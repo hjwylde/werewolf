@@ -16,7 +16,6 @@ import Game.Werewolf.Test.Command.Pass
 import Game.Werewolf.Test.Command.Poison
 import Game.Werewolf.Test.Command.Protect
 import Game.Werewolf.Test.Command.Quit
-import Game.Werewolf.Test.Command.Reveal
 import Game.Werewolf.Test.Command.See
 import Game.Werewolf.Test.Command.Vote
 
@@ -30,7 +29,6 @@ allCommandTests = concat
     , allPoisonCommandTests
     , allProtectCommandTests
     , allQuitCommandTests
-    , allRevealCommandTests
     , allSeeCommandTests
     , allVoteCommandTests
     ]
