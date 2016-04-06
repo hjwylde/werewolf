@@ -26,16 +26,16 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    angel, devotedServant, druid, hunter, jester, orphan, protector, scapegoat, seer,
-    simpleVillager, simpleWerewolf, villagerVillager, witch, wolfHound,
+    angel, druid, hunter, jester, orphan, protector, scapegoat, seer, simpleVillager,
+    simpleWerewolf, villagerVillager, witch, wolfHound,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    angels, devotedServants, druids, hunters, jesters, orphans, protectors, scapegoats, seers,
-    simpleVillagers, simpleWerewolves, villagerVillagers, witches, wolfHounds,
+    angels, druids, hunters, jesters, orphans, protectors, scapegoats, seers, simpleVillagers,
+    simpleWerewolves, villagerVillagers, witches, wolfHounds,
     villagers, werewolves,
     alive, dead,
 
@@ -82,14 +82,6 @@ newPlayer name role = Player name role Alive
 -- @
 angel :: Traversal' Player ()
 angel = role . only angelRole
-
--- | The traversal of 'Player's with a 'devotedServantRole'.
---
--- @
--- 'devotedServant' = 'role' . 'only' 'devotedServantRole'
--- @
-devotedServant :: Traversal' Player ()
-devotedServant = role . only devotedServantRole
 
 -- | The traversal of 'Player's with a 'druidRole'.
 --
@@ -234,14 +226,6 @@ states = traverse . state
 -- @
 angels :: Traversable t => Traversal' (t Player) Player
 angels = traverse . filtered (is angel)
-
--- | This 'Traversal' provides the traversal of 'devotedServant' 'Player's.
---
--- @
--- 'devotedServants' = 'traverse' . 'filtered' ('is' 'devotedServant')
--- @
-devotedServants :: Traversable t => Traversal' (t Player) Player
-devotedServants = traverse . filtered (is devotedServant)
 
 -- | This 'Traversal' provides the traversal of 'druid' 'Player's.
 --

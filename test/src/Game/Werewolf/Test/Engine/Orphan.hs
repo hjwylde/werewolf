@@ -15,7 +15,6 @@ import Control.Lens hiding (isn't)
 import Data.Maybe
 
 import Game.Werewolf
-import Game.Werewolf.Command.DevotedServant
 import Game.Werewolf.Command.Global
 import Game.Werewolf.Command.Villager
 import Game.Werewolf.Test.Arbitrary
@@ -63,10 +62,7 @@ prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead :: GameWithRoleModelAtVil
 prop_checkSunsetSetsOrphansAllegianceWhenRoleModelDead (GameWithRoleModelAtVillagesTurn game) = do
     let game' = foldr (\player -> run_ (apply $ voteCommand (player ^. name) (roleModel' ^. name))) game (game ^. players)
 
-    let devotedServantsName = game ^?! players . devotedServants . name
-    let command             = passCommand devotedServantsName
-
-    isn't angel roleModel' && isn't devotedServant roleModel' && isn't hunter roleModel' && isn't jester roleModel'
-        ==> is werewolf $ run_ (checkStage >> apply command >> checkStage) game' ^?! players . orphans
+    isn't angel roleModel' && isn't hunter roleModel' && isn't jester roleModel'
+        ==> is werewolf $ run_ checkStage game' ^?! players . orphans
     where
         roleModel' = game ^?! players . traverse . filteredBy name (fromJust $ game ^. roleModel)

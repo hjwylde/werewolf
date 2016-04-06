@@ -22,7 +22,6 @@ import Data.List.Extra
 import Game.Werewolf
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Engine.Angel
-import Game.Werewolf.Test.Engine.DevotedServant
 import Game.Werewolf.Test.Engine.Hunter
 import Game.Werewolf.Test.Engine.Lynching
 import Game.Werewolf.Test.Engine.Orphan
@@ -44,7 +43,6 @@ import Test.Tasty.QuickCheck
 allEngineTests :: [TestTree]
 allEngineTests = concat
     [ allAngelEngineTests
-    , allDevotedServantEngineTests
     , allHunterEngineTests
     , allLynchingEngineTests
     , allOrphanEngineTests

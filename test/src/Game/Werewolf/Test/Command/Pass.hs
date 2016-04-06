@@ -13,8 +13,7 @@ module Game.Werewolf.Test.Command.Pass (
 import Control.Lens hiding (elements, isn't)
 
 import Game.Werewolf
-import Game.Werewolf.Command.DevotedServant as DevotedServant
-import Game.Werewolf.Command.Witch          as Witch
+import Game.Werewolf.Command.Witch
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -23,47 +22,12 @@ import Test.Tasty.QuickCheck
 
 allPassCommandTests :: [TestTree]
 allPassCommandTests =
-    [ testProperty "devoted servant pass command errors when game is over"                  prop_devotedServantPassCommandErrorsWhenGameIsOver
-    , testProperty "devoted servant pass command errors when caller does not exist"         prop_devotedServantPassCommandErrorsWhenCallerDoesNotExist
-    , testProperty "devoted servant pass command errors when caller is dead"                prop_devotedServantPassCommandErrorsWhenCallerIsDead
-    , testProperty "devoted servant pass command errors when not devoted servant's turn"    prop_devotedServantPassCommandErrorsWhenNotDevotedServantsTurn
-    , testProperty "devoted servant pass command sets passed"                               prop_devotedServantPassCommandSetsPassed
-
-    , testProperty "witch pass command errors when game is over"            prop_witchPassCommandErrorsWhenGameIsOver
+    [ testProperty "witch pass command errors when game is over"            prop_witchPassCommandErrorsWhenGameIsOver
     , testProperty "witch pass command errors when caller does not exist"   prop_witchPassCommandErrorsWhenCallerDoesNotExist
     , testProperty "witch pass command errors when caller is dead"          prop_witchPassCommandErrorsWhenCallerIsDead
     , testProperty "witch pass command errors when not witch's turn"        prop_witchPassCommandErrorsWhenNotWitchsTurn
     , testProperty "witch pass command sets passed"                         prop_witchPassCommandSetsPassed
     ]
-
-prop_devotedServantPassCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
-prop_devotedServantPassCommandErrorsWhenGameIsOver (GameAtGameOver game) =
-    forAll (arbitraryDevotedServantPassCommand game) $ verbose_runCommandErrors game . getBlind
-
-prop_devotedServantPassCommandErrorsWhenCallerDoesNotExist :: GameAtDevotedServantsTurn -> Player -> Property
-prop_devotedServantPassCommandErrorsWhenCallerDoesNotExist (GameAtDevotedServantsTurn game) caller =
-    not (doesPlayerExist (caller ^. name) game)
-    ==> verbose_runCommandErrors game (DevotedServant.passCommand (caller ^. name))
-
-prop_devotedServantPassCommandErrorsWhenCallerIsDead :: GameAtDevotedServantsTurn -> Property
-prop_devotedServantPassCommandErrorsWhenCallerIsDead (GameAtDevotedServantsTurn game) = do
-    let devotedServantsName = game ^?! players . devotedServants . name
-    let game'               = killPlayer devotedServantsName game
-    let command             = DevotedServant.passCommand devotedServantsName
-
-    verbose_runCommandErrors game' command
-
-prop_devotedServantPassCommandErrorsWhenNotDevotedServantsTurn :: Game -> Property
-prop_devotedServantPassCommandErrorsWhenNotDevotedServantsTurn game =
-    hasn't (stage . _DevotedServantsTurn) game
-    ==> forAll (arbitraryDevotedServantPassCommand game) $ verbose_runCommandErrors game . getBlind
-
-prop_devotedServantPassCommandSetsPassed :: GameAtDevotedServantsTurn -> Property
-prop_devotedServantPassCommandSetsPassed (GameAtDevotedServantsTurn game) =
-    forAll (arbitraryDevotedServantPassCommand game) $ \(Blind command) -> do
-        let game' = run_ (apply command) game
-
-        game' ^. passed
 
 prop_witchPassCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_witchPassCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -72,13 +36,13 @@ prop_witchPassCommandErrorsWhenGameIsOver (GameAtGameOver game) =
 prop_witchPassCommandErrorsWhenCallerDoesNotExist :: GameAtWitchsTurn -> Player -> Property
 prop_witchPassCommandErrorsWhenCallerDoesNotExist (GameAtWitchsTurn game) caller =
     not (doesPlayerExist (caller ^. name) game)
-    ==> verbose_runCommandErrors game (Witch.passCommand (caller ^. name))
+    ==> verbose_runCommandErrors game (passCommand $ caller ^. name)
 
 prop_witchPassCommandErrorsWhenCallerIsDead :: GameAtWitchsTurn -> Property
 prop_witchPassCommandErrorsWhenCallerIsDead (GameAtWitchsTurn game) = do
     let witchsName  = game ^?! players . witches . name
     let game'       = killPlayer witchsName game
-    let command     = Witch.passCommand witchsName
+    let command     = passCommand witchsName
 
     verbose_runCommandErrors game' command
 

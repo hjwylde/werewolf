@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Minor*
+
+* Removed the Devoted Servant. ([#127](https://github.com/hjwylde/werewolf/issues/127))
+
 *Revisions*
 
 * Changed the Druid's balance to 3. ([#165](https://github.com/hjwylde/werewolf/issues/165))

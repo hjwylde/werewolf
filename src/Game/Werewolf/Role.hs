@@ -33,7 +33,7 @@ module Game.Werewolf.Role (
     -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
     --
     --   The Ambiguous are able to change allegiance throughout the game.
-    devotedServantRole, orphanRole, wolfHoundRole,
+    orphanRole, wolfHoundRole,
 
     -- *** The Loners
     -- | The Loners look out for themselves and themselves alone.
@@ -101,7 +101,6 @@ makePrisms ''Allegiance
 allRoles :: [Role]
 allRoles =
     [ angelRole
-    , devotedServantRole
     , druidRole
     , hunterRole
     , jesterRole
@@ -123,32 +122,6 @@ allRoles =
 --   @
 restrictedRoles :: [Role]
 restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
-
--- | /Who could dream of a better servant than one willing to give up her life for that of her/
---   /masters? Don't rejoice too fast, as the devouring ambition within her could spell the end of/
---   /the village!/
---
---   Before the revelation of the card of the player eliminated by the village's vote, the Devoted
---   Servant can reveal herself by showing her card and taking on the role of the eliminated player.
---   Upon taking on her master's role, any special abilities are reset and any first turns are
---   replayed.
-devotedServantRole :: Role
-devotedServantRole = Role
-    { _name         = "Devoted Servant"
-    , _allegiance   = Villagers
-    , _balance      = 2
-    , _description  = T.unwords
-        [ "Who could dream of a better servant than one willing to give up her life for that of her"
-        , "masters? Don't rejoice too fast, as the devouring ambition within her could spell the"
-        , "end of the village!"
-        ]
-    , _rules        = T.unwords
-        [ "Before the revelation of the card of the player eliminated by the village's vote, the"
-        , "Devoted Servant can reveal herself by showing her card and taking on the role of the"
-        , "eliminated player. Upon taking on her master's role, any special abilities are reset and"
-        , "any first turns are replayed."
-        ]
-    }
 
 -- | /Abandoned by their parents as a child, with no-one wanting to look after another mouth to/
 --   /feed, the Orphan was left to fend for themself. No-one looks twice at the Orphan and even/

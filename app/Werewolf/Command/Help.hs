@@ -87,11 +87,6 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     , [ "Standard commands:"
       , "- `vote PLAYER`"
       ]
-    , whenPlayerHasRole callerName mGame devotedServantRole
-      [ "Devoted Servant commands:"
-      , "- `reveal`"
-      , "- `pass`"
-      ]
     , whenPlayerHasRole callerName mGame hunterRole
       [ "Hunter commands:"
       , "- `choose PLAYER`"
@@ -174,8 +169,6 @@ rulesMessages mGame = map (T.intercalate "\n")
       , whenRoleInPlay mGame druidRole
         "- Ferina grunts if the Druid is next to a Werewolf."
       , "- The village votes to lynch a suspect."
-      , whenRoleInPlay mGame devotedServantRole
-        "- (When someone is lynched) the Devoted Servant may choose whether to reveal themselves and take on the role of their master."
       , whenRoleInPlay mGame hunterRole
         "- (When the Hunter is killed) the Hunter chooses someone to shoot."
       , whenRoleInPlay mGame scapegoatRole

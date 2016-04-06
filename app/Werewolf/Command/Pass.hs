@@ -23,8 +23,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
-import Game.Werewolf.Command.DevotedServant as DevotedServant
-import Game.Werewolf.Command.Witch          as Witch
+import Game.Werewolf.Command.Witch
 
 import Werewolf.Game
 import Werewolf.Messages
@@ -38,9 +37,8 @@ handle callerName tag = do
     game <- readGame tag
 
     command <- case game ^. stage of
-            DevotedServantsTurn -> return $ DevotedServant.passCommand callerName
-            WitchsTurn          -> return $ Witch.passCommand callerName
-            _                   -> exitWith failure
+            WitchsTurn  -> return $ passCommand callerName
+            _           -> exitWith failure
                 { messages = [playerCannotDoThatRightNowMessage callerName]
                 }
 

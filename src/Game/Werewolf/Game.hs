@@ -22,9 +22,9 @@ module Game.Werewolf.Game (
     scapegoatBlamed, see, votes,
 
     Stage(..),
-    _DevotedServantsTurn, _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching,
-    _OrphansTurn, _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn,
-    _WerewolvesTurn, _WitchsTurn, _WolfHoundsTurn,
+    _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OrphansTurn,
+    _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn,
+    _WitchsTurn, _WolfHoundsTurn,
 
     allStages,
     stageCycle, stageAvailable,
@@ -92,7 +92,7 @@ data Game = Game
     , _healUsed         :: Bool             -- ^ Witch
     , _hunterRetaliated :: Bool             -- ^ Hunter
     , _jesterRevealed   :: Bool             -- ^ Jester
-    , _passed           :: Bool             -- ^ Devoted Servant, Witch
+    , _passed           :: Bool             -- ^ Witch
     , _poison           :: Maybe Text       -- ^ Witch
     , _poisonUsed       :: Bool             -- ^ Witch
     , _priorProtect     :: Maybe Text       -- ^ Protector
@@ -109,9 +109,9 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
-data Stage  = DevotedServantsTurn | FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching
-            | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
-            | VillagesTurn | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
+data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OrphansTurn
+            | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
+            | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
     deriving (Eq, Read, Show)
 
 -- TODO (hjw): remove events
@@ -137,7 +137,6 @@ makePrisms ''Event
 allStages :: [Stage]
 allStages =
     [ VillagesTurn
-    , DevotedServantsTurn
     , Lynching
     , HuntersTurn1
     , ScapegoatsTurn
@@ -164,10 +163,6 @@ stageCycle = cycle allStages
 --   One of the more complex checks here is for the 'VillagesTurn'. If the Angel is in play, then
 --   the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
-stageAvailable game DevotedServantsTurn =
-    has (players . devotedServants . alive) game
-    && length (getVoteResult game) == 1
-    && isn't devotedServant (head $ getVoteResult game)
 stageAvailable game FerinasGrunt        = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
 stageAvailable game HuntersTurn1        =

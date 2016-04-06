@@ -67,12 +67,6 @@ checkBoots = do
 
 checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
-    DevotedServantsTurn -> do
-        whenM (has (players . devotedServants . dead) <$> get) advanceStage
-
-        whenM (has devotedServants <$> getVoteResult)   advanceStage
-        whenM (use passed)                              advanceStage
-
     FerinasGrunt -> do
         druid       <- findPlayerBy_ role druidRole
         players'    <- getAdjacentAlivePlayers (druid ^. name)
