@@ -27,7 +27,7 @@ module Game.Werewolf.Player (
 
     -- ** Traversals
     druid, fallenAngel, hunter, jester, orphan, protector, scapegoat, seer, simpleVillager,
-    simpleWerewolf, villagerVillager, witch, wolfHound,
+    simpleWerewolf, trueVillager, witch, wolfHound,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
@@ -35,7 +35,7 @@ module Game.Werewolf.Player (
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
     druids, fallenAngels, hunters, jesters, orphans, protectors, scapegoats, seers, simpleVillagers,
-    simpleWerewolves, villagerVillagers, witches, wolfHounds,
+    simpleWerewolves, trueVillagers, witches, wolfHounds,
     villagers, werewolves,
     alive, dead,
 
@@ -155,13 +155,13 @@ simpleVillager = role . only simpleVillagerRole
 simpleWerewolf :: Traversal' Player ()
 simpleWerewolf = role . only simpleWerewolfRole
 
--- | The traversal of 'Player's with a 'villagerVillagerRole'.
+-- | The traversal of 'Player's with a 'trueVillagerRole'.
 --
 -- @
--- 'villagerVillager' = 'role' . 'only' 'villagerVillagerRole'
+-- 'trueVillager' = 'role' . 'only' 'trueVillagerRole'
 -- @
-villagerVillager :: Traversal' Player ()
-villagerVillager = role . only villagerVillagerRole
+trueVillager :: Traversal' Player ()
+trueVillager = role . only trueVillagerRole
 
 -- | The traversal of 'Player's with a 'witchRole'.
 --
@@ -299,13 +299,13 @@ simpleVillagers = traverse . filtered (is simpleVillager)
 simpleWerewolves :: Traversable t => Traversal' (t Player) Player
 simpleWerewolves = traverse . filtered (is simpleWerewolf)
 
--- | This 'Traversal' provides the traversal of 'villagerVillager' 'Player's.
+-- | This 'Traversal' provides the traversal of 'trueVillager' 'Player's.
 --
 -- @
--- 'villagerVillagers' = 'traverse' . 'filtered' ('is' 'villagerVillager')
+-- 'trueVillagers' = 'traverse' . 'filtered' ('is' 'trueVillager')
 -- @
-villagerVillagers :: Traversable t => Traversal' (t Player) Player
-villagerVillagers = traverse . filtered (is villagerVillager)
+trueVillagers :: Traversable t => Traversal' (t Player) Player
+trueVillagers = traverse . filtered (is trueVillager)
 
 -- | This 'Traversal' provides the traversal of 'witch' 'Player's.
 --
