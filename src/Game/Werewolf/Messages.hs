@@ -112,14 +112,14 @@ newGameMessages game = concat
     [ [newPlayersInGameMessage $ players' ^.. names]
     , [rolesInGameMessage Nothing $ players' ^.. roles]
     , map newPlayerMessage players'
-    , villagerVillagerMessages
+    , trueVillagerMessages
     , stageMessages game
     ]
     where
-        players'                    = game ^. players
-        villagerVillagerMessages    = case players' ^? villagerVillagers of
-            Just villagerVillager   -> [villagerVillagerMessage $ villagerVillager ^. name]
-            _                       -> []
+        players'                = game ^. players
+        trueVillagerMessages    = case players' ^? trueVillagers of
+            Just trueVillager   -> [trueVillagerMessage $ trueVillager ^. name]
+            _                   -> []
 
 newPlayersInGameMessage :: [Text] -> Message
 newPlayersInGameMessage playerNames = publicMessage $ T.concat
@@ -136,12 +136,12 @@ newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
     where
         playerRole = player ^. role
 
-villagerVillagerMessage :: Text -> Message
-villagerVillagerMessage name = publicMessage $ T.unwords
+trueVillagerMessage :: Text -> Message
+trueVillagerMessage name = publicMessage $ T.unwords
     [ "Unguarded advice is seldom given, for advice is a dangerous gift,"
     , "even from the wise to the wise, and all courses may run ill."
     , "Yet as you feel like you need help, I begrudgingly leave you with this:"
-    , name, "is the Villager-Villager."
+    , name, "is the True Villager."
     ]
 
 stageMessages :: Game -> [Message]
@@ -436,7 +436,7 @@ playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
 
         alivePlayersText            = T.concat
             [ "The following players are still alive: "
-            , concatList $ map (\player -> if is villagerVillager player then playerNameWithRole player else player ^. name) alivePlayers, "."
+            , concatList $ map (\player -> if is trueVillager player then playerNameWithRole player else player ^. name) alivePlayers, "."
             ]
         deadPlayersText             = T.concat
             [ "The following players are dead: "

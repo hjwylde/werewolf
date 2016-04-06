@@ -48,7 +48,7 @@ module Game.Werewolf.Role (
 
     --   The Villagers must lynch all of the Werewolves.
     druidRole, hunterRole, jesterRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole,
-    villagerVillagerRole, witchRole,
+    trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -110,7 +110,7 @@ allRoles =
     , seerRole
     , simpleVillagerRole
     , simpleWerewolfRole
-    , villagerVillagerRole
+    , trueVillagerRole
     , witchRole
     , wolfHoundRole
     ]
@@ -397,26 +397,22 @@ jesterRole = Role
         ]
     }
 
--- | /This person has a soul as clear and transparent as the water from a mountain stream. They/
---   /will deserve the attentive ear of their peers and will make their word decisive in crucial/
---   /moments./
+-- | /The True Villager has a heart and soul as clear as day! Their allegiance and devotion to the/
+--   /village are beyond reproach. If there is one person whom you should confide in, listen to and/
+--   /trust, it is the True Villager./
 --
---   When the game begins, the village is told the identity of the Villager-Villager, thus ensuring
---   certainty that its owner is truly an innocent Villager.
-villagerVillagerRole :: Role
-villagerVillagerRole = Role
-    { _name         = "Villager-Villager"
+--   At the start of the game the True Villager's identity is revealed.
+trueVillagerRole :: Role
+trueVillagerRole = Role
+    { _name         = "True Villager"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
-        [ "This person has a soul as clear and transparent as the water from a mountain stream."
-        , "They will deserve the attentive ear of their peers and will make their word decisive in"
-        , "crucial moments."
+        [ "The True Villager has a heart and soul as clear as day! Their allegiance and devotion to"
+        , "the village are beyond reproach. If there is one person whom you should confide in,"
+        , "listen to and trust, it is the True Villager."
         ]
-    , _rules        = T.unwords
-        [ "When the game begins, the village is told the identity of the Villager-Villager, thus"
-        , "ensuring certainty that its owner is truly an innocent Villager."
-        ]
+    , _rules        = "At the start of the game the True Villager's identity is revealed."
     }
 
 -- | /Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove themself/
