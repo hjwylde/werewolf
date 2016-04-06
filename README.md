@@ -14,11 +14,6 @@ See the [Wikipedia article](https://en.wikipedia.org/wiki/Mafia_(party_game)) fo
 If you're here just to play werewolf, you may wish to skip straight to
     [chat interfaces](https://github.com/hjwylde/werewolf#chat-interfaces).
 
-DISCLAIMER:
-I recently asked the copyright owners of the Werewolves of Millers Hollow if I may have permission
-    to use some content from the rule book, but they have said no.
-I am currently working on removing all copyrighted material from the project.
-
 ### Game description
 
 Long has the woods been home to wild creatures, both kind and cruel.
