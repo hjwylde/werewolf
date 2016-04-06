@@ -446,10 +446,10 @@ witchRole = Role
         ]
     }
 
--- | /It's difficult to tell, but a Werewolf is merely a Villager underneath; unfortunately one/
---   /that has been afflicted with lycanthropy and consequently transforms each night into a/
---   /fearsome lupine. Not all hope is yet lost, some Villagers would like to try and cure the/
---   /curse of lycanthropy. Perhaps one day this dream will be realised./
+-- | /The Werewolf is a fearsome lupine, cunning like no other creature that roams the forest./
+--   /Their origin is unknown, but that matters little, for they present a grave threat to/
+--   /Fougères. While each day they hide in plain sight as an ordinary Villager, each night they/
+--   /transform and devour an innocent. There is little hope left for the village./
 --
 --   A Werewolf may never devour another Werewolf.
 simpleWerewolfRole :: Role
@@ -458,10 +458,10 @@ simpleWerewolfRole = Role
     , _allegiance   = Werewolves
     , _balance      = -4
     , _description  = T.unwords
-        [ "It's difficult to tell, but a Werewolf is merely a Villager underneath; unfortunately"
-        , "one that has been afflicted with lycanthropy and consequently transforms each night into"
-        , "a fearsome lupine. Not all hope is yet lost, some Villagers would like to try and cure"
-        , "the curse of lycanthropy. Perhaps one day this dream will be realised."
+        [ "The Werewolf is a fearsome lupine, cunning like no other creature that roams the forest."
+        , "Their origin is unknown, but that matters little, for they present a grave threat to"
+        , "Fougères. While each day they hide in plain sight as an ordinary Villager, each night"
+        , "they transform and devour an innocent. There is little hope left for the village."
         ]
     , _rules        = "A Werewolf may never devour another Werewolf."
     }
