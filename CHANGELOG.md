@@ -12,6 +12,7 @@
 * Changed the Druid's balance to 3. ([#165](https://github.com/hjwylde/werewolf/issues/165))
 * Changed the Wolf-hound's balance to -2. ([#167](https://github.com/hjwylde/werewolf/issues/167))
 * Updated the Fallen Angel's description and rules. ([#130](https://github.com/hjwylde/werewolf/issues/130))
+* Updated the Simple Werewolf's description. ([#174](https://github.com/hjwylde/werewolf/issues/174))
 
 ### v0.5.2.0
 
