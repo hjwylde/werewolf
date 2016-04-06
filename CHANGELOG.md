@@ -5,6 +5,7 @@
 *Minor*
 
 * Removed the Devoted Servant. ([#127](https://github.com/hjwylde/werewolf/issues/127))
+* Renamed the Angel to the Fallen Angel. ([#130](https://github.com/hjwylde/werewolf/issues/130))
 
 *Revisions*
 

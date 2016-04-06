@@ -25,7 +25,7 @@ import Test.Tasty.QuickCheck
 allAngelEngineTests :: [TestTree]
 allAngelEngineTests =
     [ testProperty "check sunrise increments round"         prop_checkSunriseIncrementsRound
-    , testProperty "check sunrise sets angel's allegiance"  prop_checkSunriseSetsAngelsAllegiance
+    , testProperty "check sunrise sets fallenAngel's allegiance"  prop_checkSunriseSetsAngelsAllegiance
     ]
 
 prop_checkSunriseIncrementsRound :: GameAtSunrise -> Property
@@ -36,4 +36,4 @@ prop_checkSunriseSetsAngelsAllegiance :: GameAtSunrise -> Bool
 prop_checkSunriseSetsAngelsAllegiance (GameAtSunrise game) = do
     let game' = run_ checkStage game
 
-    is villager $ game' ^?! players . angels
+    is villager $ game' ^?! players . fallenAngels

@@ -26,7 +26,7 @@ module Game.Werewolf.Util (
     -- ** Queries
     isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn, isSeersTurn,
     isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
-    hasAnyoneWon, hasAngelWon, hasVillagersWon, hasWerewolvesWon,
+    hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
 
@@ -48,8 +48,8 @@ import           Data.Maybe
 import           Data.Text  (Text)
 
 import           Game.Werewolf.Game   hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
-                                       getVoteResult, hasAngelWon, hasAnyoneWon, hasVillagersWon,
-                                       hasWerewolvesWon, killPlayer)
+                                       getVoteResult, hasAnyoneWon, hasFallenAngelWon,
+                                       hasVillagersWon, hasWerewolvesWon, killPlayer)
 import qualified Game.Werewolf.Game   as Game
 import           Game.Werewolf.Player
 import           Game.Werewolf.Role   hiding (name)
@@ -67,13 +67,13 @@ removePlayer name' = do
 
     player <- findPlayerBy_ name name'
 
-    when (is angel player)      $ setPlayerAllegiance name' Villagers
-    when (is orphan player)     $ roleModel .= Nothing
-    when (is protector player)  $ do
+    when (is fallenAngel player)    $ setPlayerAllegiance name' Villagers
+    when (is orphan player)         $ roleModel .= Nothing
+    when (is protector player)      $ do
         protect         .= Nothing
         priorProtect    .= Nothing
-    when (is seer player)       $ see .= Nothing
-    when (is witch player)      $ do
+    when (is seer player)           $ see .= Nothing
+    when (is witch player)          $ do
         heal        .= False
         healUsed    .= False
         poison      .= Nothing
@@ -149,8 +149,8 @@ isWolfHoundsTurn = has (stage . _WolfHoundsTurn) <$> get
 hasAnyoneWon :: MonadState Game m => m Bool
 hasAnyoneWon = gets Game.hasAnyoneWon
 
-hasAngelWon :: MonadState Game m => m Bool
-hasAngelWon = gets Game.hasAngelWon
+hasFallenAngelWon :: MonadState Game m => m Bool
+hasFallenAngelWon = gets Game.hasFallenAngelWon
 
 hasVillagersWon :: MonadState Game m => m Bool
 hasVillagersWon = gets Game.hasVillagersWon

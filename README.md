@@ -53,7 +53,7 @@ The Loners look out for themselves and themselves alone.
 
 The Loners must complete their own objective.
 
-* Angel
+* Fallen Angel
 
 **The Villagers:**
 
