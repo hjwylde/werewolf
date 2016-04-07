@@ -108,7 +108,7 @@ E.g., to start a game:
 {"ok":true,"messages":[
     {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
     {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4) and Simple Werewolf (2) for a total balance of -2."},
-    {"to":"@foo","message":"You're a Simple Villager.\nA simple, ordinary townsperson in every way. Their only weapons are the ability to analyze behaviour to identify Werewolves, and the strength of their conviction to prevent the execution of the innocents like themselves."},
+    {"to":"@foo","message":"You're a Simple Villager.\nA simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even nobles. No matter their differences though, the plight of Werewolves in Fougères unites all the Villagers in this unfortunate time.\nThe Simple Villager has no special abilities, they must use their guile to determine whom among them is not who they say they are."},
     ...,
     {"to":null,"message":"Night falls, the village is asleep."},
     {"to":null,"message":"The Seer wakes up."},
@@ -133,9 +133,9 @@ It's the Seer's turn now.
 > werewolf --caller @corge --tag werewolf see @grault
 {"ok":true,"messages":[
     {"to":"@corge","message":"@grault is aligned with the Werewolves."},
-    {"to":"@quux","message":"You feel restless, like an old curse is keeping you from sleep. It seems you're not the only one... @grault are also emerging from their homes."},
-    {"to":"@grault","message":"You feel restless, like an old curse is keeping you from sleep.  It seems you're not the only one... @quux are also emerging from their homes."},
-    {"to":null,"message":"The Werewolves wake up, recognise one another and choose a new victim."},
+    {"to":"@quux","message":"You feel restless, like an old curse is keeping you from sleep. It seems you're not the only one... @grault is also emerging from their home."},
+    {"to":"@grault","message":"You feel restless, like an old curse is keeping you from sleep. It seems you're not the only one... @quux is also emerging from their home."},
+    {"to":null,"message":"The Werewolves wake up, transform and choose a new victim."},
     {"to":"@quux","message":"Whom would you like to `vote` to devour?"},
     {"to":"@grault","message":"Whom would you like to `vote` to devour?"}
     ]}

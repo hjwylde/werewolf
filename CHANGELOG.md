@@ -2,6 +2,8 @@
 
 ### Upcoming
 
+### v0.5.3.0
+
 *Minor*
 
 * Removed the Devoted Servant. ([#127](https://github.com/hjwylde/werewolf/issues/127))
