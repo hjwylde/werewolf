@@ -118,9 +118,7 @@ newGameMessages game = concat
 
 newPlayersInGameMessage :: [Text] -> Message
 newPlayersInGameMessage playerNames = publicMessage $ T.concat
-    [ "A new game of werewolf is starting with "
-    , concatList playerNames, "!"
-    ]
+    ["A new game of werewolf is starting with ", concatList playerNames, "!"]
 
 newPlayerMessage :: Player -> Message
 newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
@@ -133,10 +131,9 @@ newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
 
 trueVillagerMessage :: Text -> Message
 trueVillagerMessage name = publicMessage $ T.unwords
-    [ "Unguarded advice is seldom given, for advice is a dangerous gift,"
-    , "even from the wise to the wise, and all courses may run ill."
-    , "Yet as you feel like you need help, I begrudgingly leave you with this:"
-    , name, "is the True Villager."
+    [ "Unguarded advice is seldom given, for advice is a dangerous gift, even from the wise to the"
+    , "wise, and all courses may run ill. Yet as you feel like you need help, I begrudgingly leave"
+    , "you with this:", name, "is the True Villager."
     ]
 
 stageMessages :: Game -> [Message]
@@ -170,7 +167,7 @@ stageMessages game = case game ^. stage of
 
 huntersTurnMessages :: Text -> [Message]
 huntersTurnMessages huntersName =
-    [ publicMessage $ T.unwords ["Just before", huntersName, "was struck down he let off a shot."]
+    [ publicMessage $ T.unwords ["Just before", huntersName, "was struck down they let off a shot."]
     , privateMessage huntersName "Whom do you `choose` to kill with your last shot?"
     ]
 
@@ -188,7 +185,7 @@ protectorsTurnMessages to =
 
 scapegoatsTurnMessages :: Text -> [Message]
 scapegoatsTurnMessages scapegoatsName =
-    [ publicMessage "Just before he burns to a complete crisp, he cries out a dying wish."
+    [ publicMessage "Just before the Scapegoat burns to a complete crisp, they cry out a dying wish."
     , publicMessage $ T.concat [scapegoatsName, ", whom do you `choose` to vote on the next day?"]
     ]
 
@@ -208,9 +205,9 @@ firstVillagesTurnMessages :: [Message]
 firstVillagesTurnMessages = fallenAngelInPlayMessage : villagesTurnMessages
     where
         fallenAngelInPlayMessage = publicMessage $ T.unwords
-            [ "Alas, again I regrettably yield advice: an angelic menace walks among you."
-            , "Do not cast your votes lightly,"
-            , "for they will relish in this opportunity to be free from their terrible nightmare."
+            [ "Alas, again I regrettably yield advice: an angelic menace walks among you. Do not"
+            , "cast your votes lightly, for they will relish in this opportunity to be free from"
+            , "their terrible nightmare."
             ]
 
 villagesTurnMessages :: [Message]
@@ -225,9 +222,8 @@ firstWerewolvesTurnMessages tos =
     ++ werewolvesTurnMessages tos
     where
         packMessage werewolfName    = T.unwords
-            [ "You feel restless, like an old curse is keeping you from sleep."
-            , "It seems you're not the only one..."
-            , packNames werewolfName
+            [ "You feel restless, like an old curse is keeping you from sleep. It seems you're not"
+            , "the only one...", packNames werewolfName
             , conjugateToBe (length tos - 1), "also emerging from their"
             , tryPlural (length tos - 1) "home"
             ]
@@ -434,10 +430,8 @@ waitingOnMessage mTo playerNames = Message mTo $ T.concat
     ["Waiting on ", concatList playerNames, "..."]
 
 ferinaGruntsMessage :: Message
-ferinaGruntsMessage = publicMessage $ T.unwords
-    [ "Ferina wakes from her slumber, disturbed and on edge."
-    , "She loudly grunts as she smells danger."
-    ]
+ferinaGruntsMessage = publicMessage
+    "Ferina wakes from her slumber, disturbed and on edge. She loudly grunts as she smells danger."
 
 fallenAngelJoinedVillagersMessage :: Message
 fallenAngelJoinedVillagersMessage = publicMessage $ T.unwords
@@ -458,15 +452,14 @@ playerShotMessage target = publicMessage $ T.unwords
 orphanJoinedPackMessages :: Text -> [Text] -> [Message]
 orphanJoinedPackMessages orphansName werewolfNames =
     privateMessage orphansName (T.unwords
-        [ "The death of your role model is distressing."
-        , "Without second thought you abandon the Villagers and run off into the woods,"
-        , "towards your old home."
-        , "As you arrive you see the familiar", tryPlural (length werewolfNames) "face", "of"
-        , concatList werewolfNames, "waiting and happy to have you back."
+        [ "The death of your role model is distressing. Without second thought you abandon the"
+        , "Villagers and run off into the woods, towards a new home. As you arrive you see the"
+        , tryPlural (length werewolfNames) "face", "of"
+        , concatList werewolfNames, "waiting for you."
         ])
     : groupMessages werewolfNames (T.unwords
-        [ orphansName, "the Orphan scampers off into the woods."
-        , "Without their role model nothing is holding back their true, wolfish, nature."
+        [ orphansName, "the Orphan scampers off into the woods. Without their role model they have"
+        , "abandoned the village and are in search of a new home."
         ])
 
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
@@ -475,8 +468,8 @@ playerCannotProtectSamePlayerTwiceInARowMessage to =
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message
 scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
-    [ "On the next day only", concatList allowedVoters, "shall be allowed to vote."
-    , "The town crier, realising how foolish it was to kill him, grants him this wish."
+    [ "On the next day only", concatList allowedVoters, "shall be allowed to vote. The town crier,"
+    , "realising how foolish it was to kill the Scapegoat, grants them this wish."
     ]
 
 playerMustChooseAtLeastOneTargetMessage :: Text -> Message
@@ -505,16 +498,15 @@ playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
     | is simpleWerewolf player  = publicMessage $ T.concat
-        [ playerName, " is tied up to a pyre and set alight."
-        , " As they scream their body starts to contort and writhe, transforming into "
-        , article playerRole, " ", playerRole ^. Role.name, "."
-        , " Thankfully they go limp before breaking free of their restraints."
+        [ playerName, " is tied up to a pyre and set alight. As they scream their body starts to "
+        , "contort and writhe, transforming into ", article playerRole, " "
+        , playerRole ^. Role.name, ".", " Thankfully they go limp before breaking free of their "
+        , "restraints."
         ]
     | otherwise                 = publicMessage $ T.concat
-        [ playerName, " is tied up to a pyre and set alight."
-        , " Eventually the screams start to die and with their last breath,"
-        , " they reveal themselves as "
-        , article playerRole, " ", playerRole ^. Role.name, "."
+        [ playerName, " is tied up to a pyre and set alight. Eventually the screams start to die "
+        , "and with their last breath, they reveal themselves as ", article playerRole, " "
+        , playerRole ^. Role.name, "."
         ]
     where
         playerName = player ^. name
@@ -522,8 +514,8 @@ playerLynchedMessage player
 
 noPlayerLynchedMessage :: Message
 noPlayerLynchedMessage = publicMessage $ T.unwords
-    [ "Daylight is wasted as the townsfolk squabble over whom to tie up."
-    , "Looks like no-one is being burned this day."
+    [ "Daylight is wasted as the townsfolk squabble over whom to tie up. Looks like no-one is being"
+    , "burned this day."
     ]
 
 jesterLynchedMessage :: Text -> Message

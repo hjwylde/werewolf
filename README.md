@@ -107,7 +107,7 @@ E.g., to start a game:
 > werewolf --caller @foo --tag werewolf start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
     {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
-    {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4), Simple Werewolf (2) for a total balance of -2."},
+    {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4) and Simple Werewolf (2) for a total balance of -2."},
     {"to":"@foo","message":"You're a Simple Villager.\nA simple, ordinary townsperson in every way. Their only weapons are the ability to analyze behaviour to identify Werewolves, and the strength of their conviction to prevent the execution of the innocents like themselves."},
     ...,
     {"to":null,"message":"Night falls, the village is asleep."},
