@@ -43,7 +43,7 @@
 *Revisions*
 
 * Updated the Protector's description and rules. ([#132](https://github.com/hjwylde/werewolf/issues/132))
-* Improved the Enligsh used. ([#72](https://github.com/hjwylde/werewolf/issues/72))
+* Improved the English used. ([#72](https://github.com/hjwylde/werewolf/issues/72))
 * Added which player is the Villager-Villager to `status`. ([#144](https://github.com/hjwylde/werewolf/issues/144))
 
 ### v0.5.0.0
