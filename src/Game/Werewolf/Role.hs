@@ -33,7 +33,7 @@ module Game.Werewolf.Role (
     -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
     --
     --   The Ambiguous are able to change allegiance throughout the game.
-    orphanRole, wolfHoundRole,
+    orphanRole,
 
     -- *** The Loners
     -- | The Loners look out for themselves and themselves alone.
@@ -112,7 +112,6 @@ allRoles =
     , simpleWerewolfRole
     , trueVillagerRole
     , witchRole
-    , wolfHoundRole
     ]
 
 -- | A list containing roles that are restricted to a single instance per 'Game'.
@@ -128,7 +127,7 @@ restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 --   /fewer offer kindness towards the lonely child. One day however, one townsperson changes all/
 --   /this. He offers the Orphan food, water and a roof over his head. Grateful for his chairty and/
 --   /affection, the Orphan makes him their role model. Pray that no ill should befall their role/
---   /model, for who knows in such an event whom, or what, the Orphan may turn to.../
+--   /model, for who knows in such an event whom, or what, the Orphan may turn to for comfort.../
 --
 --   On the first night, the Orphan may choose a player to become his role model. If during the game
 --   the role model is eliminated, the Orphan becomes a Werewolf. He will then wake up the next
@@ -146,7 +145,7 @@ orphanRole = Role
         , "changes all this. He offers the Orphan food, water and a roof over his head. Grateful"
         , "for his chairty and affection, the Orphan makes him their role model. Pray that no ill"
         , "should befall their role model, for who knows in such an event whom, or what, the Orphan"
-        , "may turn to..."
+        , "may turn to for comfort..."
         ]
     , _rules        = T.unwords
         [ "On the first night, the Orphan may choose a player to become his role model. If during"
@@ -154,30 +153,6 @@ orphanRole = Role
         , "up the next night with his peers and will devour with them each night until the end of"
         , "the game. However for as long as the Orphan's role model is alive, he remains a"
         , "Villager."
-        ]
-    }
-
--- | /All dogs know in the depths of their soul that their ancestors were wolves and that it's/
---   /mankind who has kept them in the state of childishness and fear, the faithful and generous/
---   /companions. In any case, only the Wolf-hound can decide if he'll obey his human and civilized/
---   /master or if he'll listen to the call of wild nature buried within him./
---
---   On the first night, the Wolf-hound chooses if he wants to be a Simple Villager or Werewolf. The
---   choice is final.
-wolfHoundRole :: Role
-wolfHoundRole = Role
-    { _name         = "Wolf-hound"
-    , _allegiance   = Villagers
-    , _balance      = -2
-    , _description  = T.unwords
-        [ "All dogs know in the depths of their soul that their ancestors were wolves and that it's"
-        , "mankind who has kept them in the state of childishness and fear, the faithful and"
-        , "generous companions. In any case, only the Wolf-hound can decide if he'll obey his human"
-        , "and civilized master or if he'll listen to the call of wild nature buried within him."
-        ]
-    , _rules        = T.unwords
-        [ "On the first night, the Wolf-hound chooses if he wants to be a Simple Villager or"
-        , "Werewolf. The choice is final."
         ]
     }
 

@@ -17,14 +17,14 @@ It also has a few additional functions for manipulating and querying the game st
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, events, boots, allegianceChosen, allowedVoters, heal, healUsed,
-    hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
-    scapegoatBlamed, see, votes,
+    stage, round, players, events, boots, allowedVoters, heal, healUsed, hunterRetaliated,
+    jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed,
+    see, votes,
 
     Stage(..),
     _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OrphansTurn,
     _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn,
-    _WitchsTurn, _WolfHoundsTurn,
+    _WitchsTurn,
 
     allStages,
     stageCycle, stageAvailable,
@@ -86,7 +86,6 @@ data Game = Game
     , _players          :: [Player]
     , _events           :: [Event]
     , _boots            :: Map Text [Text]
-    , _allegianceChosen :: Bool             -- ^ Wolf-hound
     , _allowedVoters    :: [Text]           -- ^ Scapegoat
     , _heal             :: Bool             -- ^ Witch
     , _healUsed         :: Bool             -- ^ Witch
@@ -111,7 +110,7 @@ data Game = Game
 --   it past. Often only certain roles and commands may be performed at any given stage.
 data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OrphansTurn
             | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
-            | WerewolvesTurn | WitchsTurn | WolfHoundsTurn
+            | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
 -- TODO (hjw): remove events
@@ -141,7 +140,6 @@ allStages =
     , HuntersTurn1
     , ScapegoatsTurn
     , Sunset
-    , WolfHoundsTurn
     , SeersTurn
     , OrphansTurn
     , ProtectorsTurn
@@ -187,9 +185,6 @@ stageAvailable game OrphansTurn      =
 stageAvailable game WitchsTurn          =
     has (players . witches . alive) game
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
-stageAvailable game WolfHoundsTurn      =
-    has (players . wolfHounds . alive) game
-    && not (game ^. allegianceChosen)
 
 -- | Creates a new 'Game' with the given players. No validations are performed here, those are left
 --   to 'Game.Werewolf.Engine.startGame'.
@@ -197,26 +192,25 @@ newGame :: [Player] -> Game
 newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
     where
         game = Game
-            { _stage                = Sunset
-            , _round                = 0
-            , _players              = players
-            , _events               = []
-            , _boots                = Map.empty
-            , _passed               = False
-            , _allegianceChosen     = False
-            , _allowedVoters        = players ^.. names
-            , _heal                 = False
-            , _healUsed             = False
-            , _hunterRetaliated     = False
-            , _jesterRevealed       = False
-            , _poison               = Nothing
-            , _poisonUsed           = False
-            , _priorProtect         = Nothing
-            , _protect              = Nothing
-            , _roleModel            = Nothing
-            , _scapegoatBlamed      = False
-            , _see                  = Nothing
-            , _votes                = Map.empty
+            { _stage            = Sunset
+            , _round            = 0
+            , _players          = players
+            , _events           = []
+            , _boots            = Map.empty
+            , _passed           = False
+            , _allowedVoters    = players ^.. names
+            , _heal             = False
+            , _healUsed         = False
+            , _hunterRetaliated = False
+            , _jesterRevealed   = False
+            , _poison           = Nothing
+            , _poisonUsed       = False
+            , _priorProtect     = Nothing
+            , _protect          = Nothing
+            , _roleModel        = Nothing
+            , _scapegoatBlamed  = False
+            , _see              = Nothing
+            , _votes            = Map.empty
             }
 
 -- | Kills the given player! This function should be used carefully as it doesn't clear any state

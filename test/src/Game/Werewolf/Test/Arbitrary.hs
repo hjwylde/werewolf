@@ -14,10 +14,10 @@ module Game.Werewolf.Test.Arbitrary (
     NewGame(..),
     GameAtGameOver(..), GameAtHuntersTurn(..), GameAtOrphansTurn(..), GameAtProtectorsTurn(..),
     GameAtScapegoatsTurn(..), GameAtSeersTurn(..), GameAtSunrise(..), GameAtVillagesTurn(..),
-    GameAtWerewolvesTurn(..), GameAtWitchsTurn(..), GameAtWolfHoundsTurn(..),
+    GameAtWerewolvesTurn(..), GameAtWitchsTurn(..),
     GameOnSecondRound(..),
-    GameWithAllegianceChosen(..), GameWithAllowedVoters(..), GameWithConflictingVote(..),
-    GameWithDeadPlayers(..), GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
+    GameWithAllowedVoters(..), GameWithConflictingVote(..), GameWithDeadPlayers(..),
+    GameWithDevourEvent(..), GameWithDevourVotes(..), GameWithHeal(..),
     GameWithJesterRevealedAtVillagesTurn(..), GameWithLynchVotes(..), GameWithMajorityVote(..),
     GameWithNoAllowedVotersAtVillagesTurn(..), GameWithNoWerewolvesAtProtectorsTurn(..),
     GameWithOneAllegianceAlive(..), GameWithPoison(..), GameWithProtect(..),
@@ -31,10 +31,9 @@ module Game.Werewolf.Test.Arbitrary (
 
     -- ** Command
     arbitraryCommand, arbitraryHunterChooseCommand, arbitraryOrphanChooseCommand,
-    arbitraryWolfHoundChooseCommand, arbitraryScapegoatChooseCommand, arbitraryHealCommand,
-    arbitraryWitchPassCommand, arbitraryPoisonCommand, arbitraryProtectCommand,
-    arbitraryQuitCommand, arbitrarySeeCommand, arbitraryWerewolfVoteCommand,
-    arbitraryVillagerVoteCommand,
+    arbitraryScapegoatChooseCommand, arbitraryHealCommand, arbitraryPassCommand,
+    arbitraryPoisonCommand, arbitraryProtectCommand, arbitraryQuitCommand, arbitrarySeeCommand,
+    arbitraryWerewolfVoteCommand, arbitraryVillagerVoteCommand,
     runArbitraryCommands,
 
     -- ** Player
@@ -58,7 +57,6 @@ import Game.Werewolf.Command.Seer
 import Game.Werewolf.Command.Villager  as Villager
 import Game.Werewolf.Command.Werewolf  as Werewolf
 import Game.Werewolf.Command.Witch
-import Game.Werewolf.Command.WolfHound as WolfHound
 import Game.Werewolf.Test.Util
 
 import Prelude hiding (round)
@@ -187,15 +185,6 @@ instance Arbitrary GameAtWitchsTurn where
 
         return $ GameAtWitchsTurn (game & stage .~ WitchsTurn)
 
-newtype GameAtWolfHoundsTurn = GameAtWolfHoundsTurn Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameAtWolfHoundsTurn where
-    arbitrary = do
-        game <- arbitrary
-
-        return $ GameAtWolfHoundsTurn (game & stage .~ WolfHoundsTurn)
-
 newtype GameOnSecondRound = GameOnSecondRound Game
     deriving (Eq, Show)
 
@@ -204,16 +193,6 @@ instance Arbitrary GameOnSecondRound where
         game <- arbitrary
 
         return $ GameOnSecondRound (game & round .~ 1)
-
-newtype GameWithAllegianceChosen = GameWithAllegianceChosen Game
-    deriving (Eq, Show)
-
-instance Arbitrary GameWithAllegianceChosen where
-    arbitrary = do
-        (GameAtWolfHoundsTurn game) <- arbitrary
-        (Blind command)             <- arbitraryWolfHoundChooseCommand game
-
-        return $ GameWithAllegianceChosen (run_ (apply command) game)
 
 newtype GameWithAllowedVoters = GameWithAllowedVoters Game
     deriving (Eq, Show)
@@ -353,7 +332,7 @@ instance Arbitrary GameWithPassAtWitchsTurn where
     arbitrary = do
         game            <- arbitrary
         let game'       = game & stage .~ WitchsTurn
-        (Blind command) <- arbitraryWitchPassCommand game'
+        (Blind command) <- arbitraryPassCommand game'
 
         return $ GameWithPassAtWitchsTurn (run_ (apply command) game')
 
@@ -449,10 +428,9 @@ arbitraryCommand game = case game ^. stage of
     WerewolvesTurn  -> arbitraryWerewolfVoteCommand game
     WitchsTurn      -> oneof
         [ arbitraryHealCommand game
-        , arbitraryWitchPassCommand game
+        , arbitraryPassCommand game
         , arbitraryPoisonCommand game
         ]
-    WolfHoundsTurn  -> arbitraryWolfHoundChooseCommand game
 
 arbitraryHunterChooseCommand :: Game -> Gen (Blind Command)
 arbitraryHunterChooseCommand game = do
@@ -467,13 +445,6 @@ arbitraryOrphanChooseCommand game = do
     target      <- suchThat (arbitraryPlayer game) (orphan /=)
 
     return . Blind $ Orphan.chooseCommand (orphan ^. name) (target ^. name)
-
-arbitraryWolfHoundChooseCommand :: Game -> Gen (Blind Command)
-arbitraryWolfHoundChooseCommand game = do
-    let wolfHoundsName  = game ^?! players . wolfHounds . name
-    allegianceName      <- elements $ map (T.pack . show) [Villagers, Werewolves]
-
-    return . Blind $ WolfHound.chooseCommand wolfHoundsName allegianceName
 
 arbitraryScapegoatChooseCommand :: Game -> Gen (Blind Command)
 arbitraryScapegoatChooseCommand game = do
@@ -490,8 +461,8 @@ arbitraryHealCommand game = do
         then noopCommand
         else healCommand witchsName
 
-arbitraryWitchPassCommand :: Game -> Gen (Blind Command)
-arbitraryWitchPassCommand game = do
+arbitraryPassCommand :: Game -> Gen (Blind Command)
+arbitraryPassCommand game = do
     let witchsName = game ^?! players . witches . name
 
     return . Blind $ passCommand witchsName

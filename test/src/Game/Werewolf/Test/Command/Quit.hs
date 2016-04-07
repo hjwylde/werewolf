@@ -28,7 +28,6 @@ allQuitCommandTests =
     , testProperty "quit command errors when caller does not exist"                             prop_quitCommandErrorsWhenCallerDoesNotExist
     , testProperty "quit command errors when caller is dead"                                    prop_quitCommandErrorsWhenCallerIsDead
     , testProperty "quit command kills player"                                                  prop_quitCommandKillsPlayer
-    , testProperty "quit command clears allegiance chosen when caller is wolf-hound"            prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound
     , testProperty "quit command clears heal when caller is witch"                              prop_quitCommandClearsHealWhenCallerIsWitch
     , testProperty "quit command clears heal used when caller is witch"                         prop_quitCommandClearsHealUsedWhenCallerIsWitch
     , testProperty "quit command clears poison when caller is witch"                            prop_quitCommandClearsPoisonWhenCallerIsWitch
@@ -65,13 +64,6 @@ prop_quitCommandKillsPlayer game =
         let game' = run_ (apply command) game
 
         length (game' ^.. players . traverse . dead) == 1
-
-prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound :: GameWithAllegianceChosen -> Bool
-prop_quitCommandClearsAllegianceChosenWhenCallerIsWolfHound (GameWithAllegianceChosen game) = do
-    let wolfHoundsName  = game ^?! players . wolfHounds . name
-    let command         = quitCommand wolfHoundsName
-
-    run_ (apply command) game ^. allegianceChosen
 
 prop_quitCommandClearsHealWhenCallerIsWitch :: GameWithHeal -> Bool
 prop_quitCommandClearsHealWhenCallerIsWitch (GameWithHeal game) = do

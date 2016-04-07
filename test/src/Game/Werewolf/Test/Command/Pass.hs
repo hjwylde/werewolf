@@ -31,7 +31,7 @@ allPassCommandTests =
 
 prop_witchPassCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_witchPassCommandErrorsWhenGameIsOver (GameAtGameOver game) =
-    forAll (arbitraryWitchPassCommand game) $ verbose_runCommandErrors game . getBlind
+    forAll (arbitraryPassCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_witchPassCommandErrorsWhenCallerDoesNotExist :: GameAtWitchsTurn -> Player -> Property
 prop_witchPassCommandErrorsWhenCallerDoesNotExist (GameAtWitchsTurn game) caller =
@@ -49,11 +49,11 @@ prop_witchPassCommandErrorsWhenCallerIsDead (GameAtWitchsTurn game) = do
 prop_witchPassCommandErrorsWhenNotWitchsTurn :: Game -> Property
 prop_witchPassCommandErrorsWhenNotWitchsTurn game =
     hasn't (stage . _WitchsTurn) game
-    ==> forAll (arbitraryWitchPassCommand game) $ verbose_runCommandErrors game . getBlind
+    ==> forAll (arbitraryPassCommand game) $ verbose_runCommandErrors game . getBlind
 
 prop_witchPassCommandSetsPassed :: GameAtWitchsTurn -> Property
 prop_witchPassCommandSetsPassed (GameAtWitchsTurn game) =
-    forAll (arbitraryWitchPassCommand game) $ \(Blind command) -> do
+    forAll (arbitraryPassCommand game) $ \(Blind command) -> do
         let game' = run_ (apply command) game
 
         game' ^. passed

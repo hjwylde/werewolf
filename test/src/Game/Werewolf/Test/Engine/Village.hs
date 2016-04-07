@@ -32,8 +32,8 @@ allVillageEngineTests =
 
 prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty :: GameAtWitchsTurn -> Property
 prop_checkStageSkipsVillagesTurnWhenAllowedVotersEmpty (GameAtWitchsTurn game) =
-    forAll (arbitraryWitchPassCommand game') $ \(Blind passWitchsTurnCommand) -> do
-        hasn't (stage . _VillagesTurn) (run_ (apply passWitchsTurnCommand >> checkStage) game')
+    forAll (arbitraryPassCommand game') $ \(Blind command) -> do
+        hasn't (stage . _VillagesTurn) (run_ (apply command >> checkStage) game')
     where
         game' = game & allowedVoters .~ []
 
