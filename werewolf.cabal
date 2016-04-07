@@ -85,7 +85,6 @@ library
         Game.Werewolf.Command.Villager
         Game.Werewolf.Command.Werewolf
         Game.Werewolf.Command.Witch
-        Game.Werewolf.Command.WolfHound
         Game.Werewolf.Engine
         Game.Werewolf.Game
         Game.Werewolf.Player
@@ -143,7 +142,6 @@ test-suite werewolf-test
         Game.Werewolf.Test.Engine.Village
         Game.Werewolf.Test.Engine.Werewolf
         Game.Werewolf.Test.Engine.Witch
-        Game.Werewolf.Test.Engine.WolfHound
         Game.Werewolf.Test.Game
         Game.Werewolf.Test.Player
         Game.Werewolf.Test.Util

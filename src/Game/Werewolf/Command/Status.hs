@@ -53,7 +53,6 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     VillagesTurn    -> pingVillagers
     WerewolvesTurn  -> pingWerewolves
     WitchsTurn      -> pingRole witchRole
-    WolfHoundsTurn  -> pingRole wolfHoundRole
 
 pingRole :: (MonadState Game m, MonadWriter [Message] m) => Role -> m ()
 pingRole role' = do

@@ -27,7 +27,7 @@ module Game.Werewolf.Player (
 
     -- ** Traversals
     druid, fallenAngel, hunter, jester, orphan, protector, scapegoat, seer, simpleVillager,
-    simpleWerewolf, trueVillager, witch, wolfHound,
+    simpleWerewolf, trueVillager, witch,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
@@ -35,7 +35,7 @@ module Game.Werewolf.Player (
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
     druids, fallenAngels, hunters, jesters, orphans, protectors, scapegoats, seers, simpleVillagers,
-    simpleWerewolves, trueVillagers, witches, wolfHounds,
+    simpleWerewolves, trueVillagers, witches,
     villagers, werewolves,
     alive, dead,
 
@@ -170,14 +170,6 @@ trueVillager = role . only trueVillagerRole
 -- @
 witch :: Traversal' Player ()
 witch = role . only witchRole
-
--- | The traversal of 'Player's with a 'wolfHoundRole'.
---
--- @
--- 'wolfHound' = 'role' . 'only' 'wolfHoundRole'
--- @
-wolfHound :: Traversal' Player ()
-wolfHound = role . only wolfHoundRole
 
 -- | The traversal of 'Player's aligned with the 'Villagers'.
 --
@@ -314,14 +306,6 @@ trueVillagers = traverse . filtered (is trueVillager)
 -- @
 witches :: Traversable t => Traversal' (t Player) Player
 witches = traverse . filtered (is witch)
-
--- | This 'Traversal' provides the traversal of 'wolfHound' 'Player's.
---
--- @
--- 'wolfHounds' = 'traverse' . 'filtered' ('is' 'wolfHound')
--- @
-wolfHounds :: Traversable t => Traversal' (t Player) Player
-wolfHounds = traverse . filtered (is wolfHound)
 
 -- | This 'Traversal' provides the traversal of 'villager' 'Player's.
 --

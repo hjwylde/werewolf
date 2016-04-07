@@ -173,11 +173,6 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (use healUsed &&^ use poisonUsed) advanceStage
         whenM (use passed)                      advanceStage
 
-    WolfHoundsTurn -> do
-        whenM (has (players . wolfHounds . dead) <$> get) advanceStage
-
-        whenM (use allegianceChosen) advanceStage
-
 lynchVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
 lynchVotees [votee]
     | is jester votee       = do

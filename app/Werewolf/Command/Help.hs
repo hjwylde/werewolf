@@ -113,10 +113,6 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
       , "- `poison PLAYER`"
       , "- `pass`"
       ]
-    , whenPlayerHasRole callerName mGame wolfHoundRole
-      [ "Wolf-hound commands:"
-      , "- `choose (villagers | werewolves)`"
-      ]
     ]
 
 roleMessage :: Role -> Text
@@ -158,8 +154,6 @@ rulesMessages mGame = map (T.intercalate "\n")
         "- The Protector wakes up and protects someone."
       , whenRoleInPlay mGame seerRole
         "- The Seer wakes up and sees someone's allegiance."
-      , whenRoleInPlay mGame wolfHoundRole
-        "- (First round only) the Wolf-hound wakes up and chooses an allegiance."
       , "- The Werewolves wake up and vote to devour a victim."
       , whenRoleInPlay mGame witchRole
         "- The Witch wakes up and may heal the victim and/or poison someone."

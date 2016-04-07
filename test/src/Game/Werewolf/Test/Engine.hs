@@ -31,7 +31,6 @@ import Game.Werewolf.Test.Engine.Seer
 import Game.Werewolf.Test.Engine.Village
 import Game.Werewolf.Test.Engine.Werewolf
 import Game.Werewolf.Test.Engine.Witch
-import Game.Werewolf.Test.Engine.WolfHound
 import Game.Werewolf.Test.Util
 
 import Prelude hiding (round)
@@ -52,7 +51,6 @@ allEngineTests = concat
     , allVillageEngineTests
     , allWerewolfEngineTests
     , allWitchEngineTests
-    , allWolfHoundEngineTests
 
     , allGameOverTests
     , allStartGameTests

@@ -87,11 +87,6 @@ module Game.Werewolf.Messages (
 
     -- ** Error messages
     playerHasAlreadyHealedMessage, playerHasAlreadyPoisonedMessage,
-
-    -- * Wolf-hound's turn messages
-
-    -- ** Error messages
-    allegianceDoesNotExistMessage,
 ) where
 
 import Control.Arrow
@@ -164,7 +159,6 @@ stageMessages game = case game ^. stage of
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
     WitchsTurn      -> witchsTurnMessages game
-    WolfHoundsTurn  -> wolfHoundsTurnMessages wolfHoundsName
     where
         players'            = game ^. players
         huntersName         = players' ^?! hunters . name
@@ -173,7 +167,6 @@ stageMessages game = case game ^. stage of
         scapegoatsName      = players' ^?! scapegoats . name
         seersName           = players' ^?! seers . name
         aliveWerewolfNames  = players' ^.. werewolves . alive . name
-        wolfHoundsName      = players' ^?! wolfHounds . name
 
 huntersTurnMessages :: Text -> [Message]
 huntersTurnMessages huntersName =
@@ -270,13 +263,6 @@ witchsTurnMessages game = concat
         poisonMessages
             | game ^. poisonUsed    = []
             | otherwise             = [privateMessage witchsName "Would you like to `poison` anyone?"]
-
-wolfHoundsTurnMessages :: Text -> [Message]
-wolfHoundsTurnMessages to =
-    [ publicMessage "The Wolf-hound wakes up."
-    , privateMessage to
-        "Which allegiance do you `choose` to be aligned with? (Either `villagers` or `werewolves`.)"
-    ]
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
@@ -413,7 +399,6 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
         showTurn VillagesTurn   = "village's"
         showTurn WerewolvesTurn = "Werewolves'"
         showTurn WitchsTurn     = "Witch's"
-        showTurn WolfHoundsTurn = "Wolf-hound's"
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat
@@ -600,11 +585,6 @@ playerHasAlreadyHealedMessage to = privateMessage to "You've already healed some
 
 playerHasAlreadyPoisonedMessage :: Text -> Message
 playerHasAlreadyPoisonedMessage to = privateMessage to "You've already poisoned someone!"
-
-allegianceDoesNotExistMessage :: Text -> Text -> Message
-allegianceDoesNotExistMessage to name = privateMessage to $ T.unwords
-    [ "Allegiance", name, "does not exist."
-    ]
 
 article :: Role -> Text
 article role

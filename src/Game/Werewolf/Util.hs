@@ -25,7 +25,7 @@ module Game.Werewolf.Util (
 
     -- ** Queries
     isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn, isSeersTurn,
-    isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn, isWolfHoundsTurn,
+    isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
     hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
@@ -33,7 +33,7 @@ module Game.Werewolf.Util (
     -- ** Queries
     doesPlayerExist,
     isPlayerHunter, isPlayerJester, isPlayerOrphan, isPlayerProtector, isPlayerScapegoat,
-    isPlayerSeer, isPlayerWitch, isPlayerWolfHound,
+    isPlayerSeer, isPlayerWitch,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -78,7 +78,6 @@ removePlayer name' = do
         healUsed    .= False
         poison      .= Nothing
         poisonUsed  .= False
-    when (is wolfHound player)      $ allegianceChosen .= True
 
 -- | Fudges the player's allegiance. This function is useful for roles such as the Orphan where
 --   they align themselves differently given some trigger.
@@ -143,9 +142,6 @@ isWerewolvesTurn = has (stage . _WerewolvesTurn) <$> get
 isWitchsTurn :: MonadState Game m => m Bool
 isWitchsTurn = has (stage . _WitchsTurn) <$> get
 
-isWolfHoundsTurn :: MonadState Game m => m Bool
-isWolfHoundsTurn = has (stage . _WolfHoundsTurn) <$> get
-
 hasAnyoneWon :: MonadState Game m => m Bool
 hasAnyoneWon = gets Game.hasAnyoneWon
 
@@ -181,9 +177,6 @@ isPlayerSeer name' = is seer <$> findPlayerBy_ name name'
 
 isPlayerWitch :: MonadState Game m => Text -> m Bool
 isPlayerWitch name' = is witch <$> findPlayerBy_ name name'
-
-isPlayerWolfHound :: MonadState Game m => Text -> m Bool
-isPlayerWolfHound name' = is wolfHound <$> findPlayerBy_ name name'
 
 isPlayerWerewolf :: MonadState Game m => Text -> m Bool
 isPlayerWerewolf name' = is werewolf <$> findPlayerBy_ name name'

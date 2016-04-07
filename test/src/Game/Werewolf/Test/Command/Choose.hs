@@ -14,15 +14,12 @@ module Game.Werewolf.Test.Command.Choose (
 
 import Control.Lens hiding (elements, isn't)
 
-import           Data.Maybe
-import           Data.Text  (Text)
-import qualified Data.Text  as T
+import Data.Maybe
 
 import Game.Werewolf
 import Game.Werewolf.Command.Hunter    as Hunter
 import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
-import Game.Werewolf.Command.WolfHound as WolfHound
 import Game.Werewolf.Test.Arbitrary
 import Game.Werewolf.Test.Util
 
@@ -49,15 +46,6 @@ allChooseCommandTests =
     , testProperty "orphan choose command errors when not orphan's turn"        prop_orphanChooseCommandErrorsWhenNotOrphansTurn
     , testProperty "orphan choose command errors when caller not orphan"        prop_orphanChooseCommandErrorsWhenCallerNotOrphan
     , testProperty "orphan choose command sets role model"                      prop_orphanChooseCommandSetsRoleModel
-
-    , testProperty "wolf-hound choose command errors when game is over"                 prop_wolfHoundChooseCommandErrorsWhenGameIsOver
-    , testProperty "wolf-hound choose command errors when caller does not exist"        prop_wolfHoundChooseCommandErrorsWhenCallerDoesNotExist
-    , testProperty "wolf-hound choose command errors when caller is dead"               prop_wolfHoundChooseCommandErrorsWhenCallerIsDead
-    , testProperty "wolf-hound choose command errors when not wolf-hound's turn"        prop_wolfHoundChooseCommandErrorsWhenNotWolfHoundsTurn
-    , testProperty "wolf-hound choose command errors when caller not wolf-hound"        prop_wolfHoundChooseCommandErrorsWhenCallerNotWolfHound
-    , testProperty "wolf-hound choose command errors when allegiance does not exist"    prop_wolfHoundChooseCommandErrorsWhenAllegianceDoesNotExist
-    , testProperty "wolf-hound choose command sets allegiance chosen"                   prop_wolfHoundChooseCommandSetsAllegianceChosen
-    , testProperty "wolf-hound choose command sets allegiance"                          prop_wolfHoundChooseCommandSetsAllegiance
 
     , testProperty "scapegoat choose command errors when game is over"              prop_scapegoatChooseCommandErrorsWhenGameIsOver
     , testProperty "scapegoat choose command errors when caller does not exist"     prop_scapegoatChooseCommandErrorsWhenCallerDoesNotExist
@@ -201,62 +189,6 @@ prop_orphanChooseCommandSetsRoleModel (GameAtOrphansTurn game) = do
         let game'   = run_ (apply command) game
 
         fromJust (game' ^. roleModel) === target ^. name
-
-prop_wolfHoundChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
-prop_wolfHoundChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
-    forAll (arbitraryWolfHoundChooseCommand game) $ verbose_runCommandErrors game . getBlind
-
-prop_wolfHoundChooseCommandErrorsWhenCallerDoesNotExist :: GameAtWolfHoundsTurn -> Player -> Allegiance -> Property
-prop_wolfHoundChooseCommandErrorsWhenCallerDoesNotExist (GameAtWolfHoundsTurn game) caller allegiance = do
-    let command = WolfHound.chooseCommand (caller ^. name) (T.pack $ show allegiance)
-
-    not (doesPlayerExist (caller ^. name) game)
-        ==> verbose_runCommandErrors game command
-
-prop_wolfHoundChooseCommandErrorsWhenCallerIsDead :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_wolfHoundChooseCommandErrorsWhenCallerIsDead (GameAtWolfHoundsTurn game) allegiance = do
-    let wolfHound   = game ^?! players . wolfHounds
-    let game'       = killPlayer (wolfHound ^. name) game
-    let command     = WolfHound.chooseCommand (wolfHound ^. name) (T.pack $ show allegiance)
-
-    verbose_runCommandErrors game' command
-
-prop_wolfHoundChooseCommandErrorsWhenNotWolfHoundsTurn :: Game -> Property
-prop_wolfHoundChooseCommandErrorsWhenNotWolfHoundsTurn game =
-    hasn't (stage . _WolfHoundsTurn) game
-    ==> forAll (arbitraryWolfHoundChooseCommand game) $ verbose_runCommandErrors game . getBlind
-
-prop_wolfHoundChooseCommandErrorsWhenCallerNotWolfHound :: GameAtWolfHoundsTurn -> Allegiance -> Property
-prop_wolfHoundChooseCommandErrorsWhenCallerNotWolfHound (GameAtWolfHoundsTurn game) allegiance =
-    forAll (suchThat (arbitraryPlayer game) (isn't wolfHound)) $ \caller -> do
-        let command = WolfHound.chooseCommand (caller ^. name) (T.pack $ show allegiance)
-
-        verbose_runCommandErrors game command
-
-prop_wolfHoundChooseCommandErrorsWhenAllegianceDoesNotExist :: GameAtWolfHoundsTurn -> Text -> Property
-prop_wolfHoundChooseCommandErrorsWhenAllegianceDoesNotExist (GameAtWolfHoundsTurn game) allegiance = do
-    let wolfHound   = game ^?! players . wolfHounds
-    let command     = WolfHound.chooseCommand (wolfHound ^. name) allegiance
-
-    allegiance `notElem` ["Villagers", "Werewolves"]
-        ==> verbose_runCommandErrors game command
-
-prop_wolfHoundChooseCommandSetsAllegianceChosen :: GameAtWolfHoundsTurn -> Property
-prop_wolfHoundChooseCommandSetsAllegianceChosen (GameAtWolfHoundsTurn game) =
-    forAll (arbitraryWolfHoundChooseCommand game) $ \(Blind command) -> do
-        let game' = run_ (apply command) game
-
-        game' ^. allegianceChosen
-
-prop_wolfHoundChooseCommandSetsAllegiance :: GameAtWolfHoundsTurn -> Property
-prop_wolfHoundChooseCommandSetsAllegiance (GameAtWolfHoundsTurn game) = do
-    let wolfHoundsName = game ^?! players . wolfHounds . name
-
-    forAll (elements [Villagers, Werewolves]) $ \allegiance' -> do
-        let command = WolfHound.chooseCommand wolfHoundsName (T.pack $ show allegiance')
-        let game'   = run_ (apply command) game
-
-        game' ^?! players . wolfHounds . role . allegiance === allegiance'
 
 prop_scapegoatChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_scapegoatChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =

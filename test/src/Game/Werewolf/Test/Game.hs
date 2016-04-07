@@ -28,7 +28,6 @@ allGameTests =
     , testProperty "new game uses given players"                                    prop_newGameUsesGivenPlayers
     , testProperty "new game starts with events empty"                              prop_newGameStartsWithEventsEmpty
     , testProperty "new game starts with boots empty"                               prop_newGameStartsWithBootsEmpty
-    , testProperty "new game starts with allegiance chosen false"                   prop_newGameStartsWithAllegianceChosenFalse
     , testProperty "new game starts with allowed voters full"                       prop_newGameStartsWithAllowedVotersFull
     , testProperty "new game starts with heal false"                                prop_newGameStartsWithHealFalse
     , testProperty "new game starts with heal used false"                           prop_newGameStartsWithHealUsedFalse
@@ -66,9 +65,6 @@ prop_newGameStartsWithEventsEmpty players = has (events . _Empty) (newGame playe
 
 prop_newGameStartsWithBootsEmpty :: [Player] -> Bool
 prop_newGameStartsWithBootsEmpty players = has (boots . _Empty) (newGame players)
-
-prop_newGameStartsWithAllegianceChosenFalse :: [Player] -> Bool
-prop_newGameStartsWithAllegianceChosenFalse players = not $ newGame players ^. allegianceChosen
 
 prop_newGameStartsWithAllowedVotersFull :: [Player] -> Property
 prop_newGameStartsWithAllowedVotersFull players = newGame players ^. allowedVoters === players ^.. names

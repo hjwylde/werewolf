@@ -14,7 +14,6 @@ module Werewolf.Command.Pass (
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -36,11 +35,7 @@ handle callerName tag = do
 
     game <- readGame tag
 
-    command <- case game ^. stage of
-            WitchsTurn  -> return $ passCommand callerName
-            _           -> exitWith failure
-                { messages = [playerCannotDoThatRightNowMessage callerName]
-                }
+    let command = passCommand callerName
 
     case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
