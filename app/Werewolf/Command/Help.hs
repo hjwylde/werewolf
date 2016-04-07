@@ -184,7 +184,7 @@ helpMessages = map (T.intercalate "\n")
         , "village has yet to lay eyes on the merciless Werewolf."
         ]
       , T.unwords
-        [ "Each night Werewolves attack the village and devour the innocent. For centuries no one"
+        [ "Each night Werewolves attack the village and devour the innocent. For centuries no-one"
         , "knew how to fight this scourge, however recently a theory has taken ahold that mayhaps"
         , "the Werewolves walk among the Villagers themselves..."
         ]

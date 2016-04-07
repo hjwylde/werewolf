@@ -16,6 +16,7 @@
 * Updated the Simple Werewolf's description. ([#174](https://github.com/hjwylde/werewolf/issues/174))
 * Updated the True Villager's description and rules. ([#137](https://github.com/hjwylde/werewolf/issues/137))
 * Made the roles gender neutral. ([#101](https://github.com/hjwylde/werewolf/issues/101))
+* Made the role descriptions use consistent tenses. ([#158](https://github.com/hjwylde/werewolf/issues/158))
 
 ### v0.5.2.0
 
