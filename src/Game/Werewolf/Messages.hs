@@ -167,7 +167,7 @@ stageMessages game = case game ^. stage of
 
 huntersTurnMessages :: Text -> [Message]
 huntersTurnMessages huntersName =
-    [ publicMessage $ T.unwords ["Just before", huntersName, "was struck down they let off a shot."]
+    [ publicMessage $ T.unwords ["Just before", huntersName, "was murdered they let off a shot."]
     , privateMessage huntersName "Whom do you `choose` to kill with your last shot?"
     ]
 
@@ -212,7 +212,7 @@ firstVillagesTurnMessages = fallenAngelInPlayMessage : villagesTurnMessages
 
 villagesTurnMessages :: [Message]
 villagesTurnMessages =
-    [ publicMessage "As the village gathers in the square the town clerk calls for a vote."
+    [ publicMessage "As the village gathers in the square the Town Clerk calls for a vote."
     , publicMessage "Whom would you like to `vote` to lynch?"
     ]
 
@@ -459,7 +459,7 @@ orphanJoinedPackMessages orphansName werewolfNames =
         ])
     : groupMessages werewolfNames (T.unwords
         [ orphansName, "the Orphan scampers off into the woods. Without their role model they have"
-        , "abandoned the village and are in search of a new home."
+        , "abandoned the village and are in search of a new home. You welcome them into your pack."
         ])
 
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
@@ -468,7 +468,7 @@ playerCannotProtectSamePlayerTwiceInARowMessage to =
 
 scapegoatChoseAllowedVotersMessage :: [Text] -> Message
 scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
-    [ "On the next day only", concatList allowedVoters, "shall be allowed to vote. The town crier,"
+    [ "On the next day only", concatList allowedVoters, "shall be allowed to vote. The Town Crier,"
     , "realising how foolish it was to kill the Scapegoat, grants them this wish."
     ]
 

@@ -21,7 +21,7 @@ Most have faces and are known to the inhabitants of Fougères in Brittany, Franc
     the village has yet to lay eyes on the merciless Werewolf.
 
 Each night Werewolves attack the village and devour the innocent.
-For centuries no one knew how to fight this scourge, however recently a theory has taken ahold that
+For centuries no-one knew how to fight this scourge, however recently a theory has taken ahold that
     mayhaps the Werewolves walk among the Villagers themselves...
 
 Objective of the Game:  
@@ -153,7 +153,7 @@ Let's have the Werewolves, _@quux_ and _@grault_, vote to devour a Villager.
     {"to":"@quux","message":"@grault voted to devour @foo."},
     {"to":null,"message":"The sun rises. Everybody wakes up and opens their eyes..."},
     {"to":null,"message":"As you open them you notice a door broken down and @foo's guts half devoured and spilling out over the cobblestones. From the look of their personal effects, you deduce they were a Simple Villager."},
-    {"to":null,"message":"As the village gathers in the square the town clerk calls for a vote."},
+    {"to":null,"message":"As the village gathers in the square the Town Clerk calls for a vote."},
     {"to":null,"message":"Whom would you like to `vote` to lynch?"}
     ]}
 ```

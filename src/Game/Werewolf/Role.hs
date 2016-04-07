@@ -123,17 +123,15 @@ restrictedRoles :: [Role]
 restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 
 -- | /Abandoned by their parents as a child, with no-one wanting to look after another mouth to/
---   /feed, the Orphan was left to fend for themself. No-one looks twice at the Orphan and even/
---   /fewer show kindness towards the lonely child. One day however, one townsperson changes all/
---   /this. He offers the Orphan food, water and a roof over their head. Grateful for his chairty/
---   /and affection, the Orphan makes him their role model. Pray that no ill should befall their/
---   /role model, for who knows in such an event whom, or what, the Orphan may turn to for/
---   /comfort.../
+--   /feed, the Orphan was left to fend for themself. No-one looked twice at the Orphan and even/
+--   /fewer showed kindness towards the lonely child. One day however, one townsperson changed all/
+--   /this. He offered the Orphan food, water and a roof over their head. Grateful for his chairty/
+--   /and affection, the Orphan made him their role model. Pray that no ill should befall their/
+--   /role model, for they are the only one conforming the Orphan as a Villager./
 --
---   On the first night, the Orphan may choose a player to become their role model. If during the
---   game the role model is eliminated, the Orphan becomes a Werewolf. They will then wake up the
---   next night with their peers and will devour with them each night until the end of the game.
---   However for as long as the Orphan's role model is alive, they remain a Villager.
+--   On the first night, the Orphan chooses a player to become their role model. So long as the role
+--   model is alive, the Orphan is a Villager. If however the role model is eliminated, then the
+--   Orphan becomes a Werewolf.
 orphanRole :: Role
 orphanRole = Role
     { _name         = "Orphan"
@@ -141,19 +139,17 @@ orphanRole = Role
     , _balance      = -1
     , _description  = T.unwords
         [ "Abandoned by their parents as a child, with no-one wanting to look after another mouth"
-        , "to feed, the Orphan was left to fend for themself. No-one looks twice at the Orphan and"
-        , "even fewer show kindness towards the lonely child. One day however, one townsperson"
-        , "changes all this. He offers the Orphan food, water and a roof over their head. Grateful"
-        , "for his chairty and affection, the Orphan makes him their role model. Pray that no ill"
-        , "should befall their role model, for who knows in such an event whom, or what, the Orphan"
-        , "may turn to for comfort..."
+        , "to feed, the Orphan was left to fend for themself. No-one looked twice at the Orphan and"
+        , "even fewer showed kindness towards the lonely child. One day however, one townsperson"
+        , "changed all this. He offered the Orphan food, water and a roof over their head. Grateful"
+        , "for his chairty and affection, the Orphan made him their role model. Pray that no ill"
+        , "should befall their role model, for they are the only one conforming the Orphan as a"
+        , "Villager."
         ]
     , _rules        = T.unwords
-        [ "On the first night, the Orphan may choose a player to become their role model. If during"
-        , "the game the role model is eliminated, the Orphan becomes a Werewolf. They will then"
-        , "wake up the next night with their peers and will devour with them each night until the"
-        , "end of the game. However for as long as the Orphan's role model is alive, they remain a"
-        , "Villager."
+        [ "On the first night, the Orphan chooses a player to become their role model. So long as"
+        , "the role model is alive, the Orphan is a Villager. If however the role model is"
+        , "eliminated, then the Orphan becomes a Werewolf."
         ]
     }
 
@@ -167,7 +163,7 @@ orphanRole = Role
 --   night.
 --
 --   The Fallen Angel wins if they manage to get eliminated on the first round (day or night). If
---   however they fail, they become a Simple Villager for the rest of the game.
+--   however they fail, they become a Villager for the rest of the game.
 fallenAngelRole :: Role
 fallenAngelRole = Role
     { _name         = "Fallen Angel"
@@ -187,8 +183,7 @@ fallenAngelRole = Role
             ]
         , T.unwords
             [ "The Fallen Angel wins if they manage to get eliminated on the first round (day or"
-            , "night). If however they fail, they become a Simple Villager for the rest of the"
-            , "game."
+            , "night). If however they fail, they become a Villager for the rest of the game."
             ]
         ]
     }
@@ -197,7 +192,7 @@ fallenAngelRole = Role
 --   /marks an exceptional time in Fougères's history! Friend of the woodland creatures, practiced/
 --   /philosopher and now, with the help of Ferina their companion, a bane to the Werewolves/
 --   /themselves! My does she have a nose on her, strong enough to sniff out lycanthropes in close/
---   /proximity! Listen for her grunt and heed the Druid's words for they will not let you down./
+--   /proximity! Listen for her grunt and heed her warning for she will not let you down./
 --
 --   Each morning when Ferina wakes from her slumber she will be alert and cautious. If the Druid is
 --   next to a Werewolf then Ferina will grunt in warning.
@@ -211,8 +206,8 @@ druidRole = Role
         , "Druid marks an exceptional time in Fougères's history! Friend of the woodland creatures,"
         , "practiced philosopher and now, with the help of Ferina their companion, a bane to the"
         , "Werewolves themselves! My does she have a nose on her, strong enough to sniff out"
-        , "lycanthropes in close proximity! Listen for her grunt and heed the Druid's words for"
-        , "they will not let you down."
+        , "lycanthropes in close proximity! Listen for her grunt and heed her warning for she will"
+        , "not let you down."
         ]
     , _rules        = T.unwords
         [ "Each morning when Ferina wakes from her slumber she will be alert and cautious. If the"
@@ -221,10 +216,10 @@ druidRole = Role
     }
 
 -- | /A skilled marksman with quick reflexes. In the unfortunate situation that they are jumped and/
---   /killed unjustly, they are able to let off a shot at their attacker, killing them instantly./
---   /The Hunter never misses./
+--   /killed unjustly, they let off a shot at their attacker, killing them instantly. The Hunter/
+--   /never misses./
 --
---   If the Hunter gets killed they get to choose one player, believed to be an attacker, to kill
+--   If the Hunter is killed they choose one player, believed to be an attacker, to kill
 --   immediately.
 hunterRole :: Role
 hunterRole = Role
@@ -233,12 +228,12 @@ hunterRole = Role
     , _balance      = 2
     , _description  = T.unwords
         [ "A skilled marksman with quick reflexes. In the unfortunate situation that they are"
-        , "jumped and killed unjustly, they are able to let off a shot at their attacker, killing"
-        , "them instantly. The Hunter never misses."
+        , "jumped and killed unjustly, they let off a shot at their attacker, killing them"
+        , "instantly. The Hunter never misses."
         ]
     , _rules        = T.unwords
-        [ "If the Hunter gets killed they get to choose one player, believed to be an attacker, to"
-        , "kill immediately."
+        [ "If the Hunter is killed they choose one player, believed to be an attacker, to kill"
+        , "immediately."
         ]
     }
 
@@ -246,7 +241,7 @@ hunterRole = Role
 --   /putting others needs above their own. Each night they fight against the Werewolves with/
 --   /naught but a sword and shield, potentially saving an innocents life./
 --
---   Each night the Protector may choose a player deemed worthy of their protection. That player is
+--   Each night the Protector chooses a player deemed worthy of their protection. That player is
 --   safe for that night (and only that night) against the Werewolves.
 --
 --   The Protector may not protect the same player two nights in a row.
@@ -262,7 +257,7 @@ protectorRole = Role
         ]
     , _rules        = T.intercalate "\n"
         [ T.unwords
-            [ "Each night the Protector may choose a player deemed worthy of their protection. That"
+            [ "Each night the Protector chooses a player deemed worthy of their protection. That"
             , "player is safe for that night (and only that night) against the Werewolves."
             ]
         , "The Protector may not protect the same player two nights in a row."
@@ -300,10 +295,9 @@ scapegoatRole = Role
         ]
     }
 
--- | /Frequently misunderstood and thought to be a fortune teller, the Seer has the ability to see/
---   /into fellow townsfolk and determine their true nature. This ability to see is not given out/
---   /lightly, for certain it is a gift! Visions will always be true, but only for the present as/
---   /not even the Seer knows what the future holds./
+-- | /The Seer has the ability to see into fellow townsfolk and determine their true nature. This/
+--   /ability to see is not given out lightly, for certain it is a gift! The visions will always be/
+--   /true, but only for the present as not even the Seer knows what the future holds./
 --
 --   Each night the Seer sees the allegiance of one player of their choice.
 seerRole :: Role
@@ -312,17 +306,17 @@ seerRole = Role
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
-        [ "Frequently misunderstood and thought to be a fortune teller, the Seer has the ability to"
-        , "see into fellow townsfolk and determine their true nature. This ability to see is not"
-        , "given out lightly, for certain it is a gift! Visions will always be true, but only for"
-        , "the present as not even the Seer knows what the future holds."
+        [ "The Seer has the ability to see into fellow townsfolk and determine their true nature."
+        , "This ability to see is not given out lightly, for certain it is a gift! The visions will"
+        , "always be true, but only for the present as not even the Seer knows what the future"
+        , "holds."
         ]
     , _rules        = "Each night the Seer sees the allegiance of one player of their choice."
     }
 
 -- | /A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even/
---   /nobles. No matter their differences though, the plight of Werewolves in Fougères unites them/
---   /in this unfortunate time./
+--   /nobles. No matter their differences though, the plight of Werewolves in Fougères unites all/
+--   /the Villagers in this unfortunate time./
 --
 --   The Simple Villager has no special abilities, they must use their guile to determine whom among
 --   them is not who they say they are.
@@ -334,7 +328,7 @@ simpleVillagerRole = Role
     , _description  = T.unwords
         [ "A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even"
         , "nobles. No matter their differences though, the plight of Werewolves in Fougères unites"
-        , "them in this unfortunate time."
+        , "all the Villagers in this unfortunate time."
         ]
     , _rules        = T.unwords
         [ "The Simple Villager has no special abilities, they must use their guile to determine"
@@ -342,8 +336,8 @@ simpleVillagerRole = Role
         ]
     }
 
--- | /Every village needs a Jester, they're so stupid but provide so much entertainment! The Jester/
---   /may not have any special abilities, but at least no one in the village would want to hurt/
+-- | /Every village needs a Jester; they're so stupid, but provide so much entertainment! The/
+--   /Jester may not have any special abilities, but at least no one in the village wants to hurt/
 --   /them./
 --
 --   If the village votes to lynch the Jester, their identity is revealed. The village realise
@@ -356,9 +350,9 @@ jesterRole = Role
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
-        [ "Every village needs a Jester, they're so stupid but provide so much entertainment! The"
-        , "Jester may not have any special abilities, but at least no one in the village would want"
-        , "to hurt them."
+        [ "Every village needs a Jester; they're so stupid, but provide so much entertainment! The"
+        , "Jester may not have any special abilities, but at least no one in the village wants to"
+        , "hurt them."
         ]
     , _rules        = T.intercalate "\n"
         [ T.unwords
@@ -388,9 +382,9 @@ trueVillagerRole = Role
     }
 
 -- | /Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove themself/
---   /valuable to the village. The Witch is blessed (or maybe cursed) with the ability to make two/
---   /powerful potions; one of which may heal a victim of the Werewolves, the other able to poison/
---   /a player./
+--   /valuable to the village and maybe abolish the absurd pastime of burning and drowning their/
+--   /cult. The Witch is blessed (or maybe cursed) with the ability to make two powerful potions;/
+--   /one of which heals a victim of the Werewolves, the other poisons a player./
 --
 --   The Witch is called after the Werewolves. They are able to heal and poison one player per game.
 --   There is no restriction on using both potions in one night or to heal themself.
@@ -401,9 +395,10 @@ witchRole = Role
     , _balance      = 3
     , _description  = T.unwords
         [ "Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove"
-        , "themself valuable to the village. The Witch is blessed (or maybe cursed) with the"
-        , "ability to make two powerful potions; one of which may heal a victim of the Werewolves,"
-        , "the other able to poison a player."
+        , "themself valuable to the village and maybe abolish the absurd pastime of burning and"
+        , "drowning their cult. The Witch is blessed (or maybe cursed) with the ability to make two"
+        , "powerful potions; one of which heals a victim of the Werewolves, the other poisons a"
+        , "player."
         ]
     , _rules        = T.unwords
         [ "The Witch is called after the Werewolves. They are able to heal and poison one player"
@@ -412,8 +407,8 @@ witchRole = Role
         ]
     }
 
--- | /The Werewolf is a fearsome lupine, cunning like no other creature that roams the forest./
---   /Their origin is unknown, but that matters little, for they present a grave threat to/
+-- | /The Simple Werewolf is a fearsome lupine, cunning like no other creature that roams the/
+--   /forest. Their origin is unknown, but that matters little, for they present a grave threat to/
 --   /Fougères. While each day they hide in plain sight as an ordinary Villager, each night they/
 --   /transform and devour an innocent. There is little hope left for the village./
 --
@@ -424,10 +419,11 @@ simpleWerewolfRole = Role
     , _allegiance   = Werewolves
     , _balance      = -4
     , _description  = T.unwords
-        [ "The Werewolf is a fearsome lupine, cunning like no other creature that roams the forest."
-        , "Their origin is unknown, but that matters little, for they present a grave threat to"
-        , "Fougères. While each day they hide in plain sight as an ordinary Villager, each night"
-        , "they transform and devour an innocent. There is little hope left for the village."
+        [ "The Simple Werewolf is a fearsome lupine, cunning like no other creature that roams the"
+        , "forest. Their origin is unknown, but that matters little, for they present a grave"
+        , "threat to Fougères. While each day they hide in plain sight as an ordinary Villager,"
+        , "each night they transform and devour an innocent. There is little hope left for the"
+        , "village."
         ]
     , _rules        = "A Werewolf may never devour another Werewolf."
     }
