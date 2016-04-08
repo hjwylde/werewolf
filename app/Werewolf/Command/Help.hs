@@ -125,25 +125,26 @@ roleMessage role = T.intercalate "\n"
 rulesMessages :: Maybe Game -> [Text]
 rulesMessages mGame = map (T.intercalate "\n")
     [ [ T.unwords
+        [ "Each player is informed of their role (see `help roles` for a list) at the start of the"
+        , "game."
+        ]
+      , T.unwords
         [ "Each night, the Werewolves transform and subsequently assault and devour one Villager."
-        , "After feasting their lycanthropic form subsides and they once again hide in plain sight."
+        , "After feasting, their lycanthropic form subsides and they once again hide in plain"
+        , "sight."
         ]
       , T.unwords
         [ "Each day, after discovering the victim, the village gathers in the town square. In a"
         , "democratic fashion they then vote for whom they believe to be a Werewolf. The votee is"
-        , "immediately tied to a pyre and burned alive in an attempt to rid them of any"
-        , "lycanthropy."
-        ]
-    , T.unwords
-        [ "The number of Werewolves in play depends upon the number of players and extra roles in"
-        , "the game."
+        , "immediately tied to a pyre and burned alive in an attempt to rid Fougères of all"
+        , "lupines."
         ]
       ]
-    , filter (/= "") [ T.concat
-        [ "Each player is informed of their role (see `help roles` for a list) at the start of the"
-        , "game. A game begins at night and follows a standard cycle."
+    , filter (/= "")
+      [ T.concat
+        [ "A game begins at night and follows a standard cycle."
         , whenRoleInPlay mGame fallenAngelRole
-          " (N.B., when the Fallen Angel is in play the game begins with the village vote.)"
+            " (N.B., when the Fallen Angel is in play the game begins with the village vote.)"
         ]
       , whenRoleInPlay mGame fallenAngelRole
         "- (When the Fallen Angel is in play) the village votes to lynch a suspect."

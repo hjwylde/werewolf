@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Revisions*
+
+* Minor udpates to the `help rules` text.
+
 ### v0.5.3.0
 
 *Minor*
