@@ -28,6 +28,7 @@ import Control.Monad.Random
 import Control.Monad.State
 import Control.Monad.Writer
 
+import           Data.List
 import           Data.Text (Text)
 import qualified Data.Text as T
 
@@ -40,15 +41,16 @@ import Werewolf.Game
 import Werewolf.Messages
 
 data Options = Options
-    { optExtraRoles :: ExtraRoles
-    , argPlayers    :: [Text]
+    { optExtraRoles  :: ExtraRoles
+    , optIncludeSeer :: Bool
+    , argPlayers     :: [Text]
     } deriving (Eq, Show)
 
 data ExtraRoles = None | Random | Use [Text]
     deriving (Eq, Show)
 
 handle :: MonadIO m => Text -> Text -> Options -> m ()
-handle callerName tag (Options extraRoles playerNames) = do
+handle callerName tag (Options extraRoles includeSeer playerNames) = do
     whenM (doesGameExist tag &&^ (hasn't (stage . _GameOver) <$> readGame tag)) $ exitWith failure
         { messages = [gameAlreadyRunningMessage callerName]
         }
@@ -59,7 +61,9 @@ handle callerName tag (Options extraRoles playerNames) = do
             Random          -> randomExtraRoles $ length playerNames
             Use roleNames   -> useExtraRoles callerName roleNames
 
-        players <- createPlayers (callerName:playerNames) (padRoles extraRoles' (length playerNames + 1))
+        let extraRoles'' = if includeSeer then nub (seerRole:extraRoles') else extraRoles'
+
+        players <- createPlayers (callerName:playerNames) (padRoles extraRoles'' (length playerNames + 1))
 
         runWriterT $ startGame callerName players >>= execStateT checkStage
 

@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Minor*
+
+* Added `--include-seer` option to `start`. ([#179](https://github.com/hjwylde/werewolf/issues/179))
+
 *Revisions*
 
 * Minor udpates to the `help rules` text.
