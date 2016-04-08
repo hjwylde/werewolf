@@ -12,8 +12,6 @@ module Main (
 
 import Game.Werewolf.Test.Command
 import Game.Werewolf.Test.Engine
-import Game.Werewolf.Test.Game
-import Game.Werewolf.Test.Player
 
 import Test.Tasty
 import Test.Tasty.QuickCheck
@@ -22,5 +20,4 @@ main :: IO ()
 main = defaultMain . localOption (QuickCheckTests 20) =<< tests
 
 tests :: IO TestTree
-tests = return . testGroup "Tests" $ concat
-    [allCommandTests, allEngineTests, allGameTests, allPlayerTests]
+tests = return . testGroup "Tests" $ concat [allCommandTests, allEngineTests]

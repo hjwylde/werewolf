@@ -10,7 +10,7 @@ module Game.Werewolf.Test.Command.Heal (
     allHealCommandTests,
 ) where
 
-import Control.Lens hiding (elements, isn't)
+import Control.Lens hiding (isn't)
 
 import Game.Werewolf
 import Game.Werewolf.Command.Witch
@@ -29,8 +29,6 @@ allHealCommandTests =
     , testProperty "heal command errors when not witch's turn"      prop_healCommandErrorsWhenNotWitchsTurn
     , testProperty "heal command errors when caller has healed"     prop_healCommandErrorsWhenCallerHasHealed
     , testProperty "heal command errors when caller not witch"      prop_healCommandErrorsWhenCallerNotWitch
-    , testProperty "heal command sets heal"                         prop_healCommandSetsHeal
-    , testProperty "heal command sets heal used"                    prop_healCommandSetsHealUsed
     ]
 
 prop_healCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -81,13 +79,3 @@ prop_healCommandErrorsWhenCallerNotWitch (GameWithDevourEvent game) =
         let command = healCommand (caller ^. name)
 
         verbose_runCommandErrors game command
-
-prop_healCommandSetsHeal :: GameWithDevourEvent -> Property
-prop_healCommandSetsHeal (GameWithDevourEvent game) =
-    forAll (arbitraryHealCommand game) $ \(Blind command) ->
-        (run_ (apply command) game) ^. heal
-
-prop_healCommandSetsHealUsed :: GameWithDevourEvent -> Property
-prop_healCommandSetsHealUsed (GameWithDevourEvent game) =
-    forAll (arbitraryHealCommand game) $ \(Blind command) ->
-        (run_ (apply command) game) ^. healUsed

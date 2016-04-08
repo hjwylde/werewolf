@@ -10,9 +10,7 @@ module Game.Werewolf.Test.Command.See (
     allSeeCommandTests,
 ) where
 
-import Control.Lens hiding (elements, isn't)
-
-import Data.Maybe
+import Control.Lens hiding (isn't)
 
 import Game.Werewolf
 import Game.Werewolf.Command.Seer
@@ -31,7 +29,6 @@ allSeeCommandTests =
     , testProperty "see command errors when target is dead"         prop_seeCommandErrorsWhenTargetIsDead
     , testProperty "see command errors when not seer's turn"        prop_seeCommandErrorsWhenNotSeersTurn
     , testProperty "see command errors when caller not seer"        prop_seeCommandErrorsWhenCallerNotSeer
-    , testProperty "see command sets see"                           prop_seeCommandSetsSee
     ]
 
 prop_seeCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -86,8 +83,3 @@ prop_seeCommandErrorsWhenCallerNotSeer (GameAtSeersTurn game) =
         let command = seeCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
-
-prop_seeCommandSetsSee :: GameAtSeersTurn -> Property
-prop_seeCommandSetsSee (GameAtSeersTurn game) =
-    forAll (arbitrarySeeCommand game) $ \(Blind command) ->
-    isJust $ run_ (apply command) game ^. see

@@ -10,9 +10,7 @@ module Game.Werewolf.Test.Command.Vote (
     allVoteCommandTests,
 ) where
 
-import Control.Lens hiding (elements, isn't)
-
-import qualified Data.Map as Map
+import Control.Lens hiding (isn't)
 
 import Game.Werewolf
 import Game.Werewolf.Command.Villager as Villager
@@ -34,7 +32,6 @@ allVoteCommandTests =
     , testProperty "werewolf vote command errors when caller not werewolf"      prop_werewolfVoteCommandErrorsWhenCallerNotWerewolf
     , testProperty "werewolf vote command errors when caller has voted"         prop_werewolfVoteCommandErrorsWhenCallerHasVoted
     , testProperty "werewolf vote command errors when target werewolf"          prop_werewolfVoteCommandErrorsWhenTargetWerewolf
-    , testProperty "werewolf vote command updates votes"                        prop_werewolfVoteCommandUpdatesVotes
 
     , testProperty "villager vote command errors when game is over"                     prop_villagerVoteCommandErrorsWhenGameIsOver
     , testProperty "villager vote command errors when caller does not exist"            prop_villagerVoteCommandErrorsWhenCallerDoesNotExist
@@ -45,7 +42,6 @@ allVoteCommandTests =
     , testProperty "villager vote command errors when caller has voted"                 prop_villagerVoteCommandErrorsWhenCallerHasVoted
     , testProperty "villager vote command errors when caller is not in allowed voters"  prop_villagerVoteCommandErrorsWhenCallerIsNotInAllowedVoters
     , testProperty "villager vote command errors when caller is known jester"           prop_villagerVoteCommandErrorsWhenCallerIsKnownJester
-    , testProperty "villager vote command updates votes"                                prop_villagerVoteCommandUpdatesVotes
     ]
 
 prop_werewolfVoteCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -112,13 +108,6 @@ prop_werewolfVoteCommandErrorsWhenTargetWerewolf (GameAtWerewolvesTurn game) =
     forAll (arbitraryPlayer game) $ \caller ->
     forAll (arbitraryWerewolf game) $ \target ->
     verbose_runCommandErrors game (Werewolf.voteCommand (caller ^. name) (target ^. name))
-
-prop_werewolfVoteCommandUpdatesVotes :: GameAtWerewolvesTurn -> Property
-prop_werewolfVoteCommandUpdatesVotes (GameAtWerewolvesTurn game) =
-    forAll (arbitraryWerewolfVoteCommand game) $ \(Blind command) -> do
-        let game' = run_ (apply command) game
-
-        Map.size (game' ^. votes) == 1
 
 prop_villagerVoteCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_villagerVoteCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -189,10 +178,3 @@ prop_villagerVoteCommandErrorsWhenCallerIsKnownJester (GameWithJesterRevealedAtV
         verbose_runCommandErrors game command
     where
         caller = game ^?! players . jesters
-
-prop_villagerVoteCommandUpdatesVotes :: GameAtVillagesTurn -> Property
-prop_villagerVoteCommandUpdatesVotes (GameAtVillagesTurn game) =
-    forAll (arbitraryVillagerVoteCommand game) $ \(Blind command) -> do
-        let game' = run_ (apply command) game
-
-        Map.size (game' ^. votes) == 1

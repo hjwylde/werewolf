@@ -14,8 +14,6 @@ module Game.Werewolf.Test.Command.Choose (
 
 import Control.Lens hiding (elements, isn't)
 
-import Data.Maybe
-
 import Game.Werewolf
 import Game.Werewolf.Command.Hunter    as Hunter
 import Game.Werewolf.Command.Orphan    as Orphan
@@ -34,8 +32,6 @@ allChooseCommandTests =
     , testProperty "hunter choose command errors when any target is dead"           prop_hunterChooseCommandErrorsWhenTargetIsDead
     , testProperty "hunter choose command errors when not hunter's turn"            prop_hunterChooseCommandErrorsWhenNotHuntersTurn
     , testProperty "hunter choose command errors when caller not hunter"            prop_hunterChooseCommandErrorsWhenCallerNotHunter
-    , testProperty "hunter choose command kills target"                             prop_hunterChooseCommandKillsTarget
-    , testProperty "hunter choose command sets hunter retaliated"                   prop_hunterChooseCommandSetsHunterRetaliated
 
     , testProperty "orphan choose command errors when game is over"             prop_orphanChooseCommandErrorsWhenGameIsOver
     , testProperty "orphan choose command errors when caller does not exist"    prop_orphanChooseCommandErrorsWhenCallerDoesNotExist
@@ -45,7 +41,6 @@ allChooseCommandTests =
     , testProperty "orphan choose command errors when target is caller"         prop_orphanChooseCommandErrorsWhenTargetIsCaller
     , testProperty "orphan choose command errors when not orphan's turn"        prop_orphanChooseCommandErrorsWhenNotOrphansTurn
     , testProperty "orphan choose command errors when caller not orphan"        prop_orphanChooseCommandErrorsWhenCallerNotOrphan
-    , testProperty "orphan choose command sets role model"                      prop_orphanChooseCommandSetsRoleModel
 
     , testProperty "scapegoat choose command errors when game is over"              prop_scapegoatChooseCommandErrorsWhenGameIsOver
     , testProperty "scapegoat choose command errors when caller does not exist"     prop_scapegoatChooseCommandErrorsWhenCallerDoesNotExist
@@ -53,8 +48,6 @@ allChooseCommandTests =
     , testProperty "scapegoat choose command errors when any target is dead"        prop_scapegoatChooseCommandErrorsWhenAnyTargetIsDead
     , testProperty "scapegoat choose command errors when not scapegoat's turn"      prop_scapegoatChooseCommandErrorsWhenNotScapegoatsTurn
     , testProperty "scapegoat choose command errors when caller not scapegoat"      prop_scapegoatChooseCommandErrorsWhenCallerNotScapegoat
-    , testProperty "scapegoat choose command sets allowed voters"                   prop_scapegoatChooseCommandSetsAllowedVoters
-    , testProperty "scapegoat choose command resets scapegoat blamed"               prop_scapegoatChooseCommandResetsScapegoatBlamed
     ]
 
 prop_hunterChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -99,26 +92,6 @@ prop_hunterChooseCommandErrorsWhenCallerNotHunter (GameAtHuntersTurn game) =
         let command = Hunter.chooseCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
-
-prop_hunterChooseCommandKillsTarget :: GameAtHuntersTurn -> Property
-prop_hunterChooseCommandKillsTarget (GameAtHuntersTurn game) = do
-    let hunter = game ^?! players . hunters
-
-    forAll (arbitraryPlayer game) $ \target -> do
-        let command = Hunter.chooseCommand (hunter ^. name) (target ^. name)
-        let game'   = run_ (apply command) game
-
-        is dead $ game' ^?! players . traverse . filteredBy name (target ^. name)
-
-prop_hunterChooseCommandSetsHunterRetaliated :: GameAtHuntersTurn -> Property
-prop_hunterChooseCommandSetsHunterRetaliated (GameAtHuntersTurn game) = do
-    let hunter = game ^?! players . hunters
-
-    forAll (arbitraryPlayer game) $ \target -> do
-        let command = Hunter.chooseCommand (hunter ^. name) (target ^. name)
-        let game'   = run_ (apply command) game
-
-        game' ^. hunterRetaliated
 
 prop_orphanChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_orphanChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
@@ -180,16 +153,6 @@ prop_orphanChooseCommandErrorsWhenCallerNotOrphan (GameAtOrphansTurn game) =
 
         verbose_runCommandErrors game command
 
-prop_orphanChooseCommandSetsRoleModel :: GameAtOrphansTurn -> Property
-prop_orphanChooseCommandSetsRoleModel (GameAtOrphansTurn game) = do
-    let orphan = game ^?! players . orphans
-
-    forAll (suchThat (arbitraryPlayer game) (orphan /=)) $ \target -> do
-        let command = Orphan.chooseCommand (orphan ^. name) (target ^. name)
-        let game'   = run_ (apply command) game
-
-        fromJust (game' ^. roleModel) === target ^. name
-
 prop_scapegoatChooseCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
 prop_scapegoatChooseCommandErrorsWhenGameIsOver (GameAtGameOver game) =
     forAll (arbitraryScapegoatChooseCommand game) $ verbose_runCommandErrors game . getBlind
@@ -233,18 +196,3 @@ prop_scapegoatChooseCommandErrorsWhenCallerNotScapegoat (GameAtScapegoatsTurn ga
         let command = Scapegoat.chooseCommand (caller ^. name) (targets ^.. names)
 
         verbose_runCommandErrors game command
-
-prop_scapegoatChooseCommandSetsAllowedVoters :: GameAtScapegoatsTurn -> Property
-prop_scapegoatChooseCommandSetsAllowedVoters (GameAtScapegoatsTurn game) = do
-    let scapegoat = game ^?! players . scapegoats
-
-    forAll (NonEmpty <$> sublistOf (game ^.. players . traverse . alive)) $ \(NonEmpty targets) -> do
-        let command = Scapegoat.chooseCommand (scapegoat ^. name) (targets ^.. names)
-        let game'   = run_ (apply command) game
-
-        game' ^. allowedVoters === targets ^.. names
-
-prop_scapegoatChooseCommandResetsScapegoatBlamed :: GameAtScapegoatsTurn -> Property
-prop_scapegoatChooseCommandResetsScapegoatBlamed (GameAtScapegoatsTurn game) = do
-    forAll (arbitraryScapegoatChooseCommand game) $ \(Blind command) ->
-        not $ run_ (apply command) game ^. scapegoatBlamed
