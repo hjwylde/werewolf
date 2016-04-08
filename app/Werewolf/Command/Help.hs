@@ -73,7 +73,7 @@ handle callerName _ (Options Nothing) = exitWith success
 commandsMessages :: Text -> Maybe Game -> [Text]
 commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
     [ [ "Global commands:"
-      , "- `start ([-e | --extra-roles ROLE,...] | [-r | --random-extra-roles]) PLAYER...`"
+      , "- `start ([-e | --extra-roles ROLE,...] | [-r | --random-extra-roles]) [--include-seer] PLAYER...`"
       , "- `end`"
       , "- `boot PLAYER`"
       , "- `quit`"
