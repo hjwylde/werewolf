@@ -10,9 +10,7 @@ module Game.Werewolf.Test.Command.Poison (
     allPoisonCommandTests,
 ) where
 
-import Control.Lens hiding (elements, isn't)
-
-import Data.Maybe
+import Control.Lens hiding (isn't)
 
 import Game.Werewolf
 import Game.Werewolf.Command.Witch
@@ -33,8 +31,6 @@ allPoisonCommandTests =
     , testProperty "poison command errors when not witch's turn"        prop_poisonCommandErrorsWhenNotWitchsTurn
     , testProperty "poison command errors when caller has poisoned"     prop_poisonCommandErrorsWhenCallerHasPoisoned
     , testProperty "poison command errors when caller not witch"        prop_poisonCommandErrorsWhenCallerNotWitch
-    , testProperty "poison command sets poison"                         prop_poisonCommandSetsPoison
-    , testProperty "poison command sets poison used"                    prop_poisonCommandSetsPoisonUsed
     ]
 
 prop_poisonCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -106,13 +102,3 @@ prop_poisonCommandErrorsWhenCallerNotWitch (GameAtWitchsTurn game) =
         let command = poisonCommand (caller ^. name) (target ^. name)
 
         verbose_runCommandErrors game command
-
-prop_poisonCommandSetsPoison :: GameAtWitchsTurn -> Property
-prop_poisonCommandSetsPoison (GameAtWitchsTurn game) =
-    forAll (arbitraryPoisonCommand game) $ \(Blind command) ->
-    isJust (run_ (apply command) game ^. poison)
-
-prop_poisonCommandSetsPoisonUsed :: GameAtWitchsTurn -> Property
-prop_poisonCommandSetsPoisonUsed (GameAtWitchsTurn game) =
-    forAll (arbitraryPoisonCommand game) $ \(Blind command) ->
-    run_ (apply command) game ^. poisonUsed

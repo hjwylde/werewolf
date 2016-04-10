@@ -10,7 +10,7 @@ module Game.Werewolf.Test.Command.Protect (
     allProtectCommandTests,
 ) where
 
-import Control.Lens hiding (elements, isn't)
+import Control.Lens hiding (isn't)
 
 import Data.Maybe
 
@@ -32,8 +32,6 @@ allProtectCommandTests =
     , testProperty "protect command errors when not protector's turn"       prop_protectCommandErrorsWhenNotProtectorsTurn
     , testProperty "protect command errors when caller not protector"       prop_protectCommandErrorsWhenCallerNotProtector
     , testProperty "protect command errors when target is prior protect"    prop_protectCommandErrorsWhenTargetIsPriorProtect
-    , testProperty "protect command sets prior protect"                     prop_protectCommandSetsPriorProtect
-    , testProperty "protect command sets protect"                           prop_protectCommandSetsProtect
     ]
 
 prop_protectCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
@@ -97,13 +95,3 @@ prop_protectCommandErrorsWhenTargetIsPriorProtect (GameWithProtect game) = do
     let command     = protectCommand (protector ^. name) (fromJust $ game' ^. priorProtect)
 
     verbose_runCommandErrors game' command
-
-prop_protectCommandSetsPriorProtect :: GameAtProtectorsTurn -> Property
-prop_protectCommandSetsPriorProtect (GameAtProtectorsTurn game) =
-    forAll (arbitraryProtectCommand game) $ \(Blind command) ->
-    isJust $ run_ (apply command) game ^. priorProtect
-
-prop_protectCommandSetsProtect :: GameAtProtectorsTurn -> Property
-prop_protectCommandSetsProtect (GameAtProtectorsTurn game) =
-    forAll (arbitraryProtectCommand game) $ \(Blind command) ->
-    isJust $ run_ (apply command) game ^. protect

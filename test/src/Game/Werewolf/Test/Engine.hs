@@ -17,96 +17,20 @@ import Control.Monad.Except
 import Control.Monad.Writer
 
 import Data.Either.Extra
-import Data.List.Extra
 
 import Game.Werewolf
-import Game.Werewolf.Test.Arbitrary
-import Game.Werewolf.Test.Engine.FallenAngel
-import Game.Werewolf.Test.Engine.Hunter
-import Game.Werewolf.Test.Engine.Lynching
-import Game.Werewolf.Test.Engine.Orphan
-import Game.Werewolf.Test.Engine.Protector
-import Game.Werewolf.Test.Engine.Scapegoat
-import Game.Werewolf.Test.Engine.Seer
-import Game.Werewolf.Test.Engine.Village
-import Game.Werewolf.Test.Engine.Werewolf
-import Game.Werewolf.Test.Engine.Witch
-import Game.Werewolf.Test.Util
-
-import Prelude hiding (round)
+import Game.Werewolf.Test.Arbitrary ()
 
 import Test.QuickCheck
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
 allEngineTests :: [TestTree]
-allEngineTests = concat
-    [ allFallenAngelEngineTests
-    , allHunterEngineTests
-    , allLynchingEngineTests
-    , allOrphanEngineTests
-    , allProtectorEngineTests
-    , allScapegoatEngineTests
-    , allSeerEngineTests
-    , allVillageEngineTests
-    , allWerewolfEngineTests
-    , allWitchEngineTests
-
-    , allGameOverTests
-    , allStartGameTests
-    ]
-
-allGameOverTests :: [TestTree]
-allGameOverTests =
-    [ testProperty "check game over advances stage when one allegiance alive"                       prop_checkGameOverAdvancesStageWhenOneAllegianceAlive
-    , testProperty "check game over advances stage when after first round and fallen angel dead"    prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndFallenAngelDead
-    , testProperty "check game over does nothing when fallen angel dead but aligned with villagers" prop_checkGameOverDoesNothingWhenFallenAngelDeadButAlignedWithVillagers
-    , testProperty "check game over does nothing when game over"                                    prop_checkGameOverDoesNothingWhenGameOver
-    ]
-
-allStartGameTests :: [TestTree]
-allStartGameTests =
-    [ testProperty "start game uses given players"                              prop_startGameUsesGivenPlayers
-    , testProperty "start game errors unless unique player names"               prop_startGameErrorsUnlessUniquePlayerNames
+allEngineTests =
+    [ testProperty "start game errors unless unique player names"               prop_startGameErrorsUnlessUniquePlayerNames
     , testProperty "start game errors when less than 7 players"                 prop_startGameErrorsWhenLessThan7Players
     , testProperty "start game errors when more than 1 of a restricted role"    prop_startGameErrorsWhenMoreThan1OfARestrictedRole
     ]
-
-prop_checkGameOverAdvancesStageWhenOneAllegianceAlive :: GameWithOneAllegianceAlive -> Property
-prop_checkGameOverAdvancesStageWhenOneAllegianceAlive (GameWithOneAllegianceAlive game) =
-    forAll (sublistOf $ game ^.. players . traverse . alive) $ \players' -> do
-        let game' = foldr killPlayer game (players' ^.. names)
-
-        has (stage . _GameOver) $ run_ checkGameOver game'
-
-prop_checkGameOverDoesNothingWhenGameOver :: GameAtGameOver -> Property
-prop_checkGameOverDoesNothingWhenGameOver (GameAtGameOver game) =
-    run_ checkStage game === game
-
--- TODO (hjw): pending
---prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive :: GameWithDeadPlayers -> Property
---prop_checkGameOverDoesNothingWhenAtLeastTwoAllegiancesAlive (GameWithDeadPlayers game) =
---    length (nub . map (view $ role . allegiance) . filterAlive $ game ^. players) > 1
---    ==> not . is gameOver $ run_ checkGameOver game
-
-prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndFallenAngelDead :: GameOnSecondRound -> Bool
-prop_checkGameOverAdvancesStageWhenAfterFirstRoundAndFallenAngelDead (GameOnSecondRound game) = do
-    let fallenAngelsName    = game ^?! players . fallenAngels . name
-    let game'               = killPlayer fallenAngelsName game
-
-    has (stage . _GameOver) $ run_ checkGameOver game'
-
-prop_checkGameOverDoesNothingWhenFallenAngelDeadButAlignedWithVillagers :: GameOnSecondRound -> Bool
-prop_checkGameOverDoesNothingWhenFallenAngelDeadButAlignedWithVillagers (GameOnSecondRound game) = do
-    let fallenAngelsName    = game ^?! players . fallenAngels . name
-    let game'               = killPlayer fallenAngelsName game & players . traverse . filteredBy name fallenAngelsName . role . allegiance .~ Villagers
-
-    hasn't (stage . _GameOver) $ run_ checkGameOver game'
-
-prop_startGameUsesGivenPlayers :: Property
-prop_startGameUsesGivenPlayers =
-    forAll arbitraryPlayerSet $ \players' ->
-    (fst . fromRight . runExcept . runWriterT $ startGame "" players') ^. players == players'
 
 prop_startGameErrorsUnlessUniquePlayerNames :: Game -> Property
 prop_startGameErrorsUnlessUniquePlayerNames game =
