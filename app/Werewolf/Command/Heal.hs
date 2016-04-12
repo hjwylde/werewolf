@@ -18,6 +18,7 @@ module Werewolf.Command.Heal (
 
 import Control.Monad.Except
 import Control.Monad.Extra
+import Control.Monad.Random
 import Control.Monad.State
 import Control.Monad.Writer
 
@@ -29,7 +30,7 @@ import Game.Werewolf.Command.Witch
 import Werewolf.Game
 import Werewolf.Messages
 
-handle :: MonadIO m => Text -> Text -> m ()
+handle :: (MonadIO m, MonadRandom m) => Text -> Text -> m ()
 handle callerName tag = do
     unlessM (doesGameExist tag) $ exitWith failure
         { messages = [noGameRunningMessage callerName]
@@ -39,6 +40,7 @@ handle callerName tag = do
 
     let command = healCommand callerName
 
-    case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
+    result <- runExceptT . runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game
+    case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game', messages) -> writeOrDeleteGame tag game' >> exitWith success { messages = messages }

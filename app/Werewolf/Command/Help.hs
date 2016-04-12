@@ -151,10 +151,12 @@ rulesMessages mGame = map (T.intercalate "\n")
       , "- The village falls asleep."
       , whenRoleInPlay mGame orphanRole
         "- (First round only) the Orphan wakes up and chooses a role model."
-      , whenRoleInPlay mGame protectorRole
-        "- The Protector wakes up and protects someone."
+      , whenRoleInPlay mGame villageDrunkRole
+        "- (Third round only) the Village Drunk sobers up and remembers their allegiance."
       , whenRoleInPlay mGame seerRole
         "- The Seer wakes up and sees someone's allegiance."
+      , whenRoleInPlay mGame protectorRole
+        "- The Protector wakes up and protects someone."
       , "- The Werewolves wake up and vote to devour a victim."
       , whenRoleInPlay mGame witchRole
         "- The Witch wakes up and may heal the victim and/or poison someone."

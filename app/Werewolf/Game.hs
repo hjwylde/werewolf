@@ -22,7 +22,6 @@ module Werewolf.Game (
 
 import Control.Lens         hiding (cons)
 import Control.Monad.Except
-import Control.Monad.Random
 
 import           Data.List.Extra
 import           Data.Text       (Text)
@@ -34,10 +33,9 @@ import Prelude hiding (round)
 
 import System.Directory
 import System.FilePath
-import System.Random.Shuffle
 
-createPlayers :: MonadIO m => [Text] -> [Role] -> m [Player]
-createPlayers playerNames roles = liftIO $ zipWith newPlayer playerNames <$> evalRandIO (shuffleM roles)
+createPlayers :: [Text] -> [Role] -> [Player]
+createPlayers playerNames roles = zipWith newPlayer playerNames roles
 
 padRoles :: [Role] -> Int -> [Role]
 padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles

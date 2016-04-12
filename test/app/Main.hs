@@ -20,4 +20,4 @@ main :: IO ()
 main = defaultMain . localOption (QuickCheckTests 20) =<< tests
 
 tests :: IO TestTree
-tests = return . testGroup "Tests" $ concat [allCommandTests, allEngineTests]
+tests = return . testGroup "Tests" $ allCommandTests ++ allEngineTests

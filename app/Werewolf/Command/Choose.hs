@@ -22,6 +22,7 @@ module Werewolf.Command.Choose (
 import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
+import Control.Monad.Random
 import Control.Monad.State
 import Control.Monad.Writer
 
@@ -39,7 +40,7 @@ data Options = Options
     { args :: [Text]
     } deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle :: (MonadIO m, MonadRandom m) => Text -> Text -> Options -> m ()
 handle callerName tag (Options args) = do
     unlessM (doesGameExist tag) $ exitWith failure
         { messages = [noGameRunningMessage callerName]
@@ -56,6 +57,7 @@ handle callerName tag (Options args) = do
                 { messages = [playerCannotDoThatRightNowMessage callerName]
                 }
 
-    case runExcept (runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game) of
+    result <- runExceptT . runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game
+    case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game, messages)  -> writeOrDeleteGame tag game >> exitWith success { messages = messages }

@@ -24,6 +24,7 @@ module Game.Werewolf.Engine (
 import Control.Lens         hiding (cons, isn't)
 import Control.Monad.Except
 import Control.Monad.Extra
+import Control.Monad.Random
 import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
@@ -45,7 +46,7 @@ import           Game.Werewolf.Util
 
 import Prelude hiding (round)
 
-checkStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkStage :: (MonadRandom m, MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage = do
     game <- get
     checkBoots >> checkStage' >> checkEvents
@@ -65,7 +66,7 @@ checkBoots = do
 
         removePlayer (bootee ^. name)
 
-checkStage' :: (MonadState Game m, MonadWriter [Message] m) => m ()
+checkStage' :: (MonadRandom m, MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
     FerinasGrunt -> do
         druid       <- findPlayerBy_ role druidRole
@@ -141,6 +142,20 @@ checkStage' = use stage >>= \stage' -> case stage' of
                 setPlayerAllegiance (orphan ^. name) Werewolves
 
                 tell $ orphanJoinedPackMessages (orphan ^. name) aliveWerewolfNames
+
+        advanceStage
+
+    VillageDrunksTurn -> do
+        aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
+
+        randomAllegiance <- getRandomAllegiance
+        players . villageDrunks . role . allegiance .= randomAllegiance
+
+        villageDrunk <- findPlayerBy_ role villageDrunkRole
+
+        if is villager villageDrunk
+            then tell [villageDrunkJoinedVillageMessage $ villageDrunk ^. name]
+            else tell $ villageDrunkJoinedPackMessages (villageDrunk ^. name) aliveWerewolfNames
 
         advanceStage
 

@@ -9,7 +9,7 @@
 
 *Revisions*
 
-* Minor udpates to the `help rules` text.
+* Minor updates to the `help rules` text.
 * Removed most logical tests and kept error ones. ([#164](https://github.com/hjwylde/werewolf/issues/164))
 
 ### v0.5.3.0

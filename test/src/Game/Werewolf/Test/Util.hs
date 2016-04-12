@@ -11,6 +11,7 @@ module Game.Werewolf.Test.Util (
 ) where
 
 import Control.Monad.Except
+import Control.Monad.Random
 import Control.Monad.State  hiding (State)
 import Control.Monad.Writer
 
@@ -20,10 +21,10 @@ import Game.Werewolf
 
 import Test.QuickCheck
 
-run :: StateT Game (WriterT [Message] (Except [Message])) a -> Game -> Either [Message] (Game, [Message])
-run action game = runExcept . runWriterT $ execStateT action game
+run :: StateT Game (WriterT [Message] (ExceptT [Message] (Rand StdGen))) a -> Game -> Either [Message] (Game, [Message])
+run action game = evalRand (runExceptT . runWriterT $ execStateT action game) (mkStdGen 0)
 
-run_ :: StateT Game (WriterT [Message] (Except [Message])) a -> Game -> Game
+run_ :: StateT Game (WriterT [Message] (ExceptT [Message] (Rand StdGen))) a -> Game -> Game
 run_ action = fst . fromRight . run action
 
 verbose_runCommandErrors :: Game -> Command -> Property

@@ -17,7 +17,7 @@ module Game.Werewolf.Util (
     -- * Game
 
     -- ** Manipulations
-    killPlayer, removePlayer, setPlayerAllegiance,
+    killPlayer, removePlayer, setPlayerAllegiance, getRandomAllegiance,
 
     -- ** Searches
     findPlayerBy_, getAdjacentAlivePlayers, getPlayerVote, getAllowedVoters, getPendingVoters,
@@ -38,9 +38,10 @@ module Game.Werewolf.Util (
     isPlayerAlive, isPlayerDead,
 ) where
 
-import Control.Lens        hiding (cons)
+import Control.Lens         hiding (cons)
 import Control.Monad.Extra
-import Control.Monad.State hiding (state)
+import Control.Monad.Random
+import Control.Monad.State  hiding (state)
 
 import           Data.List
 import qualified Data.Map   as Map
@@ -83,6 +84,10 @@ removePlayer name' = do
 --   they align themselves differently given some trigger.
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
 setPlayerAllegiance name' allegiance' = modify $ players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
+
+-- | Get a random allegiance (either Villagers or Werewolves).
+getRandomAllegiance :: MonadRandom m => m Allegiance
+getRandomAllegiance = fromList [(Villagers, 0.5), (Werewolves, 0.5)]
 
 findPlayerBy_ :: (Eq a, MonadState Game m) => Lens' Player a -> a -> m Player
 findPlayerBy_ lens value = fromJust <$> preuse (players . traverse . filteredBy lens value)

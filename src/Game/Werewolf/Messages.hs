@@ -66,6 +66,9 @@ module Game.Werewolf.Messages (
     -- * Seer's turn messages
     playerSeenMessage,
 
+    -- * Village Drunk's turn messages
+    villageDrunkJoinedVillageMessage, villageDrunkJoinedPackMessages,
+
     -- * Villages' turn messages
     playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
     jesterLynchedMessage, scapegoatLynchedMessage,
@@ -93,8 +96,9 @@ import Control.Arrow
 import Control.Lens
 
 import           Data.List.Extra
-import           Data.Text       (Text)
-import qualified Data.Text       as T
+import           Data.String.ToString
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 
 import           Game.Werewolf.Game
 import           Game.Werewolf.Player
@@ -138,24 +142,25 @@ trueVillagerMessage name = publicMessage $ T.unwords
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
-    FerinasGrunt    -> []
-    GameOver        -> []
-    HuntersTurn1    -> huntersTurnMessages huntersName
-    HuntersTurn2    -> huntersTurnMessages huntersName
-    Lynching        -> []
-    OrphansTurn     -> orphansTurnMessages orphansName
-    ProtectorsTurn  -> protectorsTurnMessages protectorsName
-    ScapegoatsTurn  -> scapegoatsTurnMessages scapegoatsName
-    SeersTurn       -> seersTurnMessages seersName
-    Sunrise         -> [sunriseMessage]
-    Sunset          -> [nightFallsMessage]
-    VillagesTurn    -> if isFirstRound game
+    FerinasGrunt        -> []
+    GameOver            -> []
+    HuntersTurn1        -> huntersTurnMessages huntersName
+    HuntersTurn2        -> huntersTurnMessages huntersName
+    Lynching            -> []
+    OrphansTurn         -> orphansTurnMessages orphansName
+    ProtectorsTurn      -> protectorsTurnMessages protectorsName
+    ScapegoatsTurn      -> scapegoatsTurnMessages scapegoatsName
+    SeersTurn           -> seersTurnMessages seersName
+    Sunrise             -> [sunriseMessage]
+    Sunset              -> [nightFallsMessage]
+    VillageDrunksTurn   -> [villageDrunksTurnMessage]
+    VillagesTurn        -> if isFirstRound game
         then firstVillagesTurnMessages
         else villagesTurnMessages
-    WerewolvesTurn  -> if isFirstRound game
+    WerewolvesTurn      -> if isFirstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
-    WitchsTurn      -> witchsTurnMessages game
+    WitchsTurn          -> witchsTurnMessages game
     where
         players'            = game ^. players
         huntersName         = players' ^?! hunters . name
@@ -194,6 +199,9 @@ seersTurnMessages to =
     [ publicMessage "The Seer wakes up."
     , privateMessage to "Whose allegiance would you like to `see`?"
     ]
+
+villageDrunksTurnMessage :: Message
+villageDrunksTurnMessage = publicMessage "The Village Drunk sobers up."
 
 sunriseMessage :: Message
 sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
@@ -266,8 +274,8 @@ gameOverMessages game
         [ [publicMessage "You should have heeded my warning, for now the Fallen Angel has been set free!"]
         , [publicMessage "The game is over! The Fallen Angel has won."]
         , [playerRolesMessage]
-        , [playerWonMessage $ game ^?! players . fallenAngels . name]
-        , playerLostMessages
+        , [playerWonMessage fallenAngelsName]
+        , map playerLostMessage (game ^.. players . names \\ [fallenAngelsName])
         ]
     | hasVillagersWon game      = concat
         [ [publicMessage "The game is over! The Villagers have won."]
@@ -294,7 +302,6 @@ gameOverMessages game
             ]
 
         winningAllegiance
-            | hasFallenAngelWon game    = FallenAngel
             | hasVillagersWon game      = Villagers
             | hasWerewolvesWon game     = Werewolves
             | otherwise                 = undefined
@@ -305,6 +312,8 @@ gameOverMessages game
         playerWonMessages           = map playerWonMessage (winningPlayers ^.. traverse . alive . name)
         playerContributedMessages   = map playerContributedMessage (winningPlayers ^.. traverse . dead . name)
         playerLostMessages          = map playerLostMessage (losingPlayers ^.. names)
+
+        fallenAngelsName = game ^?! players . fallenAngels . name
 
 playerWonMessage :: Text -> Message
 playerWonMessage to = privateMessage to "Victory! You won!"
@@ -377,24 +386,8 @@ currentStageMessages _ Lynching     = []
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
 currentStageMessages to turn        = [privateMessage to $ T.concat
-    [ "It's currently the ", showTurn turn, " turn."
+    [ "It's currently the ", T.pack $ toString turn, "."
     ]]
-    where
-        showTurn :: Stage -> Text
-        showTurn FerinasGrunt   = undefined
-        showTurn GameOver       = undefined
-        showTurn HuntersTurn1   = "Hunter's"
-        showTurn HuntersTurn2   = "Hunter's"
-        showTurn Lynching       = undefined
-        showTurn OrphansTurn    = "Orphan's"
-        showTurn ProtectorsTurn = "Protector's"
-        showTurn ScapegoatsTurn = "Scapegoat's"
-        showTurn SeersTurn      = "Seer's"
-        showTurn Sunrise        = undefined
-        showTurn Sunset         = undefined
-        showTurn VillagesTurn   = "village's"
-        showTurn WerewolvesTurn = "Werewolves'"
-        showTurn WitchsTurn     = "Witch's"
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat
@@ -482,13 +475,29 @@ playerCannotChooseJesterMessage to =
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
-    [targetName, " is aligned with the ", allegiance', "."]
+    [targetName, " is aligned with ", article, T.pack $ toString allegiance', "."]
     where
         targetName  = target ^. name
-        allegiance' = case target ^. role . allegiance of
-            FallenAngel -> "Fallen Angel"
-            Villagers   -> "Villagers"
-            Werewolves  -> "Werewolves"
+        allegiance' = target ^. role . allegiance
+        article     = if allegiance' == NoOne then "" else "the "
+
+villageDrunkJoinedVillageMessage :: Text -> Message
+villageDrunkJoinedVillageMessage to = privateMessage to $ T.unwords
+    [ "Somehow you managed to avoid getting killed while in your drunken stupor. Thank God for"
+    , "that, maybe now you can actually help the village."
+    ]
+
+villageDrunkJoinedPackMessages :: Text -> [Text] -> [Message]
+villageDrunkJoinedPackMessages villageDrunksName werewolfNames =
+    privateMessage villageDrunksName (T.concat
+        [ "As you start to feel sober for the first time in days a new thirst begins to take hold."
+        , " The bloodthirst starts to bring back memories, memories of your true home with "
+        , concatList werewolfNames, "."
+        ])
+    : groupMessages werewolfNames (T.unwords
+        [ villageDrunksName
+        , "the Village Drunk has finally sobered up and remembered their true home."
+        ])
 
 playerMadeLynchVoteMessage :: Text -> Text -> Message
 playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat

@@ -39,20 +39,21 @@ circleCommand callerName includeDead = Command $ do
 
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    FerinasGrunt    -> return ()
-    GameOver        -> tell [gameIsOverMessage callerName]
-    HuntersTurn1    -> pingRole hunterRole
-    HuntersTurn2    -> pingRole hunterRole
-    Lynching        -> return ()
-    OrphansTurn     -> pingRole orphanRole
-    ProtectorsTurn  -> pingRole protectorRole
-    ScapegoatsTurn  -> pingRole scapegoatRole
-    SeersTurn       -> pingRole seerRole
-    Sunrise         -> return ()
-    Sunset          -> return ()
-    VillagesTurn    -> pingVillagers
-    WerewolvesTurn  -> pingWerewolves
-    WitchsTurn      -> pingRole witchRole
+    FerinasGrunt        -> return ()
+    GameOver            -> tell [gameIsOverMessage callerName]
+    HuntersTurn1        -> pingRole hunterRole
+    HuntersTurn2        -> pingRole hunterRole
+    Lynching            -> return ()
+    OrphansTurn         -> pingRole orphanRole
+    ProtectorsTurn      -> pingRole protectorRole
+    ScapegoatsTurn      -> pingRole scapegoatRole
+    SeersTurn           -> pingRole seerRole
+    Sunrise             -> return ()
+    Sunset              -> return ()
+    VillageDrunksTurn   -> pingRole villageDrunkRole
+    VillagesTurn        -> pingVillagers
+    WerewolvesTurn      -> pingWerewolves
+    WitchsTurn          -> pingRole witchRole
 
 pingRole :: (MonadState Game m, MonadWriter [Message] m) => Role -> m ()
 pingRole role' = do
