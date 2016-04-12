@@ -37,6 +37,6 @@ handle callerName tag = do
 
     let command = pingCommand callerName
 
-    case runExcept (execWriterT $ execStateT (apply command) game) of
+    case runExcept . execWriterT $ execStateT (apply command) game of
         Left errorMessages  -> exitWith failure { messages = errorMessages }
         Right messages      -> exitWith success { messages = messages }

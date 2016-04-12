@@ -111,8 +111,10 @@ library
         extra == 1.4.*,
         filepath == 1.4.*,
         lens >= 4.12 && < 4.14,
+        MonadRandom == 0.4.*,
         mtl == 2.2.*,
         text == 1.2.*,
+        tostring == 0.2.*,
         transformers == 0.4.*
 
 test-suite werewolf-test
@@ -142,6 +144,7 @@ test-suite werewolf-test
         containers == 0.5.*,
         extra == 1.4.*,
         lens >= 4.12 && < 4.14,
+        MonadRandom == 0.4.*,
         mtl == 2.2.*,
         QuickCheck == 2.8.*,
         tasty >= 0.10 && < 0.12,

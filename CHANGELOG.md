@@ -5,10 +5,11 @@
 *Minor*
 
 * Added `--include-seer` option to `start`. ([#179](https://github.com/hjwylde/werewolf/issues/179))
+* Added the Village Drunk role. ([#160](https://github.com/hjwylde/werewolf/issues/160))
 
 *Revisions*
 
-* Minor udpates to the `help rules` text.
+* Minor updates to the `help rules` text.
 * Removed most logical tests and kept error ones. ([#164](https://github.com/hjwylde/werewolf/issues/164))
 
 ### v0.5.3.0

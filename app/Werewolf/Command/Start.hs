@@ -49,7 +49,7 @@ data Options = Options
 data ExtraRoles = None | Random | Use [Text]
     deriving (Eq, Show)
 
-handle :: MonadIO m => Text -> Text -> Options -> m ()
+handle :: (MonadIO m, MonadRandom m) => Text -> Text -> Options -> m ()
 handle callerName tag (Options extraRoles includeSeer playerNames) = do
     whenM (doesGameExist tag &&^ (hasn't (stage . _GameOver) <$> readGame tag)) $ exitWith failure
         { messages = [gameAlreadyRunningMessage callerName]
@@ -61,9 +61,10 @@ handle callerName tag (Options extraRoles includeSeer playerNames) = do
             Random          -> randomExtraRoles $ length playerNames
             Use roleNames   -> useExtraRoles callerName roleNames
 
-        let extraRoles'' = if includeSeer then nub (seerRole:extraRoles') else extraRoles'
+        let extraRoles''    = if includeSeer then nub (seerRole:extraRoles') else extraRoles'
+        let roles           = padRoles extraRoles'' (length playerNames + 1)
 
-        players <- createPlayers (callerName:playerNames) (padRoles extraRoles'' (length playerNames + 1))
+        players <- createPlayers (callerName:playerNames) <$> shuffleM roles
 
         runWriterT $ startGame callerName players >>= execStateT checkStage
 
@@ -71,8 +72,8 @@ handle callerName tag (Options extraRoles includeSeer playerNames) = do
         Left errorMessages      -> exitWith failure { messages = errorMessages }
         Right (game, messages)  -> writeOrDeleteGame tag game >> exitWith success { messages = messages }
 
-randomExtraRoles :: MonadIO m => Int -> m [Role]
-randomExtraRoles n = liftIO . evalRandIO $ do
+randomExtraRoles :: MonadRandom m => Int -> m [Role]
+randomExtraRoles n = do
     let minimum = n `div` 3
 
     count <- getRandomR (minimum, minimum + 2)

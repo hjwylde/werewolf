@@ -299,20 +299,21 @@ arbitraryPlayerSet = do
 
 arbitraryCommand :: Game -> Gen (Blind Command)
 arbitraryCommand game = case game ^. stage of
-    FerinasGrunt    -> return $ Blind noopCommand
-    GameOver        -> return $ Blind noopCommand
-    HuntersTurn1    -> arbitraryHunterChooseCommand game
-    HuntersTurn2    -> arbitraryHunterChooseCommand game
-    Lynching        -> return $ Blind noopCommand
-    OrphansTurn     -> arbitraryOrphanChooseCommand game
-    ProtectorsTurn  -> arbitraryProtectCommand game
-    ScapegoatsTurn  -> arbitraryScapegoatChooseCommand game
-    SeersTurn       -> arbitrarySeeCommand game
-    Sunrise         -> return $ Blind noopCommand
-    Sunset          -> return $ Blind noopCommand
-    VillagesTurn    -> arbitraryVillagerVoteCommand game
-    WerewolvesTurn  -> arbitraryWerewolfVoteCommand game
-    WitchsTurn      -> oneof
+    FerinasGrunt        -> return $ Blind noopCommand
+    GameOver            -> return $ Blind noopCommand
+    HuntersTurn1        -> arbitraryHunterChooseCommand game
+    HuntersTurn2        -> arbitraryHunterChooseCommand game
+    Lynching            -> return $ Blind noopCommand
+    OrphansTurn         -> arbitraryOrphanChooseCommand game
+    ProtectorsTurn      -> arbitraryProtectCommand game
+    ScapegoatsTurn      -> arbitraryScapegoatChooseCommand game
+    SeersTurn           -> arbitrarySeeCommand game
+    Sunrise             -> return $ Blind noopCommand
+    Sunset              -> return $ Blind noopCommand
+    VillageDrunksTurn   -> return $ Blind noopCommand
+    VillagesTurn        -> arbitraryVillagerVoteCommand game
+    WerewolvesTurn      -> arbitraryWerewolfVoteCommand game
+    WitchsTurn          -> oneof
         [ arbitraryHealCommand game
         , arbitraryPassCommand game
         , arbitraryPoisonCommand game

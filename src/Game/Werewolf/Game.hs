@@ -23,8 +23,8 @@ module Game.Werewolf.Game (
 
     Stage(..),
     _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OrphansTurn,
-    _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillagesTurn, _WerewolvesTurn,
-    _WitchsTurn,
+    _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillageDrunksTurn,
+    _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
 
     allStages,
     stageCycle, stageAvailable,
@@ -41,7 +41,7 @@ module Game.Werewolf.Game (
     getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
-    isFirstRound,
+    isFirstRound, isThirdRound,
     doesPlayerExist,
     hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
@@ -49,10 +49,11 @@ module Game.Werewolf.Game (
 import Control.Lens hiding (isn't)
 
 import           Data.List.Extra
-import           Data.Map        (Map)
-import qualified Data.Map        as Map
+import           Data.Map             (Map)
+import qualified Data.Map             as Map
 import           Data.Maybe
-import           Data.Text       (Text)
+import           Data.String.ToString
+import           Data.Text            (Text)
 
 import Game.Werewolf.Player
 
@@ -109,9 +110,26 @@ data Game = Game
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
 data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OrphansTurn
-            | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillagesTurn
-            | WerewolvesTurn | WitchsTurn
+            | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillageDrunksTurn
+            | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
+
+instance ToString Stage where
+    toString FerinasGrunt       = "Ferina's Grunt"
+    toString GameOver           = "Game over"
+    toString HuntersTurn1       = "Hunter's turn"
+    toString HuntersTurn2       = "Hunter's turn"
+    toString Lynching           = "Lynching"
+    toString OrphansTurn        = "Orphan's turn"
+    toString ProtectorsTurn     = "Protector's turn"
+    toString ScapegoatsTurn     = "Scapegoat's turn"
+    toString SeersTurn          = "Seer's turn"
+    toString Sunrise            = "Sunrise"
+    toString Sunset             = "Sunset"
+    toString VillageDrunksTurn  = "Village Drunk's turn"
+    toString VillagesTurn       = "village's turn"
+    toString WerewolvesTurn     = "Werewolves' turn"
+    toString WitchsTurn         = "Witch's turn"
 
 -- TODO (hjw): remove events
 -- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
@@ -140,8 +158,9 @@ allStages =
     , HuntersTurn1
     , ScapegoatsTurn
     , Sunset
-    , SeersTurn
     , OrphansTurn
+    , VillageDrunksTurn
+    , SeersTurn
     , ProtectorsTurn
     , WerewolvesTurn
     , WitchsTurn
@@ -175,6 +194,9 @@ stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
 stageAvailable game SeersTurn           = has (players . seers . alive) game
 stageAvailable _ Sunrise                = True
 stageAvailable _ Sunset                 = True
+stageAvailable game VillageDrunksTurn   =
+    has (players . villageDrunks . alive) game
+    && isThirdRound game
 stageAvailable game VillagesTurn        =
     (has (players . fallenAngels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)
@@ -244,6 +266,10 @@ getVoteResult game
 -- | @'isFirstRound' game = game ^. 'round' == 0@
 isFirstRound :: Game -> Bool
 isFirstRound game = game ^. round == 0
+
+-- | @'isThirdRound' game = game ^. 'round' == 2@
+isThirdRound :: Game -> Bool
+isThirdRound game = game ^. round == 2
 
 -- | Queries whether the player is in the game.
 doesPlayerExist :: Text -> Game -> Bool

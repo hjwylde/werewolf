@@ -24,7 +24,7 @@ module Game.Werewolf.Role (
     name, allegiance, balance, description, rules,
 
     Allegiance(..),
-    _FallenAngel, _Villagers, _Werewolves,
+    _NoOne, _Villagers, _Werewolves,
 
     -- ** Instances
     allRoles, restrictedRoles,
@@ -33,7 +33,7 @@ module Game.Werewolf.Role (
     -- | No-one knows the true nature of the Ambiguous, sometimes not even the Ambiguous themselves!
     --
     --   The Ambiguous are able to change allegiance throughout the game.
-    orphanRole,
+    orphanRole, villageDrunkRole,
 
     -- *** The Loners
     -- | The Loners look out for themselves and themselves alone.
@@ -65,8 +65,9 @@ import Control.Lens hiding (isn't)
 import           Data.Function
 import           Data.List
 import           Data.Monoid
-import           Data.Text     (Text)
-import qualified Data.Text     as T
+import           Data.String.ToString
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 
 -- | Role definitions require only a few pieces of information.
 --   Most of the game logic behind a role is implemented in "Game.Werewolf.Command" and
@@ -86,9 +87,15 @@ data Role = Role
     , _rules       :: Text
     } deriving (Read, Show)
 
--- | The Loner allegiances are seldom used, rather they are present for correctness.
-data Allegiance = FallenAngel | Villagers | Werewolves
+-- | The 'NoOne' allegiance is used for the Loners. It is not used to determine who has won (i.e.,
+--   if one Loner wins, the others still lose).
+data Allegiance = NoOne | Villagers | Werewolves
     deriving (Eq, Read, Show)
+
+instance ToString Allegiance where
+    toString NoOne      = "no-one"
+    toString Villagers  = "Villagers"
+    toString Werewolves = "Werewolves"
 
 makeLenses ''Role
 
@@ -111,6 +118,7 @@ allRoles =
     , simpleVillagerRole
     , simpleWerewolfRole
     , trueVillagerRole
+    , villageDrunkRole
     , witchRole
     ]
 
@@ -153,6 +161,37 @@ orphanRole = Role
         ]
     }
 
+-- | /Hah, maybe not as liked as the Jester, but the Drunk sure does their fair share of stupid/
+--   /things in the night! No-one knows if they even actually make it home; sometimes people see/
+--   /them sleeping outside the Blacksmith's home, others say they see them wandering towards the/
+--   /woods. It's pointless quizzing the Village Drunk in the, morning about their doings; they can/
+--   /never remember what they did!/
+--
+--   The Village Drunk is randomly assigned an alignment at the start, either Villagers or
+--   Werewolves. However, they are not told to which allegiance they belong.
+--
+--   On the third night the Village Drunk sobers up and is informed of their role.
+villageDrunkRole :: Role
+villageDrunkRole = Role
+    { _name         = "Village Drunk"
+    , _allegiance   = Villagers
+    , _balance      = -1
+    , _description  = T.unwords
+        [ "Hah, maybe not as liked as the Jester, but the Drunk sure does their fair share of"
+        , "stupid things in the night! No-one knows if they even actually make it home; sometimes"
+        , "people see them sleeping outside the Blacksmith's home, others say they see them"
+        , "wandering towards the woods. It's pointless quizzing the Village Drunk in the, morning"
+        , "about their doings; they can never remember what they did!"
+        ]
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "The Village Drunk is randomly assigned an alignment at the start, either Villagers"
+            , "or Werewolves. However, they are not told to which allegiance they belong."
+            ]
+        , "On the third night the Village Drunk sobers up and is informed of their role."
+        ]
+    }
+
 -- | /Long ago during the War in Heaven, angels fell from the sky as one by one those that followed/
 --   /Lucifer were defeated. For centuries they lived amongst mortal Villagers as punishment for/
 --   /their sins and wrongdoings. The Fallen Angel was one such being and is now one of the few/
@@ -167,7 +206,7 @@ orphanRole = Role
 fallenAngelRole :: Role
 fallenAngelRole = Role
     { _name         = "Fallen Angel"
-    , _allegiance   = FallenAngel
+    , _allegiance   = NoOne
     , _balance      = 0
     , _description  = T.unwords
         [ "Long ago during the War in Heaven, angels fell from the sky as one by one those that"
@@ -430,11 +469,11 @@ simpleWerewolfRole = Role
 
 -- | The counter-part to 'isn't', but more general as it takes a 'Getting' instead.
 is :: Getting Any s a -> s -> Bool
-is query = has query
+is = has
 
 -- | A re-write of 'Control.Lens.Prism.isn't' to be more general by taking a 'Getting' instead.
 isn't :: Getting All s a -> s -> Bool
-isn't query = hasn't query
+isn't = hasn't
 
 -- | A companion to 'filtered' that, rather than using a predicate, filters on the given lens for
 -- matches.
