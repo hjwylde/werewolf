@@ -2,6 +2,8 @@
 
 ### Upcoming
 
+### v0.5.4.0
+
 *Minor*
 
 * Added `--include-seer` option to `start`. ([#179](https://github.com/hjwylde/werewolf/issues/179))
