@@ -1,13 +1,13 @@
 # werewolf
 
-[![Project Status: Wip - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/1.0.0/wip.svg)](http://www.repostatus.org/#wip)
+[![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Build Status](https://travis-ci.org/hjwylde/werewolf.svg?branch=master)](https://travis-ci.org/hjwylde/werewolf)
 [![Release](https://img.shields.io/github/release/hjwylde/werewolf.svg)](https://github.com/hjwylde/werewolf/releases/latest)
 [![werewolf on Stackage LTS](https://www.stackage.org/package/werewolf/badge/lts)](https://www.stackage.org/lts/package/werewolf)
 [![werewolf on Stackage Nightly](https://www.stackage.org/package/werewolf/badge/nightly)](https://www.stackage.org/nightly/package/werewolf)
 
-A game engine for playing werewolf within a chat client.
-This engine is based off of the party game Mafia, also known as Werewolf.
+A game engine for playing werewolf within an arbitrary chat client.
+Werewolf is a well known social party game, commonly also called Mafia.
 See the [Wikipedia article](https://en.wikipedia.org/wiki/Mafia_(party_game)) for a rundown on it's
     gameplay and history.
 
@@ -107,7 +107,7 @@ E.g., to start a game:
 ```bash
 > werewolf --caller @foo --tag werewolf start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
-    {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
+    {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge and @grault!"},
     {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4) and Simple Werewolf (2) for a total balance of -2."},
     {"to":"@foo","message":"You're a Simple Villager.\nA simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even nobles. No matter their differences though, the plight of Werewolves in Fougères unites all the Villagers in this unfortunate time.\nThe Simple Villager has no special abilities, they must use their guile to determine whom among them is not who they say they are."},
     ...,
