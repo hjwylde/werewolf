@@ -6,8 +6,8 @@
 [![werewolf on Stackage LTS](https://www.stackage.org/package/werewolf/badge/lts)](https://www.stackage.org/lts/package/werewolf)
 [![werewolf on Stackage Nightly](https://www.stackage.org/package/werewolf/badge/nightly)](https://www.stackage.org/nightly/package/werewolf)
 
-A game engine for playing werewolf within a chat client.
-This engine is based off of the party game Mafia, also known as Werewolf.
+A game engine for playing werewolf within an arbitrary chat client.
+Werewolf is a well known social party game, commonly also called Mafia.
 See the [Wikipedia article](https://en.wikipedia.org/wiki/Mafia_(party_game)) for a rundown on it's
     gameplay and history.
 
