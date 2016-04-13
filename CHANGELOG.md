@@ -2,6 +2,12 @@
 
 ### Upcoming
 
+### v1.0.0.0
+
+*Major*
+
+* Initial stable release!
+
 ### v0.5.4.0
 
 *Minor*
