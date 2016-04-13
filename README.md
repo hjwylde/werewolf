@@ -107,7 +107,7 @@ E.g., to start a game:
 ```bash
 > werewolf --caller @foo --tag werewolf start --extra-roles seer @bar @baz @qux @quux @corge @grault
 {"ok":true,"messages":[
-    {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge, @grault!"},
+    {"to":null,"message":"A new game of werewolf is starting with @foo, @bar, @baz, @qux, @quux, @corge and @grault!"},
     {"to":null,"message":"The roles in play are Seer (1), Simple Villager (4) and Simple Werewolf (2) for a total balance of -2."},
     {"to":"@foo","message":"You're a Simple Villager.\nA simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even nobles. No matter their differences though, the plight of Werewolves in Fougères unites all the Villagers in this unfortunate time.\nThe Simple Villager has no special abilities, they must use their guile to determine whom among them is not who they say they are."},
     ...,
