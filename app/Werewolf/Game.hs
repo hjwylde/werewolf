@@ -35,7 +35,7 @@ import System.Directory
 import System.FilePath
 
 createPlayers :: [Text] -> [Role] -> [Player]
-createPlayers playerNames roles = zipWith newPlayer playerNames roles
+createPlayers = zipWith newPlayer
 
 padRoles :: [Role] -> Int -> [Role]
 padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
@@ -71,7 +71,7 @@ deleteGame tag = liftIO $ filePath tag >>= removeFile
 
 writeOrDeleteGame :: MonadIO m => Text -> Game -> m ()
 writeOrDeleteGame tag game
-    | has (stage . _GameOver) game    = deleteGame tag
+    | has (stage . _GameOver) game  = deleteGame tag
     | otherwise                     = writeGame tag game
 
 doesGameExist :: MonadIO m => Text -> m Bool

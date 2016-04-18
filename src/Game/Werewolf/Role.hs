@@ -376,13 +376,13 @@ simpleVillagerRole = Role
     }
 
 -- | /Every village needs a Jester; they're so stupid, but provide so much entertainment! The/
---   /Jester may not have any special abilities, but at least no one in the village wants to hurt/
+--   /Jester may not have any special abilities, but at least no-one in the village wants to hurt/
 --   /them./
 --
 --   If the village votes to lynch the Jester, their identity is revealed. The village realise
 --   there's no point in burning them and so they are set free.
 --
---   The Jester continues to play but may no longer vote as no one can take them seriously.
+--   The Jester continues to play but may no longer vote as no-one can take them seriously.
 jesterRole :: Role
 jesterRole = Role
     { _name         = "Jester"
@@ -390,7 +390,7 @@ jesterRole = Role
     , _balance      = 0
     , _description  = T.unwords
         [ "Every village needs a Jester; they're so stupid, but provide so much entertainment! The"
-        , "Jester may not have any special abilities, but at least no one in the village wants to"
+        , "Jester may not have any special abilities, but at least no-one in the village wants to"
         , "hurt them."
         ]
     , _rules        = T.intercalate "\n"
@@ -398,7 +398,7 @@ jesterRole = Role
             [ "If the village votes to lynch the Jester, their identity is revealed. The village"
             , "realise there's no point in burning them and so they are set free."
             ]
-        , "The Jester continues to play but may no longer vote as no one can take them seriously."
+        , "The Jester continues to play but may no longer vote as no-one can take them seriously."
         ]
     }
 

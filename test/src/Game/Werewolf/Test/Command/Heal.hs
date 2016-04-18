@@ -32,11 +32,7 @@ allHealCommandTests =
     ]
 
 prop_healCommandErrorsWhenGameIsOver :: GameAtGameOver -> Property
-prop_healCommandErrorsWhenGameIsOver (GameAtGameOver game) = do
-    let witch   = game ^?! players . witches
-    let command = healCommand $ witch ^. name
-
-    verbose_runCommandErrors game command
+prop_healCommandErrorsWhenGameIsOver (GameAtGameOver game) = verbose_runHealCommandErrors game
 
 prop_healCommandErrorsWhenCallerDoesNotExist :: GameWithDevourEvent -> Player -> Property
 prop_healCommandErrorsWhenCallerDoesNotExist (GameWithDevourEvent game) caller =
@@ -52,26 +48,15 @@ prop_healCommandErrorsWhenCallerIsDead (GameWithDevourEvent game) =
         verbose_runCommandErrors game' command
 
 prop_healCommandErrorsWhenNoTargetIsDevoured :: GameAtWitchsTurn -> Property
-prop_healCommandErrorsWhenNoTargetIsDevoured (GameAtWitchsTurn game) = do
-    let witch   = game ^?! players . witches
-    let command = healCommand $ witch ^. name
-
-    verbose_runCommandErrors game command
+prop_healCommandErrorsWhenNoTargetIsDevoured (GameAtWitchsTurn game) = verbose_runHealCommandErrors game
 
 prop_healCommandErrorsWhenNotWitchsTurn :: Game -> Property
-prop_healCommandErrorsWhenNotWitchsTurn game = do
-    let witch   = game ^?! players . witches
-    let command = healCommand $ witch ^. name
-
+prop_healCommandErrorsWhenNotWitchsTurn game =
     hasn't (stage . _WitchsTurn) game
-        ==> verbose_runCommandErrors game command
+    ==> verbose_runHealCommandErrors game
 
 prop_healCommandErrorsWhenCallerHasHealed :: GameWithHeal -> Property
-prop_healCommandErrorsWhenCallerHasHealed (GameWithHeal game) = do
-    let witch   = game ^?! players . witches
-    let command = healCommand $ witch ^. name
-
-    verbose_runCommandErrors game command
+prop_healCommandErrorsWhenCallerHasHealed (GameWithHeal game) = verbose_runHealCommandErrors game
 
 prop_healCommandErrorsWhenCallerNotWitch :: GameWithDevourEvent -> Property
 prop_healCommandErrorsWhenCallerNotWitch (GameWithDevourEvent game) =
@@ -79,3 +64,10 @@ prop_healCommandErrorsWhenCallerNotWitch (GameWithDevourEvent game) =
         let command = healCommand (caller ^. name)
 
         verbose_runCommandErrors game command
+
+verbose_runHealCommandErrors :: Game -> Property
+verbose_runHealCommandErrors game = do
+    let witch   = game ^?! players . witches
+    let command = healCommand $ witch ^. name
+
+    verbose_runCommandErrors game command
