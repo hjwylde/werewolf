@@ -26,16 +26,16 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    druid, fallenAngel, hunter, jester, orphan, protector, scapegoat, seer, simpleVillager,
-    simpleWerewolf, trueVillager, villageDrunk, witch,
+    crookedSenator, druid, fallenAngel, hunter, jester, orphan, protector, scapegoat, seer,
+    simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    druids, fallenAngels, hunters, jesters, orphans, protectors, scapegoats, seers, simpleVillagers,
-    simpleWerewolves, trueVillagers, villageDrunks, witches,
+    crookedSenators, druids, fallenAngels, hunters, jesters, orphans, protectors, scapegoats,
+    seers, simpleVillagers, simpleWerewolves, trueVillagers, villageDrunks, witches,
     villagers, werewolves,
     alive, dead,
 
@@ -74,6 +74,14 @@ makePrisms ''State
 -- | Creates a new 'Alive' player.
 newPlayer :: Text -> Role -> Player
 newPlayer name role = Player name role Alive
+
+-- | The traversal of 'Player's with a 'crookedSenatorRole'.
+--
+-- @
+-- 'crookedSenator' = 'role' . 'only' 'crookedSenatorRole'
+-- @
+crookedSenator :: Traversal' Player ()
+crookedSenator = role . only crookedSenatorRole
 
 -- | The traversal of 'Player's with a 'druidRole'.
 --
@@ -218,6 +226,14 @@ roles = traverse . role
 -- @
 states :: Traversable t => Traversal' (t Player) State
 states = traverse . state
+
+-- | This 'Traversal' provides the traversal of 'crookedSenator' 'Player's.
+--
+-- @
+-- 'crookedSenators' = 'traverse' . 'filtered' ('is' 'crookedSenator')
+-- @
+crookedSenators :: Traversable t => Traversal' (t Player) Player
+crookedSenators = traverse . filtered (is crookedSenator)
 
 -- | This 'Traversal' provides the traversal of 'druid' 'Player's.
 --

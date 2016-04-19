@@ -17,6 +17,7 @@ module Game.Werewolf.Command.Villager (
 import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
+import Control.Monad.Writer
 
 import qualified Data.Map   as Map
 import           Data.Maybe
@@ -35,3 +36,6 @@ voteCommand callerName targetName = Command $ do
     validatePlayer callerName targetName
 
     votes %= Map.insert callerName targetName
+
+    whenJustM (preuse $ players . crookedSenators . alive) $ \crookedSenator ->
+        tell [playerMadeLynchVoteMessage (Just $ crookedSenator ^. name) callerName targetName]
