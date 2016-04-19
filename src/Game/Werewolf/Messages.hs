@@ -478,7 +478,9 @@ playerSeenMessage to target = privateMessage to $ T.concat
     [targetName, " is aligned with ", article, T.pack $ toString allegiance', "."]
     where
         targetName  = target ^. name
-        allegiance' = target ^. role . allegiance
+        allegiance'
+            | is alphaWolf target   = Villagers
+            | otherwise             = target ^. role . allegiance
         article     = if allegiance' == NoOne then "" else "the "
 
 villageDrunkJoinedVillageMessage :: Text -> Message
@@ -506,7 +508,8 @@ playerMadeLynchVoteMessage mTo voterName targetName = Message mTo $ T.concat
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
-    | is simpleWerewolf player  = publicMessage $ T.concat
+    | is simpleWerewolf player
+        || is alphaWolf player  = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight. As they scream their body starts to "
         , "contort and writhe, transforming into ", article playerRole, " "
         , playerRole ^. Role.name, ".", " Thankfully they go limp before breaking free of their "

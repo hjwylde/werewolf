@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Minor*
+
+* Added the Alpha Wolf role. ([#149](https://github.com/hjwylde/werewolf/issues/149))
+
 ### v1.0.1.0
 
 *Minor*

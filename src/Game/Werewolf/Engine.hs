@@ -70,7 +70,7 @@ checkStage' :: (MonadRandom m, MonadState Game m, MonadWriter [Message] m) => m 
 checkStage' = use stage >>= \stage' -> case stage' of
     FerinasGrunt -> do
         druid       <- findPlayerBy_ role druidRole
-        players'    <- getAdjacentAlivePlayers (druid ^. name)
+        players'    <- filter (isn't alphaWolf) <$> getAdjacentAlivePlayers (druid ^. name)
 
         when (has werewolves players') $ tell [ferinaGruntsMessage]
 
