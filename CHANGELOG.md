@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Minor*
+
+* Added the Crooked Senator role. ([#142](https://github.com/hjwylde/werewolf/issues/142))
+
 ### v1.0.0.0
 
 *Major*

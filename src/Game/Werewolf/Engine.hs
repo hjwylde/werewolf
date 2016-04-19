@@ -160,7 +160,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     VillagesTurn -> whenM (null <$> liftM2 intersect getAllowedVoters getPendingVoters) $ do
-        tell . map (uncurry playerMadeLynchVoteMessage) =<< uses votes Map.toList
+        tell . map (uncurry $ playerMadeLynchVoteMessage Nothing) =<< uses votes Map.toList
 
         advanceStage
 

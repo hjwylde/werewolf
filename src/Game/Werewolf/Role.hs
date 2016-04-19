@@ -47,8 +47,8 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    druidRole, hunterRole, jesterRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole,
-    trueVillagerRole, witchRole,
+    crookedSenatorRole, druidRole, hunterRole, jesterRole, protectorRole, scapegoatRole, seerRole,
+    simpleVillagerRole, trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -107,7 +107,8 @@ makePrisms ''Allegiance
 -- | A list containing all the roles defined in this file.
 allRoles :: [Role]
 allRoles =
-    [ druidRole
+    [ crookedSenatorRole
+    , druidRole
     , fallenAngelRole
     , hunterRole
     , jesterRole
@@ -225,6 +226,26 @@ fallenAngelRole = Role
             , "night). If however they fail, they become a Villager for the rest of the game."
             ]
         ]
+    }
+
+-- | /Never trust a politician. Nor a Crooked Senator for that matter. The Crooked Senator may seem/
+--   /like he has the village's best interests at heart, but let's be honest, when put in a tough/
+--   /situation he looks after no-one but himself. Even when safe, the Crooked Senator may decide/
+--   /to toy with the Villagers' emotions and try pit them against one another./
+--
+--   The Crooked Senator looks at the Villager votes as they come in.
+crookedSenatorRole :: Role
+crookedSenatorRole = Role
+    { _name         = "Crooked Senator"
+    , _allegiance   = Villagers
+    , _balance      = 1
+    , _description  = T.unwords
+        [ "Never trust a politician. Nor a Crooked Senator for that matter. The Crooked Senator may"
+        , "seem like he has the village's best interests at heart, but let's be honest, when put in"
+        , "a tough situation he looks after no-one but himself. Even when safe, the Crooked Senator"
+        , "may decide to toy with the Villagers' emotions and try pit them against one another."
+        ]
+    , _rules        = "The Crooked Senator looks at the Villager votes as they come in."
     }
 
 -- | /How honoured we are to be in the presence of such a noble leader. The return of the Druid/

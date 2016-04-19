@@ -499,8 +499,8 @@ villageDrunkJoinedPackMessages villageDrunksName werewolfNames =
         , "the Village Drunk has finally sobered up and remembered their true home."
         ])
 
-playerMadeLynchVoteMessage :: Text -> Text -> Message
-playerMadeLynchVoteMessage voterName targetName = publicMessage $ T.concat
+playerMadeLynchVoteMessage :: Maybe Text -> Text -> Text -> Message
+playerMadeLynchVoteMessage mTo voterName targetName = Message mTo $ T.concat
     [ voterName, " voted to lynch ", targetName, "."
     ]
 
