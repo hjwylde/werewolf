@@ -96,7 +96,7 @@ import Control.Arrow
 import Control.Lens
 
 import           Data.List.Extra
-import           Data.String.ToString
+import           Data.String.Humanise
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 
@@ -386,7 +386,7 @@ currentStageMessages _ Lynching     = []
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
 currentStageMessages to turn        = [privateMessage to $ T.concat
-    [ "It's currently the ", T.pack $ toString turn, "."
+    [ "It's currently the ", humanise turn, "."
     ]]
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
@@ -475,10 +475,12 @@ playerCannotChooseJesterMessage to =
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
-    [targetName, " is aligned with ", article, T.pack $ toString allegiance', "."]
+    [targetName, " is aligned with ", article, humanise allegiance', "."]
     where
         targetName  = target ^. name
-        allegiance' = target ^. role . allegiance
+        allegiance'
+            | is alphaWolf target   = Villagers
+            | otherwise             = target ^. role . allegiance
         article     = if allegiance' == NoOne then "" else "the "
 
 villageDrunkJoinedVillageMessage :: Text -> Message
@@ -506,7 +508,8 @@ playerMadeLynchVoteMessage mTo voterName targetName = Message mTo $ T.concat
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
-    | is simpleWerewolf player  = publicMessage $ T.concat
+    | is simpleWerewolf player
+        || is alphaWolf player  = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight. As they scream their body starts to "
         , "contort and writhe, transforming into ", article playerRole, " "
         , playerRole ^. Role.name, ".", " Thankfully they go limp before breaking free of their "

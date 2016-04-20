@@ -10,10 +10,9 @@ Players are quite simple in themselves. They have a 'name', 'role' and 'state'. 
 behaviour is handled in "Game.Werewolf.Command" and "Game.Werewolf.Engine".
 -}
 
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE Rank2Types            #-}
-{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE Rank2Types       #-}
+{-# LANGUAGE TemplateHaskell  #-}
 
 module Game.Werewolf.Player (
     -- * Player
@@ -26,16 +25,16 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    crookedSenator, druid, fallenAngel, hunter, jester, orphan, protector, scapegoat, seer,
-    simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
+    alphaWolf, crookedSenator, druid, fallenAngel, hunter, jester, orphan, protector, scapegoat,
+    seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    crookedSenators, druids, fallenAngels, hunters, jesters, orphans, protectors, scapegoats,
-    seers, simpleVillagers, simpleWerewolves, trueVillagers, villageDrunks, witches,
+    alphaWolves, crookedSenators, druids, fallenAngels, hunters, jesters, orphans, protectors,
+    scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers, villageDrunks, witches,
     villagers, werewolves,
     alive, dead,
 
@@ -74,6 +73,14 @@ makePrisms ''State
 -- | Creates a new 'Alive' player.
 newPlayer :: Text -> Role -> Player
 newPlayer name role = Player name role Alive
+
+-- | The traversal of 'Player's with a 'alphaWolfRole'.
+--
+-- @
+-- 'alphaWolf' = 'role' . 'only' 'alphaWolfRole'
+-- @
+alphaWolf :: Traversal' Player ()
+alphaWolf = role . only alphaWolfRole
 
 -- | The traversal of 'Player's with a 'crookedSenatorRole'.
 --
@@ -226,6 +233,14 @@ roles = traverse . role
 -- @
 states :: Traversable t => Traversal' (t Player) State
 states = traverse . state
+
+-- | This 'Traversal' provides the traversal of 'alphaWolf' 'Player's.
+--
+-- @
+-- 'alphaWolves' = 'traverse' . 'filtered' ('is' 'alphaWolf')
+-- @
+alphaWolves :: Traversable t => Traversal' (t Player) Player
+alphaWolves = traverse . filtered (is alphaWolf)
 
 -- | This 'Traversal' provides the traversal of 'crookedSenator' 'Player's.
 --

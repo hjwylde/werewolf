@@ -54,7 +54,7 @@ module Game.Werewolf.Role (
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
 
     --   The Werewolves must devour all of the Villagers.
-    simpleWerewolfRole,
+    alphaWolfRole, simpleWerewolfRole,
 
     -- * Utility functions
     is, isn't, filteredBy,
@@ -65,7 +65,8 @@ import Control.Lens hiding (isn't)
 import           Data.Function
 import           Data.List
 import           Data.Monoid
-import           Data.String.ToString
+import           Data.String
+import           Data.String.Humanise
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 
@@ -92,10 +93,10 @@ data Role = Role
 data Allegiance = NoOne | Villagers | Werewolves
     deriving (Eq, Read, Show)
 
-instance ToString Allegiance where
-    toString NoOne      = "no-one"
-    toString Villagers  = "Villagers"
-    toString Werewolves = "Werewolves"
+instance Humanise Allegiance where
+    humanise NoOne      = fromString "no-one"
+    humanise Villagers  = fromString "Villagers"
+    humanise Werewolves = fromString "Werewolves"
 
 makeLenses ''Role
 
@@ -107,7 +108,8 @@ makePrisms ''Allegiance
 -- | A list containing all the roles defined in this file.
 allRoles :: [Role]
 allRoles =
-    [ crookedSenatorRole
+    [ alphaWolfRole
+    , crookedSenatorRole
     , druidRole
     , fallenAngelRole
     , hunterRole
@@ -465,6 +467,27 @@ witchRole = Role
         , "per game. There is no restriction on using both potions in one night or to heal"
         , "themself."
         ]
+    }
+
+-- | /The Alpha Wolf leads the Werewolves in the raids against Fougères each night and not even the/
+--   /Seer can see them coming. If the Werewolves caused the Villagers to question and accuse one/
+--   /another beforehand, the Alpha Wolf eliminates any shred of humanity left. No-one can be/
+--   /trusted anymore and no-one knows the truth./
+--
+--   The Alpha Wolf appears to nature-seeing roles (e.g., the Seer) as a Villager.
+alphaWolfRole :: Role
+alphaWolfRole = Role
+    { _name         = "Alpha Wolf"
+    , _allegiance   = Werewolves
+    , _balance      = -5
+    , _description  = T.unwords
+        [ "The Alpha Wolf leads the Werewolves in the raids against Fougères each night and not"
+        , "even the Seer can see them coming. If the Werewolves caused the Villagers to question"
+        , "and accuse one another beforehand, the Alpha Wolf eliminates any shred of humanity left."
+        , "No-one can be trusted anymore and no-one knows the truth."
+        ]
+    , _rules        =
+        "The Alpha Wolf appears to nature-seeing roles (e.g., the Seer) as a Villager."
     }
 
 -- | /The Simple Werewolf is a fearsome lupine, cunning like no other creature that roams the/

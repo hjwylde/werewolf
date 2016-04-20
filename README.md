@@ -24,7 +24,7 @@ Each night Werewolves attack the village and devour the innocent.
 For centuries no-one knew how to fight this scourge, however recently a theory has taken ahold that
     mayhaps the Werewolves walk among the Villagers themselves...
 
-Objective of the Game:  
+Objective of the game:  
 For the Loners: complete their own objective.  
 For the Villagers: lynch all of the Werewolves.  
 For the Werewolves: devour all of the Villagers.
@@ -76,6 +76,7 @@ Hiding in plain sight, the Werewolves are not a small trifle.
 
 The Werewolves must devour all of the Villagers.
 
+* Alpha Wolf
 * Simple Werewolf
 
 ### Installing
