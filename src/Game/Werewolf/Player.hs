@@ -25,16 +25,17 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    alphaWolf, crookedSenator, druid, fallenAngel, hunter, jester, orphan, protector, scapegoat,
-    seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
+    alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, orphan, protector,
+    scapegoat, seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    alphaWolves, crookedSenators, druids, fallenAngels, hunters, jesters, orphans, protectors,
-    scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers, villageDrunks, witches,
+    alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, orphans,
+    protectors, scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers, villageDrunks,
+    witches,
     villagers, werewolves,
     alive, dead,
 
@@ -43,6 +44,7 @@ module Game.Werewolf.Player (
 ) where
 
 import Control.Lens hiding (isn't)
+import Control.Lens.Extra
 
 import Data.Function
 import Data.Text     (Text)
@@ -81,6 +83,14 @@ newPlayer name role = Player name role Alive
 -- @
 alphaWolf :: Traversal' Player ()
 alphaWolf = role . only alphaWolfRole
+
+-- | The traversal of 'Player's with a 'beholderRole'.
+--
+-- @
+-- 'beholder' = 'role' . 'only' 'beholderRole'
+-- @
+beholder :: Traversal' Player ()
+beholder = role . only beholderRole
 
 -- | The traversal of 'Player's with a 'crookedSenatorRole'.
 --
@@ -241,6 +251,14 @@ states = traverse . state
 -- @
 alphaWolves :: Traversable t => Traversal' (t Player) Player
 alphaWolves = traverse . filtered (is alphaWolf)
+
+-- | This 'Traversal' provides the traversal of 'beholder' 'Player's.
+--
+-- @
+-- 'beholders' = 'traverse' . 'filtered' ('is' 'beholder')
+-- @
+beholders :: Traversable t => Traversal' (t Player) Player
+beholders = traverse . filtered (is beholder)
 
 -- | This 'Traversal' provides the traversal of 'crookedSenator' 'Player's.
 --

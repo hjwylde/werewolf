@@ -75,6 +75,7 @@ executable werewolf
 library
     hs-source-dirs: src/
     exposed-modules:
+        Control.Lens.Extra
         Data.String.Humanise
         Game.Werewolf
         Game.Werewolf.Command

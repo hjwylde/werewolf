@@ -47,24 +47,20 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    crookedSenatorRole, druidRole, hunterRole, jesterRole, protectorRole, scapegoatRole, seerRole,
-    simpleVillagerRole, trueVillagerRole, witchRole,
+    beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, protectorRole,
+    scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
 
     --   The Werewolves must devour all of the Villagers.
     alphaWolfRole, simpleWerewolfRole,
-
-    -- * Utility functions
-    is, isn't, filteredBy,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens
 
 import           Data.Function
 import           Data.List
-import           Data.Monoid
 import           Data.String
 import           Data.String.Humanise
 import           Data.Text            (Text)
@@ -109,6 +105,7 @@ makePrisms ''Allegiance
 allRoles :: [Role]
 allRoles =
     [ alphaWolfRole
+    , beholderRole
     , crookedSenatorRole
     , druidRole
     , fallenAngelRole
@@ -228,6 +225,26 @@ fallenAngelRole = Role
             , "night). If however they fail, they become a Villager for the rest of the game."
             ]
         ]
+    }
+
+-- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
+--   /Over the years the Beholder has grown to know a certain few of the village just by paying/
+--   /attention. Little cues here and there, the way someone talks, the way they move - it all/
+--   /gives clues as to their true nature and role./
+--
+--   At the start of the game the Beholder is informed the Seer's identity.
+beholderRole :: Role
+beholderRole = Role
+    { _name         = "Beholder"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = T.unwords
+        [ "Awareness comes easy to the Beholder. They listen to their senses and trust their"
+        , "hunches. Over the years the Beholder has grown to know a certain few of the village just"
+        , "by paying attention. Little cues here and there, the way someone talks, the way they"
+        , "move - it all gives clues as to their true nature and role."
+        ]
+    , _rules        = "At the start of the game the Beholder is informed the Seer's identity."
     }
 
 -- | /Never trust a politician. Nor a Crooked Senator for that matter. The Crooked Senator may seem/
@@ -510,16 +527,3 @@ simpleWerewolfRole = Role
         ]
     , _rules        = "A Werewolf may never devour another Werewolf."
     }
-
--- | The counter-part to 'isn't', but more general as it takes a 'Getting' instead.
-is :: Getting Any s a -> s -> Bool
-is = has
-
--- | A re-write of 'Control.Lens.Prism.isn't' to be more general by taking a 'Getting' instead.
-isn't :: Getting All s a -> s -> Bool
-isn't = hasn't
-
--- | A companion to 'filtered' that, rather than using a predicate, filters on the given lens for
--- matches.
-filteredBy :: Eq b => Lens' a b -> b -> Traversal' a a
-filteredBy lens value = filtered ((value ==) . view lens)

@@ -59,6 +59,7 @@ The task before them will not be easy, but a certain few have learnt some tricks
 
 The Villagers must lynch all of the Werewolves.
 
+* Beholder
 * Crooked Senator
 * Druid
 * Hunter

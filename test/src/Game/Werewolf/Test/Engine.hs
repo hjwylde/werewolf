@@ -40,7 +40,7 @@ prop_startGameErrorsUnlessUniquePlayerNames game =
         players' = game ^. players
 
 prop_startGameErrorsWhenLessThan7Players :: [Player] -> Property
-prop_startGameErrorsWhenLessThan7Players players =
+prop_startGameErrorsWhenLessThan7Players players = once $
     length players < 7
     ==> isLeft . runExcept . runWriterT $ startGame "" players
 
