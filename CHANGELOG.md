@@ -8,6 +8,10 @@
 * Added the Beholder role. ([#168](https://github.com/hjwylde/werewolf/issues/168))
 * Added the Lycan role. ([#169](https://github.com/hjwylde/werewolf/issues/169))
 
+*Revisions*
+
+* Moved Seer's player seen message to Sunrise. ([#184](https://github.com/hjwylde/werewolf/issues/184))
+
 ### v1.0.1.0
 
 *Minor*

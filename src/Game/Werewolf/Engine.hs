@@ -114,13 +114,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
     SeersTurn -> do
         whenM (has (players . seers . dead) <$> get) advanceStage
 
-        whenJustM (use see) $ \targetName -> do
-            seer    <- findPlayerBy_ role seerRole
-            target  <- findPlayerBy_ name targetName
-
-            tell [playerSeenMessage (seer ^. name) target]
-
-            advanceStage
+        whenM (isJust <$> use see) advanceStage
 
     Sunrise -> do
         round += 1
@@ -130,6 +124,13 @@ checkStage' = use stage >>= \stage' -> case stage' of
                 tell [fallenAngelJoinedVillagersMessage]
 
                 setPlayerAllegiance (fallenAngel ^. name) Villagers
+
+        whenJustM (preuse $ players . seers . alive) $ \seer -> do
+            target <- use see >>= findPlayerBy_ name . fromJust
+
+            when (is alive target) $ tell [playerSeenMessage (seer ^. name) target]
+
+        see .= Nothing
 
         advanceStage
 
@@ -222,7 +223,6 @@ advanceStage = do
     stage   .= nextStage
     boots   .= Map.empty
     passed  .= False
-    see     .= Nothing
 
     tell . stageMessages =<< get
 
