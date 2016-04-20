@@ -13,6 +13,7 @@ module Game.Werewolf.Test.Engine (
 ) where
 
 import Control.Lens         hiding (elements)
+import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Writer
 

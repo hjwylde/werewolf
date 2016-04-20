@@ -10,7 +10,8 @@ module Game.Werewolf.Test.Command.See (
     allSeeCommandTests,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens       hiding (isn't)
+import Control.Lens.Extra
 
 import Game.Werewolf
 import Game.Werewolf.Command.Seer

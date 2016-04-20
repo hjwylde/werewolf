@@ -6,6 +6,7 @@
 
 * Added the Alpha Wolf role. ([#149](https://github.com/hjwylde/werewolf/issues/149))
 * Added the Beholder role. ([#168](https://github.com/hjwylde/werewolf/issues/168))
+* Added the Lycan role. ([#169](https://github.com/hjwylde/werewolf/issues/169))
 
 ### v1.0.1.0
 

@@ -12,7 +12,8 @@ module Game.Werewolf.Test.Command.Choose (
     allChooseCommandTests,
 ) where
 
-import Control.Lens hiding (elements, isn't)
+import Control.Lens       hiding (elements, isn't)
+import Control.Lens.Extra
 
 import Game.Werewolf
 import Game.Werewolf.Command.Hunter    as Hunter

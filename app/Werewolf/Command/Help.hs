@@ -20,6 +20,7 @@ module Werewolf.Command.Help (
 ) where
 
 import Control.Lens
+import Control.Lens.Extra
 import Control.Monad.Extra
 import Control.Monad.IO.Class
 

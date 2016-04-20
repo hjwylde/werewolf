@@ -25,25 +25,22 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, orphan, protector,
-    scapegoat, seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
+    alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, lycan, orphan,
+    protector, scapegoat, seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
     villager, werewolf,
 
     -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
     names, roles, states,
 
     -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
-    alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, orphans,
-    protectors, scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers, villageDrunks,
-    witches,
+    alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
+    orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers,
+    villageDrunks, witches,
     villagers, werewolves,
     alive, dead,
-
-    -- * Utility functions
-    is, isn't, filteredBy,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import Data.Function
@@ -131,6 +128,14 @@ hunter = role . only hunterRole
 -- @
 jester :: Traversal' Player ()
 jester = role . only jesterRole
+
+-- | The traversal of 'Player's with a 'lycanRole'.
+--
+-- @
+-- 'lycan' = 'role' . 'only' 'lycanRole'
+-- @
+lycan :: Traversal' Player ()
+lycan = role . only lycanRole
 
 -- | The traversal of 'Player's with a 'orphanRole'.
 --
@@ -299,6 +304,14 @@ hunters = traverse . filtered (is hunter)
 -- @
 jesters :: Traversable t => Traversal' (t Player) Player
 jesters = traverse . filtered (is jester)
+
+-- | This 'Traversal' provides the traversal of 'lycan' 'Player's.
+--
+-- @
+-- 'lycans' = 'traverse' . 'filtered' ('is' 'lycan')
+-- @
+lycans :: Traversable t => Traversal' (t Player) Player
+lycans = traverse . filtered (is lycan)
 
 -- | This 'Traversal' provides the traversal of 'orphan' 'Player's.
 --

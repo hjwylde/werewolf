@@ -10,7 +10,8 @@ module Game.Werewolf.Test.Command.Vote (
     allVoteCommandTests,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens       hiding (isn't)
+import Control.Lens.Extra
 
 import Game.Werewolf
 import Game.Werewolf.Command.Villager as Villager

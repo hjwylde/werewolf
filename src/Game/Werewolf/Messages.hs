@@ -94,6 +94,7 @@ module Game.Werewolf.Messages (
 
 import Control.Arrow
 import Control.Lens
+import Control.Lens.Extra
 
 import           Data.List.Extra
 import           Data.String.Humanise
@@ -490,6 +491,7 @@ playerSeenMessage to target = privateMessage to $ T.concat
         targetName  = target ^. name
         allegiance'
             | is alphaWolf target   = Villagers
+            | is lycan target       = Werewolves
             | otherwise             = target ^. role . allegiance
         article     = if allegiance' == NoOne then "" else "the "
 

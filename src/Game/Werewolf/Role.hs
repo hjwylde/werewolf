@@ -47,7 +47,7 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, protectorRole,
+    beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, protectorRole,
     scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole, witchRole,
 
     -- *** The Werewolves
@@ -111,6 +111,7 @@ allRoles =
     , fallenAngelRole
     , hunterRole
     , jesterRole
+    , lycanRole
     , orphanRole
     , protectorRole
     , scapegoatRole
@@ -316,6 +317,57 @@ hunterRole = Role
         ]
     }
 
+-- | /Every village needs a Jester; they're so stupid, but provide so much entertainment! The/
+--   /Jester may not have any special abilities, but at least no-one in the village wants to hurt/
+--   /them./
+--
+--   If the village votes to lynch the Jester, their identity is revealed. The village realise
+--   there's no point in burning them and so they are set free.
+--
+--   The Jester continues to play but may no longer vote as no-one can take them seriously.
+jesterRole :: Role
+jesterRole = Role
+    { _name         = "Jester"
+    , _allegiance   = Villagers
+    , _balance      = 0
+    , _description  = T.unwords
+        [ "Every village needs a Jester; they're so stupid, but provide so much entertainment! The"
+        , "Jester may not have any special abilities, but at least no-one in the village wants to"
+        , "hurt them."
+        ]
+    , _rules        = T.intercalate "\n"
+        [ T.unwords
+            [ "If the village votes to lynch the Jester, their identity is revealed. The village"
+            , "realise there's no point in burning them and so they are set free."
+            ]
+        , "The Jester continues to play but may no longer vote as no-one can take them seriously."
+        ]
+    }
+
+-- | /Traditionally a Werewolf once transformed loses all memories and personality. Over years of/
+--   /transforming, the Lycan has slowly evolved and learnt how to retain themself. Night after/
+--   /night of devouring with the other Werewolves took its toll. The screams alone were enough to/
+--   /turn the Lycan and make them question their true nature./
+--
+--   The Lycan is aligned with the Villagers, but appears to nature-seeing roles (e.g., the Seer) as
+--   a Werewolf.
+lycanRole :: Role
+lycanRole = Role
+    { _name         = "Lycan"
+    , _allegiance   = Villagers
+    , _balance      = 0
+    , _description  = T.unwords
+        [ "Traditionally a Werewolf once transformed loses all memories and personality. Over years"
+        , "of transforming, the Lycan has slowly evolved and learnt how to retain themself. Night"
+        , "after night of devouring with the other Werewolves took its toll. The screams alone were"
+        , "enough to turn the Lycan and make them question their true nature."
+        ]
+    , _rules        = T.unwords
+        [ "The Lycan is aligned with the Villagers, but appears to nature-seeing roles (e.g., the"
+        , "Seer) as a Werewolf."
+        ]
+    }
+
 -- | /The Protector is one of the few pure of heart and altruistic Villagers; they are forever/
 --   /putting others needs above their own. Each night they fight against the Werewolves with/
 --   /naught but a sword and shield, potentially saving an innocents life./
@@ -412,33 +464,6 @@ simpleVillagerRole = Role
     , _rules        = T.unwords
         [ "The Simple Villager has no special abilities, they must use their guile to determine"
         , "whom among them is not who they say they are."
-        ]
-    }
-
--- | /Every village needs a Jester; they're so stupid, but provide so much entertainment! The/
---   /Jester may not have any special abilities, but at least no-one in the village wants to hurt/
---   /them./
---
---   If the village votes to lynch the Jester, their identity is revealed. The village realise
---   there's no point in burning them and so they are set free.
---
---   The Jester continues to play but may no longer vote as no-one can take them seriously.
-jesterRole :: Role
-jesterRole = Role
-    { _name         = "Jester"
-    , _allegiance   = Villagers
-    , _balance      = 0
-    , _description  = T.unwords
-        [ "Every village needs a Jester; they're so stupid, but provide so much entertainment! The"
-        , "Jester may not have any special abilities, but at least no-one in the village wants to"
-        , "hurt them."
-        ]
-    , _rules        = T.intercalate "\n"
-        [ T.unwords
-            [ "If the village votes to lynch the Jester, their identity is revealed. The village"
-            , "realise there's no point in burning them and so they are set free."
-            ]
-        , "The Jester continues to play but may no longer vote as no-one can take them seriously."
         ]
     }
 
