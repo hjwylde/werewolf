@@ -44,6 +44,7 @@ module Game.Werewolf.Player (
 ) where
 
 import Control.Lens hiding (isn't)
+import Control.Lens.Extra
 
 import Data.Function
 import Data.Text     (Text)

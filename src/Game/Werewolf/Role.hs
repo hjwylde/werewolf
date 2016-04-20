@@ -55,16 +55,12 @@ module Game.Werewolf.Role (
 
     --   The Werewolves must devour all of the Villagers.
     alphaWolfRole, simpleWerewolfRole,
-
-    -- * Utility functions
-    is, isn't, filteredBy,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens
 
 import           Data.Function
 import           Data.List
-import           Data.Monoid
 import           Data.String
 import           Data.String.Humanise
 import           Data.Text            (Text)
@@ -531,16 +527,3 @@ simpleWerewolfRole = Role
         ]
     , _rules        = "A Werewolf may never devour another Werewolf."
     }
-
--- | The counter-part to 'isn't', but more general as it takes a 'Getting' instead.
-is :: Getting Any s a -> s -> Bool
-is = has
-
--- | A re-write of 'Control.Lens.Prism.isn't' to be more general by taking a 'Getting' instead.
-isn't :: Getting All s a -> s -> Bool
-isn't = hasn't
-
--- | A companion to 'filtered' that, rather than using a predicate, filters on the given lens for
--- matches.
-filteredBy :: Eq b => Lens' a b -> b -> Traversal' a a
-filteredBy lens value = filtered ((value ==) . view lens)
