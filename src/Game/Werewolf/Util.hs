@@ -38,10 +38,11 @@ module Game.Werewolf.Util (
     isPlayerAlive, isPlayerDead,
 ) where
 
-import Control.Lens         hiding (cons)
+import Control.Lens
+import Control.Lens.Extra
 import Control.Monad.Extra
 import Control.Monad.Random
-import Control.Monad.State  hiding (state)
+import Control.Monad.State
 
 import           Data.List
 import qualified Data.Map   as Map

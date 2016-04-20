@@ -9,7 +9,7 @@ Maintainer  : public@hjwylde.com
 Extra utility functions for working with lenses.
 -}
 
-{-# LANGUAGE Rank2Types        #-}
+{-# LANGUAGE Rank2Types #-}
 
 module Control.Lens.Extra (
     -- * Folds
@@ -21,7 +21,7 @@ module Control.Lens.Extra (
 
 import Control.Lens hiding (isn't)
 
-import           Data.Monoid
+import Data.Monoid
 
 -- | The counter-part to 'isn't', but more general as it takes a 'Getting' instead.
 --

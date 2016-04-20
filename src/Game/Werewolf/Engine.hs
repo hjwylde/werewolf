@@ -22,10 +22,11 @@ module Game.Werewolf.Engine (
 ) where
 
 import Control.Lens         hiding (cons, isn't)
+import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Random
-import Control.Monad.State  hiding (state)
+import Control.Monad.State
 import Control.Monad.Writer
 
 import           Data.List.Extra
@@ -72,7 +73,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         druid       <- findPlayerBy_ role druidRole
         players'    <- filter (isn't alphaWolf) <$> getAdjacentAlivePlayers (druid ^. name)
 
-        when (has werewolves players') $ tell [ferinaGruntsMessage]
+        when (has werewolves players' || has lycans players') $ tell [ferinaGruntsMessage]
 
         advanceStage
 

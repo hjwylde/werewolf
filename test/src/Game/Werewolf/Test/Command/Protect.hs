@@ -10,7 +10,8 @@ module Game.Werewolf.Test.Command.Protect (
     allProtectCommandTests,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens       hiding (isn't)
+import Control.Lens.Extra
 
 import Data.Maybe
 

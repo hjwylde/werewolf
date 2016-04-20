@@ -36,7 +36,8 @@ module Game.Werewolf.Test.Arbitrary (
     arbitraryPlayer, arbitraryWerewolf,
 ) where
 
-import Control.Lens hiding (elements, isn't)
+import Control.Lens       hiding (elements, isn't)
+import Control.Lens.Extra
 
 import           Data.List.Extra
 import           Data.Maybe
