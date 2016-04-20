@@ -47,8 +47,8 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    crookedSenatorRole, druidRole, hunterRole, jesterRole, protectorRole, scapegoatRole, seerRole,
-    simpleVillagerRole, trueVillagerRole, witchRole,
+    beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, protectorRole,
+    scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -109,6 +109,7 @@ makePrisms ''Allegiance
 allRoles :: [Role]
 allRoles =
     [ alphaWolfRole
+    , beholderRole
     , crookedSenatorRole
     , druidRole
     , fallenAngelRole
@@ -228,6 +229,26 @@ fallenAngelRole = Role
             , "night). If however they fail, they become a Villager for the rest of the game."
             ]
         ]
+    }
+
+-- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
+--   /Over the years the Beholder has grown to know a certain few of the village just by paying/
+--   /attention. Little cues here and there, the way someone talks, the way they move - it all/
+--   /gives clues as to their true nature and role./
+--
+--   At the start of the game the Beholder is informed the Seer's identity.
+beholderRole :: Role
+beholderRole = Role
+    { _name         = "Beholder"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = T.unwords
+        [ "Awareness comes easy to the Beholder. They listen to their senses and trust their"
+        , "hunches. Over the years the Beholder has grown to know a certain few of the village just"
+        , "by paying attention. Little cues here and there, the way someone talks, the way they"
+        , "move - it all gives clues as to their true nature and role."
+        ]
+    , _rules        = "At the start of the game the Beholder is informed the Seer's identity."
     }
 
 -- | /Never trust a politician. Nor a Crooked Senator for that matter. The Crooked Senator may seem/

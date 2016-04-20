@@ -5,6 +5,7 @@
 *Minor*
 
 * Added the Alpha Wolf role. ([#149](https://github.com/hjwylde/werewolf/issues/149))
+* Added the Beholder role. ([#168](https://github.com/hjwylde/werewolf/issues/168))
 
 ### v1.0.1.0
 

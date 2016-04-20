@@ -111,11 +111,15 @@ newGameMessages game = concat
     [ [newPlayersInGameMessage $ players' ^.. names]
     , [rolesInGameMessage Nothing $ players' ^.. roles]
     , map newPlayerMessage players'
+    , beholderMessages
     , trueVillagerMessages
     , stageMessages game
     ]
     where
         players'                = game ^. players
+        beholderMessages        = case (,) <$> players' ^? beholders <*> players' ^? seers of
+            Just (beholder, seer)   -> [beholderMessage (beholder ^. name) (seer ^. name)]
+            _                       -> []
         trueVillagerMessages    = case players' ^? trueVillagers of
             Just trueVillager   -> [trueVillagerMessage $ trueVillager ^. name]
             _                   -> []
@@ -132,6 +136,12 @@ newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
     ]
     where
         playerRole = player ^. role
+
+beholderMessage :: Text -> Text -> Message
+beholderMessage to seerName = privateMessage to $ T.concat
+    [ "The Seer has always been held in high regard among the Villagers. Few are as lucky as you to"
+    , " know the Seer, ", seerName, ", personally."
+    ]
 
 trueVillagerMessage :: Text -> Message
 trueVillagerMessage name = publicMessage $ T.unwords
