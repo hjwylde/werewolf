@@ -233,7 +233,7 @@ fallenAngelRole = Role
 --   /situation he looks after no-one but himself. Even when safe, the Crooked Senator may decide/
 --   /to toy with the Villagers' emotions and try pit them against one another./
 --
---   The Crooked Senator looks at the Villager votes as they come in.
+--   The Crooked Senator looks at the village votes as they come in.
 crookedSenatorRole :: Role
 crookedSenatorRole = Role
     { _name         = "Crooked Senator"
@@ -245,7 +245,7 @@ crookedSenatorRole = Role
         , "a tough situation he looks after no-one but himself. Even when safe, the Crooked Senator"
         , "may decide to toy with the Villagers' emotions and try pit them against one another."
         ]
-    , _rules        = "The Crooked Senator looks at the Villager votes as they come in."
+    , _rules        = "The Crooked Senator looks at the village votes as they come in."
     }
 
 -- | /How honoured we are to be in the presence of such a noble leader. The return of the Druid/
