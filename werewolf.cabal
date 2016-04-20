@@ -75,6 +75,7 @@ executable werewolf
 library
     hs-source-dirs: src/
     exposed-modules:
+        Data.String.Humanise
         Game.Werewolf
         Game.Werewolf.Command
         Game.Werewolf.Command.Global
@@ -116,7 +117,6 @@ library
         MonadRandom == 0.4.*,
         mtl == 2.2.*,
         text == 1.2.*,
-        tostring == 0.2.*,
         transformers == 0.4.*
 
 test-suite werewolf-test

@@ -52,7 +52,8 @@ import           Data.List.Extra
 import           Data.Map             (Map)
 import qualified Data.Map             as Map
 import           Data.Maybe
-import           Data.String.ToString
+import           Data.String
+import           Data.String.Humanise
 import           Data.Text            (Text)
 
 import Game.Werewolf.Player
@@ -114,22 +115,22 @@ data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching |
             | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
-instance ToString Stage where
-    toString FerinasGrunt       = "Ferina's Grunt"
-    toString GameOver           = "Game over"
-    toString HuntersTurn1       = "Hunter's turn"
-    toString HuntersTurn2       = "Hunter's turn"
-    toString Lynching           = "Lynching"
-    toString OrphansTurn        = "Orphan's turn"
-    toString ProtectorsTurn     = "Protector's turn"
-    toString ScapegoatsTurn     = "Scapegoat's turn"
-    toString SeersTurn          = "Seer's turn"
-    toString Sunrise            = "Sunrise"
-    toString Sunset             = "Sunset"
-    toString VillageDrunksTurn  = "Village Drunk's turn"
-    toString VillagesTurn       = "village's turn"
-    toString WerewolvesTurn     = "Werewolves' turn"
-    toString WitchsTurn         = "Witch's turn"
+instance Humanise Stage where
+    humanise FerinasGrunt       = fromString "Ferina's Grunt"
+    humanise GameOver           = fromString "Game over"
+    humanise HuntersTurn1       = fromString "Hunter's turn"
+    humanise HuntersTurn2       = fromString "Hunter's turn"
+    humanise Lynching           = fromString "Lynching"
+    humanise OrphansTurn        = fromString "Orphan's turn"
+    humanise ProtectorsTurn     = fromString "Protector's turn"
+    humanise ScapegoatsTurn     = fromString "Scapegoat's turn"
+    humanise SeersTurn          = fromString "Seer's turn"
+    humanise Sunrise            = fromString "Sunrise"
+    humanise Sunset             = fromString "Sunset"
+    humanise VillageDrunksTurn  = fromString "Village Drunk's turn"
+    humanise VillagesTurn       = fromString "village's turn"
+    humanise WerewolvesTurn     = fromString "Werewolves' turn"
+    humanise WitchsTurn         = fromString "Witch's turn"
 
 -- TODO (hjw): remove events
 -- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in

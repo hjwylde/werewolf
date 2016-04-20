@@ -96,7 +96,7 @@ import Control.Arrow
 import Control.Lens
 
 import           Data.List.Extra
-import           Data.String.ToString
+import           Data.String.Humanise
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 
@@ -386,7 +386,7 @@ currentStageMessages _ Lynching     = []
 currentStageMessages _ Sunrise      = []
 currentStageMessages _ Sunset       = []
 currentStageMessages to turn        = [privateMessage to $ T.concat
-    [ "It's currently the ", T.pack $ toString turn, "."
+    [ "It's currently the ", humanise turn, "."
     ]]
 
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
@@ -475,7 +475,7 @@ playerCannotChooseJesterMessage to =
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to target = privateMessage to $ T.concat
-    [targetName, " is aligned with ", article, T.pack $ toString allegiance', "."]
+    [targetName, " is aligned with ", article, humanise allegiance', "."]
     where
         targetName  = target ^. name
         allegiance'

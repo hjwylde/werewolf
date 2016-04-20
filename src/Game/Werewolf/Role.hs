@@ -65,7 +65,8 @@ import Control.Lens hiding (isn't)
 import           Data.Function
 import           Data.List
 import           Data.Monoid
-import           Data.String.ToString
+import           Data.String
+import           Data.String.Humanise
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 
@@ -92,10 +93,10 @@ data Role = Role
 data Allegiance = NoOne | Villagers | Werewolves
     deriving (Eq, Read, Show)
 
-instance ToString Allegiance where
-    toString NoOne      = "no-one"
-    toString Villagers  = "Villagers"
-    toString Werewolves = "Werewolves"
+instance Humanise Allegiance where
+    humanise NoOne      = fromString "no-one"
+    humanise Villagers  = fromString "Villagers"
+    humanise Werewolves = fromString "Werewolves"
 
 makeLenses ''Role
 
