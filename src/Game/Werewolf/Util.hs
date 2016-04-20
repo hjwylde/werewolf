@@ -101,7 +101,7 @@ getAdjacentAlivePlayers name' = do
     return $ adjacentElements index alivePlayers
     where
         adjacentElements 0 list     = last list : take 2 list
-        adjacentElements index list = take 3 $ drop (index - 1) (cycle list)
+        adjacentElements index list = take 3 . drop (index - 1) $ cycle list
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = use $ votes . at playerName

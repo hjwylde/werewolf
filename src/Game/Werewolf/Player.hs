@@ -29,10 +29,11 @@ module Game.Werewolf.Player (
     protector, scapegoat, seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
     villager, werewolf,
 
-    -- | These are provided just as a bit of sugar to avoid continually writing @'traverse' .@.
+    -- | The following traversals are provided just as a bit of sugar to avoid continually writing
+    --   @'traverse' .@.
     names, roles, states,
 
-    -- | N.B., these are not legal traversals for the same reason 'filtered' isn't!
+    -- | N.B., the following traversals are not legal for the same reason 'filtered' isn't!
     alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
     orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers,
     villageDrunks, witches,
@@ -73,7 +74,7 @@ makePrisms ''State
 newPlayer :: Text -> Role -> Player
 newPlayer name role = Player name role Alive
 
--- | The traversal of 'Player's with a 'alphaWolfRole'.
+-- | The traversal of 'Player's with an 'alphaWolfRole'.
 --
 -- @
 -- 'alphaWolf' = 'role' . 'only' 'alphaWolfRole'
@@ -105,7 +106,7 @@ crookedSenator = role . only crookedSenatorRole
 druid :: Traversal' Player ()
 druid = role . only druidRole
 
--- | The traversal of 'Player's with an 'fallenAngelRole'.
+-- | The traversal of 'Player's with a 'fallenAngelRole'.
 --
 -- @
 -- 'fallenAngel' = 'role' . 'only' 'fallenAngelRole'
@@ -137,7 +138,7 @@ jester = role . only jesterRole
 lycan :: Traversal' Player ()
 lycan = role . only lycanRole
 
--- | The traversal of 'Player's with a 'orphanRole'.
+-- | The traversal of 'Player's with an 'orphanRole'.
 --
 -- @
 -- 'orphan' = 'role' . 'only' 'orphanRole'

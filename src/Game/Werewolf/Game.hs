@@ -105,9 +105,9 @@ data Game = Game
     , _votes            :: Map Text Text    -- ^ Villagers and Werewolves
     } deriving (Eq, Read, Show)
 
--- | Most of these are fairly self-sufficient (the turn stages). 'Sunrise' and 'Sunset' are provided
---   as meaningful breaks between the day and night as, for example, a 'VillagesTurn' may not always
---   be available (curse that retched Scapegoat).
+-- | Most of these are fairly self-explainable (the turn stages). 'Sunrise' and 'Sunset' are
+--   provided as meaningful breaks between the day and night as, for example, a 'VillagesTurn' may
+--   not always be available (curse that retched Scapegoat).
 --
 --   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
 --   it past. Often only certain roles and commands may be performed at any given stage.
@@ -203,7 +203,7 @@ stageAvailable game VillagesTurn        =
     (has (players . fallenAngels . alive) game || not (isFirstRound game))
     && any (is alive) (getAllowedVoters game)
 stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
-stageAvailable game OrphansTurn      =
+stageAvailable game OrphansTurn         =
     has (players . orphans . alive) game
     && isNothing (game ^. roleModel)
 stageAvailable game WitchsTurn          =
