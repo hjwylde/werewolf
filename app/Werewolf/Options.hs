@@ -71,7 +71,7 @@ werewolfPrefs = prefs $ columns 100
 
 -- | An optparse parser of a werewolf command.
 werewolfInfo :: ParserInfo Options
-werewolfInfo = info (infoOptions <*> werewolf) (fullDesc <> header' <> progDesc')
+werewolfInfo = info (infoOptions <*> werewolf) (fullDesc <> progDesc')
     where
         infoOptions = helper <*> version
         version     = infoOption ("Version " ++ showVersion This.version) $ mconcat
@@ -79,9 +79,7 @@ werewolfInfo = info (infoOptions <*> werewolf) (fullDesc <> header' <> progDesc'
             , help "Show this binary's version"
             ]
 
-        header'     = header "A game engine for running werewolf within a chat client."
-        progDesc'   = progDesc
-            "This engine is based off of the party game Mafia, also known as Werewolf."
+        progDesc' = progDesc "Runs the given command from the perspective of the caller"
 
 -- | An options parser.
 werewolf :: Parser Options
