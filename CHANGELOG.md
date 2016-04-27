@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Revisions*
+
+* Removed the binary header and updated the program description.
+
 ### v1.0.2.0
 
 *Minor*
