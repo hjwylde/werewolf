@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Revisions*
+
+* Bumped max version constraint of lens.
+
 ### v1.0.2.1
 
 *Revisions*
