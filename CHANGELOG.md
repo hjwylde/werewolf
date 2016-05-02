@@ -6,6 +6,12 @@
 
 * Updated the Scapegoat's turn messages to be clear that they may choose more than 1 player. ([#185](https://github.com/hjwylde/werewolf/issues/185))
 
+### v1.0.2.2
+
+*Revisions*
+
+* Bumped max version constraint of lens.
+
 ### v1.0.2.1
 
 *Revisions*

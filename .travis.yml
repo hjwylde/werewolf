@@ -13,7 +13,6 @@ cache:
 
 matrix:
     include:
-    - env: ARGS="--resolver lts-3"
     - env: ARGS="--resolver lts-4"
     - env: ARGS="--resolver lts"
     - env: ARGS="--resolver nightly"
@@ -26,7 +25,7 @@ before_install:
 install:
 - travis_wait stack $ARGS --no-terminal --skip-ghc-check setup
 - travis_wait stack $ARGS --no-terminal --skip-ghc-check test --only-snapshot
-- stack --resolver lts --no-terminal --skip-ghc-check install hlint git-fmt stylish-haskell
+- travis_wait stack $ARGS --no-terminal --skip-ghc-check install hlint git-fmt stylish-haskell
 
 script:
 - stack $ARGS --no-terminal --skip-ghc-check test
