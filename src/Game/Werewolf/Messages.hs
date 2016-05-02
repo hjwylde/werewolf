@@ -202,7 +202,7 @@ protectorsTurnMessages to =
 scapegoatsTurnMessages :: Text -> [Message]
 scapegoatsTurnMessages scapegoatsName =
     [ publicMessage "Just before the Scapegoat burns to a complete crisp, they cry out a dying wish."
-    , publicMessage $ T.concat [scapegoatsName, ", whom do you `choose` to vote on the next day?"]
+    , publicMessage $ T.concat [scapegoatsName, ", which players do you `choose` to vote on the next day?"]
     ]
 
 seersTurnMessages :: Text -> [Message]
