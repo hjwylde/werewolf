@@ -9,7 +9,7 @@ synopsis:       A game engine for playing werewolf within an arbitrary chat clie
 description:    A game engine for playing werewolf within an arbitrary chat client.
                 Werewolf is a well known social party game, commonly also called Mafia.
                 See the <https://en.wikipedia.org/wiki/Mafia_(party_game) Wikipedia article> for a
-                rundown on it's gameplay and history.
+                rundown on its gameplay and history.
 
 license:        BSD3
 license-file:   LICENSE

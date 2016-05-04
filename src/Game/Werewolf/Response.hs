@@ -80,7 +80,7 @@ failure = Response False []
 exitWith :: MonadIO m => Response -> m a
 exitWith response = liftIO $ T.putStrLn (T.decodeUtf8 $ encode response) >> Exit.exitSuccess
 
--- | A message may be either public or private, indicated by it's @to@ field.
+-- | A message may be either public or private, indicated by its @to@ field.
 --
 --   Each message contains a single text field. This field is permitted to contain special
 --   characters such as new lines and tabs.
