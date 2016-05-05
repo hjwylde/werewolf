@@ -47,8 +47,8 @@ module Game.Werewolf.Role (
     --   certain few have learnt some tricks over the years that may turn out rather useful.
 
     --   The Villagers must lynch all of the Werewolves.
-    beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, protectorRole,
-    scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole, witchRole,
+    beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, medusaRole,
+    protectorRole, scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -110,6 +110,7 @@ allRoles =
     , hunterRole
     , jesterRole
     , lycanRole
+    , medusaRole
     , orphanRole
     , protectorRole
     , scapegoatRole
@@ -273,7 +274,7 @@ crookedSenatorRole = Role
 --   /proximity! Listen for her grunt and heed her warning for she will not let you down./
 --
 --   Each morning when Ferina wakes from her slumber she will be alert and cautious. If the Druid is
---   next to a Werewolf then Ferina will grunt in warning.
+--   next to a Werewolf in the player `circle` then Ferina will grunt in warning.
 druidRole :: Role
 druidRole = Role
     { _name         = "Druid"
@@ -289,7 +290,7 @@ druidRole = Role
         ]
     , _rules        = T.unwords
         [ "Each morning when Ferina wakes from her slumber she will be alert and cautious. If the"
-        , "Druid is next to a Werewolf then Ferina will grunt in warning."
+        , "Druid is next to a Werewolf in the player `circle` then Ferina will grunt in warning."
         ]
     }
 
@@ -363,6 +364,35 @@ lycanRole = Role
     , _rules        = T.unwords
         [ "The Lycan is aligned with the Villagers, but appears to nature-seeing roles (e.g., the"
         , "Seer) as a Werewolf."
+        ]
+    }
+
+-- | /A beautiful flirt, the Medusa is aligned with the Villagers but harbours a terrifying secret./
+--   /During the day they are well known in the village of Fougères for their stunning appearance/
+--   /which captures the eye and love of all the townsfolk. However when their secret takes ahold/
+--   /at sundown, their true self is revealed. Any who gaze upon her true form would see live/
+--   /snakes for hair and the few that further look into her eyes are turned to stone./
+--
+--   If Medusa attracts the attention of a Werewolf during the night and is devoured, the first
+--   Werewolf to their left in the player `circle` will catch their gaze and turn to stone,
+--   instantly killing the lupine predator.
+medusaRole :: Role
+medusaRole = Role
+    { _name         = "Medusa"
+    , _allegiance   = Villagers
+    , _balance      = 4
+    , _description  = T.unwords
+        [ "A beautiful flirt, the Medusa is aligned with the Villagers but harbours a terrifying"
+        , "secret. During the day they are well known in the village of Fougères for their stunning"
+        , "appearance which captures the eye and love of all the townsfolk. However when their"
+        , "secret takes ahold at sundown, their true self is revealed. Any who gaze upon her true"
+        , "form would see live snakes for hair and the few that further look into her eyes are"
+        , "turned to stone."
+        ]
+    , _rules        = T.unwords
+        [ "If Medusa attracts the attention of a Werewolf during the night and is devoured, the"
+        , "first Werewolf to their left in the player `circle` will catch their gaze and turn to"
+        , "stone, instantly killing the lupine predator."
         ]
     }
 
