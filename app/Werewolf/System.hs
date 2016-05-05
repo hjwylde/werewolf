@@ -43,6 +43,7 @@ import System.FilePath
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
+    -- TODO (hjw): move the messages to Messages
     when (playerNames /= nub playerNames)   $ throwError [privateMessage callerName "Player names must be unique."]
     when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
     forM_ restrictedRoles $ \role' ->

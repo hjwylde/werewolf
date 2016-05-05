@@ -34,6 +34,7 @@ import Game.Werewolf.Command.Hunter    as Hunter
 import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
 import Game.Werewolf.Engine
+import Game.Werewolf.Messages
 
 import Werewolf.Messages
 import Werewolf.System

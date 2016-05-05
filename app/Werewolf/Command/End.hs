@@ -27,6 +27,7 @@ import           Data.Text (Text)
 import qualified Data.Text as T
 
 import Game.Werewolf
+import Game.Werewolf.Messages
 
 import Werewolf.Messages
 import Werewolf.System
@@ -49,4 +50,5 @@ handle callerName tag (Options force) = do
 
     exitWith success { messages = [gameEndedMessage] }
     where
+        -- TODO (hjw): move this to Messages
         gameEndedMessage = publicMessage $ T.concat ["Game ended by ", callerName, "."]
