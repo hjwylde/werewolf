@@ -29,6 +29,20 @@ executable werewolf
     hs-source-dirs: app/
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
+        Game.Werewolf.Command
+        Game.Werewolf.Command.Global
+        Game.Werewolf.Command.Hunter
+        Game.Werewolf.Command.Orphan
+        Game.Werewolf.Command.Protector
+        Game.Werewolf.Command.Scapegoat
+        Game.Werewolf.Command.Seer
+        Game.Werewolf.Command.Status
+        Game.Werewolf.Command.Villager
+        Game.Werewolf.Command.Werewolf
+        Game.Werewolf.Command.Witch
+        Game.Werewolf.Engine
+        Game.Werewolf.Messages
+        Game.Werewolf.Util
         Paths_werewolf
         Werewolf.Command.Boot
         Werewolf.Command.Choose
@@ -56,10 +70,12 @@ executable werewolf
     other-extensions:
         FlexibleContexts,
         MultiParamTypeClasses,
-        OverloadedStrings
+        OverloadedStrings,
+        Rank2Types
     build-depends:
         aeson >= 0.8 && < 0.12,
         base >= 4.8 && < 5,
+        containers == 0.5.*,
         directory == 1.2.*,
         extra == 1.4.*,
         filepath == 1.4.*,
@@ -78,32 +94,16 @@ library
         Control.Lens.Extra
         Data.String.Humanise
         Game.Werewolf
-        Game.Werewolf.Command
-        Game.Werewolf.Command.Global
-        Game.Werewolf.Command.Hunter
-        Game.Werewolf.Command.Orphan
-        Game.Werewolf.Command.Protector
-        Game.Werewolf.Command.Scapegoat
-        Game.Werewolf.Command.Seer
-        Game.Werewolf.Command.Status
-        Game.Werewolf.Command.Villager
-        Game.Werewolf.Command.Werewolf
-        Game.Werewolf.Command.Witch
-        Game.Werewolf.Engine
         Game.Werewolf.Game
         Game.Werewolf.Player
         Game.Werewolf.Response
         Game.Werewolf.Role
-    other-modules:
-        Game.Werewolf.Messages
-        Game.Werewolf.Util
 
     default-language: Haskell2010
     other-extensions:
         CPP,
         DeriveGeneric,
         FlexibleContexts,
-        MultiParamTypeClasses,
         OverloadedStrings,
         Rank2Types,
         TemplateHaskell
@@ -111,46 +111,7 @@ library
         aeson >= 0.8 && < 0.12,
         base >= 4.8 && < 5,
         containers == 0.5.*,
-        directory == 1.2.*,
         extra == 1.4.*,
-        filepath == 1.4.*,
         lens >= 4.12 && < 4.15,
-        MonadRandom == 0.4.*,
-        mtl == 2.2.*,
         text == 1.2.*,
         transformers == 0.4.*
-
-test-suite werewolf-test
-    type:           exitcode-stdio-1.0
-    main-is:        Main.hs
-    hs-source-dirs: test/app/, test/src/
-    ghc-options:    -threaded -with-rtsopts=-N
-    other-modules:
-        Game.Werewolf.Test.Arbitrary
-        Game.Werewolf.Test.Command
-        Game.Werewolf.Test.Command.Choose
-        Game.Werewolf.Test.Command.Heal
-        Game.Werewolf.Test.Command.Pass
-        Game.Werewolf.Test.Command.Poison
-        Game.Werewolf.Test.Command.Protect
-        Game.Werewolf.Test.Command.Quit
-        Game.Werewolf.Test.Command.See
-        Game.Werewolf.Test.Command.Vote
-        Game.Werewolf.Test.Engine
-        Game.Werewolf.Test.Util
-
-    default-language: Haskell2010
-    other-extensions:
-        OverloadedStrings
-    build-depends:
-        base >= 4.8 && < 5,
-        containers == 0.5.*,
-        extra == 1.4.*,
-        lens >= 4.12 && < 4.15,
-        MonadRandom == 0.4.*,
-        mtl == 2.2.*,
-        QuickCheck == 2.8.*,
-        tasty >= 0.10 && < 0.12,
-        tasty-quickcheck == 0.8.*,
-        text == 1.2.*,
-        werewolf

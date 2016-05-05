@@ -8,8 +8,6 @@ Maintainer  : public@hjwylde.com
 
 Re-exports all of the public modules under /Game.Werewolf/. These are:
 
-* "Game.Werewolf.Command"
-* "Game.Werewolf.Engine"
 * "Game.Werewolf.Game"
 * "Game.Werewolf.Player"
 * "Game.Werewolf.Response"
@@ -23,8 +21,6 @@ module Game.Werewolf (
     module Werewolf
 ) where
 
-import Game.Werewolf.Command  as Werewolf
-import Game.Werewolf.Engine   as Werewolf
 import Game.Werewolf.Game     as Werewolf
 import Game.Werewolf.Player   as Werewolf
 import Game.Werewolf.Response as Werewolf

@@ -32,8 +32,9 @@ import           Data.List
 import           Data.Text (Text)
 import qualified Data.Text as T
 
-import Game.Werewolf      hiding (name)
-import Game.Werewolf.Role
+import Game.Werewolf
+import Game.Werewolf.Engine
+import Game.Werewolf.Role   as Role
 
 import System.Random.Shuffle
 
@@ -86,7 +87,7 @@ useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByNa
     Nothing     -> throwError [roleDoesNotExistMessage callerName roleName]
 
 findByName :: Text -> Maybe Role
-findByName name' = restrictedRoles ^? traverse . filtered ((sanitise name' ==) . T.toLower . sanitise . view name)
+findByName name' = restrictedRoles ^? traverse . filtered ((sanitise name' ==) . T.toLower . sanitise . view Role.name)
     where
         sanitise = T.replace " " "-"
 
@@ -109,4 +110,3 @@ padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
 
 createPlayers :: [Text] -> [Role] -> [Player]
 createPlayers = zipWith newPlayer
-

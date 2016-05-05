@@ -7,6 +7,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Major*
+
+* Moved majority of library classes to app/. ([#208](https://github.com/hjwylde/werewolf/issues/208))
+
 *Minor*
 
 * Added private message to players when they die. ([#188](https://github.com/hjwylde/werewolf/issues/188))

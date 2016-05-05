@@ -11,14 +11,10 @@ Engine functions.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings     #-}
 
 module Game.Werewolf.Engine (
     -- * Loop
     checkStage, checkGameOver,
-
-    -- * Game
-    startGame,
 ) where
 
 import Control.Lens         hiding (cons, isn't)
@@ -32,18 +28,15 @@ import Control.Monad.Writer
 import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Maybe
-import           Data.Text       (Text)
-import qualified Data.Text       as T
 
-import           Game.Werewolf.Game     hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
-                                         getVoteResult, hasAnyoneWon, hasFallenAngelWon,
-                                         hasVillagersWon, hasWerewolvesWon, killPlayer)
-import           Game.Werewolf.Messages
-import           Game.Werewolf.Player
-import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name)
-import qualified Game.Werewolf.Role     as Role
-import           Game.Werewolf.Util
+import Game.Werewolf.Game     hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
+                               getVoteResult, hasAnyoneWon, hasFallenAngelWon, hasVillagersWon,
+                               hasWerewolvesWon, killPlayer)
+import Game.Werewolf.Messages
+import Game.Werewolf.Player
+import Game.Werewolf.Response
+import Game.Werewolf.Role     hiding (name)
+import Game.Werewolf.Util
 
 import Prelude hiding (round)
 
@@ -254,19 +247,3 @@ applyEvent (PoisonEvent targetName) = do
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = whenM hasAnyoneWon $ stage .= GameOver >> get >>= tell . gameOverMessages
-
-startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
-startGame callerName players = do
-    when (playerNames /= nub playerNames)   $ throwError [privateMessage callerName "Player names must be unique."]
-    when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
-    forM_ restrictedRoles $ \role' ->
-        when (length (players ^.. traverse . filteredBy role role') > 1) $
-            throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role' ^. Role.name, "."]]
-
-    let game = newGame players
-
-    tell $ newGameMessages game
-
-    return game
-    where
-        playerNames = players ^.. names

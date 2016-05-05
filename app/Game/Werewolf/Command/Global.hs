@@ -24,6 +24,7 @@ import           Data.Maybe
 import           Data.Text  (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command
 import Game.Werewolf.Messages
 import Game.Werewolf.Util
 

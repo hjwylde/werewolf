@@ -9,6 +9,10 @@ Maintainer  : public@hjwylde.com
 This module defines a few system functions for working with a game state file.
 -}
 
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
+
 module Werewolf.System (
     -- * Game
 
@@ -20,17 +24,38 @@ module Werewolf.System (
 ) where
 
 import Control.Lens         hiding (cons)
+import Control.Lens.Extra
 import Control.Monad.Except
+import Control.Monad.Writer
 
+import           Data.List
 import           Data.Text (Text)
 import qualified Data.Text as T
 
 import Game.Werewolf
+import Game.Werewolf.Messages
+import Game.Werewolf.Role     as Role
 
 import Prelude hiding (round)
 
 import System.Directory
 import System.FilePath
+
+startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
+startGame callerName players = do
+    when (playerNames /= nub playerNames)   $ throwError [privateMessage callerName "Player names must be unique."]
+    when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
+    forM_ restrictedRoles $ \role' ->
+        when (length (players ^.. traverse . filteredBy role role') > 1) $
+            throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role' ^. Role.name, "."]]
+
+    let game = newGame players
+
+    tell $ newGameMessages game
+
+    return game
+    where
+        playerNames = players ^.. names
 
 filePath :: MonadIO m => Text -> m FilePath
 filePath tag = (</> ".werewolf" </> T.unpack tag) <$> liftIO getHomeDirectory
