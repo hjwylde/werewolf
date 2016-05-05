@@ -43,25 +43,31 @@ import Control.Lens.Extra
 import Control.Monad.Extra
 import Control.Monad.Random
 import Control.Monad.State
+import Control.Monad.Writer
 
 import           Data.List
 import qualified Data.Map   as Map
 import           Data.Maybe
 import           Data.Text  (Text)
 
-import           Game.Werewolf.Game   hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
-                                       getVoteResult, hasAnyoneWon, hasFallenAngelWon,
-                                       hasVillagersWon, hasWerewolvesWon, killPlayer)
-import qualified Game.Werewolf.Game   as Game
+import           Game.Werewolf.Game     hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
+                                         getVoteResult, hasAnyoneWon, hasFallenAngelWon,
+                                         hasVillagersWon, hasWerewolvesWon, killPlayer)
+import qualified Game.Werewolf.Game     as Game
+import           Game.Werewolf.Messages
 import           Game.Werewolf.Player
-import           Game.Werewolf.Role   hiding (name)
+import           Game.Werewolf.Response
+import           Game.Werewolf.Role     hiding (name)
 
 import Prelude hiding (round)
 
-killPlayer :: MonadState Game m => Text -> m ()
-killPlayer name = modify $ Game.killPlayer name
+killPlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
+killPlayer name = do
+    tell [playerKilledMessage name]
 
-removePlayer :: MonadState Game m => Text -> m ()
+    modify $ Game.killPlayer name
+
+removePlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
 removePlayer name' = do
     killPlayer name'
 

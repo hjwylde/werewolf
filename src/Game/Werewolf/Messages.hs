@@ -20,6 +20,7 @@ includes features such as emoji support.
 module Game.Werewolf.Messages (
     -- * Generic messages
     newGameMessages, stageMessages, gameOverMessages, playerQuitMessage, gameIsOverMessage,
+    playerKilledMessage,
 
     -- ** Error messages
     playerDoesNotExistMessage, playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
@@ -343,6 +344,9 @@ playerQuitMessage player = publicMessage $ T.unwords [playerName, "the", playerR
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to "The game is over!"
+
+playerKilledMessage :: Text -> Message
+playerKilledMessage to = privateMessage to "Guh, you've been killed!"
 
 playerDoesNotExistMessage :: Text -> Text -> Message
 playerDoesNotExistMessage to name = privateMessage to $ T.unwords ["Player", name, "does not exist."]
