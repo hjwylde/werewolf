@@ -30,8 +30,8 @@ import Game.Werewolf
 import Game.Werewolf.Command.Villager as Villager
 import Game.Werewolf.Command.Werewolf as Werewolf
 
-import Werewolf.Game
 import Werewolf.Messages
+import Werewolf.System
 
 data Options = Options
     { argTarget :: Text

@@ -47,9 +47,9 @@ executable werewolf
         Werewolf.Command.Status
         Werewolf.Command.Version
         Werewolf.Command.Vote
-        Werewolf.Game
         Werewolf.Messages
         Werewolf.Options
+        Werewolf.System
         Werewolf.Version
 
     default-language: Haskell2010

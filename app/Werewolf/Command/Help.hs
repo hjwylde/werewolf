@@ -32,7 +32,7 @@ import qualified Data.Text     as T
 import           Game.Werewolf      hiding (Command)
 import qualified Game.Werewolf.Role as Role
 
-import Werewolf.Game
+import Werewolf.System
 
 data Options = Options
     { argCommand :: Maybe Command

@@ -33,8 +33,8 @@ import Game.Werewolf.Command.Hunter    as Hunter
 import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
 
-import Werewolf.Game
 import Werewolf.Messages
+import Werewolf.System
 
 data Options = Options
     { args :: [Text]

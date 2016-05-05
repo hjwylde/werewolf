@@ -27,8 +27,8 @@ import qualified Data.Text as T
 
 import Game.Werewolf
 
-import Werewolf.Game
 import Werewolf.Messages
+import Werewolf.System
 
 data Options = Options
     { optForce :: Bool

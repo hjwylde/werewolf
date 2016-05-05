@@ -27,8 +27,8 @@ import Data.Text (Text)
 import Game.Werewolf
 import Game.Werewolf.Command.Status
 
-import Werewolf.Game
 import Werewolf.Messages
+import Werewolf.System
 
 data Options = Options
     { optIncludeDead :: Bool
