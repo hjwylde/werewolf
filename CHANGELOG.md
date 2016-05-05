@@ -2,6 +2,10 @@
 
 ### Upcoming
 
+*Minor*
+
+* Added private message to players when they die. ([#188](https://github.com/hjwylde/werewolf/issues/188))
+
 *Revisions*
 
 * Updated the Scapegoat's turn messages to be clear that they may choose more than 1 player. ([#185](https://github.com/hjwylde/werewolf/issues/185))
@@ -371,7 +375,7 @@
 
 *Minor*
 
-* Added a Scapegoat role. ([#40](https://github.com/hjwylde/werewolf/issues/40))
+* Added the Scapegoat role. ([#40](https://github.com/hjwylde/werewolf/issues/40))
 * Added a `status` command. ([#18](https://github.com/hjwylde/werewolf/issues/18))
 
 *Revisions*
