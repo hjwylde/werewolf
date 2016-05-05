@@ -491,7 +491,7 @@ trueVillagerRole = Role
 --   /one of which heals a victim of the Werewolves, the other poisons a player./
 --
 --   The Witch is called after the Werewolves. They are able to heal and poison one player per game.
---   There is no restriction on using both potions in one night or to heal themself.
+--   There is no restriction on using both potions in one night or on healing themself.
 witchRole :: Role
 witchRole = Role
     { _name         = "Witch"
@@ -506,7 +506,7 @@ witchRole = Role
         ]
     , _rules        = T.unwords
         [ "The Witch is called after the Werewolves. They are able to heal and poison one player"
-        , "per game. There is no restriction on using both potions in one night or to heal"
+        , "per game. There is no restriction on using both potions in one night or on healing"
         , "themself."
         ]
     }
