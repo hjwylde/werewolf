@@ -1,13 +1,12 @@
 {-|
 Module      : Game.Werewolf.Player
-Description : Simplistic player data structure with functions for searching, filtering and querying
+Description : Simplistic player data structure with lenses for searching, filtering and querying
               lists of players.
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Players are quite simple in themselves. They have a 'name', 'role' and 'state'. Any complex
-behaviour is handled in "Game.Werewolf.Command" and "Game.Werewolf.Engine".
+Players are quite simple in themselves. They have a 'name', 'role' and 'state'.
 -}
 
 {-# LANGUAGE FlexibleContexts #-}

@@ -1,6 +1,6 @@
 {-|
 Module      : Game.Werewolf.Role
-Description : Simplistic role data structure and instances.
+Description : Simplistic role data structure with lenses and instances.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
@@ -67,8 +67,6 @@ import           Data.Text            (Text)
 import qualified Data.Text            as T
 
 -- | Role definitions require only a few pieces of information.
---   Most of the game logic behind a role is implemented in "Game.Werewolf.Command" and
---   "Game.Werewolf.Engine".
 --
 --   The @balance@ attribute on a role indicates the allegiance it favours. For example, a Simple
 --   Werewolf has a balance of -4 while the Seer has a balance of 2. A balance of 0 means it favours

@@ -29,9 +29,8 @@ import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Maybe
 
-import Game.Werewolf.Game     hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
-                               getVoteResult, hasAnyoneWon, hasFallenAngelWon, hasVillagersWon,
-                               hasWerewolvesWon, killPlayer)
+import Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, getVoteResult,
+                               hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
 import Game.Werewolf.Messages
 import Game.Werewolf.Player
 import Game.Werewolf.Response

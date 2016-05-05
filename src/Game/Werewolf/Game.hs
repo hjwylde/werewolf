@@ -1,17 +1,16 @@
 {-|
 Module      : Game.Werewolf.Game
-Description : Game data structure with functions for manipulating and querying the game state.
+Description : Simplistic game data structure with lenses.
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
 A game is not quite as simple as players! Roughly speaking though, this engine is /stateful/. The
-game state only changes when a /command/ is issued (see "Game.Werewolf.Command"). Thus, this module
-defines the 'Game' data structure and any fields required to keep track of the current state.
-
-It also has a few additional functions for manipulating and querying the game state.
+game state only changes when a /command/ is issued. Thus, this module defines the 'Game' data
+structure and any fields required to keep track of the current state.
 -}
 
+{-# LANGUAGE Rank2Types      #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 module Game.Werewolf.Game (
@@ -34,15 +33,14 @@ module Game.Werewolf.Game (
 
     newGame,
 
-    -- ** Manipulations
-    killPlayer,
+    -- ** Traversals
+    player,
 
     -- ** Searches
     getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
     isFirstRound, isThirdRound,
-    doesPlayerExist,
     hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
 
@@ -71,18 +69,6 @@ import Prelude hiding (round)
 --   Any further fields on the game are specific to one or more roles (and their respective turns!).
 --   Some of the additional fields are reset each round (e.g., the Seer's 'see') while others are
 --   kept around for the whole game (e.g., the Orphan's 'roleModel').
---
---   In order to advance a game's 'state', a 'Game.Werewolf.Command.Command' from a user needs to be
---   received. Afterwards the following steps should be performed:
---
---   1. 'Game.Werewolf.Command.apply' the 'Game.Werewolf.Command.Command'.
---   2. run 'Game.Werewolf.Engine.checkStage'.
---   3. run 'Game.Werewolf.Engine.checkGameOver'.
---
---   'Game.Werewolf.Engine.checkStage' will perform any additional checks and manipulations to the
---   game state before advancing the game's 'stage'. It also runs any relevant 'events'.
---   'Game.Werewolf.Engine.checkGameOver' will check to see if any of the win conditions are met and
---   if so, advance the game's 'stage' to 'GameOver'.
 data Game = Game
     { _stage            :: Stage
     , _round            :: Int
@@ -109,8 +95,8 @@ data Game = Game
 --   provided as meaningful breaks between the day and night as, for example, a 'VillagesTurn' may
 --   not always be available (curse that retched Scapegoat).
 --
---   Once the game reaches a turn stage, it requires a 'Game.Werewolf.Command.Command' to help push
---   it past. Often only certain roles and commands may be performed at any given stage.
+--   Once the game reaches a turn stage, it requires a /command/ to help push it past. Often only
+--   certain roles and commands may be performed at any given stage.
 data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OrphansTurn
             | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillageDrunksTurn
             | VillagesTurn | WerewolvesTurn | WitchsTurn
@@ -133,7 +119,6 @@ instance Humanise Stage where
     humanise WerewolvesTurn     = fromString "Werewolves' turn"
     humanise WitchsTurn         = fromString "Witch's turn"
 
--- TODO (hjw): remove events
 -- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
 --   'Game.Werewolf.Engine.checkStage', while an event's specific behaviour is defined by
 --   'Game.Werewolf.Engine.eventAvailable' and 'Game.Werewolf.Engine.applyEvent'.
@@ -211,7 +196,7 @@ stageAvailable game WitchsTurn          =
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
 
 -- | Creates a new 'Game' with the given players. No validations are performed here, those are left
---   to 'Game.Werewolf.Engine.startGame'.
+--   to the binary.
 newGame :: [Player] -> Game
 newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
     where
@@ -237,11 +222,13 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _votes            = Map.empty
             }
 
--- | Kills the given player! This function should be used carefully as it doesn't clear any state
---   that the player's role may use. If you're after just removing a player from a game for a test,
---   try using a 'Game.Werewolf.Command.quitCommand' instead.
-killPlayer :: Text -> Game -> Game
-killPlayer name' = players . traverse . filteredBy name name' . state .~ Dead
+-- | The traversal of 'Player's with the given name.
+--
+-- @
+-- 'player' name = 'players' . 'names' . 'only' name
+-- @
+player :: Text -> Traversal' Game ()
+player name = players . names . only name
 
 -- | Gets all the 'allowedVoters' in a game (which is names only) and maps them to their player.
 getAllowedVoters :: Game -> [Player]
@@ -272,10 +259,6 @@ isFirstRound game = game ^. round == 0
 -- | @'isThirdRound' game = game ^. 'round' == 2@
 isThirdRound :: Game -> Bool
 isThirdRound game = game ^. round == 2
-
--- | Queries whether the player is in the game.
-doesPlayerExist :: Text -> Game -> Bool
-doesPlayerExist name = has $ players . names . only name
 
 -- | Queries whether anyone has won.
 hasAnyoneWon :: Game -> Bool

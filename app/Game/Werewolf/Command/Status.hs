@@ -26,7 +26,7 @@ import Control.Monad.Writer
 import Data.List
 import Data.Text (Text)
 
-import           Game.Werewolf          hiding (doesPlayerExist, getPendingVoters)
+import           Game.Werewolf          hiding (getPendingVoters)
 import           Game.Werewolf.Command
 import           Game.Werewolf.Messages
 import qualified Game.Werewolf.Role     as Role

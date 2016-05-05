@@ -19,6 +19,7 @@ module Werewolf.Command.End (
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Extra
 import Control.Monad.IO.Class
 
@@ -41,7 +42,7 @@ handle callerName tag (Options force) = do
     unless force $ do
         game <- readGame tag
 
-        unless (doesPlayerExist callerName game) $
+        unless (has (player callerName) game) $
             exitWith failure { messages = [playerCannotDoThatMessage callerName] }
 
     deleteGame tag
