@@ -33,6 +33,7 @@ module Game.Werewolf.Player (
     names, roles, states,
 
     -- | N.B., the following traversals are not legal for the same reason 'filtered' isn't!
+    named,
     alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
     orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers,
     villageDrunks, witches,
@@ -248,6 +249,14 @@ roles = traverse . role
 -- @
 states :: Traversable t => Traversal' (t Player) State
 states = traverse . state
+
+-- | This 'Traversal' provides the traversal of 'Player's with the given name.
+--
+-- @
+-- 'player' name = 'players' . 'names' . 'only' name
+-- @
+named :: Traversable t => Text -> Traversal' (t Player) Player
+named name' = traverse . filteredBy name name'
 
 -- | This 'Traversal' provides the traversal of 'alphaWolf' 'Player's.
 --

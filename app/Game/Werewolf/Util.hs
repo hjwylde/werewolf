@@ -167,7 +167,7 @@ hasWerewolvesWon :: MonadState Game m => m Bool
 hasWerewolvesWon = gets Game.hasWerewolvesWon
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
-doesPlayerExist name = has (player name) <$> get
+doesPlayerExist name = has (players . named name) <$> get
 
 isPlayerHunter :: MonadState Game m => Text -> m Bool
 isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'

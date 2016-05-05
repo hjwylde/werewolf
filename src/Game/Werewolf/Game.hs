@@ -33,14 +33,13 @@ module Game.Werewolf.Game (
 
     newGame,
 
-    -- ** Traversals
-    player,
+    -- ** Prisms
+    firstRound, secondRound, thirdRound,
 
     -- ** Searches
     getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
-    isFirstRound, isThirdRound,
     hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
 
@@ -75,7 +74,7 @@ data Game = Game
     , _players          :: [Player]
     , _events           :: [Event]
     , _boots            :: Map Text [Text]
-    , _allowedVoters    :: [Text]           -- ^ Scapegoat
+    , _allowedVoters    :: [Text]           -- ^ Jester, Scapegoat
     , _heal             :: Bool             -- ^ Witch
     , _healUsed         :: Bool             -- ^ Witch
     , _hunterRetaliated :: Bool             -- ^ Hunter
@@ -183,9 +182,9 @@ stageAvailable _ Sunrise                = True
 stageAvailable _ Sunset                 = True
 stageAvailable game VillageDrunksTurn   =
     has (players . villageDrunks . alive) game
-    && isThirdRound game
+    && is thirdRound game
 stageAvailable game VillagesTurn        =
-    (has (players . fallenAngels . alive) game || not (isFirstRound game))
+    (has (players . fallenAngels . alive) game || not (is firstRound game))
     && any (is alive) (getAllowedVoters game)
 stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
 stageAvailable game OrphansTurn         =
@@ -222,13 +221,17 @@ newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
             , _votes            = Map.empty
             }
 
--- | The traversal of 'Player's with the given name.
---
--- @
--- 'player' name = 'players' . 'names' . 'only' name
--- @
-player :: Text -> Traversal' Game ()
-player name = players . names . only name
+-- | The traversal of 'Game's on the first round.
+firstRound :: Prism' Game Game
+firstRound = prism (set round 0) $ \game -> (if game ^. round == 0 then Right else Left) game
+
+-- | The traversal of 'Game's on the second round.
+secondRound :: Prism' Game Game
+secondRound = prism (set round 1) $ \game -> (if game ^. round == 1 then Right else Left) game
+
+-- | The traversal of 'Game's on the third round.
+thirdRound :: Prism' Game Game
+thirdRound = prism (set round 2) $ \game -> (if game ^. round == 2 then Right else Left) game
 
 -- | Gets all the 'allowedVoters' in a game (which is names only) and maps them to their player.
 getAllowedVoters :: Game -> [Player]
@@ -251,14 +254,6 @@ getVoteResult game
     where
         votees = Map.elems $ game ^. votes
         result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)
-
--- | @'isFirstRound' game = game ^. 'round' == 0@
-isFirstRound :: Game -> Bool
-isFirstRound game = game ^. round == 0
-
--- | @'isThirdRound' game = game ^. 'round' == 2@
-isThirdRound :: Game -> Bool
-isThirdRound game = game ^. round == 2
 
 -- | Queries whether anyone has won.
 hasAnyoneWon :: Game -> Bool
