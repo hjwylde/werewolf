@@ -112,6 +112,7 @@ newGameMessages game = concat
     , [rolesInGameMessage Nothing $ players' ^.. roles]
     , map newPlayerMessage players'
     , beholderMessages
+    , spitefulGhostMessages
     , trueVillagerMessages
     , fallenAngelMessages
     , stageMessages game
@@ -121,6 +122,9 @@ newGameMessages game = concat
         beholderMessages        = case (,) <$> players' ^? beholders <*> players' ^? seers of
             Just (beholder, seer)   -> [beholderMessage (beholder ^. name) (seer ^. name)]
             _                       -> []
+        spitefulGhostMessages   = case players' ^? spitefulGhosts of
+            Just spitefulGhost  -> [spitefulGhostMessage (spitefulGhost ^. name) (players' \\ [spitefulGhost])]
+            _                   -> []
         trueVillagerMessages    = case players' ^? trueVillagers of
             Just trueVillager   -> [trueVillagerMessage $ trueVillager ^. name]
             _                   -> []
@@ -146,6 +150,16 @@ beholderMessage to seerName = privateMessage to $ T.concat
     [ "The Seer has always been held in high regard among the Villagers. Few are as lucky as you to"
     , " know the Seer, ", seerName, ", personally."
     ]
+
+spitefulGhostMessage :: Text -> [Player] -> Message
+spitefulGhostMessage to players = privateMessage to $ T.concat
+    [ "Being ethereal seldom has it's benefits. Perhaps however this knowledge of the townsfolks' "
+    , "natures will bring you some joy in the afterlife: ", playerNamesWithRoles, "."
+    ]
+    where
+        playerNamesWithRoles = concatList $ map
+            (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"])
+            players
 
 trueVillagerMessage :: Text -> Message
 trueVillagerMessage name = publicMessage $ T.unwords

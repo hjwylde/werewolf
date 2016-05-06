@@ -39,7 +39,7 @@ module Game.Werewolf.Role (
     -- | The Loners look out for themselves and themselves alone.
 
     --   The Loners must complete their own objective.
-    fallenAngelRole,
+    fallenAngelRole, spitefulGhostRole,
 
     -- *** The Villagers
     -- | Fraught with fear of the unseen enemy, the Villagers must work together to determine the
@@ -117,6 +117,7 @@ allRoles =
     , seerRole
     , simpleVillagerRole
     , simpleWerewolfRole
+    , spitefulGhostRole
     , trueVillagerRole
     , villageDrunkRole
     , witchRole
@@ -216,6 +217,15 @@ fallenAngelRole = Role
         [ "The Fallen Angel wins if they manage to get lynched by the Villagers before the end of"
         , "the game."
         ]
+    }
+
+spitefulGhostRole :: Role
+spitefulGhostRole = Role
+    { _name         = "Spiteful Ghost"
+    , _allegiance   = NoOne
+    , _balance      = 0
+    , _description  = "TODO (hjw): description"
+    , _rules        = "TODO (hjw): rules"
     }
 
 -- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
