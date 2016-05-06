@@ -87,6 +87,7 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
       ]
     , [ "Standard commands:"
       , "- `vote PLAYER`"
+      , "- `unvote`"
       ]
     , whenPlayerHasRole callerName mGame hunterRole
       [ "Hunter commands:"

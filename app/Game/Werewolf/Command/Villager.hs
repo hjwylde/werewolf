@@ -11,7 +11,7 @@ Villager commands.
 
 module Game.Werewolf.Command.Villager (
     -- * Commands
-    voteCommand,
+    unvoteCommand, voteCommand,
 ) where
 
 import Control.Lens
@@ -27,6 +27,18 @@ import Game.Werewolf
 import Game.Werewolf.Command
 import Game.Werewolf.Messages
 import Game.Werewolf.Util
+
+unvoteCommand :: Text -> Command
+unvoteCommand callerName = Command $ do
+    validatePlayer callerName callerName
+    whenM (uses allowedVoters (callerName `notElem`))   $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isVillagesTurn                              $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (isNothing <$> getPlayerVote callerName)      $ throwError [playerHasNotVotedMessage callerName]
+
+    votes %= Map.delete callerName
+
+    whenJustM (preuse $ players . crookedSenators . alive) $ \crookedSenator ->
+        tell [playerRescindedVoteMessage (crookedSenator ^. name) callerName]
 
 voteCommand :: Text -> Text -> Command
 voteCommand callerName targetName = Command $ do

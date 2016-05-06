@@ -60,6 +60,7 @@ data Command
     | See See.Options
     | Start Start.Options
     | Status
+    | Unvote
     | Version
     | Vote Vote.Options
     deriving (Eq, Show)
@@ -108,6 +109,7 @@ werewolf = Options
         , command "see"         $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance")
         , command "start"       $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game")
         , command "status"      $ info (helper <*> status)      (fullDesc <> progDesc "Get the status of the current game")
+        , command "unvote"      $ info (helper <*> unvote)      (fullDesc <> progDesc "Rescind a vote")
         , command "version"     $ info (helper <*> version)     (fullDesc <> progDesc "Show this engine's version")
         , command "vote"        $ info (helper <*> vote)        (fullDesc <> progDesc "Vote against a player")
         ])
@@ -189,6 +191,9 @@ start = fmap Start $ Start.Options
 
 status :: Parser Command
 status = pure Status
+
+unvote :: Parser Command
+unvote = pure Unvote
 
 version :: Parser Command
 version = pure Version

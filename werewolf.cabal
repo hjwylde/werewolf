@@ -59,6 +59,7 @@ executable werewolf
         Werewolf.Command.See
         Werewolf.Command.Start
         Werewolf.Command.Status
+        Werewolf.Command.Unvote
         Werewolf.Command.Version
         Werewolf.Command.Vote
         Werewolf.Messages
