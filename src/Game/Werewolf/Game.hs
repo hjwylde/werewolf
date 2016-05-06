@@ -139,11 +139,7 @@ makePrisms ''Event
 -- | All of the 'Stage's in the order that they should occur.
 allStages :: [Stage]
 allStages =
-    [ VillagesTurn
-    , Lynching
-    , HuntersTurn1
-    , ScapegoatsTurn
-    , Sunset
+    [ Sunset
     , OrphansTurn
     , VillageDrunksTurn
     , SeersTurn
@@ -153,6 +149,10 @@ allStages =
     , Sunrise
     , HuntersTurn2
     , FerinasGrunt
+    , VillagesTurn
+    , Lynching
+    , HuntersTurn1
+    , ScapegoatsTurn
     , GameOver
     ]
 
@@ -183,9 +183,7 @@ stageAvailable _ Sunset                 = True
 stageAvailable game VillageDrunksTurn   =
     has (players . villageDrunks . alive) game
     && is thirdRound game
-stageAvailable game VillagesTurn        =
-    (has (players . fallenAngels . alive) game || not (is firstRound game))
-    && any (is alive) (getAllowedVoters game)
+stageAvailable game VillagesTurn        = any (is alive) (getAllowedVoters game)
 stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
 stageAvailable game OrphansTurn         =
     has (players . orphans . alive) game
@@ -197,29 +195,27 @@ stageAvailable game WitchsTurn          =
 -- | Creates a new 'Game' with the given players. No validations are performed here, those are left
 --   to the binary.
 newGame :: [Player] -> Game
-newGame players = game & stage .~ head (filter (stageAvailable game) stageCycle)
-    where
-        game = Game
-            { _stage            = Sunset
-            , _round            = 0
-            , _players          = players
-            , _events           = []
-            , _boots            = Map.empty
-            , _passed           = False
-            , _allowedVoters    = players ^.. names
-            , _heal             = False
-            , _healUsed         = False
-            , _hunterRetaliated = False
-            , _jesterRevealed   = False
-            , _poison           = Nothing
-            , _poisonUsed       = False
-            , _priorProtect     = Nothing
-            , _protect          = Nothing
-            , _roleModel        = Nothing
-            , _scapegoatBlamed  = False
-            , _see              = Nothing
-            , _votes            = Map.empty
-            }
+newGame players = Game
+    { _stage            = head stageCycle
+    , _round            = 0
+    , _players          = players
+    , _events           = []
+    , _boots            = Map.empty
+    , _passed           = False
+    , _allowedVoters    = players ^.. names
+    , _heal             = False
+    , _healUsed         = False
+    , _hunterRetaliated = False
+    , _jesterRevealed   = False
+    , _poison           = Nothing
+    , _poisonUsed       = False
+    , _priorProtect     = Nothing
+    , _protect          = Nothing
+    , _roleModel        = Nothing
+    , _scapegoatBlamed  = False
+    , _see              = Nothing
+    , _votes            = Map.empty
+    }
 
 -- | The traversal of 'Game's on the first round.
 firstRound :: Prism' Game Game

@@ -142,13 +142,7 @@ rulesMessages mGame = map (T.intercalate "\n")
         ]
       ]
     , filter (/= "")
-      [ T.concat
-        [ "A game begins at night and follows a standard cycle."
-        , whenRoleInPlay mGame fallenAngelRole
-            " (N.B., when the Fallen Angel is in play the game begins with the village vote.)"
-        ]
-      , whenRoleInPlay mGame fallenAngelRole
-        "- (When the Fallen Angel is in play) the village votes to lynch a suspect."
+      [ "A game begins at night and follows a standard cycle."
       , "- The village falls asleep."
       , whenRoleInPlay mGame orphanRole
         "- (First round only) the Orphan wakes up and chooses a role model."
