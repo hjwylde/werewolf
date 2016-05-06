@@ -17,7 +17,6 @@ module Werewolf.Messages (
 
     -- ** Error messages
     noGameRunningMessage, gameAlreadyRunningMessage, roleDoesNotExistMessage,
-    playerCannotDoThatMessage, playerCannotDoThatRightNowMessage,
 ) where
 
 import           Data.Text    (Text)
@@ -38,9 +37,3 @@ gameAlreadyRunningMessage to = privateMessage to "A game is already running."
 
 roleDoesNotExistMessage :: Text -> Text -> Message
 roleDoesNotExistMessage to name = privateMessage to $ T.unwords ["Role", name, "does not exist."]
-
-playerCannotDoThatMessage :: Text -> Message
-playerCannotDoThatMessage to = privateMessage to "You cannot do that!"
-
-playerCannotDoThatRightNowMessage :: Text -> Message
-playerCannotDoThatRightNowMessage to = privateMessage to "You cannot do that right now!"

@@ -1,13 +1,12 @@
 {-|
 Module      : Game.Werewolf.Player
-Description : Simplistic player data structure with functions for searching, filtering and querying
+Description : Simplistic player data structure with lenses for searching, filtering and querying
               lists of players.
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Players are quite simple in themselves. They have a 'name', 'role' and 'state'. Any complex
-behaviour is handled in "Game.Werewolf.Command" and "Game.Werewolf.Engine".
+Players are quite simple in themselves. They have a 'name', 'role' and 'state'.
 -}
 
 {-# LANGUAGE FlexibleContexts #-}
@@ -34,6 +33,7 @@ module Game.Werewolf.Player (
     names, roles, states,
 
     -- | N.B., the following traversals are not legal for the same reason 'filtered' isn't!
+    named,
     alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
     orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers,
     villageDrunks, witches,
@@ -249,6 +249,14 @@ roles = traverse . role
 -- @
 states :: Traversable t => Traversal' (t Player) State
 states = traverse . state
+
+-- | This 'Traversal' provides the traversal of 'Player's with the given name.
+--
+-- @
+-- 'player' name = 'players' . 'names' . 'only' name
+-- @
+named :: Traversable t => Text -> Traversal' (t Player) Player
+named name' = traverse . filteredBy name name'
 
 -- | This 'Traversal' provides the traversal of 'alphaWolf' 'Player's.
 --

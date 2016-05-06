@@ -21,7 +21,8 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf          hiding (doesPlayerExist, killPlayer)
+import Game.Werewolf
+import Game.Werewolf.Command
 import Game.Werewolf.Messages
 import Game.Werewolf.Util
 

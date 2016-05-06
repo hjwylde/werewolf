@@ -27,11 +27,14 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command
 import Game.Werewolf.Command.Villager as Villager
 import Game.Werewolf.Command.Werewolf as Werewolf
+import Game.Werewolf.Engine
+import Game.Werewolf.Messages
 
-import Werewolf.Game
 import Werewolf.Messages
+import Werewolf.System
 
 data Options = Options
     { argTarget :: Text

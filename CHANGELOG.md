@@ -1,6 +1,15 @@
 # Changelog
 
+**N.B.**, prior to v1 a change was considered *breaking* if it altered how an interface interacts
+    with the werewolf binary.
+Post v1 a change is further considered breaking if the state file format is incompatible with the
+    previous version.
+
 ### Upcoming
+
+*Major*
+
+* Moved majority of library classes to app/. ([#208](https://github.com/hjwylde/werewolf/issues/208))
 
 *Minor*
 

@@ -166,10 +166,10 @@ stageMessages game = case game ^. stage of
     Sunrise             -> [sunriseMessage]
     Sunset              -> [nightFallsMessage]
     VillageDrunksTurn   -> [villageDrunksTurnMessage]
-    VillagesTurn        -> if isFirstRound game
+    VillagesTurn        -> if is firstRound game
         then firstVillagesTurnMessages
         else villagesTurnMessages
-    WerewolvesTurn      -> if isFirstRound game
+    WerewolvesTurn      -> if is firstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
     WitchsTurn          -> witchsTurnMessages game

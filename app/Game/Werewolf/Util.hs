@@ -42,7 +42,7 @@ import Control.Lens
 import Control.Lens.Extra
 import Control.Monad.Extra
 import Control.Monad.Random
-import Control.Monad.State
+import Control.Monad.State  hiding (state)
 import Control.Monad.Writer
 
 import           Data.List
@@ -50,9 +50,9 @@ import qualified Data.Map   as Map
 import           Data.Maybe
 import           Data.Text  (Text)
 
-import           Game.Werewolf.Game     hiding (doesPlayerExist, getAllowedVoters, getPendingVoters,
-                                         getVoteResult, hasAnyoneWon, hasFallenAngelWon,
-                                         hasVillagersWon, hasWerewolvesWon, killPlayer)
+import           Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, getVoteResult,
+                                         hasAnyoneWon, hasFallenAngelWon, hasVillagersWon,
+                                         hasWerewolvesWon)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Messages
 import           Game.Werewolf.Player
@@ -62,10 +62,10 @@ import           Game.Werewolf.Role     hiding (name)
 import Prelude hiding (round)
 
 killPlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
-killPlayer name = do
-    tell [playerKilledMessage name]
+killPlayer name' = do
+    tell [playerKilledMessage name']
 
-    modify $ Game.killPlayer name
+    players . traverse . filteredBy name name' . state .= Dead
 
 removePlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
 removePlayer name' = do
@@ -167,7 +167,7 @@ hasWerewolvesWon :: MonadState Game m => m Bool
 hasWerewolvesWon = gets Game.hasWerewolvesWon
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
-doesPlayerExist name = gets $ Game.doesPlayerExist name
+doesPlayerExist name = has (players . named name) <$> get
 
 isPlayerHunter :: MonadState Game m => Text -> m Bool
 isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'

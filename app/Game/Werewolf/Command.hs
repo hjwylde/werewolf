@@ -26,12 +26,12 @@ module Game.Werewolf.Command (
 
 import Control.Monad.Except
 import Control.Monad.Extra
-import Control.Monad.State  hiding (state)
+import Control.Monad.State
 import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf.Game     hiding (doesPlayerExist, getPendingVoters, getVoteResult, killPlayer)
+import Game.Werewolf.Game     hiding (getPendingVoters, getVoteResult)
 import Game.Werewolf.Messages
 import Game.Werewolf.Response
 import Game.Werewolf.Util

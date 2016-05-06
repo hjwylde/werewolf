@@ -20,11 +20,12 @@ module Game.Werewolf.Command.Witch (
 import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
-import Control.Monad.State  hiding (state)
+import Control.Monad.State
 
 import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Command
 import Game.Werewolf.Messages
 import Game.Werewolf.Util
 

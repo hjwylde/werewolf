@@ -19,6 +19,7 @@ module Werewolf.Command.End (
     handle,
 ) where
 
+import Control.Lens
 import Control.Monad.Extra
 import Control.Monad.IO.Class
 
@@ -26,9 +27,10 @@ import           Data.Text (Text)
 import qualified Data.Text as T
 
 import Game.Werewolf
+import Game.Werewolf.Messages
 
-import Werewolf.Game
 import Werewolf.Messages
+import Werewolf.System
 
 data Options = Options
     { optForce :: Bool
@@ -41,11 +43,12 @@ handle callerName tag (Options force) = do
     unless force $ do
         game <- readGame tag
 
-        unless (doesPlayerExist callerName game) $
+        unless (has (players . named callerName) game) $
             exitWith failure { messages = [playerCannotDoThatMessage callerName] }
 
     deleteGame tag
 
     exitWith success { messages = [gameEndedMessage] }
     where
+        -- TODO (hjw): move this to Messages
         gameEndedMessage = publicMessage $ T.concat ["Game ended by ", callerName, "."]
