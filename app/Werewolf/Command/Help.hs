@@ -195,11 +195,11 @@ helpMessages = map (T.intercalate "\n")
     ]
 
 whenPlayerHasRole :: Monoid m => Text -> Maybe Game -> Role -> m -> m
-whenPlayerHasRole _ Nothing _ m                         = m
+whenPlayerHasRole _ Nothing _ m                 = m
 whenPlayerHasRole callerName (Just game) role' m
-    | hasn't (players . names . only callerName) game   = mempty
-    | hasn't (role . only role') player                 = mempty
-    | otherwise                                         = m
+    | hasn't (players . named callerName) game  = mempty
+    | hasn't (role . only role') player         = mempty
+    | otherwise                                 = m
      where
         player = game ^?! players . traverse . filteredBy name callerName
 
