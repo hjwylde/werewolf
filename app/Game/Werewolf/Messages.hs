@@ -44,9 +44,6 @@ module Game.Werewolf.Messages (
     -- * Druid's turn messages
     ferinaGruntsMessage,
 
-    -- * Fallen Angel's turn messages
-    fallenAngelJoinedVillagersMessage,
-
     -- * Hunter's turn messages
     playerShotMessage,
 
@@ -116,6 +113,7 @@ newGameMessages game = concat
     , map newPlayerMessage players'
     , beholderMessages
     , trueVillagerMessages
+    , fallenAngelMessages
     , stageMessages game
     ]
     where
@@ -126,6 +124,9 @@ newGameMessages game = concat
         trueVillagerMessages    = case players' ^? trueVillagers of
             Just trueVillager   -> [trueVillagerMessage $ trueVillager ^. name]
             _                   -> []
+        fallenAngelMessages     = if has fallenAngels players'
+            then [fallenAngelMessage]
+            else []
 
 newPlayersInGameMessage :: [Text] -> Message
 newPlayersInGameMessage playerNames = publicMessage $ T.concat
@@ -153,6 +154,13 @@ trueVillagerMessage name = publicMessage $ T.unwords
     , "you with this:", name, "is the True Villager."
     ]
 
+fallenAngelMessage :: Message
+fallenAngelMessage = publicMessage $ T.unwords
+    [ "Alas, again I regrettably yield advice: an angelic menace walks among you. Do not cast your"
+    , "votes lightly, for they will relish in this opportunity to be free from their terrible"
+    , "nightmare."
+    ]
+
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
     FerinasGrunt        -> []
@@ -167,9 +175,7 @@ stageMessages game = case game ^. stage of
     Sunrise             -> [sunriseMessage]
     Sunset              -> [nightFallsMessage]
     VillageDrunksTurn   -> [villageDrunksTurnMessage]
-    VillagesTurn        -> if is firstRound game
-        then firstVillagesTurnMessages
-        else villagesTurnMessages
+    VillagesTurn        -> villagesTurnMessages
     WerewolvesTurn      -> if is firstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
@@ -221,15 +227,6 @@ sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens thei
 
 nightFallsMessage :: Message
 nightFallsMessage = publicMessage "Night falls, the village is asleep."
-
-firstVillagesTurnMessages :: [Message]
-firstVillagesTurnMessages = fallenAngelInPlayMessage : villagesTurnMessages
-    where
-        fallenAngelInPlayMessage = publicMessage $ T.unwords
-            [ "Alas, again I regrettably yield advice: an angelic menace walks among you. Do not"
-            , "cast your votes lightly, for they will relish in this opportunity to be free from"
-            , "their terrible nightmare."
-            ]
 
 villagesTurnMessages :: [Message]
 villagesTurnMessages =
@@ -441,13 +438,6 @@ waitingOnMessage mTo playerNames = Message mTo $ T.concat
 ferinaGruntsMessage :: Message
 ferinaGruntsMessage = publicMessage
     "Ferina wakes from her slumber, disturbed and on edge. She loudly grunts as she smells danger."
-
-fallenAngelJoinedVillagersMessage :: Message
-fallenAngelJoinedVillagersMessage = publicMessage $ T.unwords
-    [ "You hear the Fallen Angel wrought with anger off in the distance. They failed to attract the"
-    , "prejudiced vote of the village to leave this world. Now they are stuck here, doomed forever"
-    , "to live out a mortal life as a Villager."
-    ]
 
 playerShotMessage :: Player -> Message
 playerShotMessage target = publicMessage $ T.unwords

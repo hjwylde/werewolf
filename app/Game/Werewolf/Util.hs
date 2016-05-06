@@ -75,7 +75,6 @@ removePlayer name' = do
 
     player <- findPlayerBy_ name name'
 
-    when (is fallenAngel player)    $ setPlayerAllegiance name' Villagers
     when (is orphan player)         $ roleModel .= Nothing
     when (is protector player)      $ do
         protect         .= Nothing

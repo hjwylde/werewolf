@@ -16,9 +16,9 @@ structure and any fields required to keep track of the current state.
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, events, boots, allowedVoters, heal, healUsed, hunterRetaliated,
-    jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel, scapegoatBlamed,
-    see, votes,
+    stage, round, players, events, boots, allowedVoters, fallenAngelLynched, heal, healUsed,
+    hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
+    scapegoatBlamed, see, votes,
 
     Stage(..),
     _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OrphansTurn,
@@ -69,25 +69,26 @@ import Prelude hiding (round)
 --   Some of the additional fields are reset each round (e.g., the Seer's 'see') while others are
 --   kept around for the whole game (e.g., the Orphan's 'roleModel').
 data Game = Game
-    { _stage            :: Stage
-    , _round            :: Int
-    , _players          :: [Player]
-    , _events           :: [Event]
-    , _boots            :: Map Text [Text]
-    , _allowedVoters    :: [Text]           -- ^ Jester, Scapegoat
-    , _heal             :: Bool             -- ^ Witch
-    , _healUsed         :: Bool             -- ^ Witch
-    , _hunterRetaliated :: Bool             -- ^ Hunter
-    , _jesterRevealed   :: Bool             -- ^ Jester
-    , _passed           :: Bool             -- ^ Witch
-    , _poison           :: Maybe Text       -- ^ Witch
-    , _poisonUsed       :: Bool             -- ^ Witch
-    , _priorProtect     :: Maybe Text       -- ^ Protector
-    , _protect          :: Maybe Text       -- ^ Protector
-    , _roleModel        :: Maybe Text       -- ^ Orphan
-    , _scapegoatBlamed  :: Bool             -- ^ Scapegoat
-    , _see              :: Maybe Text       -- ^ Seer
-    , _votes            :: Map Text Text    -- ^ Villagers and Werewolves
+    { _stage              :: Stage
+    , _round              :: Int
+    , _players            :: [Player]
+    , _events             :: [Event]
+    , _boots              :: Map Text [Text]
+    , _allowedVoters      :: [Text]           -- ^ Jester, Scapegoat
+    , _fallenAngelLynched :: Bool           -- ^ Fallen Angel
+    , _heal               :: Bool             -- ^ Witch
+    , _healUsed           :: Bool             -- ^ Witch
+    , _hunterRetaliated   :: Bool             -- ^ Hunter
+    , _jesterRevealed     :: Bool             -- ^ Jester
+    , _passed             :: Bool             -- ^ Witch
+    , _poison             :: Maybe Text       -- ^ Witch
+    , _poisonUsed         :: Bool             -- ^ Witch
+    , _priorProtect       :: Maybe Text       -- ^ Protector
+    , _protect            :: Maybe Text       -- ^ Protector
+    , _roleModel          :: Maybe Text       -- ^ Orphan
+    , _scapegoatBlamed    :: Bool             -- ^ Scapegoat
+    , _see                :: Maybe Text       -- ^ Seer
+    , _votes              :: Map Text Text    -- ^ Villagers and Werewolves
     } deriving (Eq, Read, Show)
 
 -- | Most of these are fairly self-explainable (the turn stages). 'Sunrise' and 'Sunset' are
@@ -196,25 +197,26 @@ stageAvailable game WitchsTurn          =
 --   to the binary.
 newGame :: [Player] -> Game
 newGame players = Game
-    { _stage            = head stageCycle
-    , _round            = 0
-    , _players          = players
-    , _events           = []
-    , _boots            = Map.empty
-    , _passed           = False
-    , _allowedVoters    = players ^.. names
-    , _heal             = False
-    , _healUsed         = False
-    , _hunterRetaliated = False
-    , _jesterRevealed   = False
-    , _poison           = Nothing
-    , _poisonUsed       = False
-    , _priorProtect     = Nothing
-    , _protect          = Nothing
-    , _roleModel        = Nothing
-    , _scapegoatBlamed  = False
-    , _see              = Nothing
-    , _votes            = Map.empty
+    { _stage                = head stageCycle
+    , _round                = 0
+    , _players              = players
+    , _events               = []
+    , _boots                = Map.empty
+    , _passed               = False
+    , _allowedVoters        = players ^.. names
+    , _fallenAngelLynched   = False
+    , _heal                 = False
+    , _healUsed             = False
+    , _hunterRetaliated     = False
+    , _jesterRevealed       = False
+    , _poison               = Nothing
+    , _poisonUsed           = False
+    , _priorProtect         = Nothing
+    , _protect              = Nothing
+    , _roleModel            = Nothing
+    , _scapegoatBlamed      = False
+    , _see                  = Nothing
+    , _votes                = Map.empty
     }
 
 -- | The traversal of 'Game's on the first round.
@@ -256,19 +258,16 @@ hasAnyoneWon :: Game -> Bool
 hasAnyoneWon game = any ($ game) [hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon]
 
 -- | Queries whether the Fallen Angel has won. The Fallen Angel wins if they manage to get
---   themselves killed on the first round.
---
---   N.B., we check that the Fallen Angel isn't a 'villager' as the Fallen Angel's role is altered
---   if they don't win.
+--   themselves lynched by the Villagers.
 hasFallenAngelWon :: Game -> Bool
-hasFallenAngelWon game = has (players . fallenAngels) game && is dead fallenAngel && isn't villager fallenAngel
-    where
-        fallenAngel = game ^?! players . fallenAngels
+hasFallenAngelWon game = game ^. fallenAngelLynched
 
 -- | Queries whether the 'Villagers' have won. The 'Villagers' win if they are the only players
 --   surviving.
+--
+--   N.B., the Fallen Angel is not considered when determining whether the 'Villagers' have won.
 hasVillagersWon :: Game -> Bool
-hasVillagersWon = allOf (players . traverse . alive) (is villager)
+hasVillagersWon = allOf (players . traverse . alive) (\player -> is villager player || is fallenAngel player)
 
 -- | Queries whether the 'Werewolves' have won. The 'Werewolves' win if they are the only players
 --   surviving.

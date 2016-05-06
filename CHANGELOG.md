@@ -10,6 +10,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Major*
 
 * Moved majority of library classes to app/. ([#208](https://github.com/hjwylde/werewolf/issues/208))
+* Changed the Fallen Angel to be a true Loner. ([#173](https://github.com/hjwylde/werewolf/issues/173))
 
 *Minor*
 
