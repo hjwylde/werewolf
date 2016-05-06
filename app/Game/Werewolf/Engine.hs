@@ -237,6 +237,10 @@ applyEvent (DevourEvent targetName) = do
 
     killPlayer targetName
     tell [playerDevouredMessage target]
+
+    when (is medusa target) . whenJustM (getFirstAdjacentAliveWerewolf targetName) $ \werewolf -> do
+        killPlayer (werewolf ^. name)
+        tell [playerTurnedToStoneMessage werewolf]
 applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
 applyEvent (PoisonEvent targetName) = do
     target <- findPlayerBy_ name targetName

@@ -24,7 +24,7 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, lycan, orphan,
+    alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, lycan, medusa, orphan,
     protector, scapegoat, seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk, witch,
     villager, werewolf,
 
@@ -35,8 +35,8 @@ module Game.Werewolf.Player (
     -- | N.B., the following traversals are not legal for the same reason 'filtered' isn't!
     named,
     alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
-    orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves, trueVillagers,
-    villageDrunks, witches,
+    medusas, orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves,
+    trueVillagers, villageDrunks, witches,
     villagers, werewolves,
     alive, dead,
 ) where
@@ -137,6 +137,14 @@ jester = role . only jesterRole
 -- @
 lycan :: Traversal' Player ()
 lycan = role . only lycanRole
+
+-- | The traversal of 'Player's with a 'medusaRole'.
+--
+-- @
+-- 'medusa' = 'role' . 'only' 'medusaRole'
+-- @
+medusa :: Traversal' Player ()
+medusa = role . only medusaRole
 
 -- | The traversal of 'Player's with an 'orphanRole'.
 --
@@ -321,6 +329,14 @@ jesters = traverse . filtered (is jester)
 -- @
 lycans :: Traversable t => Traversal' (t Player) Player
 lycans = traverse . filtered (is lycan)
+
+-- | This 'Traversal' provides the traversal of 'medusa' 'Player's.
+--
+-- @
+-- 'medusas' = 'traverse' . 'filtered' ('is' 'medusa')
+-- @
+medusas :: Traversable t => Traversal' (t Player) Player
+medusas = traverse . filtered (is medusa)
 
 -- | This 'Traversal' provides the traversal of 'orphan' 'Player's.
 --

@@ -78,7 +78,8 @@ module Game.Werewolf.Messages (
     playerHasAlreadyVotedMessage,
 
     -- * Werewolves' turn messages
-    playerMadeDevourVoteMessage, playerDevouredMessage, noPlayerDevouredMessage,
+    playerMadeDevourVoteMessage, playerDevouredMessage, playerTurnedToStoneMessage,
+    noPlayerDevouredMessage,
 
     -- ** Error messages
     playerCannotDevourAnotherWerewolfMessage,
@@ -578,6 +579,15 @@ playerDevouredMessage player = publicMessage $ T.concat
     where
         playerName = player ^. name
         playerRole = player ^. role
+
+playerTurnedToStoneMessage :: Player -> Message
+playerTurnedToStoneMessage player = publicMessage $ T.unwords
+    [ "Next to them you see a stone", playerRole, "statue, cold to the touch.", playerName
+    , "must have looked into the eyes of the Medusa at the very end."
+    ]
+    where
+        playerName = player ^. name
+        playerRole = player ^. role . Role.name
 
 noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords

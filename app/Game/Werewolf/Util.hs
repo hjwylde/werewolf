@@ -20,8 +20,8 @@ module Game.Werewolf.Util (
     killPlayer, removePlayer, setPlayerAllegiance, getRandomAllegiance,
 
     -- ** Searches
-    findPlayerBy_, getAdjacentAlivePlayers, getPlayerVote, getAllowedVoters, getPendingVoters,
-    getVoteResult,
+    findPlayerBy_, getAdjacentAlivePlayers, getFirstAdjacentAliveWerewolf, getPlayerVote,
+    getAllowedVoters, getPendingVoters, getVoteResult,
 
     -- ** Queries
     isGameOver, isHuntersTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn, isSeersTurn,
@@ -38,7 +38,7 @@ module Game.Werewolf.Util (
     isPlayerAlive, isPlayerDead,
 ) where
 
-import Control.Lens
+import Control.Lens         hiding (isn't)
 import Control.Lens.Extra
 import Control.Monad.Extra
 import Control.Monad.Random
@@ -108,6 +108,14 @@ getAdjacentAlivePlayers name' = do
     where
         adjacentElements 0 list     = last list : take 2 list
         adjacentElements index list = take 3 . drop (index - 1) $ cycle list
+
+getFirstAdjacentAliveWerewolf :: MonadState Game m => Text -> m (Maybe Player)
+getFirstAdjacentAliveWerewolf name = do
+    players'            <- toListOf (players . traverse) <$> get
+    let index           = fromJust $ elemIndex name (players' ^.. names)
+    let filteredPlayers = dropWhile (isn't werewolf) (drop index (players' ++ players') ^.. traverse . alive)
+
+    return $ listToMaybe filteredPlayers
 
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = use $ votes . at playerName
