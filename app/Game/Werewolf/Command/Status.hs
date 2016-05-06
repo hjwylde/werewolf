@@ -19,7 +19,6 @@ module Game.Werewolf.Command.Status (
 ) where
 
 import Control.Lens
-import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
@@ -68,7 +67,7 @@ pingVillagers = do
     allowedVoterNames <- use allowedVoters
     pendingVoterNames <- toListOf names <$> getPendingVoters
 
-    tell [waitingOnMessage Nothing $ allowedVoterNames `intersect` pendingVoterNames]
+    tell [pingRoleMessage "village"]
     tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
 
 pingWerewolves :: (MonadState Game m, MonadWriter [Message] m) => m ()
@@ -80,26 +79,10 @@ pingWerewolves = do
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    FerinasGrunt    -> return ()
-    GameOver        -> tell [gameIsOverMessage callerName]
-    Lynching        -> return ()
-    Sunrise         -> return ()
-    Sunset          -> return ()
-    VillagesTurn    -> do
-        allowedVoterNames <- use allowedVoters
-        pendingVoterNames <- toListOf names <$> getPendingVoters
-
-        tell . standardStatusMessages stage' =<< use players
-        tell [waitingOnMessage (Just callerName) (allowedVoterNames `intersect` pendingVoterNames)]
-    WerewolvesTurn  -> do
-        pendingVoterNames <- toListOf (werewolves . name) <$> getPendingVoters
-
-        tell . standardStatusMessages stage' =<< use players
-        whenM (doesPlayerExist callerName &&^ isPlayerWerewolf callerName) $
-            tell [waitingOnMessage (Just callerName) pendingVoterNames]
-    _               -> tell . standardStatusMessages stage' =<< use players
+    GameOver    -> tell [gameIsOverMessage callerName]
+    _           -> tell . statusMessages stage' =<< use players
     where
-        standardStatusMessages stage players =
+        statusMessages stage players =
             currentStageMessages callerName stage ++
             [ rolesInGameMessage (Just callerName) (players ^.. roles)
             , playersInGameMessage callerName players
