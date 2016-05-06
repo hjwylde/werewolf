@@ -66,6 +66,7 @@ The Villagers must lynch all of the Werewolves.
 * Jester
 * Lycan
 * Medusa
+* Oracle
 * Protector
 * Scapegoat
 * Seer

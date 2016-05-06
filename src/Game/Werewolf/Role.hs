@@ -48,7 +48,8 @@ module Game.Werewolf.Role (
 
     --   The Villagers must lynch all of the Werewolves.
     beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, medusaRole,
-    protectorRole, scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole, witchRole,
+    oracleRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole,
+    witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -111,6 +112,7 @@ allRoles =
     , jesterRole
     , lycanRole
     , medusaRole
+    , oracleRole
     , orphanRole
     , protectorRole
     , scapegoatRole
@@ -385,6 +387,15 @@ medusaRole = Role
         , "first Werewolf to their left in the player `circle` will catch their gaze and turn to"
         , "stone, instantly killing the lupine predator."
         ]
+    }
+
+oracleRole :: Role
+oracleRole = Role
+    { _name         = "Oracle"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = "TODO (hjw): description"
+    , _rules        = "TODO (hjw): rules"
     }
 
 -- | /The Protector is one of the few pure of heart and altruistic Villagers; they are forever/
