@@ -39,7 +39,7 @@ module Game.Werewolf.Messages (
     pingPlayerMessage, pingRoleMessage,
 
     -- * Status messages
-    currentStageMessages, rolesInGameMessage, playersInGameMessage, waitingOnMessage,
+    currentStageMessages, rolesInGameMessage, playersInGameMessage,
 
     -- * Druid's turn messages
     ferinaGruntsMessage,
@@ -430,10 +430,6 @@ playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
             , concatList $ map playerNameWithRole deadPlayers, "."
             ]
         playerNameWithRole player   = T.concat [player ^. name, " (", player ^. role . Role.name, ")"]
-
-waitingOnMessage :: Maybe Text -> [Text] -> Message
-waitingOnMessage mTo playerNames = Message mTo $ T.concat
-    ["Waiting on ", concatList playerNames, "..."]
 
 ferinaGruntsMessage :: Message
 ferinaGruntsMessage = publicMessage
