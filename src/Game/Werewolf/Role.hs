@@ -228,7 +228,7 @@ beholderRole :: Role
 beholderRole = Role
     { _name         = "Beholder"
     , _allegiance   = Villagers
-    , _balance      = 2
+    , _balance      = 1
     , _description  = T.unwords
         [ "Awareness comes easy to the Beholder. They listen to their senses and trust their"
         , "hunches. Over the years the Beholder has grown to know a certain few of the village just"

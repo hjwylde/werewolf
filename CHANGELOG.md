@@ -20,6 +20,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Revisions*
 
 * Updated the Scapegoat's turn messages to be clear that they may choose more than 1 player. ([#185](https://github.com/hjwylde/werewolf/issues/185))
+* Updated Beholder's balance to 1.
 
 ### v1.0.2.2
 
