@@ -11,7 +11,7 @@ Werewolf commands.
 
 module Game.Werewolf.Command.Werewolf (
     -- * Commands
-    voteCommand,
+    unvoteCommand, voteCommand,
 
     -- ** Validation
     validatePlayer,
@@ -32,6 +32,19 @@ import Game.Werewolf
 import Game.Werewolf.Command
 import Game.Werewolf.Messages
 import Game.Werewolf.Util
+
+unvoteCommand :: Text -> Command
+unvoteCommand callerName = Command $ do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (isNothing <$> getPlayerVote callerName)  $ throwError [playerHasNotVotedMessage callerName]
+
+    votes %= Map.delete callerName
+
+    aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
+
+    tell [playerRescindedVoteMessage werewolfName callerName | werewolfName <- aliveWerewolfNames \\ [callerName]]
 
 voteCommand :: Text -> Text -> Command
 voteCommand callerName targetName = Command $ do

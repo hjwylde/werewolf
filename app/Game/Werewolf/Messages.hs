@@ -68,11 +68,11 @@ module Game.Werewolf.Messages (
     villageDrunkJoinedVillageMessage, villageDrunkJoinedPackMessages,
 
     -- * Villages' turn messages
-    playerMadeLynchVoteMessage, playerLynchedMessage, noPlayerLynchedMessage,
-    jesterLynchedMessage, scapegoatLynchedMessage,
+    playerMadeLynchVoteMessage, playerRescindedVoteMessage, playerLynchedMessage,
+    noPlayerLynchedMessage, jesterLynchedMessage, scapegoatLynchedMessage,
 
     -- ** Error messages
-    playerHasAlreadyVotedMessage,
+    playerHasAlreadyVotedMessage, playerHasNotVotedMessage,
 
     -- * Werewolves' turn messages
     playerMadeDevourVoteMessage, playerDevouredMessage, playerTurnedToStoneMessage,
@@ -513,6 +513,11 @@ playerMadeLynchVoteMessage mTo voterName targetName = Message mTo $ T.concat
     [ voterName, " voted to lynch ", targetName, "."
     ]
 
+playerRescindedVoteMessage :: Text -> Text -> Message
+playerRescindedVoteMessage to voterName = privateMessage to $ T.unwords
+    [ voterName, "rescinded their vote."
+    ]
+
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
     | is simpleWerewolf player
@@ -553,6 +558,9 @@ scapegoatLynchedMessage name = publicMessage $ T.unwords
 
 playerHasAlreadyVotedMessage :: Text -> Message
 playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
+
+playerHasNotVotedMessage :: Text -> Message
+playerHasNotVotedMessage to = privateMessage to "You haven't voted yet!"
 
 playerMadeDevourVoteMessage :: Text -> Text -> Text -> Message
 playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat

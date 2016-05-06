@@ -35,6 +35,7 @@ import qualified Werewolf.Command.Quit      as Quit
 import qualified Werewolf.Command.See       as See
 import qualified Werewolf.Command.Start     as Start
 import qualified Werewolf.Command.Status    as Status
+import qualified Werewolf.Command.Unvote    as Unvote
 import qualified Werewolf.Command.Version   as Version
 import qualified Werewolf.Command.Vote      as Vote
 import           Werewolf.Options
@@ -70,5 +71,6 @@ handle (Options callerName tag command) = case command of
     See options                         -> See.handle callerName tag options
     Start options                       -> Start.handle callerName tag options
     Status                              -> Status.handle callerName tag
+    Unvote                              -> Unvote.handle callerName tag
     Version                             -> Version.handle callerName
     Vote options                        -> Vote.handle callerName tag options
