@@ -198,11 +198,8 @@ villageDrunkRole = Role
 --   /angels left on Earth. Nothing is worse punishment for them, the Fallen Angel yearns for death/
 --   /to once again be free!/
 --
---   When the Fallen Angel is in play, the game begins with the village's vote and then the first
---   night.
---
---   The Fallen Angel wins if they manage to get eliminated on the first round (day or night). If
---   however they fail, they become a Villager for the rest of the game.
+--   The Fallen Angel wins if they manage to get lynched by the Villagers before the end of the
+--   game.
 fallenAngelRole :: Role
 fallenAngelRole = Role
     { _name         = "Fallen Angel"
@@ -215,15 +212,9 @@ fallenAngelRole = Role
         , "now one of the few angels left on Earth. Nothing is worse punishment for them, the"
         , "Fallen Angel yearns for death to once again be free!"
         ]
-    , _rules        = T.intercalate "\n"
-        [ T.unwords
-            [ "When the Fallen Angel is in play, the game begins with the village's vote and then"
-            , "the first night."
-            ]
-        , T.unwords
-            [ "The Fallen Angel wins if they manage to get eliminated on the first round (day or"
-            , "night). If however they fail, they become a Villager for the rest of the game."
-            ]
+    , _rules        = T.unwords
+        [ "The Fallen Angel wins if they manage to get lynched by the Villagers before the end of"
+        , "the game."
         ]
     }
 

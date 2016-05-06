@@ -142,13 +142,7 @@ rulesMessages mGame = map (T.intercalate "\n")
         ]
       ]
     , filter (/= "")
-      [ T.concat
-        [ "A game begins at night and follows a standard cycle."
-        , whenRoleInPlay mGame fallenAngelRole
-            " (N.B., when the Fallen Angel is in play the game begins with the village vote.)"
-        ]
-      , whenRoleInPlay mGame fallenAngelRole
-        "- (When the Fallen Angel is in play) the village votes to lynch a suspect."
+      [ "A game begins at night and follows a standard cycle."
       , "- The village falls asleep."
       , whenRoleInPlay mGame orphanRole
         "- (First round only) the Orphan wakes up and chooses a role model."
@@ -201,11 +195,11 @@ helpMessages = map (T.intercalate "\n")
     ]
 
 whenPlayerHasRole :: Monoid m => Text -> Maybe Game -> Role -> m -> m
-whenPlayerHasRole _ Nothing _ m                         = m
+whenPlayerHasRole _ Nothing _ m                 = m
 whenPlayerHasRole callerName (Just game) role' m
-    | hasn't (players . names . only callerName) game   = mempty
-    | hasn't (role . only role') player                 = mempty
-    | otherwise                                         = m
+    | hasn't (players . named callerName) game  = mempty
+    | hasn't (role . only role') player         = mempty
+    | otherwise                                 = m
      where
         player = game ^?! players . traverse . filteredBy name callerName
 

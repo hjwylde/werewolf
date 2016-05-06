@@ -111,12 +111,6 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
-        whenJustM (preuse $ players . fallenAngels . alive) $ \fallenAngel ->
-            unless (is villager fallenAngel) $ do
-                tell [fallenAngelJoinedVillagersMessage]
-
-                setPlayerAllegiance (fallenAngel ^. name) Villagers
-
         whenJustM (preuse $ players . seers . alive) $ \seer -> do
             target <- use see >>= findPlayerBy_ name . fromJust
 
@@ -188,6 +182,10 @@ lynchVotees [votee]
         jesterRevealed .= True
 
         tell [jesterLynchedMessage $ votee ^. name]
+    | is fallenAngel votee  = do
+        fallenAngelLynched .= True
+
+        tell [playerLynchedMessage votee]
     | otherwise             = do
         killPlayer (votee ^. name)
         tell [playerLynchedMessage votee]
