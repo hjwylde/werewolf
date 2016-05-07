@@ -16,12 +16,12 @@ structure and any fields required to keep track of the current state.
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, events, boots, allowedVoters, fallenAngelLynched, heal, healUsed,
+    stage, round, players, events, boots, allowedVoters, divine, fallenAngelLynched, heal, healUsed,
     hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
     scapegoatBlamed, see, votes,
 
     Stage(..),
-    _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OrphansTurn,
+    _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
     _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillageDrunksTurn,
     _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
 
@@ -75,7 +75,8 @@ data Game = Game
     , _events             :: [Event]
     , _boots              :: Map Text [Text]
     , _allowedVoters      :: [Text]           -- ^ Jester, Scapegoat
-    , _fallenAngelLynched :: Bool           -- ^ Fallen Angel
+    , _divine             :: Maybe Text       -- ^ Oracle
+    , _fallenAngelLynched :: Bool             -- ^ Fallen Angel
     , _heal               :: Bool             -- ^ Witch
     , _healUsed           :: Bool             -- ^ Witch
     , _hunterRetaliated   :: Bool             -- ^ Hunter
@@ -97,9 +98,9 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a /command/ to help push it past. Often only
 --   certain roles and commands may be performed at any given stage.
-data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OrphansTurn
-            | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset | VillageDrunksTurn
-            | VillagesTurn | WerewolvesTurn | WitchsTurn
+data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OraclesTurn
+            | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
+            | VillageDrunksTurn | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
 instance Humanise Stage where
@@ -108,6 +109,7 @@ instance Humanise Stage where
     humanise HuntersTurn1       = fromString "Hunter's turn"
     humanise HuntersTurn2       = fromString "Hunter's turn"
     humanise Lynching           = fromString "Lynching"
+    humanise OraclesTurn        = fromString "Oracle's turn"
     humanise OrphansTurn        = fromString "Orphan's turn"
     humanise ProtectorsTurn     = fromString "Protector's turn"
     humanise ScapegoatsTurn     = fromString "Scapegoat's turn"
@@ -144,6 +146,7 @@ allStages =
     , OrphansTurn
     , VillageDrunksTurn
     , SeersTurn
+    , OraclesTurn
     , ProtectorsTurn
     , WerewolvesTurn
     , WitchsTurn
@@ -176,6 +179,10 @@ stageAvailable game HuntersTurn2        =
     has (players . hunters . dead) game
     && not (game ^. hunterRetaliated)
 stageAvailable game Lynching            = Map.size (game ^. votes) > 0
+stageAvailable game OraclesTurn         = has (players . oracles . alive) game
+stageAvailable game OrphansTurn         =
+    has (players . orphans . alive) game
+    && isNothing (game ^. roleModel)
 stageAvailable game ProtectorsTurn      = has (players . protectors . alive) game
 stageAvailable game ScapegoatsTurn      = game ^. scapegoatBlamed
 stageAvailable game SeersTurn           = has (players . seers . alive) game
@@ -186,9 +193,6 @@ stageAvailable game VillageDrunksTurn   =
     && is thirdRound game
 stageAvailable game VillagesTurn        = any (is alive) (getAllowedVoters game)
 stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
-stageAvailable game OrphansTurn         =
-    has (players . orphans . alive) game
-    && isNothing (game ^. roleModel)
 stageAvailable game WitchsTurn          =
     has (players . witches . alive) game
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
@@ -204,6 +208,7 @@ newGame players = Game
     , _boots                = Map.empty
     , _passed               = False
     , _allowedVoters        = players ^.. names
+    , _divine               = Nothing
     , _fallenAngelLynched   = False
     , _heal                 = False
     , _healUsed             = False

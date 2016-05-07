@@ -9,6 +9,9 @@ Maintainer  : public@hjwylde.com
 Werewolf commands.
 -}
 
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Game.Werewolf.Command.Werewolf (
     -- * Commands
     unvoteCommand, voteCommand,
@@ -35,10 +38,8 @@ import Game.Werewolf.Util
 
 unvoteCommand :: Text -> Command
 unvoteCommand callerName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerWerewolf callerName)           $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWerewolvesTurn                        $ throwError [playerCannotDoThatRightNowMessage callerName]
-    whenM (isNothing <$> getPlayerVote callerName)  $ throwError [playerHasNotVotedMessage callerName]
+    validateCommand callerName
+    whenM (isNothing <$> getPlayerVote callerName) $ throwError [playerHasNotVotedMessage callerName]
 
     votes %= Map.delete callerName
 
@@ -48,9 +49,7 @@ unvoteCommand callerName = Command $ do
 
 voteCommand :: Text -> Text -> Command
 voteCommand callerName targetName = Command $ do
-    validatePlayer callerName callerName
-    unlessM (isPlayerWerewolf callerName)       $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isWerewolvesTurn                    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    validateCommand callerName
     whenM (isJust <$> getPlayerVote callerName) $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
     whenM (isPlayerWerewolf targetName)         $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
@@ -60,3 +59,9 @@ voteCommand callerName targetName = Command $ do
     aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
 
     tell [playerMadeDevourVoteMessage werewolfName callerName targetName | werewolfName <- aliveWerewolfNames \\ [callerName]]
+
+validateCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
+validateCommand callerName = do
+    validatePlayer callerName callerName
+    unlessM (isPlayerWerewolf callerName)   $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isWerewolvesTurn                $ throwError [playerCannotDoThatRightNowMessage callerName]

@@ -93,6 +93,10 @@ commandsMessages callerName mGame = map (T.intercalate "\n") $ filter (/= [])
       [ "Hunter commands:"
       , "- `choose PLAYER`"
       ]
+    , whenPlayerHasRole callerName mGame oracleRole
+      [ "Oracle commands:"
+      , "- `divine PLAYER`"
+      ]
     , whenPlayerHasRole callerName mGame orphanRole
       [ "Orphan commands:"
       , "- `choose PLAYER`"
@@ -151,6 +155,8 @@ rulesMessages mGame = map (T.intercalate "\n")
         "- (Third round only) the Village Drunk sobers up and remembers their allegiance."
       , whenRoleInPlay mGame seerRole
         "- The Seer wakes up and sees someone's allegiance."
+      , whenRoleInPlay mGame oracleRole
+        "- The Oracle wakes up and divines someone's role."
       , whenRoleInPlay mGame protectorRole
         "- The Protector wakes up and protects someone."
       , "- The Werewolves wake up and vote to devour a victim."

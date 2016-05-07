@@ -87,6 +87,11 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
+    OraclesTurn -> do
+        whenM (has (players . oracles . dead) <$> get) advanceStage
+
+        whenM (isJust <$> use divine) advanceStage
+
     OrphansTurn -> do
         whenM (has (players . orphans . dead) <$> get) advanceStage
 
@@ -116,7 +121,13 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             when (is alive target) $ tell [playerSeenMessage (seer ^. name) target]
 
-        see .= Nothing
+        whenJustM (preuse $ players . oracles . alive) $ \oracle -> do
+            target <- use divine >>= findPlayerBy_ name . fromJust
+
+            when (is alive target) $ tell [playerDivinedMessage (oracle ^. name) target]
+
+        see     .= Nothing
+        divine  .= Nothing
 
         advanceStage
 

@@ -23,6 +23,7 @@ import System.Environment
 import qualified Werewolf.Command.Boot      as Boot
 import qualified Werewolf.Command.Choose    as Choose
 import qualified Werewolf.Command.Circle    as Circle
+import qualified Werewolf.Command.Divine    as Divine
 import qualified Werewolf.Command.End       as End
 import qualified Werewolf.Command.Heal      as Heal
 import qualified Werewolf.Command.Help      as Help
@@ -59,6 +60,7 @@ handle (Options callerName tag command) = case command of
     Choose options                      -> Choose.handle callerName tag options
     Boot options                        -> Boot.handle callerName tag options
     Circle options                      -> Circle.handle callerName tag options
+    Divine options                      -> Divine.handle callerName tag options
     End options                         -> End.handle callerName tag options
     Heal                                -> Heal.handle callerName tag
     Help options                        -> Help.handle callerName tag options

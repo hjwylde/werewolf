@@ -47,6 +47,9 @@ module Game.Werewolf.Messages (
     -- * Hunter's turn messages
     playerShotMessage,
 
+    -- * Oracle's turn messages
+    playerDivinedMessage,
+
     -- * Orphan's turn messages
     orphanJoinedPackMessages,
 
@@ -168,6 +171,7 @@ stageMessages game = case game ^. stage of
     HuntersTurn1        -> huntersTurnMessages huntersName
     HuntersTurn2        -> huntersTurnMessages huntersName
     Lynching            -> []
+    OraclesTurn         -> oraclesTurnMessages oraclesName
     OrphansTurn         -> orphansTurnMessages orphansName
     ProtectorsTurn      -> protectorsTurnMessages protectorsName
     ScapegoatsTurn      -> scapegoatsTurnMessages scapegoatsName
@@ -183,6 +187,7 @@ stageMessages game = case game ^. stage of
     where
         players'            = game ^. players
         huntersName         = players' ^?! hunters . name
+        oraclesName         = players' ^?! oracles . name
         orphansName         = players' ^?! orphans . name
         protectorsName      = players' ^?! protectors . name
         scapegoatsName      = players' ^?! scapegoats . name
@@ -193,6 +198,12 @@ huntersTurnMessages :: Text -> [Message]
 huntersTurnMessages huntersName =
     [ publicMessage $ T.unwords ["Just before", huntersName, "was murdered they let off a shot."]
     , privateMessage huntersName "Whom do you `choose` to kill with your last shot?"
+    ]
+
+oraclesTurnMessages :: Text -> [Message]
+oraclesTurnMessages to =
+    [ publicMessage "The Oracle wakes up."
+    , privateMessage to "Whose role would you like to `divine`?"
     ]
 
 orphansTurnMessages :: Text -> [Message]
@@ -444,6 +455,13 @@ playerShotMessage target = publicMessage $ T.unwords
         targetName = target ^. name
         targetRole = target ^. role . Role.name
 
+playerDivinedMessage :: Text -> Player -> Message
+playerDivinedMessage to player = privateMessage to $ T.concat
+    [playerName, " is ", article playerRole, " ", playerRole ^. Role.name, "."]
+    where
+        playerName = player ^. name
+        playerRole = player ^. role
+
 orphanJoinedPackMessages :: Text -> [Text] -> [Message]
 orphanJoinedPackMessages orphansName werewolfNames =
     privateMessage orphansName (T.unwords
@@ -476,14 +494,14 @@ playerCannotChooseJesterMessage to =
     privateMessage to "You cannot choose the Jester!"
 
 playerSeenMessage :: Text -> Player -> Message
-playerSeenMessage to target = privateMessage to $ T.concat
-    [targetName, " is aligned with ", article, humanise allegiance', "."]
+playerSeenMessage to player = privateMessage to $ T.concat
+    [playerName, " is aligned with ", article, humanise allegiance', "."]
     where
-        targetName  = target ^. name
+        playerName  = player ^. name
         allegiance'
-            | is alphaWolf target   = Villagers
-            | is lycan target       = Werewolves
-            | otherwise             = target ^. role . allegiance
+            | is alphaWolf player   = Villagers
+            | is lycan player       = Werewolves
+            | otherwise             = player ^. role . allegiance
         article     = if allegiance' == NoOne then "" else "the "
 
 villageDrunkJoinedVillageMessage :: Text -> Message

@@ -32,6 +32,7 @@ executable werewolf
         Game.Werewolf.Command
         Game.Werewolf.Command.Global
         Game.Werewolf.Command.Hunter
+        Game.Werewolf.Command.Oracle
         Game.Werewolf.Command.Orphan
         Game.Werewolf.Command.Protector
         Game.Werewolf.Command.Scapegoat
@@ -47,6 +48,7 @@ executable werewolf
         Werewolf.Command.Boot
         Werewolf.Command.Choose
         Werewolf.Command.Circle
+        Werewolf.Command.Divine
         Werewolf.Command.End
         Werewolf.Command.Heal
         Werewolf.Command.Help
