@@ -129,40 +129,40 @@ getVoteResult :: MonadState Game m => m [Player]
 getVoteResult = gets Game.getVoteResult
 
 isGameOver :: MonadState Game m => m Bool
-isGameOver = has (stage . _GameOver) <$> get
+isGameOver = hasuse $ stage . _GameOver
 
 isHuntersTurn :: MonadState Game m => m Bool
 isHuntersTurn = orM
-    [ has (stage . _HuntersTurn1) <$> get
-    , has (stage . _HuntersTurn2) <$> get
+    [ hasuse $ stage . _HuntersTurn1
+    , hasuse $ stage . _HuntersTurn2
     ]
 
 isOraclesTurn :: MonadState Game m => m Bool
-isOraclesTurn = has (stage . _OraclesTurn) <$> get
+isOraclesTurn = hasuse $ stage . _OraclesTurn
 
 isOrphansTurn :: MonadState Game m => m Bool
-isOrphansTurn = has (stage . _OrphansTurn) <$> get
+isOrphansTurn = hasuse $ stage . _OrphansTurn
 
 isProtectorsTurn :: MonadState Game m => m Bool
-isProtectorsTurn = has (stage . _ProtectorsTurn) <$> get
+isProtectorsTurn = hasuse $ stage . _ProtectorsTurn
 
 isScapegoatsTurn :: MonadState Game m => m Bool
-isScapegoatsTurn = has (stage . _ScapegoatsTurn) <$> get
+isScapegoatsTurn = hasuse $ stage . _ScapegoatsTurn
 
 isSeersTurn :: MonadState Game m => m Bool
-isSeersTurn = has (stage . _SeersTurn) <$> get
+isSeersTurn = hasuse $ stage . _SeersTurn
 
 isSunrise :: MonadState Game m => m Bool
-isSunrise = has (stage . _Sunrise) <$> get
+isSunrise = hasuse $ stage . _Sunrise
 
 isVillagesTurn :: MonadState Game m => m Bool
-isVillagesTurn = has (stage . _VillagesTurn) <$> get
+isVillagesTurn = hasuse $ stage . _VillagesTurn
 
 isWerewolvesTurn :: MonadState Game m => m Bool
-isWerewolvesTurn = has (stage . _WerewolvesTurn) <$> get
+isWerewolvesTurn = hasuse $ stage . _WerewolvesTurn
 
 isWitchsTurn :: MonadState Game m => m Bool
-isWitchsTurn = has (stage . _WitchsTurn) <$> get
+isWitchsTurn = hasuse $ stage . _WitchsTurn
 
 hasAnyoneWon :: MonadState Game m => m Bool
 hasAnyoneWon = gets Game.hasAnyoneWon
@@ -177,7 +177,7 @@ hasWerewolvesWon :: MonadState Game m => m Bool
 hasWerewolvesWon = gets Game.hasWerewolvesWon
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
-doesPlayerExist name = has (players . named name) <$> get
+doesPlayerExist name = hasuse $ players . named name
 
 isPlayerHunter :: MonadState Game m => Text -> m Bool
 isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'
