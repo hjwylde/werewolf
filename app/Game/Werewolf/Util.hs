@@ -80,7 +80,6 @@ removePlayer name' = do
         priorProtect    .= Nothing
     when (is seer player)           $ see .= Nothing
     when (is witch player)          $ do
-        heal        .= False
         healUsed    .= False
         poison      .= Nothing
         poisonUsed  .= False

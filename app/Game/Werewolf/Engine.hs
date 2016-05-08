@@ -116,8 +116,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
-        whenM (use heal)                                                $ votes .= Map.empty
-        whenM (liftM2 (==) (use protect) (preuses votee $ view name))   $ votes .= Map.empty
+        whenM (liftM2 (==) (use protect) (preuses votee $ view name)) $ votes .= Map.empty
 
         devourVotee =<< preuse (votee . alive)
 
@@ -138,7 +137,6 @@ checkStage' = use stage >>= \stage' -> case stage' of
             when (is alive target) $ tell [playerDivinedMessage (oracle ^. name) target]
 
         divine  .= Nothing
-        heal    .= False
         poison  .= Nothing
         protect .= Nothing
         see     .= Nothing

@@ -16,7 +16,7 @@ structure and any fields required to keep track of the current state.
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, boots, allowedVoters, divine, fallenAngelLynched, heal, healUsed,
+    stage, round, players, boots, allowedVoters, divine, fallenAngelLynched, healUsed,
     hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
     scapegoatBlamed, see, votes,
 
@@ -75,7 +75,6 @@ data Game = Game
     , _allowedVoters      :: [Text]           -- ^ Jester, Scapegoat
     , _divine             :: Maybe Text       -- ^ Oracle
     , _fallenAngelLynched :: Bool             -- ^ Fallen Angel
-    , _heal               :: Bool             -- ^ Witch
     , _healUsed           :: Bool             -- ^ Witch
     , _hunterRetaliated   :: Bool             -- ^ Hunter
     , _jesterRevealed     :: Bool             -- ^ Jester
@@ -193,7 +192,6 @@ newGame players = Game
     , _allowedVoters        = players ^.. names
     , _divine               = Nothing
     , _fallenAngelLynched   = False
-    , _heal                 = False
     , _healUsed             = False
     , _hunterRetaliated     = False
     , _jesterRevealed       = False

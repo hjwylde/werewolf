@@ -23,6 +23,7 @@ import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
 
+import Data.Map  as Map
 import Data.Text (Text)
 
 import Game.Werewolf
@@ -36,8 +37,8 @@ healCommand callerName = Command $ do
     whenM (use healUsed)        $ throwError [playerHasAlreadyHealedMessage callerName]
     whenM (hasn'tuse votee)     $ throwError [playerCannotDoThatRightNowMessage callerName]
 
-    heal        .= True
     healUsed    .= True
+    votes       .= Map.empty
 
 passCommand :: Text -> Command
 passCommand callerName = Command $ do
