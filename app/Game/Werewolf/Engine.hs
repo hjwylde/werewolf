@@ -29,8 +29,8 @@ import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Maybe
 
-import Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, getVoteResult,
-                               hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
+import Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
+                               hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
 import Game.Werewolf.Messages
 import Game.Werewolf.Player
 import Game.Werewolf.Response
@@ -42,7 +42,7 @@ import Prelude hiding (round)
 checkStage :: (MonadRandom m, MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage = do
     game <- get
-    checkBoots >> checkStage' >> checkEvents
+    checkBoots >> checkStage'
     game' <- get
 
     when (game /= game') checkStage
@@ -76,7 +76,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
     HuntersTurn2 -> whenM (use hunterRetaliated) advanceStage
 
     Lynching -> do
-        getVoteResult >>= lynchVotees
+        lynchVotee =<< preuse votee
 
         allVoters       <- ifM (use jesterRevealed)
             (uses players $ filter (isn't jester))
@@ -116,6 +116,17 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
+        whenM (use heal)                                                $ votes .= Map.empty
+        whenM (liftM2 (==) (use protect) (preuses votee $ view name))   $ votes .= Map.empty
+
+        devourVotee =<< preuse (votee . alive)
+
+        whenJustM (use poison) $ \targetName -> do
+            target <- findPlayerBy_ name targetName
+
+            killPlayer targetName
+            tell [playerPoisonedMessage target]
+
         whenJustM (preuse $ players . seers . alive) $ \seer -> do
             target <- use see >>= findPlayerBy_ name . fromJust
 
@@ -126,8 +137,12 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             when (is alive target) $ tell [playerDivinedMessage (oracle ^. name) target]
 
-        see     .= Nothing
         divine  .= Nothing
+        heal    .= False
+        poison  .= Nothing
+        protect .= Nothing
+        see     .= Nothing
+        votes   .= Map.empty
 
         advanceStage
 
@@ -163,32 +178,16 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
-    WerewolvesTurn -> whenM (none (is werewolf) <$> getPendingVoters) $ do
-        getVoteResult >>= devourVotees
-
-        protect .= Nothing
-        votes .= Map.empty
-
-        advanceStage
+    WerewolvesTurn -> whenM (none (is werewolf) <$> getPendingVoters) advanceStage
 
     WitchsTurn -> do
         whenM (hasuse $ players . witches . dead) advanceStage
 
-        whenJustM (use poison) $ \targetName -> do
-            events %= (++ [PoisonEvent targetName])
-            poison .= Nothing
-
-        whenM (use heal) $ do
-            devourEvent <- fromJust <$> preuse (events . traverse . filtered (is _DevourEvent))
-
-            events  %= cons NoDevourEvent . delete devourEvent
-            heal    .= False
-
         whenM (use healUsed &&^ use poisonUsed) advanceStage
         whenM (use passed)                      advanceStage
 
-lynchVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
-lynchVotees [votee]
+lynchVotee :: (MonadState Game m, MonadWriter [Message] m) => Maybe Player -> m ()
+lynchVotee (Just votee)
     | is jester votee       = do
         jesterRevealed .= True
 
@@ -200,7 +199,7 @@ lynchVotees [votee]
     | otherwise             = do
         killPlayer (votee ^. name)
         tell [playerLynchedMessage votee]
-lynchVotees _       = preuse (players . scapegoats . alive) >>= \mScapegoat -> case mScapegoat of
+lynchVotee _            = preuse (players . scapegoats . alive) >>= \mScapegoat -> case mScapegoat of
     Just scapegoat  -> do
         scapegoatBlamed .= True
 
@@ -208,11 +207,15 @@ lynchVotees _       = preuse (players . scapegoats . alive) >>= \mScapegoat -> c
         tell [scapegoatLynchedMessage (scapegoat ^. name)]
     _               -> tell [noPlayerLynchedMessage]
 
-devourVotees :: (MonadState Game m, MonadWriter [Message] m) => [Player] -> m ()
-devourVotees [votee]    = ifM (uses protect $ maybe False (== votee ^. name))
-    (events %= cons NoDevourEvent)
-    (events %= cons (DevourEvent $ votee ^. name))
-devourVotees _          = events %= cons NoDevourEvent
+devourVotee :: (MonadState Game m, MonadWriter [Message] m) => Maybe Player -> m ()
+devourVotee Nothing         = tell [noPlayerDevouredMessage]
+devourVotee (Just votee)    = do
+    killPlayer (votee ^. name)
+    tell [playerDevouredMessage votee]
+
+    when (is medusa votee) . whenJustM (getFirstAdjacentAliveWerewolf $ votee ^. name) $ \werewolf -> do
+        killPlayer (werewolf ^. name)
+        tell [playerTurnedToStoneMessage werewolf]
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
@@ -226,36 +229,6 @@ advanceStage = do
     passed  .= False
 
     tell . stageMessages =<< get
-
-checkEvents :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkEvents = do
-    (available, pending) <- use events >>= partitionM eventAvailable
-
-    events .= pending
-
-    mapM_ applyEvent available
-
-eventAvailable :: MonadState Game m => Event -> m Bool
-eventAvailable (DevourEvent _)  = isSunrise
-eventAvailable NoDevourEvent    = isSunrise
-eventAvailable (PoisonEvent _)  = isSunrise
-
-applyEvent :: (MonadState Game m, MonadWriter [Message] m) => Event -> m ()
-applyEvent (DevourEvent targetName) = do
-    target <- findPlayerBy_ name targetName
-
-    killPlayer targetName
-    tell [playerDevouredMessage target]
-
-    when (is medusa target) . whenJustM (getFirstAdjacentAliveWerewolf targetName) $ \werewolf -> do
-        killPlayer (werewolf ^. name)
-        tell [playerTurnedToStoneMessage werewolf]
-applyEvent NoDevourEvent            = tell [noPlayerDevouredMessage]
-applyEvent (PoisonEvent targetName) = do
-    target <- findPlayerBy_ name targetName
-
-    killPlayer targetName
-    tell [playerPoisonedMessage target]
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
 checkGameOver = whenM hasAnyoneWon $ stage .= GameOver >> get >>= tell . gameOverMessages

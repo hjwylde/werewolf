@@ -289,16 +289,16 @@ witchsTurnMessages game = concat
         witchsName      = game ^?! players . witches . name
         wakeUpMessage   = publicMessage "The Witch wakes up."
         passMessage     = privateMessage witchsName "Type `pass` to end your turn."
-        devourMessages  = case game ^? events . traverse . _DevourEvent of
-            Just targetName ->
+        devourMessages  = case game ^? votee of
+            Just votee ->
                 [ privateMessage witchsName $
-                    T.unwords ["You see", targetName, "sprawled outside bleeding uncontrollably."]
+                    T.unwords ["You see", votee ^. name, "sprawled outside bleeding uncontrollably."]
                 ]
             _               -> []
         healMessages
-            | game ^. healUsed                                  = []
-            | hasn't (events . traverse . _DevourEvent) game    = []
-            | otherwise                                         = [privateMessage witchsName "Would you like to `heal` them?"]
+            | game ^. healUsed  = []
+            | hasn't votee game = []
+            | otherwise         = [privateMessage witchsName "Would you like to `heal` them?"]
         poisonMessages
             | game ^. poisonUsed    = []
             | otherwise             = [privateMessage witchsName "Would you like to `poison` anyone?"]

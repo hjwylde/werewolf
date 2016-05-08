@@ -21,7 +21,7 @@ module Game.Werewolf.Util (
 
     -- ** Searches
     findPlayerBy_, getAdjacentAlivePlayers, getFirstAdjacentAliveWerewolf, getPlayerVote,
-    getAllowedVoters, getPendingVoters, getVoteResult,
+    getAllowedVoters, getPendingVoters,
 
     -- ** Queries
     isGameOver, isHuntersTurn, isOraclesTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn,
@@ -50,9 +50,8 @@ import qualified Data.Map   as Map
 import           Data.Maybe
 import           Data.Text  (Text)
 
-import           Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, getVoteResult,
-                                         hasAnyoneWon, hasFallenAngelWon, hasVillagersWon,
-                                         hasWerewolvesWon)
+import           Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
+                                         hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
 import qualified Game.Werewolf.Game     as Game
 import           Game.Werewolf.Messages
 import           Game.Werewolf.Player
@@ -62,10 +61,10 @@ import           Game.Werewolf.Role     hiding (name)
 import Prelude hiding (round)
 
 killPlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
-killPlayer name' = do
-    tell [playerKilledMessage name']
+killPlayer name = do
+    tell [playerKilledMessage name]
 
-    players . traverse . filteredBy name name' . state .= Dead
+    players . traverse . named name . state .= Dead
 
 removePlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
 removePlayer name' = do
@@ -89,7 +88,7 @@ removePlayer name' = do
 -- | Fudges the player's allegiance. This function is useful for roles such as the Orphan where
 --   they align themselves differently given some trigger.
 setPlayerAllegiance :: MonadState Game m => Text -> Allegiance -> m ()
-setPlayerAllegiance name' allegiance' = modify $ players . traverse . filteredBy name name' . role . allegiance .~ allegiance'
+setPlayerAllegiance name allegiance' = modify $ players . traverse . named name . role . allegiance .~ allegiance'
 
 -- | Get a random allegiance (either Villagers or Werewolves).
 getRandomAllegiance :: MonadRandom m => m Allegiance
@@ -124,9 +123,6 @@ getAllowedVoters = gets Game.getAllowedVoters
 
 getPendingVoters :: MonadState Game m => m [Player]
 getPendingVoters = gets Game.getPendingVoters
-
-getVoteResult :: MonadState Game m => m [Player]
-getVoteResult = gets Game.getVoteResult
 
 isGameOver :: MonadState Game m => m Bool
 isGameOver = hasuse $ stage . _GameOver
@@ -177,7 +173,7 @@ hasWerewolvesWon :: MonadState Game m => m Bool
 hasWerewolvesWon = gets Game.hasWerewolvesWon
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
-doesPlayerExist name = hasuse $ players . named name
+doesPlayerExist name = hasuse $ players . traverse . named name
 
 isPlayerHunter :: MonadState Game m => Text -> m Bool
 isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'

@@ -33,8 +33,8 @@ import Game.Werewolf.Util
 healCommand :: Text -> Command
 healCommand callerName = Command $ do
     validateCommand callerName
-    whenM (use healUsed)                                    $ throwError [playerHasAlreadyHealedMessage callerName]
-    whenM (hasn'tuse $ events . traverse . _DevourEvent)    $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (use healUsed)        $ throwError [playerHasAlreadyHealedMessage callerName]
+    whenM (hasn'tuse votee)     $ throwError [playerCannotDoThatRightNowMessage callerName]
 
     heal        .= True
     healUsed    .= True
@@ -48,9 +48,9 @@ passCommand callerName = Command $ do
 poisonCommand :: Text -> Text -> Command
 poisonCommand callerName targetName = Command $ do
     validateCommand callerName
-    whenM (use poisonUsed)                                              $ throwError [playerHasAlreadyPoisonedMessage callerName]
+    whenM (use poisonUsed)                      $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
-    whenM (hasuse $ events . traverse . _DevourEvent . only targetName) $ throwError [playerCannotDoThatMessage callerName]
+    whenM (hasuse $ votee . named targetName)   $ throwError [playerCannotDoThatMessage callerName]
 
     poison      .= Just targetName
     poisonUsed  .= True

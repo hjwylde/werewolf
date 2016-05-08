@@ -20,7 +20,6 @@ module Werewolf.Command.Help (
 ) where
 
 import Control.Lens
-import Control.Lens.Extra
 import Control.Monad.Extra
 import Control.Monad.IO.Class
 
@@ -204,11 +203,11 @@ helpMessages = map (T.intercalate "\n")
 whenPlayerHasRole :: Monoid m => Text -> Maybe Game -> Role -> m -> m
 whenPlayerHasRole _ Nothing _ m                 = m
 whenPlayerHasRole callerName (Just game) role' m
-    | hasn't (players . named callerName) game  = mempty
+    | hasn't (players . traverse . named callerName) game  = mempty
     | hasn't (role . only role') player         = mempty
     | otherwise                                 = m
      where
-        player = game ^?! players . traverse . filteredBy name callerName
+        player = game ^?! players . traverse . named callerName
 
 ifRoleInPlay :: Maybe Game -> Role -> a -> a -> a
 ifRoleInPlay Nothing _ true _               = true
