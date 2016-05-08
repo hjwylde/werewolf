@@ -389,15 +389,26 @@ medusaRole = Role
         ]
     }
 
+-- | /Originally rejected by the townsfolk, the Oracle's prophetic divinations has earned trust/
+--   /within the village. With constant precognition - and concern for the future - the Oracle/
+--   /knows the village will only live if they work together./
+--
+--   Each night the Oracle chooses a player to divine. They are then informed of the player's role
+--   the following morning. This wisdom is for the Oracle to use to ensure the future of Fougères.
 oracleRole :: Role
 oracleRole = Role
     { _name         = "Oracle"
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = "TODO (hjw): description"
+    , _description  = T.unwords
+        [ "Originally rejected by the townsfolk, the Oracle's prophetic divinations has earned"
+        , "trust within the village. With constant precognition - and concern for the future - the"
+        , "Oracle knows the village will only live if they work together."
+        ]
     , _rules        = T.unwords
         [ "Each night the Oracle chooses a player to divine. They are then informed of the player's"
-        , "role the following morning."
+        , "role the following morning. This wisdom is for the Oracle to use to ensure the future of"
+        , "Fougères."
         ]
     }
 
