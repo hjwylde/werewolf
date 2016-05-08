@@ -219,13 +219,29 @@ fallenAngelRole = Role
         ]
     }
 
+-- | /In this time of turmoil, it would seem unlikely for the Villagers of Fougères to unanimously/
+--   /agree on anything. Yet this is not so, for they all agree the village is haunted by a ghost./
+--   /The vindictive Spiteful Ghost never moved on, rather they remain with the sole purpose of/
+--   /haunting the village and ensuring that the Villagers never forget what they have done./
+--
+--   The Spiteful ghost is dead and cannot win, however they know the game's role allocations and
+--   may haunt the village as they wish.
 spitefulGhostRole :: Role
 spitefulGhostRole = Role
     { _name         = "Spiteful Ghost"
     , _allegiance   = NoOne
     , _balance      = 0
-    , _description  = "TODO (hjw): description"
-    , _rules        = "TODO (hjw): rules"
+    , _description  = T.unwords
+        [ "In this time of turmoil, it would seem unlikely for the Villagers of Fougères to"
+        , "unanimously agree on anything. Yet this is not so, for they all agree the village is"
+        , "haunted by a ghost. The vindictive Spiteful Ghost never moved on, rather they remain"
+        , "with the sole purpose of haunting the village and ensuring that the Villagers never"
+        , "forget what they have done."
+        ]
+    , _rules        = T.unwords
+        [ "The Spiteful ghost is dead and cannot win, however they know the game's role allocations"
+        , "and may haunt the village as they wish."
+        ]
     }
 
 -- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
