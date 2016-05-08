@@ -116,9 +116,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Sunrise -> do
         round += 1
 
-        whenM (liftM2 (==) (use protect) (preuses votee $ view name)) $ votes .= Map.empty
-
-        devourVotee =<< preuse (votee . alive)
+        devourVotee =<< preuse votee
 
         whenJustM (use poison) $ \targetName -> do
             target <- findPlayerBy_ name targetName
@@ -176,7 +174,10 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
-    WerewolvesTurn -> whenM (none (is werewolf) <$> getPendingVoters) advanceStage
+    WerewolvesTurn -> whenM (none (is werewolf) <$> getPendingVoters) $ do
+        whenM (liftM2 (==) (use protect) (preuses votee $ view name)) $ votes .= Map.empty
+
+        advanceStage
 
     WitchsTurn -> do
         whenM (hasuse $ players . witches . dead) advanceStage
