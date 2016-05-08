@@ -87,13 +87,18 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
+    OraclesTurn -> do
+        whenM (hasuse $ players . oracles . dead) advanceStage
+
+        whenM (isJust <$> use divine) advanceStage
+
     OrphansTurn -> do
-        whenM (has (players . orphans . dead) <$> get) advanceStage
+        whenM (hasuse $ players . orphans . dead) advanceStage
 
         whenM (isJust <$> use roleModel) advanceStage
 
     ProtectorsTurn -> do
-        whenM (has (players . protectors . dead) <$> get) advanceStage
+        whenM (hasuse $ players . protectors . dead) advanceStage
 
         whenM (isJust <$> use protect) advanceStage
 
@@ -104,7 +109,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     SeersTurn -> do
-        whenM (has (players . seers . dead) <$> get) advanceStage
+        whenM (hasuse $ players . seers . dead) advanceStage
 
         whenM (isJust <$> use see) advanceStage
 
@@ -116,7 +121,13 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
             when (is alive target) $ tell [playerSeenMessage (seer ^. name) target]
 
-        see .= Nothing
+        whenJustM (preuse $ players . oracles . alive) $ \oracle -> do
+            target <- use divine >>= findPlayerBy_ name . fromJust
+
+            when (is alive target) $ tell [playerDivinedMessage (oracle ^. name) target]
+
+        see     .= Nothing
+        divine  .= Nothing
 
         advanceStage
 
@@ -161,7 +172,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     WitchsTurn -> do
-        whenM (has (players . witches . dead) <$> get) advanceStage
+        whenM (hasuse $ players . witches . dead) advanceStage
 
         whenJustM (use poison) $ \targetName -> do
             events %= (++ [PoisonEvent targetName])

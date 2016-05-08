@@ -44,6 +44,7 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     HuntersTurn1        -> pingRole hunterRole
     HuntersTurn2        -> pingRole hunterRole
     Lynching            -> return ()
+    OraclesTurn         -> pingRole oracleRole
     OrphansTurn         -> pingRole orphanRole
     ProtectorsTurn      -> pingRole protectorRole
     ScapegoatsTurn      -> pingRole scapegoatRole

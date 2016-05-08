@@ -13,13 +13,14 @@ Extra utility functions for working with lenses.
 
 module Control.Lens.Extra (
     -- * Folds
-    is, isn't,
+    is, isn't, hasuse, hasn'tuse,
 
     -- * Traversals
     filteredBy,
 ) where
 
 import Control.Lens hiding (isn't)
+import Control.Monad.State
 
 import Data.Monoid
 
@@ -34,6 +35,18 @@ is = has
 --   @'isn't' = 'hasn't'@
 isn't :: Getting All s a -> s -> Bool
 isn't = hasn't
+
+-- | Check to see if this 'Fold' or 'Traversal' matches 1 or more entries in the current state.
+--
+--   @'hasuse' = 'gets' . 'has'@
+hasuse :: MonadState s m => Getting Any s a -> m Bool
+hasuse = gets . has
+
+-- | Check to see if this 'Fold' or 'Traversal' has no matches in the current state.
+--
+--   @'hasn'tuse' = 'gets' . 'hasn't'@
+hasn'tuse :: MonadState s m => Getting All s a -> m Bool
+hasn'tuse = gets . hasn't
 
 -- | A companion to 'filtered' that, rather than using a predicate, filters on the given lens for
 -- matches.

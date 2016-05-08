@@ -48,7 +48,8 @@ module Game.Werewolf.Role (
 
     --   The Villagers must lynch all of the Werewolves.
     beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, medusaRole,
-    protectorRole, scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole, witchRole,
+    oracleRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole,
+    witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -111,6 +112,7 @@ allRoles =
     , jesterRole
     , lycanRole
     , medusaRole
+    , oracleRole
     , orphanRole
     , protectorRole
     , scapegoatRole
@@ -387,6 +389,29 @@ medusaRole = Role
         ]
     }
 
+-- | /Originally rejected by the townsfolk, the Oracle's prophetic divinations has earned trust/
+--   /within the village. With constant precognition - and concern for the future - the Oracle/
+--   /knows the village will only live if they work together./
+--
+--   Each night the Oracle chooses a player to divine. They are then informed of the player's role
+--   the following morning. This wisdom is for the Oracle to use to ensure the future of Fougères.
+oracleRole :: Role
+oracleRole = Role
+    { _name         = "Oracle"
+    , _allegiance   = Villagers
+    , _balance      = 2
+    , _description  = T.unwords
+        [ "Originally rejected by the townsfolk, the Oracle's prophetic divinations has earned"
+        , "trust within the village. With constant precognition - and concern for the future - the"
+        , "Oracle knows the village will only live if they work together."
+        ]
+    , _rules        = T.unwords
+        [ "Each night the Oracle chooses a player to divine. They are then informed of the player's"
+        , "role the following morning. This wisdom is for the Oracle to use to ensure the future of"
+        , "Fougères."
+        ]
+    }
+
 -- | /The Protector is one of the few pure of heart and altruistic Villagers; they are forever/
 --   /putting others needs above their own. Each night they fight against the Werewolves with/
 --   /naught but a sword and shield, potentially saving an innocents life./
@@ -461,7 +486,10 @@ seerRole = Role
         , "always be true, but only for the present as not even the Seer knows what the future"
         , "holds."
         ]
-    , _rules        = "Each night the Seer sees the allegiance of one player of their choice."
+    , _rules        = T.unwords
+        [ "Each night the Seer chooses a player to see. They are then informed of the player's"
+        , "allegiance the following morning."
+        ]
     }
 
 -- | /A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even/

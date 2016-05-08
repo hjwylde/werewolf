@@ -26,6 +26,7 @@ import           Data.Version (showVersion)
 import qualified Werewolf.Command.Boot      as Boot
 import qualified Werewolf.Command.Choose    as Choose
 import qualified Werewolf.Command.Circle    as Circle
+import qualified Werewolf.Command.Divine    as Divine
 import qualified Werewolf.Command.End       as End
 import qualified Werewolf.Command.Help      as Help
 import qualified Werewolf.Command.Interpret as Interpret
@@ -48,6 +49,7 @@ data Command
     = Boot Boot.Options
     | Choose Choose.Options
     | Circle Circle.Options
+    | Divine Divine.Options
     | End End.Options
     | Heal
     | Help Help.Options
@@ -97,6 +99,7 @@ werewolf = Options
         [ command "boot"        $ info (helper <*> boot)        (fullDesc <> progDesc "Vote to boot a player")
         , command "choose"      $ info (helper <*> choose)      (fullDesc <> progDesc "Choose an allegiance or player(s)")
         , command "circle"      $ info (helper <*> circle)      (fullDesc <> progDesc "Get the game circle")
+        , command "divine"      $ info (helper <*> divine)      (fullDesc <> progDesc "Divine a player's role")
         , command "end"         $ info (helper <*> end)         (fullDesc <> progDesc "End the current game")
         , command "heal"        $ info (helper <*> heal)        (fullDesc <> progDesc "Heal the devoured player")
         , command "help"        $ info (helper <*> help_)       (fullDesc <> progDesc "Help documents")
@@ -126,6 +129,9 @@ circle = Circle . Circle.Options
         [ long "include-dead", short 'a'
         , help "Include dead players"
         ])
+
+divine :: Parser Command
+divine = Divine . Divine.Options <$> playerArgument
 
 end :: Parser Command
 end = End . End.Options

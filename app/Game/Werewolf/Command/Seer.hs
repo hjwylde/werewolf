@@ -28,8 +28,8 @@ import Game.Werewolf.Util
 seeCommand :: Text -> Text -> Command
 seeCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
-    unlessM (isPlayerSeer callerName)       $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isSeersTurn                     $ throwError [playerCannotDoThatRightNowMessage callerName]
+    unlessM (isPlayerSeer callerName)   $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isSeersTurn                 $ throwError [playerCannotDoThatRightNowMessage callerName]
     validatePlayer callerName targetName
 
     see .= Just targetName
