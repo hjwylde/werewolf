@@ -16,7 +16,7 @@ structure and any fields required to keep track of the current state.
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, events, boots, allowedVoters, divine, fallenAngelLynched, heal, healUsed,
+    stage, round, players, boots, allowedVoters, divine, fallenAngelLynched, healUsed,
     hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
     scapegoatBlamed, see, votes,
 
@@ -28,16 +28,16 @@ module Game.Werewolf.Game (
     allStages,
     stageCycle, stageAvailable,
 
-    Event(..),
-    _DevourEvent, _NoDevourEvent, _PoisonEvent,
-
     newGame,
+
+    -- ** Getters
+    votee,
 
     -- ** Prisms
     firstRound, secondRound, thirdRound,
 
     -- ** Searches
-    getAllowedVoters, getPendingVoters, getVoteResult,
+    getAllowedVoters, getPendingVoters,
 
     -- ** Queries
     hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
@@ -61,9 +61,8 @@ import Prelude hiding (round)
 -- | There are a few key pieces of information that a game always needs to hold. These are:
 --
 --   * the 'stage',
---   * the 'round' number,
---   * the 'players' and
---   * the 'events'.
+--   * the 'round' number and
+--   * the 'players'.
 --
 --   Any further fields on the game are specific to one or more roles (and their respective turns!).
 --   Some of the additional fields are reset each round (e.g., the Seer's 'see') while others are
@@ -72,12 +71,10 @@ data Game = Game
     { _stage              :: Stage
     , _round              :: Int
     , _players            :: [Player]
-    , _events             :: [Event]
     , _boots              :: Map Text [Text]
     , _allowedVoters      :: [Text]           -- ^ Jester, Scapegoat
     , _divine             :: Maybe Text       -- ^ Oracle
     , _fallenAngelLynched :: Bool             -- ^ Fallen Angel
-    , _heal               :: Bool             -- ^ Witch
     , _healUsed           :: Bool             -- ^ Witch
     , _hunterRetaliated   :: Bool             -- ^ Hunter
     , _jesterRevealed     :: Bool             -- ^ Jester
@@ -121,23 +118,9 @@ instance Humanise Stage where
     humanise WerewolvesTurn     = fromString "Werewolves' turn"
     humanise WitchsTurn         = fromString "Witch's turn"
 
--- | Events occur /after/ a 'Stage' is advanced. This is automatically handled in
---   'Game.Werewolf.Engine.checkStage', while an event's specific behaviour is defined by
---   'Game.Werewolf.Engine.eventAvailable' and 'Game.Werewolf.Engine.applyEvent'.
---
---   For the most part events are used to allow something to happen on a 'Stage' different to when
---   it was triggered. E.g., the 'DeovurEvent' occurs after the village wakes up rather than when
---   the Werewolves' vote, this gives the Witch a chance to heal the victim.
-data Event  = DevourEvent Text  -- ^ Werewolves
-            | NoDevourEvent     -- ^ Protector, Werewolves and Witch
-            | PoisonEvent Text  -- ^ Witch
-    deriving (Eq, Read, Show)
-
 makeLenses ''Game
 
 makePrisms ''Stage
-
-makePrisms ''Event
 
 -- | All of the 'Stage's in the order that they should occur.
 allStages :: [Stage]
@@ -204,13 +187,11 @@ newGame players = Game
     { _stage                = head stageCycle
     , _round                = 0
     , _players              = players
-    , _events               = []
     , _boots                = Map.empty
     , _passed               = False
     , _allowedVoters        = players ^.. names
     , _divine               = Nothing
     , _fallenAngelLynched   = False
-    , _heal                 = False
     , _healUsed             = False
     , _hunterRetaliated     = False
     , _jesterRevealed       = False
@@ -223,6 +204,21 @@ newGame players = Game
     , _see                  = Nothing
     , _votes                = Map.empty
     }
+
+-- | The traversal of the 'votes' victim. This is the player, if they exist, that received the
+--   majority of the votes.
+votee :: Fold Game Player
+votee = folding $ (\players -> if length players == 1 then take 1 players else []) . getVoteResult
+
+-- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
+--   on whether the votes were in conflict.
+getVoteResult :: Game -> [Player]
+getVoteResult game
+    | Map.null (game ^. votes)  = []
+    | otherwise                 = game ^.. players . traverse . filtered ((`elem` result) . view name)
+    where
+        votees = Map.elems $ game ^. votes
+        result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)
 
 -- | The traversal of 'Game's on the first round.
 firstRound :: Prism' Game Game
@@ -239,7 +235,7 @@ thirdRound = prism (set round 2) $ \game -> (if game ^. round == 2 then Right el
 -- | Gets all the 'allowedVoters' in a game (which is names only) and maps them to their player.
 getAllowedVoters :: Game -> [Player]
 getAllowedVoters game =
-    map (\name' -> game ^?! players . traverse . filteredBy name name') (game ^. allowedVoters)
+    map (\name -> game ^?! players . traverse . named name) (game ^. allowedVoters)
 
 -- | Gets all 'Alive' players that have yet to vote.
 getPendingVoters :: Game -> [Player]
@@ -247,16 +243,6 @@ getPendingVoters game =
     game ^.. players . traverse . alive . filtered ((`Map.notMember` votes') . view name)
     where
         votes' = game ^. votes
-
--- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
---   on whether the votes were in conflict.
-getVoteResult :: Game -> [Player]
-getVoteResult game
-    | Map.null (game ^. votes)  = []
-    | otherwise                 = map (\name' -> game ^?! players . traverse . filteredBy name name') result
-    where
-        votees = Map.elems $ game ^. votes
-        result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)
 
 -- | Queries whether anyone has won.
 hasAnyoneWon :: Game -> Bool

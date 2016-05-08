@@ -31,7 +31,7 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf.Game     hiding (getPendingVoters, getVoteResult)
+import Game.Werewolf.Game     hiding (getPendingVoters)
 import Game.Werewolf.Messages
 import Game.Werewolf.Response
 import Game.Werewolf.Util

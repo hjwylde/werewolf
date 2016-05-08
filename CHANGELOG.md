@@ -12,6 +12,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Moved majority of library classes to app/. ([#208](https://github.com/hjwylde/werewolf/issues/208))
 * Changed the Fallen Angel to be a true Loner. ([#173](https://github.com/hjwylde/werewolf/issues/173))
 * Added the Oracle role. ([#141](https://github.com/hjwylde/werewolf/issues/141))
+* Removed the event concept. ([#147](https://github.com/hjwylde/werewolf/issues/147))
 
 *Minor*
 

@@ -280,10 +280,10 @@ states = traverse . state
 -- | This 'Traversal' provides the traversal of 'Player's with the given name.
 --
 -- @
--- 'named' name' = 'traverse' . filteredBy' . 'name' name'
+-- 'named' name' = filteredBy' . 'name' name'
 -- @
-named :: Traversable t => Text -> Traversal' (t Player) Player
-named name' = traverse . filteredBy name name'
+named :: Text -> Traversal' Player Player
+named name' = filteredBy name name'
 
 -- | This 'Traversal' provides the traversal of 'alphaWolf' 'Player's.
 --

@@ -43,7 +43,7 @@ handle callerName tag (Options force) = do
     unless force $ do
         game <- readGame tag
 
-        unless (has (players . named callerName) game) $
+        unless (has (players . traverse . named callerName) game) $
             exitWith failure { messages = [playerCannotDoThatMessage callerName] }
 
     deleteGame tag
