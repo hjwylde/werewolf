@@ -30,7 +30,7 @@ module Game.Werewolf.Game (
 
     newGame,
 
-    -- ** Getters
+    -- ** Folds
     votee,
 
     -- ** Prisms
@@ -205,17 +205,19 @@ newGame players = Game
     , _votes                = Map.empty
     }
 
--- | The traversal of the 'votes' victim. This is the player, if they exist, that received the
---   majority of the votes.
+-- | The traversal of the 'votes' victim's name. This is the player, if they exist, that received
+--   the majority of the votes. This could be an empty list depending on whether the votes were in
+--   conflict.
 votee :: Fold Game Player
-votee = folding $ (\players -> if length players == 1 then take 1 players else []) . getVoteResult
+votee = folding getVotee
 
--- | Gets all players that had /the/ highest vote count. This could be 1 or more players depending
---   on whether the votes were in conflict.
-getVoteResult :: Game -> [Player]
-getVoteResult game
+-- | Gets the 'votes' victim's name. This is the player, if they exist, that received the majority
+--   of the votes. This could be an empty list depending on whether the votes were in conflict.
+getVotee :: Game -> [Player]
+getVotee game
     | Map.null (game ^. votes)  = []
-    | otherwise                 = game ^.. players . traverse . filtered ((`elem` result) . view name)
+    | length result /= 1        = []
+    | otherwise                 = game ^.. players . traverse . named (head result)
     where
         votees = Map.elems $ game ^. votes
         result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)
