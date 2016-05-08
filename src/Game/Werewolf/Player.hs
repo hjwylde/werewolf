@@ -25,8 +25,8 @@ module Game.Werewolf.Player (
 
     -- ** Traversals
     alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, lycan, medusa, oracle,
-    orphan, protector, scapegoat, seer, simpleVillager, simpleWerewolf, trueVillager, villageDrunk,
-    witch,
+    orphan, protector, scapegoat, seer, simpleVillager, simpleWerewolf, spitefulGhost, trueVillager,
+    villageDrunk, witch,
     villager, werewolf,
 
     -- | The following traversals are provided just as a bit of sugar to avoid continually writing
@@ -37,7 +37,7 @@ module Game.Werewolf.Player (
     named,
     alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
     medusas, oracles, orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves,
-    trueVillagers, villageDrunks, witches,
+    spitefulGhosts, trueVillagers, villageDrunks, witches,
     villagers, werewolves,
     alive, dead,
 ) where
@@ -71,9 +71,11 @@ instance Eq Player where
 
 makePrisms ''State
 
--- | Creates a new 'Alive' player.
+-- | Creates a new 'Alive' player, with one exception: a 'spitefulGhost' always starts 'Dead'.
 newPlayer :: Text -> Role -> Player
-newPlayer name role = Player name role Alive
+newPlayer name role = Player name role state
+    where
+        state = if role == spitefulGhostRole then Dead else Alive
 
 -- | The traversal of 'Player's with an 'alphaWolfRole'.
 --
@@ -202,6 +204,14 @@ simpleVillager = role . only simpleVillagerRole
 -- @
 simpleWerewolf :: Traversal' Player ()
 simpleWerewolf = role . only simpleWerewolfRole
+
+-- | The traversal of 'Player's with a 'spitefulGhostRole'.
+--
+-- @
+-- 'spitefulGhost' = 'role' . 'only' 'spitefulGhostRole'
+-- @
+spitefulGhost :: Traversal' Player ()
+spitefulGhost = role . only spitefulGhostRole
 
 -- | The traversal of 'Player's with a 'trueVillagerRole'.
 --
@@ -402,6 +412,14 @@ simpleVillagers = traverse . filtered (is simpleVillager)
 -- @
 simpleWerewolves :: Traversable t => Traversal' (t Player) Player
 simpleWerewolves = traverse . filtered (is simpleWerewolf)
+
+-- | This 'Traversal' provides the traversal of 'spitefulGhost' 'Player's.
+--
+-- @
+-- 'spitefulGhosts' = 'traverse' . 'filtered' ('is' 'spitefulGhost')
+-- @
+spitefulGhosts :: Traversable t => Traversal' (t Player) Player
+spitefulGhosts = traverse . filtered (is spitefulGhost)
 
 -- | This 'Traversal' provides the traversal of 'trueVillager' 'Player's.
 --

@@ -39,7 +39,7 @@ module Game.Werewolf.Role (
     -- | The Loners look out for themselves and themselves alone.
 
     --   The Loners must complete their own objective.
-    fallenAngelRole,
+    fallenAngelRole, spitefulGhostRole,
 
     -- *** The Villagers
     -- | Fraught with fear of the unseen enemy, the Villagers must work together to determine the
@@ -119,6 +119,7 @@ allRoles =
     , seerRole
     , simpleVillagerRole
     , simpleWerewolfRole
+    , spitefulGhostRole
     , trueVillagerRole
     , villageDrunkRole
     , witchRole
@@ -217,6 +218,31 @@ fallenAngelRole = Role
     , _rules        = T.unwords
         [ "The Fallen Angel wins if they manage to get lynched by the Villagers before the end of"
         , "the game."
+        ]
+    }
+
+-- | /In this time of turmoil, it would seem unlikely for the Villagers of Fougères to unanimously/
+--   /agree on anything. Yet this is not so, for they all agree the village is haunted by a ghost./
+--   /The vindictive Spiteful Ghost never moved on, rather they remain with the sole purpose of/
+--   /haunting the village and ensuring that the Villagers never forget what they have done./
+--
+--   The Spiteful ghost is dead and cannot win, however they know the game's role allocations and
+--   may haunt the village as they wish.
+spitefulGhostRole :: Role
+spitefulGhostRole = Role
+    { _name         = "Spiteful Ghost"
+    , _allegiance   = NoOne
+    , _balance      = 0
+    , _description  = T.unwords
+        [ "In this time of turmoil, it would seem unlikely for the Villagers of Fougères to"
+        , "unanimously agree on anything. Yet this is not so, for they all agree the village is"
+        , "haunted by a ghost. The vindictive Spiteful Ghost never moved on, rather they remain"
+        , "with the sole purpose of haunting the village and ensuring that the Villagers never"
+        , "forget what they have done."
+        ]
+    , _rules        = T.unwords
+        [ "The Spiteful ghost is dead and cannot win, however they know the game's role allocations"
+        , "and may haunt the village as they wish."
         ]
     }
 

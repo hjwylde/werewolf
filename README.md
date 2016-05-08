@@ -49,6 +49,7 @@ The Loners look out for themselves and themselves alone.
 The Loners must complete their own objective.
 
 * Fallen Angel
+* Spiteful Ghost
 
 **The Villagers:**
 

@@ -19,6 +19,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Added the Medusa role. ([#99](https://github.com/hjwylde/werewolf/issues/99))
 * Added `unvote` command. ([#213](https://github.com/hjwylde/werewolf/issues/213))
 * Removed public knowledge of Villagers and Werewolves that have voted. ([#214](https://github.com/hjwylde/werewolf/issues/214))
+* Added the Spiteful Ghost role. ([#206](https://github.com/hjwylde/werewolf/issues/206))
 
 *Revisions*
 
