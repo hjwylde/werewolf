@@ -402,7 +402,7 @@ medusaRole :: Role
 medusaRole = Role
     { _name         = "Medusa"
     , _allegiance   = Villagers
-    , _balance      = 4
+    , _balance      = 3
     , _description  = T.unwords
         [ "A beautiful flirt, the Medusa is aligned with the Villagers but harbours a terrifying"
         , "secret. During the day they are well known in the village of Fougères for their stunning"
