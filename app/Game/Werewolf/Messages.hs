@@ -103,11 +103,10 @@ import           Data.String.Humanise
 import           Data.Text            (Text)
 import qualified Data.Text            as T
 
-import           Game.Werewolf.Game
-import           Game.Werewolf.Player
-import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name)
-import qualified Game.Werewolf.Role     as Role
+import Game.Werewolf.Game
+import Game.Werewolf.Player
+import Game.Werewolf.Response
+import Game.Werewolf.Role     hiding (name)
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
@@ -123,13 +122,13 @@ newGameMessages game = concat
     where
         players'                = game ^. players
         beholderMessages        = case (,) <$> players' ^? beholders <*> players' ^? seers of
-            Just (beholder, seer)   -> [beholderMessage (beholder ^. name) (seer ^. name)]
+            Just (beholder, seer)   -> [beholderMessage (beholder ^. name) (humanise seer)]
             _                       -> []
         spitefulGhostMessages   = case players' ^? spitefulGhosts of
             Just spitefulGhost  -> [spitefulGhostMessage (spitefulGhost ^. name) (players' \\ [spitefulGhost])]
             _                   -> []
         trueVillagerMessages    = case players' ^? trueVillagers of
-            Just trueVillager   -> [trueVillagerMessage $ trueVillager ^. name]
+            Just trueVillager   -> [trueVillagerMessage $ humanise trueVillager]
             _                   -> []
         fallenAngelMessages     = if has fallenAngels players'
             then [fallenAngelMessage]
@@ -141,7 +140,7 @@ newPlayersInGameMessage playerNames = publicMessage $ T.concat
 
 newPlayerMessage :: Player -> Message
 newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
-    [ T.concat ["You're ", article playerRole, " ", playerRole ^. Role.name, "."]
+    [ T.concat ["You're ", article playerRole, " ", humanise playerRole, "."]
     , playerRole ^. description
     , playerRole ^. rules
     ]
@@ -161,7 +160,7 @@ spitefulGhostMessage to players = privateMessage to $ T.concat
     ]
     where
         playerNamesWithRoles = concatList $ map
-            (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"])
+            (\player -> T.concat [humanise player, " (", humanise $ player ^. role, ")"])
             players
 
 trueVillagerMessage :: Text -> Message
@@ -204,7 +203,7 @@ stageMessages game = case game ^. stage of
         oraclesName         = players' ^?! oracles . name
         orphansName         = players' ^?! orphans . name
         protectorsName      = players' ^?! protectors . name
-        scapegoatsName      = players' ^?! scapegoats . name
+        scapegoatsName      = humanise $ players' ^?! scapegoats
         seersName           = players' ^?! seers . name
         aliveWerewolfNames  = players' ^.. werewolves . alive . name
 
@@ -292,7 +291,7 @@ witchsTurnMessages game = concat
         devourMessages  = case game ^? votee of
             Just votee ->
                 [ privateMessage witchsName $
-                    T.unwords ["You see", votee ^. name, "sprawled outside bleeding uncontrollably."]
+                    T.unwords ["You see", humanise votee, "sprawled outside bleeding uncontrollably."]
                 ]
             _               -> []
         healMessages
@@ -331,7 +330,7 @@ gameOverMessages game
         playerRolesMessage = publicMessage $ T.concat
             [ "As I know you're all wondering who lied to you, here's the role allocations: "
             , concatList $ map
-                (\player -> T.concat [player ^. name, " (", player ^. role . Role.name, ")"])
+                (\player -> T.concat [humanise player, " (", humanise $ player ^. role, ")"])
                 (game ^. players)
             , "."
             ]
@@ -362,8 +361,8 @@ playerLostMessage to = privateMessage to "Feck, you lost this time round."
 playerQuitMessage :: Player -> Message
 playerQuitMessage player = publicMessage $ T.unwords [playerName, "the", playerRole, "has quit!"]
     where
-        playerName = player ^. name
-        playerRole = player ^. role . Role.name
+        playerName = humanise player
+        playerRole = humanise $ player ^. role
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to "The game is over!"
@@ -392,12 +391,10 @@ playerVotedToBootMessage playerName targetName = publicMessage $ T.concat
 
 playerBootedMessage :: Player -> Message
 playerBootedMessage player = publicMessage $ T.unwords
-    [ playerName, "the", playerRole ^. Role.name
-    , "has been booted from the game!"
-    ]
+    [playerName, "the", playerRole , "has been booted from the game!"]
     where
-        playerName = player ^. name
-        playerRole = player ^. role
+        playerName = humanise player
+        playerRole = humanise $ player ^. role
 
 playerHasAlreadyVotedToBootMessage :: Text -> Text -> Message
 playerHasAlreadyVotedToBootMessage to targetName = privateMessage to $ T.concat
@@ -409,7 +406,7 @@ circleMessage to players = privateMessage to $ T.intercalate "\n"
     , T.intercalate " <-> " (map playerName (players ++ [head players]))
     ]
     where
-        playerName player = T.concat [player ^. name, if is dead player then " (dead)" else ""]
+        playerName player = T.concat [humanise player, if is dead player then " (dead)" else ""]
 
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to "Waiting on you..."
@@ -431,12 +428,12 @@ rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat
     [ "The roles in play are "
     , concatList $ map (\(role, count) ->
-        T.concat [role ^. Role.name, " (", T.pack $ show count, ")"])
+        T.concat [humanise role, " (", T.pack $ show count, ")"])
         roleCounts
     , " for a total balance of ", T.pack $ show totalBalance, "."
     ]
     where
-        roleCounts      = map (head &&& length) (groupSortOn (view Role.name) roles)
+        roleCounts      = map (head &&& length) (groupSortOn (humanise :: Role -> Text) roles)
         totalBalance    = sumOf (traverse . balance) roles
 
 playersInGameMessage :: Text -> [Player] -> Message
@@ -448,13 +445,13 @@ playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
 
         alivePlayersText            = T.concat
             [ "The following players are still alive: "
-            , concatList $ map (\player -> if is trueVillager player then playerNameWithRole player else player ^. name) alivePlayers, "."
+            , concatList $ map (\player -> if is trueVillager player then playerNameWithRole player else humanise player) alivePlayers, "."
             ]
         deadPlayersText             = T.concat
             [ "The following players are dead: "
             , concatList $ map playerNameWithRole deadPlayers, "."
             ]
-        playerNameWithRole player   = T.concat [player ^. name, " (", player ^. role . Role.name, ")"]
+        playerNameWithRole player   = T.concat [humanise player, " (", humanise $ player ^. role, ")"]
 
 ferinaGruntsMessage :: Message
 ferinaGruntsMessage = publicMessage
@@ -466,14 +463,14 @@ playerShotMessage target = publicMessage $ T.unwords
     , "while blood slips between their fingers and pools around them."
     ]
     where
-        targetName = target ^. name
-        targetRole = target ^. role . Role.name
+        targetName = humanise target
+        targetRole = humanise $ target ^. role
 
 playerDivinedMessage :: Text -> Player -> Message
 playerDivinedMessage to player = privateMessage to $ T.concat
-    [playerName, " is ", article playerRole, " ", playerRole ^. Role.name, "."]
+    [playerName, " is ", article playerRole, " ", humanise playerRole, "."]
     where
-        playerName = player ^. name
+        playerName = humanise player
         playerRole = player ^. role
 
 orphanJoinedPackMessages :: Text -> [Text] -> [Message]
@@ -511,7 +508,7 @@ playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to player = privateMessage to $ T.concat
     [playerName, " is aligned with ", article, humanise allegiance', "."]
     where
-        playerName  = player ^. name
+        playerName  = humanise player
         allegiance'
             | is alphaWolf player   = Villagers
             | is lycan player       = Werewolves
@@ -552,16 +549,16 @@ playerLynchedMessage player
         || is alphaWolf player  = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight. As they scream their body starts to "
         , "contort and writhe, transforming into ", article playerRole, " "
-        , playerRole ^. Role.name, ".", " Thankfully they go limp before breaking free of their "
+        , humanise playerRole, ".", " Thankfully they go limp before breaking free of their "
         , "restraints."
         ]
     | otherwise                 = publicMessage $ T.concat
         [ playerName, " is tied up to a pyre and set alight. Eventually the screams start to die "
         , "and with their last breath, they reveal themselves as ", article playerRole, " "
-        , playerRole ^. Role.name, "."
+        , humanise playerRole, "."
         ]
     where
-        playerName = player ^. name
+        playerName = humanise player
         playerRole = player ^. role
 
 noPlayerLynchedMessage :: Message
@@ -600,10 +597,10 @@ playerDevouredMessage player = publicMessage $ T.concat
     [ "As you open them you notice a door broken down and "
     , playerName, "'s guts half devoured and spilling out over the cobblestones."
     , " From the look of their personal effects, you deduce they were "
-    , article playerRole, " ", playerRole ^. Role.name, "."
+    , article playerRole, " ", humanise playerRole, "."
     ]
     where
-        playerName = player ^. name
+        playerName = humanise player
         playerRole = player ^. role
 
 playerTurnedToStoneMessage :: Player -> Message
@@ -612,8 +609,8 @@ playerTurnedToStoneMessage player = publicMessage $ T.unwords
     , "must have looked into the eyes of the Medusa at the very end."
     ]
     where
-        playerName = player ^. name
-        playerRole = player ^. role . Role.name
+        playerName = humanise player
+        playerRole = humanise $ player ^. role
 
 noPlayerDevouredMessage :: Message
 noPlayerDevouredMessage = publicMessage $ T.unwords
@@ -633,8 +630,8 @@ playerPoisonedMessage player = publicMessage $ T.unwords
     , playerName, "the", playerRole, "is hanging over the side of their bed, poisoned."
     ]
     where
-        playerName = player ^. name
-        playerRole = player ^. role . Role.name
+        playerName = humanise player
+        playerRole = humanise $ player ^. role
 
 playerHasAlreadyHealedMessage :: Text -> Message
 playerHasAlreadyHealedMessage to = privateMessage to "You've already healed someone!"

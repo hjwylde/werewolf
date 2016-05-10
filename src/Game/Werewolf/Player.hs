@@ -46,7 +46,9 @@ import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import Data.Function
-import Data.Text     (Text)
+import Data.String
+import Data.String.Humanise
+import Data.Text            as T
 
 import Game.Werewolf.Role hiding (name)
 
@@ -68,6 +70,9 @@ makeLenses ''Player
 
 instance Eq Player where
     (==) = (==) `on` view name
+
+instance Humanise Player where
+    humanise player = fromString . T.unpack $ player ^. name
 
 makePrisms ''State
 
@@ -280,7 +285,7 @@ states = traverse . state
 -- | This 'Traversal' provides the traversal of 'Player's with the given name.
 --
 -- @
--- 'named' name' = filteredBy' . 'name' name'
+-- 'named' name' = 'filteredBy' . 'name' name'
 -- @
 named :: Text -> Traversal' Player Player
 named name' = filteredBy name name'

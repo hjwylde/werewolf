@@ -98,6 +98,9 @@ makeLenses ''Role
 instance Eq Role where
     (==) = (==) `on` view name
 
+instance Humanise Role where
+    humanise role = fromString . T.unpack $ role ^. name
+
 makePrisms ''Allegiance
 
 -- | A list containing all the roles defined in this file.
