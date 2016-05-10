@@ -7,6 +7,8 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+### v1.1.1.0
+
 *Revisions*
 
 * Updated minimum and maximum number of roles with `--random-extra-roles`.
