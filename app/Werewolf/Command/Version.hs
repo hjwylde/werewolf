@@ -21,7 +21,6 @@ import Data.Text (Text)
 import Game.Werewolf
 
 import Werewolf.Messages
-import Werewolf.Version
 
 handle :: MonadIO m => Text -> m ()
-handle callerName = exitWith success { messages = [engineVersionMessage callerName version] }
+handle callerName = exitWith success { messages = [engineVersionMessage callerName] }

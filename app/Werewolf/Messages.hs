@@ -10,30 +10,39 @@ Suite of messages used when calling the binary.
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
 
 module Werewolf.Messages (
-    -- * Binary messages
+    -- * Command messages
+
+    -- ** command.version
     engineVersionMessage,
 
-    -- ** Error messages
-    noGameRunningMessage, gameAlreadyRunningMessage, roleDoesNotExistMessage,
+    -- * Error messages
+
+    -- ** error.command
+    noGameRunningMessage,
+
+    -- ** error.command.start
+    gameAlreadyRunningMessage, roleDoesNotExistMessage,
 ) where
 
-import           Data.Text    (Text)
-import qualified Data.Text    as T
-import           Data.Version
+import Data.String.Interpolate.Extra
+import Data.Text
+import Data.Version
 
 import Game.Werewolf
 
-engineVersionMessage :: Text -> Version -> Message
-engineVersionMessage to version =
-    privateMessage to $ T.unwords ["Version", T.pack $ showVersion version]
+import Werewolf.Version
+
+engineVersionMessage :: Text -> Message
+engineVersionMessage to = privateMessage to [iFile|messages/command/version/engine-version.text|]
 
 noGameRunningMessage :: Text -> Message
-noGameRunningMessage to = privateMessage to "No game is running."
+noGameRunningMessage to = privateMessage to [iFile|messages/error/command/no-game-running.text|]
 
 gameAlreadyRunningMessage :: Text -> Message
-gameAlreadyRunningMessage to = privateMessage to "A game is already running."
+gameAlreadyRunningMessage to = privateMessage to [iFile|messages/error/command/start/game-already-running.text|]
 
 roleDoesNotExistMessage :: Text -> Text -> Message
-roleDoesNotExistMessage to name = privateMessage to $ T.unwords ["Role", name, "does not exist."]
+roleDoesNotExistMessage to role = privateMessage to [iFile|messages/error/command/start/role-does-not-exist.text|]
