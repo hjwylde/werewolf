@@ -75,9 +75,10 @@ handle callerName tag (Options extraRoles includeSeer playerNames) = do
 
 randomExtraRoles :: MonadRandom m => Int -> m [Role]
 randomExtraRoles n = do
-    let minimum = n `div` 3
+    let minimum = n `div` 4 + 1
+    let maximum = n `div` 3 + 1
 
-    count <- getRandomR (minimum, minimum + 2)
+    count <- getRandomR (minimum, maximum)
 
     take count <$> shuffleM restrictedRoles
 
