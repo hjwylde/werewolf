@@ -25,11 +25,10 @@ import Control.Monad.Writer
 import Data.List
 import Data.Text (Text)
 
-import           Game.Werewolf          hiding (getPendingVoters)
-import           Game.Werewolf.Command
-import           Game.Werewolf.Messages
-import qualified Game.Werewolf.Role     as Role
-import           Game.Werewolf.Util
+import Game.Werewolf          hiding (getPendingVoters)
+import Game.Werewolf.Command
+import Game.Werewolf.Messages
+import Game.Werewolf.Util
 
 circleCommand :: Text -> Bool -> Command
 circleCommand callerName includeDead = Command $ do
@@ -60,7 +59,7 @@ pingRole :: (MonadState Game m, MonadWriter [Message] m) => Role -> m ()
 pingRole role' = do
     player <- findPlayerBy_ role role'
 
-    tell [pingRoleMessage $ role' ^. Role.name]
+    tell [pingRoleMessage role']
     tell [pingPlayerMessage $ player ^. name]
 
 pingVillagers :: (MonadState Game m, MonadWriter [Message] m) => m ()
@@ -68,14 +67,14 @@ pingVillagers = do
     allowedVoterNames <- use allowedVoters
     pendingVoterNames <- toListOf names <$> getPendingVoters
 
-    tell [pingRoleMessage "village"]
+    tell [pingVillageMessage]
     tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
 
 pingWerewolves :: (MonadState Game m, MonadWriter [Message] m) => m ()
 pingWerewolves = do
     pendingVoters <- getPendingVoters
 
-    tell [pingRoleMessage "Werewolves"]
+    tell [pingWerewolvesMessage]
     tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
 
 statusCommand :: Text -> Command

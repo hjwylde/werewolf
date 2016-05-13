@@ -30,7 +30,6 @@ import Game.Werewolf.Command.Werewolf as Werewolf
 import Game.Werewolf.Engine
 import Game.Werewolf.Messages
 
-import Werewolf.Messages
 import Werewolf.System
 
 handle :: (MonadIO m, MonadRandom m) => Text -> Text -> m ()

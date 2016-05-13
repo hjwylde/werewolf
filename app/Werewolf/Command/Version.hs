@@ -19,8 +19,7 @@ import Control.Monad.Except
 import Data.Text (Text)
 
 import Game.Werewolf
-
-import Werewolf.Messages
+import Game.Werewolf.Messages
 
 handle :: MonadIO m => Text -> m ()
 handle callerName = exitWith success { messages = [engineVersionMessage callerName] }

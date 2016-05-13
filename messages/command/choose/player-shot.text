@@ -1,0 +1,1 @@
+#{humanise player} the #{humanise $ player ^. role} slumps down to the ground, hands clutching at their chest while blood slips between their fingers and pools around them.

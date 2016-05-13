@@ -65,7 +65,6 @@ executable werewolf
         Werewolf.Command.Unvote
         Werewolf.Command.Version
         Werewolf.Command.Vote
-        Werewolf.Messages
         Werewolf.Options
         Werewolf.System
         Werewolf.Version

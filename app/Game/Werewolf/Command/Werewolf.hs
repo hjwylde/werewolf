@@ -56,9 +56,11 @@ voteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
-    aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
+    aliveWerewolfNames  <- toListOf (players . werewolves . alive . name) <$> get
+    caller              <- findPlayerBy_ name callerName
+    target              <- findPlayerBy_ name targetName
 
-    tell [playerMadeDevourVoteMessage werewolfName callerName targetName | werewolfName <- aliveWerewolfNames \\ [callerName]]
+    tell [playerMadeDevourVoteMessage werewolfName caller target | werewolfName <- aliveWerewolfNames \\ [callerName]]
 
 validateCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
 validateCommand callerName = do

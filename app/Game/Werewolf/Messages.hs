@@ -16,6 +16,7 @@ includes features such as emoji support.
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
 
 module Game.Werewolf.Messages (
     -- * Generic messages
@@ -36,7 +37,7 @@ module Game.Werewolf.Messages (
     circleMessage,
 
     -- * Ping messages
-    pingPlayerMessage, pingRoleMessage,
+    pingPlayerMessage, pingRoleMessage, pingVillageMessage, pingWerewolvesMessage,
 
     -- * Status messages
     currentStageMessages, rolesInGameMessage, playersInGameMessage,
@@ -92,25 +93,42 @@ module Game.Werewolf.Messages (
 
     -- ** Error messages
     playerHasAlreadyHealedMessage, playerHasAlreadyPoisonedMessage,
+
+    -- * Command messages
+
+    -- ** command.version
+    engineVersionMessage,
+
+    -- * Error messages
+
+    -- ** error.command
+    noGameRunningMessage,
+
+    -- ** error.command.start
+    gameAlreadyRunningMessage, roleDoesNotExistMessage,
 ) where
 
 import Control.Arrow
-import Control.Lens
+import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import           Data.List.Extra
 import           Data.String.Humanise
-import           Data.Text            (Text)
-import qualified Data.Text            as T
+import           Data.String.Interpolate.Extra
+import           Data.Text                     (Text)
+import qualified Data.Text                     as T
+import           Data.Version
 
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
 import Game.Werewolf.Role     hiding (name)
 
+import Werewolf.Version
+
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
-    [ [newPlayersInGameMessage $ players' ^.. names]
+    [ [newPlayersInGameMessage game]
     , [rolesInGameMessage Nothing $ players' ^.. roles]
     , map newPlayerMessage players'
     , beholderMessages
@@ -122,141 +140,110 @@ newGameMessages game = concat
     where
         players'                = game ^. players
         beholderMessages        = case (,) <$> players' ^? beholders <*> players' ^? seers of
-            Just (beholder, seer)   -> [beholderMessage (beholder ^. name) (humanise seer)]
+            Just (beholder, seer)   -> [beholderMessage (beholder ^. name) seer]
             _                       -> []
         spitefulGhostMessages   = case players' ^? spitefulGhosts of
-            Just spitefulGhost  -> [spitefulGhostMessage (spitefulGhost ^. name) (players' \\ [spitefulGhost])]
+            Just spitefulGhost  -> [spitefulGhostMessage (spitefulGhost ^. name) game]
             _                   -> []
         trueVillagerMessages    = case players' ^? trueVillagers of
-            Just trueVillager   -> [trueVillagerMessage $ humanise trueVillager]
+            Just trueVillager   -> [trueVillagerMessage trueVillager]
             _                   -> []
         fallenAngelMessages     = if has fallenAngels players'
             then [fallenAngelMessage]
             else []
 
-newPlayersInGameMessage :: [Text] -> Message
-newPlayersInGameMessage playerNames = publicMessage $ T.concat
-    ["A new game of werewolf is starting with ", concatList playerNames, "!"]
+newPlayersInGameMessage :: Game -> Message
+newPlayersInGameMessage game = publicMessage [iFile|messages/engine/new-game/players-in-game.text|]
 
 newPlayerMessage :: Player -> Message
-newPlayerMessage player = privateMessage (player ^. name) $ T.intercalate "\n"
-    [ T.concat ["You're ", article playerRole, " ", humanise playerRole, "."]
-    , playerRole ^. description
-    , playerRole ^. rules
-    ]
-    where
-        playerRole = player ^. role
+newPlayerMessage player = privateMessage (player ^. name) [iFile|messages/engine/new-game/new-player.text|]
 
-beholderMessage :: Text -> Text -> Message
-beholderMessage to seerName = privateMessage to $ T.concat
-    [ "The Seer has always been held in high regard among the Villagers. Few are as lucky as you to"
-    , " know the Seer, ", seerName, ", personally."
-    ]
+beholderMessage :: Text -> Player -> Message
+beholderMessage to seer = privateMessage to [iFile|messages/engine/new-game/beholder.text|]
 
-spitefulGhostMessage :: Text -> [Player] -> Message
-spitefulGhostMessage to players = privateMessage to $ T.concat
-    [ "Being ethereal seldom has it's benefits. Perhaps however this knowledge of the townsfolks' "
-    , "natures will bring you some joy in the afterlife: ", playerNamesWithRoles, "."
-    ]
-    where
-        playerNamesWithRoles = concatList $ map
-            (\player -> T.concat [humanise player, " (", humanise $ player ^. role, ")"])
-            players
+spitefulGhostMessage :: Text -> Game -> Message
+spitefulGhostMessage to game = privateMessage to [iFile|messages/engine/new-game/spiteful-ghost.text|]
 
-trueVillagerMessage :: Text -> Message
-trueVillagerMessage name = publicMessage $ T.unwords
-    [ "Unguarded advice is seldom given, for advice is a dangerous gift, even from the wise to the"
-    , "wise, and all courses may run ill. Yet as you feel like you need help, I begrudgingly leave"
-    , "you with this:", name, "is the True Villager."
-    ]
+trueVillagerMessage :: Player -> Message
+trueVillagerMessage trueVillager = publicMessage [iFile|messages/engine/new-game/true-villager.text|]
 
 fallenAngelMessage :: Message
-fallenAngelMessage = publicMessage $ T.unwords
-    [ "Alas, again I regrettably yield advice: an angelic menace walks among you. Do not cast your"
-    , "votes lightly, for they will relish in this opportunity to be free from their terrible"
-    , "nightmare."
-    ]
+fallenAngelMessage = publicMessage [iFile|messages/engine/new-game/fallen-angel.text|]
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
     FerinasGrunt        -> []
     GameOver            -> []
-    HuntersTurn1        -> huntersTurnMessages huntersName
-    HuntersTurn2        -> huntersTurnMessages huntersName
+    HuntersTurn1        -> huntersTurnMessages hunter
+    HuntersTurn2        -> huntersTurnMessages hunter
     Lynching            -> []
     OraclesTurn         -> oraclesTurnMessages oraclesName
     OrphansTurn         -> orphansTurnMessages orphansName
     ProtectorsTurn      -> protectorsTurnMessages protectorsName
-    ScapegoatsTurn      -> scapegoatsTurnMessages scapegoatsName
+    ScapegoatsTurn      -> [scapegoatsTurnMessage scapegoat]
     SeersTurn           -> seersTurnMessages seersName
     Sunrise             -> [sunriseMessage]
     Sunset              -> [nightFallsMessage]
     VillageDrunksTurn   -> [villageDrunksTurnMessage]
-    VillagesTurn        -> villagesTurnMessages
+    VillagesTurn        -> [villagesTurnMessage]
     WerewolvesTurn      -> if is firstRound game
         then firstWerewolvesTurnMessages aliveWerewolfNames
         else werewolvesTurnMessages aliveWerewolfNames
     WitchsTurn          -> witchsTurnMessages game
     where
         players'            = game ^. players
-        huntersName         = players' ^?! hunters . name
+        hunter              = players' ^?! hunters
         oraclesName         = players' ^?! oracles . name
         orphansName         = players' ^?! orphans . name
         protectorsName      = players' ^?! protectors . name
-        scapegoatsName      = humanise $ players' ^?! scapegoats
+        scapegoat           = players' ^?! scapegoats
         seersName           = players' ^?! seers . name
         aliveWerewolfNames  = players' ^.. werewolves . alive . name
 
-huntersTurnMessages :: Text -> [Message]
-huntersTurnMessages huntersName =
-    [ publicMessage $ T.unwords ["Just before", huntersName, "was murdered they let off a shot."]
-    , privateMessage huntersName "Whom do you `choose` to kill with your last shot?"
+huntersTurnMessages :: Player -> [Message]
+huntersTurnMessages hunter =
+    [ publicMessage [iFile|messages/engine/hunters-turn/start-public.text|]
+    , privateMessage (hunter ^. name) [iFile|messages/engine/hunters-turn/start-private.text|]
     ]
 
 oraclesTurnMessages :: Text -> [Message]
 oraclesTurnMessages to =
-    [ publicMessage "The Oracle wakes up."
-    , privateMessage to "Whose role would you like to `divine`?"
+    [ publicMessage [iFile|messages/engine/oracles-turn/start-public.text|]
+    , privateMessage to [iFile|messages/engine/oracles-turn/start-private.text|]
     ]
 
 orphansTurnMessages :: Text -> [Message]
 orphansTurnMessages to =
-    [ publicMessage "The Orphan wakes up."
-    , privateMessage to "Whom do you `choose` to be your role model?"
+    [ publicMessage [iFile|messages/engine/orphans-turn/start-public.text|]
+    , privateMessage to [iFile|messages/engine/orphans-turn/start-private.text|]
     ]
 
 protectorsTurnMessages :: Text -> [Message]
 protectorsTurnMessages to =
-    [ publicMessage "The Protector wakes up."
-    , privateMessage to "Whom would you like to `protect`?"
+    [ publicMessage [iFile|messages/engine/protectors-turn/start-public.text|]
+    , privateMessage to [iFile|messages/engine/protectors-turn/start-private.text|]
     ]
 
-scapegoatsTurnMessages :: Text -> [Message]
-scapegoatsTurnMessages scapegoatsName =
-    [ publicMessage "Just before the Scapegoat burns to a complete crisp, they cry out a dying wish."
-    , publicMessage $ T.concat [scapegoatsName, ", which players do you `choose` to vote on the next day?"]
-    ]
+scapegoatsTurnMessage :: Player -> Message
+scapegoatsTurnMessage scapegoat = publicMessage [iFile|messages/engine/scapegoats-turn/start.text|]
 
 seersTurnMessages :: Text -> [Message]
 seersTurnMessages to =
-    [ publicMessage "The Seer wakes up."
-    , privateMessage to "Whose allegiance would you like to `see`?"
+    [ publicMessage [iFile|messages/engine/seers-turn/start-public.text|]
+    , privateMessage to [iFile|messages/engine/seers-turn/start-private.text|]
     ]
 
 villageDrunksTurnMessage :: Message
-villageDrunksTurnMessage = publicMessage "The Village Drunk sobers up."
+villageDrunksTurnMessage = publicMessage [iFile|messages/engine/village-drunks-turn/start.text|]
 
 sunriseMessage :: Message
-sunriseMessage = publicMessage "The sun rises. Everybody wakes up and opens their eyes..."
+sunriseMessage = publicMessage [iFile|messages/engine/sunrise/start.text|]
 
 nightFallsMessage :: Message
-nightFallsMessage = publicMessage "Night falls, the village is asleep."
+nightFallsMessage = publicMessage [iFile|messages/engine/sunset/start.text|]
 
-villagesTurnMessages :: [Message]
-villagesTurnMessages =
-    [ publicMessage "As the village gathers in the square the Town Clerk calls for a vote."
-    , publicMessage "Whom would you like to `vote` to lynch?"
-    ]
+villagesTurnMessage :: Message
+villagesTurnMessage = publicMessage [iFile|messages/engine/villages-turn/start.text|]
 
 firstWerewolvesTurnMessages :: [Text] -> [Message]
 firstWerewolvesTurnMessages tos =
@@ -267,40 +254,34 @@ firstWerewolvesTurnMessages tos =
             [ "You feel restless, like an old curse is keeping you from sleep. It seems you're not"
             , "the only one...", packNames werewolfName
             , conjugateToBe (length tos - 1), "also emerging from their"
-            , tryPlural (length tos - 1) "home"
+            , pluralise (length tos - 1) "home"
             ]
-        packNames werewolfName      = concatList $ tos \\ [werewolfName]
+        packNames werewolfName      = humanise $ tos \\ [werewolfName]
 
 werewolvesTurnMessages :: [Text] -> [Message]
 werewolvesTurnMessages tos =
-    publicMessage "The Werewolves wake up, transform and choose a new victim."
-    : groupMessages tos "Whom would you like to `vote` to devour?"
+    publicMessage [iFile|messages/engine/werewolves-turn/start-public.text|]
+    : groupMessages tos [iFile|messages/engine/werewolves-turn/start-private.text|]
 
 witchsTurnMessages :: Game -> [Message]
 witchsTurnMessages game = concat
     [ [wakeUpMessage]
-    , devourMessages
     , healMessages
     , poisonMessages
     , [passMessage]
     ]
     where
-        witchsName      = game ^?! players . witches . name
-        wakeUpMessage   = publicMessage "The Witch wakes up."
-        passMessage     = privateMessage witchsName "Type `pass` to end your turn."
-        devourMessages  = case game ^? votee of
-            Just votee ->
-                [ privateMessage witchsName $
-                    T.unwords ["You see", humanise votee, "sprawled outside bleeding uncontrollably."]
-                ]
-            _               -> []
+        to              = game ^?! players . witches . name
+        victim          = game ^?! votee
+        wakeUpMessage   = publicMessage [iFile|messages/engine/witchs-turn/start-public.text|]
+        passMessage     = privateMessage to [iFile|messages/engine/witchs-turn/start-pass.text|]
         healMessages
             | game ^. healUsed  = []
             | hasn't votee game = []
-            | otherwise         = [privateMessage witchsName "Would you like to `heal` them?"]
+            | otherwise         = [privateMessage to [iFile|messages/engine/witchs-turn/start-heal.text|]]
         poisonMessages
             | game ^. poisonUsed    = []
-            | otherwise             = [privateMessage witchsName "Would you like to `poison` anyone?"]
+            | otherwise             = [privateMessage to [iFile|messages/engine/witchs-turn/start-poison.text|]]
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
@@ -329,7 +310,7 @@ gameOverMessages game
     where
         playerRolesMessage = publicMessage $ T.concat
             [ "As I know you're all wondering who lied to you, here's the role allocations: "
-            , concatList $ map
+            , humanise $ map
                 (\player -> T.concat [humanise player, " (", humanise $ player ^. role, ")"])
                 (game ^. players)
             , "."
@@ -350,55 +331,46 @@ gameOverMessages game
         fallenAngelsName = game ^?! players . fallenAngels . name
 
 playerWonMessage :: Text -> Message
-playerWonMessage to = privateMessage to "Victory! You won!"
+playerWonMessage to = privateMessage to [iFile|messages/engine/game-over/player-won.text|]
 
 playerContributedMessage :: Text -> Message
-playerContributedMessage to = privateMessage to "Your team won, but you died. Congratulations?"
+playerContributedMessage to = privateMessage to [iFile|messages/engine/game-over/player-contributed.text|]
 
 playerLostMessage :: Text -> Message
-playerLostMessage to = privateMessage to "Feck, you lost this time round."
+playerLostMessage to = privateMessage to [iFile|messages/engine/game-over/player-lost.text|]
 
 playerQuitMessage :: Player -> Message
-playerQuitMessage player = publicMessage $ T.unwords [playerName, "the", playerRole, "has quit!"]
-    where
-        playerName = humanise player
-        playerRole = humanise $ player ^. role
+playerQuitMessage caller = publicMessage [iFile|messages/command/quit/player-quit.text|]
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to "The game is over!"
 
 playerKilledMessage :: Text -> Message
-playerKilledMessage to = privateMessage to "Guh, you've been killed!"
+playerKilledMessage to = privateMessage to [iFile|messages/engine/general/player-killed.text|]
 
 playerDoesNotExistMessage :: Text -> Text -> Message
-playerDoesNotExistMessage to name = privateMessage to $ T.unwords ["Player", name, "does not exist."]
+playerDoesNotExistMessage to name = privateMessage to [iFile|messages/error/command/general/player-does-not-exist.text|]
 
 playerCannotDoThatMessage :: Text -> Message
-playerCannotDoThatMessage to = privateMessage to "You cannot do that!"
+playerCannotDoThatMessage to = privateMessage to [iFile|messages/error/command/general/player-cannot-do-that.text|]
 
 playerCannotDoThatRightNowMessage :: Text -> Message
-playerCannotDoThatRightNowMessage to = privateMessage to "You cannot do that right now!"
+playerCannotDoThatRightNowMessage to = privateMessage to [iFile|messages/error/command/general/player-cannot-do-that-right-now.text|]
 
 playerIsDeadMessage :: Text -> Message
-playerIsDeadMessage to = privateMessage to "Sshh, you're meant to be dead!"
+playerIsDeadMessage to = privateMessage to [iFile|messages/error/command/general/player-dead.text|]
 
-targetIsDeadMessage :: Text -> Text -> Message
-targetIsDeadMessage to targetName = privateMessage to $ T.unwords [targetName, "is already dead!"]
+targetIsDeadMessage :: Text -> Player -> Message
+targetIsDeadMessage to target = privateMessage to [iFile|messages/error/command/general/target-dead.text|]
 
-playerVotedToBootMessage :: Text -> Text -> Message
-playerVotedToBootMessage playerName targetName = publicMessage $ T.concat
-    [playerName, " voted to boot ", targetName, "!"]
+playerVotedToBootMessage :: Player -> Player -> Message
+playerVotedToBootMessage caller target = publicMessage [iFile|messages/command/boot/player-voted-boot.text|]
 
 playerBootedMessage :: Player -> Message
-playerBootedMessage player = publicMessage $ T.unwords
-    [playerName, "the", playerRole , "has been booted from the game!"]
-    where
-        playerName = humanise player
-        playerRole = humanise $ player ^. role
+playerBootedMessage player = publicMessage [iFile|messages/command/boot/player-booted.text|]
 
-playerHasAlreadyVotedToBootMessage :: Text -> Text -> Message
-playerHasAlreadyVotedToBootMessage to targetName = privateMessage to $ T.concat
-    ["You've already voted to boot ", targetName, "!"]
+playerHasAlreadyVotedToBootMessage :: Text -> Player -> Message
+playerHasAlreadyVotedToBootMessage to target = privateMessage to [iFile|messages/error/command/boot/player-already-voted-boot.text|]
 
 circleMessage :: Text -> [Player] -> Message
 circleMessage to players = privateMessage to $ T.intercalate "\n"
@@ -407,12 +379,6 @@ circleMessage to players = privateMessage to $ T.intercalate "\n"
     ]
     where
         playerName player = T.concat [humanise player, if is dead player then " (dead)" else ""]
-
-pingPlayerMessage :: Text -> Message
-pingPlayerMessage to = privateMessage to "Waiting on you..."
-
-pingRoleMessage :: Text -> Message
-pingRoleMessage roleName = publicMessage $ T.concat ["Waiting on the ", roleName, "..."]
 
 currentStageMessages :: Text -> Stage -> [Message]
 currentStageMessages _ FerinasGrunt = []
@@ -427,7 +393,7 @@ currentStageMessages to turn        = [privateMessage to $ T.concat
 rolesInGameMessage :: Maybe Text -> [Role] -> Message
 rolesInGameMessage mTo roles = Message mTo $ T.concat
     [ "The roles in play are "
-    , concatList $ map (\(role, count) ->
+    , humanise $ map (\(role, count) ->
         T.concat [humanise role, " (", T.pack $ show count, ")"])
         roleCounts
     , " for a total balance of ", T.pack $ show totalBalance, "."
@@ -445,214 +411,156 @@ playersInGameMessage to players = privateMessage to . T.intercalate "\n" $
 
         alivePlayersText            = T.concat
             [ "The following players are still alive: "
-            , concatList $ map (\player -> if is trueVillager player then playerNameWithRole player else humanise player) alivePlayers, "."
+            , humanise $ map (\player -> if is trueVillager player then humanisePlayerWithRole player else humanise player) alivePlayers, "."
             ]
         deadPlayersText             = T.concat
             [ "The following players are dead: "
-            , concatList $ map playerNameWithRole deadPlayers, "."
+            , humanisePlayersWithRoles deadPlayers, "."
             ]
-        playerNameWithRole player   = T.concat [humanise player, " (", humanise $ player ^. role, ")"]
 
-ferinaGruntsMessage :: Message
-ferinaGruntsMessage = publicMessage
-    "Ferina wakes from her slumber, disturbed and on edge. She loudly grunts as she smells danger."
+orphanJoinedPackMessages :: Text -> Game -> [Message]
+orphanJoinedPackMessages to game =
+    privateMessage to [iFile|messages/engine/orphans-turn/player-joined-werewolves-private.text|]
+    : groupMessages (map (view name) werewolves) [iFile|messages/engine/orphans-turn/player-joined-werewolves-group.text|]
+    where
+        orphan      = game ^?! players . villageDrunks
+        werewolves  = game ^.. players . traverse . alive . filtered (is werewolf) \\ [orphan]
+
+-- TODO (hjw): ordered from here
 
 playerShotMessage :: Player -> Message
-playerShotMessage target = publicMessage $ T.unwords
-    [ targetName, "the", targetRole, "slumps down to the ground, hands clutching at their chest"
-    , "while blood slips between their fingers and pools around them."
-    ]
-    where
-        targetName = humanise target
-        targetRole = humanise $ target ^. role
+playerShotMessage player = publicMessage [iFile|messages/command/choose/player-shot.text|]
 
-playerDivinedMessage :: Text -> Player -> Message
-playerDivinedMessage to player = privateMessage to $ T.concat
-    [playerName, " is ", article playerRole, " ", humanise playerRole, "."]
-    where
-        playerName = humanise player
-        playerRole = player ^. role
+pingPlayerMessage :: Text -> Message
+pingPlayerMessage to = privateMessage to [iFile|messages/command/ping/player-pinged.text|]
 
-orphanJoinedPackMessages :: Text -> [Text] -> [Message]
-orphanJoinedPackMessages orphansName werewolfNames =
-    privateMessage orphansName (T.unwords
-        [ "The death of your role model is distressing. Without second thought you abandon the"
-        , "Villagers and run off into the woods, towards a new home. As you arrive you see the"
-        , tryPlural (length werewolfNames) "face", "of"
-        , concatList werewolfNames, "waiting for you."
-        ])
-    : groupMessages werewolfNames (T.unwords
-        [ orphansName, "the Orphan scampers off into the woods. Without their role model they have"
-        , "abandoned the village and are in search of a new home. You welcome them into your pack."
-        ])
+pingRoleMessage :: Role -> Message
+pingRoleMessage role = publicMessage [iFile|messages/command/ping/role-pinged.text|]
 
-playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
-playerCannotProtectSamePlayerTwiceInARowMessage to =
-    privateMessage to "You cannot protect the same player twice in a row!"
+pingVillageMessage :: Message
+pingVillageMessage = publicMessage [iFile|messages/command/ping/village-pinged.text|]
 
-scapegoatChoseAllowedVotersMessage :: [Text] -> Message
-scapegoatChoseAllowedVotersMessage allowedVoters = publicMessage $ T.unwords
-    [ "On the next day only", concatList allowedVoters, "shall be allowed to vote. The Town Crier,"
-    , "realising how foolish it was to kill the Scapegoat, grants them this wish."
-    ]
-
-playerMustChooseAtLeastOneTargetMessage :: Text -> Message
-playerMustChooseAtLeastOneTargetMessage to =
-    privateMessage to "You must choose at least 1 target!"
-
-playerCannotChooseJesterMessage :: Text -> Message
-playerCannotChooseJesterMessage to =
-    privateMessage to "You cannot choose the Jester!"
-
-playerSeenMessage :: Text -> Player -> Message
-playerSeenMessage to player = privateMessage to $ T.concat
-    [playerName, " is aligned with ", article, humanise allegiance', "."]
-    where
-        playerName  = humanise player
-        allegiance'
-            | is alphaWolf player   = Villagers
-            | is lycan player       = Werewolves
-            | otherwise             = player ^. role . allegiance
-        article     = if allegiance' == NoOne then "" else "the "
-
-villageDrunkJoinedVillageMessage :: Text -> Message
-villageDrunkJoinedVillageMessage to = privateMessage to $ T.unwords
-    [ "Somehow you managed to avoid getting killed while in your drunken stupor. Thank God for"
-    , "that, maybe now you can actually help the village."
-    ]
-
-villageDrunkJoinedPackMessages :: Text -> [Text] -> [Message]
-villageDrunkJoinedPackMessages villageDrunksName werewolfNames =
-    privateMessage villageDrunksName (T.concat
-        [ "As you start to feel sober for the first time in days a new thirst begins to take hold."
-        , " The bloodthirst starts to bring back memories, memories of your true home with "
-        , concatList werewolfNames, "."
-        ])
-    : groupMessages werewolfNames (T.unwords
-        [ villageDrunksName
-        , "the Village Drunk has finally sobered up and remembered their true home."
-        ])
-
-playerMadeLynchVoteMessage :: Maybe Text -> Text -> Text -> Message
-playerMadeLynchVoteMessage mTo voterName targetName = Message mTo $ T.concat
-    [ voterName, " voted to lynch ", targetName, "."
-    ]
+pingWerewolvesMessage :: Message
+pingWerewolvesMessage = publicMessage [iFile|messages/command/ping/werewolves-pinged.text|]
 
 playerRescindedVoteMessage :: Text -> Text -> Message
-playerRescindedVoteMessage to voterName = privateMessage to $ T.unwords
-    [ voterName, "rescinded their vote."
-    ]
+playerRescindedVoteMessage to caller = privateMessage to [iFile|messages/command/unvote/player-rescinded-vote.text|]
+
+engineVersionMessage :: Text -> Message
+engineVersionMessage to = privateMessage to [iFile|messages/command/version/engine-version.text|]
+
+playerMadeDevourVoteMessage :: Text -> Player -> Player -> Message
+playerMadeDevourVoteMessage to caller target = privateMessage to [iFile|messages/command/vote/player-made-devour-vote.text|]
+
+playerMadeLynchVoteMessage :: Maybe Text -> Text -> Text -> Message
+playerMadeLynchVoteMessage mTo caller target = Message mTo [iFile|messages/command/vote/player-made-lynch-vote.text|]
+
+ferinaGruntsMessage :: Message
+ferinaGruntsMessage = publicMessage [iFile|messages/engine/ferina-grunts/start.text|]
+
+jesterLynchedMessage :: Player -> Message
+jesterLynchedMessage jester = publicMessage [iFile|messages/engine/lynching/jester-lynched.text|]
+
+noPlayerLynchedMessage :: Message
+noPlayerLynchedMessage = publicMessage [iFile|messages/engine/lynching/no-player-lynched.text|]
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
     | is simpleWerewolf player
-        || is alphaWolf player  = publicMessage $ T.concat
-        [ playerName, " is tied up to a pyre and set alight. As they scream their body starts to "
-        , "contort and writhe, transforming into ", article playerRole, " "
-        , humanise playerRole, ".", " Thankfully they go limp before breaking free of their "
-        , "restraints."
-        ]
-    | otherwise                 = publicMessage $ T.concat
-        [ playerName, " is tied up to a pyre and set alight. Eventually the screams start to die "
-        , "and with their last breath, they reveal themselves as ", article playerRole, " "
-        , humanise playerRole, "."
-        ]
-    where
-        playerName = humanise player
-        playerRole = player ^. role
+        || is alphaWolf player  = publicMessage [iFile|messages/engine/lynching/werewolf-lynched.text|]
+    | otherwise                 = publicMessage [iFile|messages/engine/lynching/player-lynched.text|]
 
-noPlayerLynchedMessage :: Message
-noPlayerLynchedMessage = publicMessage $ T.unwords
-    [ "Daylight is wasted as the townsfolk squabble over whom to tie up. Looks like no-one is being"
-    , "burned this day."
-    ]
+scapegoatLynchedMessage :: Player -> Message
+scapegoatLynchedMessage scapegoat = publicMessage [iFile|messages/engine/lynching/scapegoat-lynched.text|]
 
-jesterLynchedMessage :: Text -> Message
-jesterLynchedMessage name = publicMessage $ T.concat
-    [ "Just as the townsfolk tie ", name, " up to the pyre, a voice in the crowd yells out."
-    , " \"We can't burn ", name, "! He's the joke of the town!\" "
-    , name, " the Jester is quickly untied and apologised to."
-    ]
-
-scapegoatLynchedMessage :: Text -> Message
-scapegoatLynchedMessage name = publicMessage $ T.unwords
-    [ "The townsfolk squabble over whom to tie up. Just as they are about to call it a day"
-    , "they notice that", name, "has been acting awfully suspicious."
-    , "Not wanting to take any chances,", name, "is promptly tied to a pyre and burned alive."
-    ]
-
-playerHasAlreadyVotedMessage :: Text -> Message
-playerHasAlreadyVotedMessage to = privateMessage to "You've already voted!"
-
-playerHasNotVotedMessage :: Text -> Message
-playerHasNotVotedMessage to = privateMessage to "You haven't voted yet!"
-
-playerMadeDevourVoteMessage :: Text -> Text -> Text -> Message
-playerMadeDevourVoteMessage to voterName targetName = privateMessage to $ T.concat
-    [ voterName, " voted to devour ", targetName, "."
-    ]
-
-playerDevouredMessage :: Player -> Message
-playerDevouredMessage player = publicMessage $ T.concat
-    [ "As you open them you notice a door broken down and "
-    , playerName, "'s guts half devoured and spilling out over the cobblestones."
-    , " From the look of their personal effects, you deduce they were "
-    , article playerRole, " ", humanise playerRole, "."
-    ]
-    where
-        playerName = humanise player
-        playerRole = player ^. role
-
-playerTurnedToStoneMessage :: Player -> Message
-playerTurnedToStoneMessage player = publicMessage $ T.unwords
-    [ "Next to them you see a stone", playerRole, "statue, cold to the touch.", playerName
-    , "must have looked into the eyes of the Medusa at the very end."
-    ]
-    where
-        playerName = humanise player
-        playerRole = humanise $ player ^. role
+scapegoatChoseAllowedVotersMessage :: Game -> Message
+scapegoatChoseAllowedVotersMessage game = publicMessage [iFile|messages/engine/scapegoats-turn/end.text|]
 
 noPlayerDevouredMessage :: Message
-noPlayerDevouredMessage = publicMessage $ T.unwords
-    [ "Surprisingly you see everyone present at the town square."
-    , "Perhaps the Werewolves have left Fougères?"
-    ]
+noPlayerDevouredMessage = publicMessage [iFile|messages/engine/sunrise/no-player-devoured.text|]
 
-playerCannotDevourAnotherWerewolfMessage :: Text -> Message
-playerCannotDevourAnotherWerewolfMessage to = privateMessage to "You cannot devour another Werewolf!"
+playerDevouredMessage :: Player -> Message
+playerDevouredMessage player = publicMessage [iFile|messages/engine/sunrise/player-devoured.text|]
 
-playerCannotChooseSelfMessage :: Text -> Message
-playerCannotChooseSelfMessage to = privateMessage to "You cannot choose yourself!"
+playerDivinedMessage :: Text -> Player -> Message
+playerDivinedMessage to player = privateMessage to [iFile|messages/engine/sunrise/player-divined.text|]
 
 playerPoisonedMessage :: Player -> Message
-playerPoisonedMessage player = publicMessage $ T.unwords
-    [ "Upon further discovery, it looks like the Witch struck in the night."
-    , playerName, "the", playerRole, "is hanging over the side of their bed, poisoned."
-    ]
+playerPoisonedMessage player = publicMessage [iFile|messages/engine/sunrise/player-poisoned.text|]
+
+playerSeenMessage :: Text -> Player -> Message
+playerSeenMessage to player
+    | is alphaWolf player   = privateMessage to [iFile|messages/engine/sunrise/alpha-wolf-seen.text|]
+    | is lycan player       = privateMessage to [iFile|messages/engine/sunrise/lycan-seen.text|]
+    | otherwise             = privateMessage to [iFile|messages/engine/sunrise/player-seen.text|]
     where
-        playerName = humanise player
-        playerRole = humanise $ player ^. role
+        article = if is loner player then "" else "the " :: Text
+
+playerTurnedToStoneMessage :: Player -> Message
+playerTurnedToStoneMessage player = publicMessage [iFile|messages/engine/sunrise/player-turned-to-stone.text|]
+
+villageDrunkJoinedVillageMessage :: Text -> Message
+villageDrunkJoinedVillageMessage to = privateMessage to [iFile|messages/engine/village-drunks-turn/player-joined-village.text|]
+
+villageDrunkJoinedPackMessages :: Text -> Game -> [Message]
+villageDrunkJoinedPackMessages to game =
+    privateMessage to [iFile|messages/engine/village-drunks-turn/player-joined-werewolves-private.text|]
+    : groupMessages (map (view name) werewolves) [iFile|messages/engine/village-drunks-turn/player-joined-werewolves-group.text|]
+    where
+        villageDrunk    = game ^?! players . villageDrunks
+        werewolves      = game ^.. players . traverse . alive . filtered (is werewolf) \\ [villageDrunk]
+
+playerCannotChooseSelfMessage :: Text -> Message
+playerCannotChooseSelfMessage to = privateMessage to [iFile|messages/error/command/choose/player-cannot-choose-self.text|]
+
+playerCannotChooseJesterMessage :: Text -> Message
+playerCannotChooseJesterMessage to = privateMessage to [iFile|messages/error/command/choose/player-cannot-choose-jester.text|]
+
+playerMustChooseAtLeastOneTargetMessage :: Text -> Message
+playerMustChooseAtLeastOneTargetMessage to = privateMessage to [iFile|messages/error/command/choose/player-must-choose-at-least-one-target.text|]
+
+noGameRunningMessage :: Text -> Message
+noGameRunningMessage to = privateMessage to [iFile|messages/error/command/general/no-game-running.text|]
 
 playerHasAlreadyHealedMessage :: Text -> Message
-playerHasAlreadyHealedMessage to = privateMessage to "You've already healed someone!"
+playerHasAlreadyHealedMessage to = privateMessage to [iFile|messages/error/command/heal/player-already-healed.text|]
 
 playerHasAlreadyPoisonedMessage :: Text -> Message
-playerHasAlreadyPoisonedMessage to = privateMessage to "You've already poisoned someone!"
+playerHasAlreadyPoisonedMessage to = privateMessage to [iFile|messages/error/command/poison/player-already-poisoned.text|]
+
+playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
+playerCannotProtectSamePlayerTwiceInARowMessage to = privateMessage to [iFile|messages/error/command/protect/player-cannot-protect-same-player-twice-in-a-row.text|]
+
+gameAlreadyRunningMessage :: Text -> Message
+gameAlreadyRunningMessage to = privateMessage to [iFile|messages/error/command/start/game-already-running.text|]
+
+roleDoesNotExistMessage :: Text -> Text -> Message
+roleDoesNotExistMessage to role = privateMessage to [iFile|messages/error/command/start/role-does-not-exist.text|]
+
+playerHasNotVotedMessage :: Text -> Message
+playerHasNotVotedMessage to = privateMessage to [iFile|messages/error/command/unvote/player-not-voted.text|]
+
+playerHasAlreadyVotedMessage :: Text -> Message
+playerHasAlreadyVotedMessage to = privateMessage to [iFile|messages/error/command/vote/player-already-voted.text|]
+
+playerCannotDevourAnotherWerewolfMessage :: Text -> Message
+playerCannotDevourAnotherWerewolfMessage to = privateMessage to [iFile|messages/error/command/vote/player-cannot-devour-werewolf.text|]
+
+humanisePlayerWithRole :: Player -> Text
+humanisePlayerWithRole player = T.concat [humanise player, " (", humanise $ player ^. role, ")"]
+
+humanisePlayersWithRoles :: [Player] -> Text
+humanisePlayersWithRoles = humanise . map humanisePlayerWithRole
 
 article :: Role -> Text
 article role
     | role `elem` restrictedRoles   = "the"
     | otherwise                     = "a"
 
-concatList :: [Text] -> Text
-concatList []       = ""
-concatList [word]   = word
-concatList words    = T.unwords [T.intercalate ", " (init words), "and", last words]
-
 conjugateToBe :: Int -> Text
 conjugateToBe 1 = "is"
 conjugateToBe _ = "are"
 
-tryPlural :: Int -> Text -> Text
-tryPlural 1 word = word
-tryPlural _ word = T.snoc word 's'
+pluralise :: Int -> Text -> Text
+pluralise 1 word = word
+pluralise _ word = T.snoc word 's'

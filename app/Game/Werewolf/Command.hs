@@ -24,6 +24,7 @@ module Game.Werewolf.Command (
     validatePlayer,
 ) where
 
+import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -31,9 +32,8 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf.Game
+import Game.Werewolf
 import Game.Werewolf.Messages
-import Game.Werewolf.Response
 import Game.Werewolf.Util
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }
@@ -42,7 +42,10 @@ noopCommand :: Command
 noopCommand = Command $ return ()
 
 validatePlayer :: (MonadError [Message] m, MonadState Game m) => Text -> Text -> m ()
-validatePlayer callerName name = do
+validatePlayer callerName name' = do
     whenM isGameOver                $ throwError [gameIsOverMessage callerName]
-    unlessM (doesPlayerExist name)  $ throwError [playerDoesNotExistMessage callerName name]
-    whenM (isPlayerDead name)       $ throwError [if callerName == name then playerIsDeadMessage callerName else targetIsDeadMessage callerName name]
+    unlessM (doesPlayerExist name') $ throwError [playerDoesNotExistMessage callerName name']
+
+    player <- findPlayerBy_ name name'
+
+    when (is dead player) $ throwError [if callerName == name' then playerIsDeadMessage callerName else targetIsDeadMessage callerName player]

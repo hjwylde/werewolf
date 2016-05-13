@@ -32,12 +32,16 @@ bootCommand :: Text -> Text -> Command
 bootCommand callerName targetName = Command $ do
     validatePlayer callerName callerName
     validatePlayer callerName targetName
+
+    caller <- findPlayerBy_ name callerName
+    target <- findPlayerBy_ name targetName
+
     whenM (uses (boots . at targetName) $ elem callerName . fromMaybe []) $
-        throwError [playerHasAlreadyVotedToBootMessage callerName targetName]
+        throwError [playerHasAlreadyVotedToBootMessage callerName target]
 
     boots %= Map.insertWith (++) targetName [callerName]
 
-    tell [playerVotedToBootMessage callerName targetName]
+    tell [playerVotedToBootMessage caller target]
 
 quitCommand :: Text -> Command
 quitCommand callerName = Command $ do
