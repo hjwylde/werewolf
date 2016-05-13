@@ -21,7 +21,7 @@ module Game.Werewolf.Game (
     scapegoatBlamed, see, votes,
 
     Stage(..),
-    _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
+    _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
     _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillageDrunksTurn,
     _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
 
@@ -95,13 +95,13 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a /command/ to help push it past. Often only
 --   certain roles and commands may be performed at any given stage.
-data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OraclesTurn
+data Stage  = DruidsTurn | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OraclesTurn
             | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
             | VillageDrunksTurn | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
 instance Humanise Stage where
-    humanise FerinasGrunt       = fromString "Ferina's Grunt"
+    humanise DruidsTurn         = fromString "Druid's turn"
     humanise GameOver           = fromString "Game over"
     humanise HuntersTurn1       = fromString "Hunter's turn"
     humanise HuntersTurn2       = fromString "Hunter's turn"
@@ -135,7 +135,7 @@ allStages =
     , WitchsTurn
     , Sunrise
     , HuntersTurn2
-    , FerinasGrunt
+    , DruidsTurn
     , VillagesTurn
     , Lynching
     , HuntersTurn1
@@ -153,7 +153,7 @@ stageCycle = cycle allStages
 --   One of the more complex checks here is for the 'VillagesTurn'. If the Fallen Angel is in play,
 --   then the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
-stageAvailable game FerinasGrunt        = has (players . druids . alive) game
+stageAvailable game DruidsTurn          = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
 stageAvailable game HuntersTurn1        =
     has (players . hunters . dead) game

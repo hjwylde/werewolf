@@ -129,7 +129,7 @@ fallenAngelMessage = publicMessage [iFile|messages/engine/new-game/fallen-angel.
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
-    FerinasGrunt        -> []
+    DruidsTurn          -> []
     GameOver            -> []
     HuntersTurn1        -> huntersTurnMessages hunter
     HuntersTurn2        -> huntersTurnMessages hunter
@@ -256,7 +256,7 @@ orphanJoinedPackMessages to game =
         werewolves  = game ^.. players . traverse . alive . filtered (is werewolf) \\ [orphan]
 
 ferinaGruntsMessage :: Message
-ferinaGruntsMessage = publicMessage [iFile|messages/engine/ferina-grunts/start.text|]
+ferinaGruntsMessage = publicMessage [iFile|messages/engine/druids-turn/start.text|]
 
 jesterLynchedMessage :: Player -> Message
 jesterLynchedMessage jester = publicMessage [iFile|messages/engine/lynching/jester-lynched.text|]

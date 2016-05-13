@@ -40,7 +40,7 @@ circleCommand callerName includeDead = Command $ do
 
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    FerinasGrunt        -> return ()
+    DruidsTurn          -> return ()
     GameOver            -> tell [gameIsOverMessage callerName]
     HuntersTurn1        -> pingRole hunterRole
     HuntersTurn2        -> pingRole hunterRole

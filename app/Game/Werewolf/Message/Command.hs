@@ -87,7 +87,7 @@ currentStageMessages :: Text -> Game -> [Message]
 currentStageMessages to game
     | has (stage . _GameOver) game  = [gameIsOverMessage to]
     | any (`is` (game ^. stage))
-        [ _FerinasGrunt
+        [ _DruidsTurn
         , _Lynching
         , _Sunrise
         , _Sunset

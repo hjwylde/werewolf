@@ -63,7 +63,7 @@ checkBoots = do
 
 checkStage' :: (MonadRandom m, MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
-    FerinasGrunt -> do
+    DruidsTurn -> do
         druid       <- findPlayerBy_ role druidRole
         players'    <- filter (isn't alphaWolf) <$> getAdjacentAlivePlayers (druid ^. name)
 
