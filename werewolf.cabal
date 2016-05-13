@@ -43,7 +43,10 @@ executable werewolf
         Game.Werewolf.Command.Werewolf
         Game.Werewolf.Command.Witch
         Game.Werewolf.Engine
-        Game.Werewolf.Messages
+        Game.Werewolf.Message
+        Game.Werewolf.Message.Command
+        Game.Werewolf.Message.Engine
+        Game.Werewolf.Message.Error
         Game.Werewolf.Util
         Paths_werewolf
         Werewolf.Command.Boot

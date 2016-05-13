@@ -33,7 +33,8 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
-import Game.Werewolf.Messages
+import Game.Werewolf.Message.Command
+import Game.Werewolf.Message.Error
 import Game.Werewolf.Util
 
 data Command = Command { apply :: forall m . (MonadError [Message] m, MonadState Game m, MonadWriter [Message] m) => m () }

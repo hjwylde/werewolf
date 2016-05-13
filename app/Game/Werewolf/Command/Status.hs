@@ -25,9 +25,11 @@ import Control.Monad.Writer
 import Data.List
 import Data.Text (Text)
 
-import Game.Werewolf          hiding (getPendingVoters)
+-- TODO (hjw): remove Message.Engine
+import Game.Werewolf                 hiding (getPendingVoters)
 import Game.Werewolf.Command
-import Game.Werewolf.Messages
+import Game.Werewolf.Message.Command
+import Game.Werewolf.Message.Engine
 import Game.Werewolf.Util
 
 circleCommand :: Text -> Bool -> Command
@@ -78,12 +80,9 @@ pingWerewolves = do
     tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
 
 statusCommand :: Text -> Command
-statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    GameOver    -> tell [gameIsOverMessage callerName]
-    _           -> tell . statusMessages stage' =<< use players
-    where
-        statusMessages stage players =
-            currentStageMessages callerName stage ++
-            [ rolesInGameMessage (Just callerName) (players ^.. roles)
-            , playersInGameMessage callerName players
-            ]
+statusCommand callerName = Command $ do
+    game <- get
+
+    tell $ currentStageMessages callerName game
+    tell $ [rolesInGameMessage (Just callerName) game]
+    tell $ [playersInGameMessage callerName game]

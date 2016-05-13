@@ -34,8 +34,8 @@ import qualified Data.Text as T
 
 import Game.Werewolf
 import Game.Werewolf.Engine
-import Game.Werewolf.Messages
-import Game.Werewolf.Role     as Role
+import Game.Werewolf.Message.Error
+import Game.Werewolf.Role          as Role
 
 import System.Random.Shuffle
 

@@ -29,12 +29,14 @@ import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Maybe
 
-import Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
-                               hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
-import Game.Werewolf.Messages
+-- TODO (hjw): remove Message.Command
+import Game.Werewolf.Game            hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
+                                      hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
+import Game.Werewolf.Message.Command
+import Game.Werewolf.Message.Engine
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (name)
+import Game.Werewolf.Role            hiding (name)
 import Game.Werewolf.Util
 
 import Prelude hiding (round)

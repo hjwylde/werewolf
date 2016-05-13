@@ -33,8 +33,8 @@ import           Data.Text (Text)
 import qualified Data.Text as T
 
 import Game.Werewolf
-import Game.Werewolf.Messages
-import Game.Werewolf.Role     as Role
+import Game.Werewolf.Message.Engine
+import Game.Werewolf.Role           as Role
 
 import Prelude hiding (round)
 

@@ -27,7 +27,7 @@ import           Data.Text (Text)
 import qualified Data.Text as T
 
 import Game.Werewolf
-import Game.Werewolf.Messages
+import Game.Werewolf.Message.Error
 
 import Werewolf.System
 
