@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Options and handler for the end subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Command.End (
     -- * Options
     Options(..),
@@ -23,10 +21,10 @@ import Control.Lens
 import Control.Monad.Extra
 import Control.Monad.IO.Class
 
-import           Data.Text (Text)
-import qualified Data.Text as T
+import Data.Text (Text)
 
 import Game.Werewolf
+import Game.Werewolf.Message.Command
 import Game.Werewolf.Message.Error
 
 import Werewolf.System
@@ -47,7 +45,4 @@ handle callerName tag (Options force) = do
 
     deleteGame tag
 
-    exitWith success { messages = [gameEndedMessage] }
-    where
-        -- TODO (hjw): move this to Messages
-        gameEndedMessage = publicMessage $ T.concat ["Game ended by ", callerName, "."]
+    exitWith success { messages = [gameEndedMessage callerName] }

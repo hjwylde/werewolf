@@ -18,6 +18,7 @@ Roles are split into four categories:
 {-# LANGUAGE Rank2Types        #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
+-- TODO (hjw): move name, description and rules to external files
 module Game.Werewolf.Role (
     -- * Role
     Role,

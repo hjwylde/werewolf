@@ -11,7 +11,6 @@ Status commands.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings     #-}
 
 module Game.Werewolf.Command.Status (
     -- * Commands

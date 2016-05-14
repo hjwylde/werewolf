@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Handler for the heal subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Command.Heal (
     -- * Handle
     handle,

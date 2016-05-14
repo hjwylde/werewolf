@@ -10,8 +10,7 @@ A 'Message' is used to relay information back to either all players or a single 
 defines suite of error messages used throughout the werewolf game.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Game.Werewolf.Message.Error (
     -- * Command
@@ -37,7 +36,8 @@ module Game.Werewolf.Message.Error (
     playerCannotProtectSamePlayerTwiceInARowMessage,
 
     -- ** Start
-    gameAlreadyRunningMessage, roleDoesNotExistMessage,
+    gameAlreadyRunningMessage, mustHaveAtLeast7PlayersMessage, playerNamesMustBeUniqueMessage,
+    roleCountRestrictedMessage, roleDoesNotExistMessage,
 
     -- ** Unvote
     playerHasNotVotedMessage,
@@ -96,8 +96,17 @@ playerCannotProtectSamePlayerTwiceInARowMessage to = privateMessage to [iFile|me
 gameAlreadyRunningMessage :: Text -> Message
 gameAlreadyRunningMessage to = privateMessage to [iFile|messages/error/command/start/game-already-running.text|]
 
+mustHaveAtLeast7PlayersMessage :: Text -> Message
+mustHaveAtLeast7PlayersMessage to = privateMessage to [iFile|messages/error/command/start/must-have-at-least-7-players.text|]
+
+playerNamesMustBeUniqueMessage :: Text -> Message
+playerNamesMustBeUniqueMessage to = privateMessage to [iFile|messages/error/command/start/player-names-must-be-unique.text|]
+
+roleCountRestrictedMessage :: Text -> Role -> Message
+roleCountRestrictedMessage to role = privateMessage to [iFile|messages/error/command/start/role-count-restricted.text|]
+
 roleDoesNotExistMessage :: Text -> Text -> Message
-roleDoesNotExistMessage to role = privateMessage to [iFile|messages/error/command/start/role-does-not-exist.text|]
+roleDoesNotExistMessage to roleName = privateMessage to [iFile|messages/error/command/start/role-does-not-exist.text|]
 
 playerHasNotVotedMessage :: Text -> Message
 playerHasNotVotedMessage to = privateMessage to [iFile|messages/error/command/unvote/player-not-voted.text|]

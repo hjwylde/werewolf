@@ -77,6 +77,7 @@ executable werewolf
         FlexibleContexts,
         MultiParamTypeClasses,
         OverloadedStrings,
+        QuasiQuotes
         Rank2Types
     build-depends:
         aeson >= 0.8 && < 0.12,

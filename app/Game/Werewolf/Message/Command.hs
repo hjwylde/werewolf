@@ -26,6 +26,9 @@ module Game.Werewolf.Message.Command (
     -- * Choose
     playerShotMessage,
 
+    -- * End
+    gameEndedMessage,
+
     -- * Ping
     pingPlayerMessage, pingRoleMessage, pingVillageMessage, pingWerewolvesMessage,
 
@@ -70,6 +73,9 @@ circleMessage to players = privateMessage to [iFile|messages/command/circle/circ
 
 playerShotMessage :: Player -> Message
 playerShotMessage player = publicMessage [iFile|messages/command/choose/player-shot.text|]
+
+gameEndedMessage :: Text -> Message
+gameEndedMessage callerName = publicMessage [iFile|messages/command/end/game-ended.text|]
 
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to [iFile|messages/command/ping/player-pinged.text|]

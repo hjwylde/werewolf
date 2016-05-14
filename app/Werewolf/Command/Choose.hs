@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Options and handler for the choose subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Command.Choose (
     -- * Options
     Options(..),

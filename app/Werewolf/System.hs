@@ -11,7 +11,6 @@ This module defines a few system functions for working with a game state file.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings     #-}
 
 module Werewolf.System (
     -- * Game
@@ -34,7 +33,7 @@ import qualified Data.Text as T
 
 import Game.Werewolf
 import Game.Werewolf.Message.Engine
-import Game.Werewolf.Role           as Role
+import Game.Werewolf.Message.Error
 
 import Prelude hiding (round)
 
@@ -43,12 +42,11 @@ import System.FilePath
 
 startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
 startGame callerName players = do
-    -- TODO (hjw): move the messages to Messages
-    when (playerNames /= nub playerNames)   $ throwError [privateMessage callerName "Player names must be unique."]
-    when (length players < 7)               $ throwError [privateMessage callerName "Must have at least 7 players."]
+    when (playerNames /= nub playerNames)   $ throwError [playerNamesMustBeUniqueMessage callerName]
+    when (length players < 7)               $ throwError [mustHaveAtLeast7PlayersMessage callerName]
     forM_ restrictedRoles $ \role' ->
         when (length (players ^.. traverse . filteredBy role role') > 1) $
-            throwError [privateMessage callerName $ T.concat ["Cannot have more than 1 ", role' ^. Role.name, "."]]
+            throwError [roleCountRestrictedMessage callerName role']
 
     let game = newGame players
 

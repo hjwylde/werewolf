@@ -11,6 +11,7 @@ Options and handler for the help subcommand.
 
 {-# LANGUAGE OverloadedStrings #-}
 
+-- TODO (hjw): remove calls to privateMessage
 module Werewolf.Command.Help (
     -- * Options
     Options(..), Command(..),
