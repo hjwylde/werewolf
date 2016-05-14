@@ -46,7 +46,6 @@ import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import Data.Function
-import Data.String
 import Data.String.Humanise
 import Data.Text            as T
 
@@ -72,7 +71,7 @@ instance Eq Player where
     (==) = (==) `on` view name
 
 instance Humanise Player where
-    humanise player = fromString . T.unpack $ player ^. name
+    humanise = view name
 
 makePrisms ''State
 

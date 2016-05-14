@@ -10,8 +10,9 @@ game state only changes when a /command/ is issued. Thus, this module defines th
 structure and any fields required to keep track of the current state.
 -}
 
-{-# LANGUAGE Rank2Types      #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE Rank2Types        #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module Game.Werewolf.Game (
     -- * Game
@@ -50,7 +51,6 @@ import           Data.List.Extra
 import           Data.Map             (Map)
 import qualified Data.Map             as Map
 import           Data.Maybe
-import           Data.String
 import           Data.String.Humanise
 import           Data.Text            (Text)
 
@@ -101,22 +101,22 @@ data Stage  = DruidsTurn | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | O
     deriving (Eq, Read, Show)
 
 instance Humanise Stage where
-    humanise DruidsTurn         = fromString "Druid's turn"
-    humanise GameOver           = fromString "Game over"
-    humanise HuntersTurn1       = fromString "Hunter's turn"
-    humanise HuntersTurn2       = fromString "Hunter's turn"
-    humanise Lynching           = fromString "Lynching"
-    humanise OraclesTurn        = fromString "Oracle's turn"
-    humanise OrphansTurn        = fromString "Orphan's turn"
-    humanise ProtectorsTurn     = fromString "Protector's turn"
-    humanise ScapegoatsTurn     = fromString "Scapegoat's turn"
-    humanise SeersTurn          = fromString "Seer's turn"
-    humanise Sunrise            = fromString "Sunrise"
-    humanise Sunset             = fromString "Sunset"
-    humanise VillageDrunksTurn  = fromString "Village Drunk's turn"
-    humanise VillagesTurn       = fromString "village's turn"
-    humanise WerewolvesTurn     = fromString "Werewolves' turn"
-    humanise WitchsTurn         = fromString "Witch's turn"
+    humanise DruidsTurn         = "Druid's turn"
+    humanise GameOver           = "Game over"
+    humanise HuntersTurn1       = "Hunter's turn"
+    humanise HuntersTurn2       = "Hunter's turn"
+    humanise Lynching           = "Lynching"
+    humanise OraclesTurn        = "Oracle's turn"
+    humanise OrphansTurn        = "Orphan's turn"
+    humanise ProtectorsTurn     = "Protector's turn"
+    humanise ScapegoatsTurn     = "Scapegoat's turn"
+    humanise SeersTurn          = "Seer's turn"
+    humanise Sunrise            = "Sunrise"
+    humanise Sunset             = "Sunset"
+    humanise VillageDrunksTurn  = "Village Drunk's turn"
+    humanise VillagesTurn       = "village's turn"
+    humanise WerewolvesTurn     = "Werewolves' turn"
+    humanise WitchsTurn         = "Witch's turn"
 
 makeLenses ''Game
 

@@ -23,7 +23,6 @@ module Werewolf.System (
 ) where
 
 import Control.Lens         hiding (cons)
-import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Writer
 
@@ -44,9 +43,9 @@ startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Playe
 startGame callerName players = do
     when (playerNames /= nub playerNames)   $ throwError [playerNamesMustBeUniqueMessage callerName]
     when (length players < 7)               $ throwError [mustHaveAtLeast7PlayersMessage callerName]
-    forM_ restrictedRoles $ \role' ->
-        when (length (players ^.. traverse . filteredBy role role') > 1) $
-            throwError [roleCountRestrictedMessage callerName role']
+    forM_ restrictedRoles $ \role ->
+        when (length (players ^.. roles . only role) > 1) $
+            throwError [roleCountRestrictedMessage callerName role]
 
     let game = newGame players
 

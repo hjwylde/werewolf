@@ -22,7 +22,7 @@ Roles are split into four categories:
 module Game.Werewolf.Role (
     -- * Role
     Role,
-    name, allegiance, balance, description, rules,
+    id, name, allegiance, balance, description, rules,
 
     Allegiance(..),
     _NoOne, _Villagers, _Werewolves,
@@ -63,7 +63,6 @@ import Control.Lens
 
 import           Data.Function
 import           Data.List
-import           Data.String
 import           Data.String.Humanise
 import           Data.Text            (Text)
 import qualified Data.Text            as T
@@ -74,10 +73,11 @@ import qualified Data.Text            as T
 --   Werewolf has a balance of -4 while the Seer has a balance of 2. A balance of 0 means it favours
 --   neither allegiance.
 --
---   N.B., role equality is defined on just the 'name' as a role's 'allegiance' may change
---   throughout the game.
+--   N.B., role equality is defined on just the 'tag' as a role's 'allegiance' may change throughout
+--   the game.
 data Role = Role
-    { _name        :: Text
+    { _tag         :: Text
+    , _name        :: Text
     , _allegiance  :: Allegiance
     , _balance     :: Int
     , _description :: Text
@@ -90,17 +90,17 @@ data Allegiance = NoOne | Villagers | Werewolves
     deriving (Eq, Read, Show)
 
 instance Humanise Allegiance where
-    humanise NoOne      = fromString "no-one"
-    humanise Villagers  = fromString "Villagers"
-    humanise Werewolves = fromString "Werewolves"
+    humanise NoOne      = "no-one"
+    humanise Villagers  = "Villagers"
+    humanise Werewolves = "Werewolves"
 
 makeLenses ''Role
 
 instance Eq Role where
-    (==) = (==) `on` view name
+    (==) = (==) `on` view tag
 
 instance Humanise Role where
-    humanise role = fromString . T.unpack $ role ^. name
+    humanise = view name
 
 makePrisms ''Allegiance
 
@@ -149,7 +149,8 @@ restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 --   Orphan becomes a Werewolf.
 orphanRole :: Role
 orphanRole = Role
-    { _name         = "Orphan"
+    { _tag          = "orphan"
+    , _name         = "Orphan"
     , _allegiance   = Villagers
     , _balance      = -1
     , _description  = T.unwords
@@ -180,7 +181,8 @@ orphanRole = Role
 --   Villagers or Werewolves.
 villageDrunkRole :: Role
 villageDrunkRole = Role
-    { _name         = "Village Drunk"
+    { _tag          = "village-drunk"
+    , _name         = "Village Drunk"
     , _allegiance   = Villagers
     , _balance      = -1
     , _description  = T.unwords
@@ -209,7 +211,8 @@ villageDrunkRole = Role
 --   game.
 fallenAngelRole :: Role
 fallenAngelRole = Role
-    { _name         = "Fallen Angel"
+    { _tag          = "fallen-angel"
+    , _name         = "Fallen Angel"
     , _allegiance   = NoOne
     , _balance      = 0
     , _description  = T.unwords
@@ -234,7 +237,8 @@ fallenAngelRole = Role
 --   may haunt the village as they wish.
 spitefulGhostRole :: Role
 spitefulGhostRole = Role
-    { _name         = "Spiteful Ghost"
+    { _tag          = "spiteful-ghost"
+    , _name         = "Spiteful Ghost"
     , _allegiance   = NoOne
     , _balance      = 0
     , _description  = T.unwords
@@ -258,7 +262,8 @@ spitefulGhostRole = Role
 --   At the start of the game the Beholder is informed the Seer's identity.
 beholderRole :: Role
 beholderRole = Role
-    { _name         = "Beholder"
+    { _tag          = "beholder"
+    , _name         = "Beholder"
     , _allegiance   = Villagers
     , _balance      = 1
     , _description  = T.unwords
@@ -278,7 +283,8 @@ beholderRole = Role
 --   The Crooked Senator looks at the village votes as they come in.
 crookedSenatorRole :: Role
 crookedSenatorRole = Role
-    { _name         = "Crooked Senator"
+    { _tag          = "crooked-senator"
+    , _name         = "Crooked Senator"
     , _allegiance   = Villagers
     , _balance      = 1
     , _description  = T.unwords
@@ -300,7 +306,8 @@ crookedSenatorRole = Role
 --   next to a Werewolf in the player `circle` then Ferina will grunt in warning.
 druidRole :: Role
 druidRole = Role
-    { _name         = "Druid"
+    { _tag          = "druid"
+    , _name         = "Druid"
     , _allegiance   = Villagers
     , _balance      = 3
     , _description  = T.unwords
@@ -325,7 +332,8 @@ druidRole = Role
 --   immediately.
 hunterRole :: Role
 hunterRole = Role
-    { _name         = "Hunter"
+    { _tag          = "hunter"
+    , _name         = "Hunter"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
@@ -349,7 +357,8 @@ hunterRole = Role
 --   The Jester continues to play but may no longer vote as no-one can take them seriously.
 jesterRole :: Role
 jesterRole = Role
-    { _name         = "Jester"
+    { _tag          = "jester"
+    , _name         = "Jester"
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
@@ -375,7 +384,8 @@ jesterRole = Role
 --   a Werewolf.
 lycanRole :: Role
 lycanRole = Role
-    { _name         = "Lycan"
+    { _tag          = "lycan"
+    , _name         = "Lycan"
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
@@ -401,7 +411,8 @@ lycanRole = Role
 --   instantly killing the lupine predator.
 medusaRole :: Role
 medusaRole = Role
-    { _name         = "Medusa"
+    { _tag          = "medusa"
+    , _name         = "Medusa"
     , _allegiance   = Villagers
     , _balance      = 3
     , _description  = T.unwords
@@ -427,7 +438,8 @@ medusaRole = Role
 --   the following morning. This wisdom is for the Oracle to use to ensure the future of Fougères.
 oracleRole :: Role
 oracleRole = Role
-    { _name         = "Oracle"
+    { _tag          = "oracle"
+    , _name         = "Oracle"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
@@ -452,7 +464,8 @@ oracleRole = Role
 --   The Protector may not protect the same player two nights in a row.
 protectorRole :: Role
 protectorRole = Role
-    { _name         = "Protector"
+    { _tag          = "protector"
+    , _name         = "Protector"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
@@ -479,7 +492,8 @@ protectorRole = Role
 --   to vote or not on the next day.
 scapegoatRole :: Role
 scapegoatRole = Role
-    { _name         = "Scapegoat"
+    { _tag          = "scapegoat"
+    , _name         = "Scapegoat"
     , _allegiance   = Villagers
     , _balance      = 0
     , _description  = T.unwords
@@ -507,7 +521,8 @@ scapegoatRole = Role
 --   Each night the Seer sees the allegiance of one player of their choice.
 seerRole :: Role
 seerRole = Role
-    { _name         = "Seer"
+    { _tag          = "seer"
+    , _name         = "Seer"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
@@ -530,7 +545,8 @@ seerRole = Role
 --   them is not who they say they are.
 simpleVillagerRole :: Role
 simpleVillagerRole = Role
-    { _name         = "Simple Villager"
+    { _tag          = "simple-villager"
+    , _name         = "Simple Villager"
     , _allegiance   = Villagers
     , _balance      = 1
     , _description  = T.unwords
@@ -551,7 +567,8 @@ simpleVillagerRole = Role
 --   At the start of the game the True Villager's identity is revealed.
 trueVillagerRole :: Role
 trueVillagerRole = Role
-    { _name         = "True Villager"
+    { _tag          = "true-villager"
+    , _name         = "True Villager"
     , _allegiance   = Villagers
     , _balance      = 2
     , _description  = T.unwords
@@ -571,7 +588,8 @@ trueVillagerRole = Role
 --   There is no restriction on using both potions in one night or on healing themself.
 witchRole :: Role
 witchRole = Role
-    { _name         = "Witch"
+    { _tag          = "witch"
+    , _name         = "Witch"
     , _allegiance   = Villagers
     , _balance      = 3
     , _description  = T.unwords
@@ -596,7 +614,8 @@ witchRole = Role
 --   The Alpha Wolf appears to nature-seeing roles (e.g., the Seer) as a Villager.
 alphaWolfRole :: Role
 alphaWolfRole = Role
-    { _name         = "Alpha Wolf"
+    { _tag          = "alpha-wolf"
+    , _name         = "Alpha Wolf"
     , _allegiance   = Werewolves
     , _balance      = -5
     , _description  = T.unwords
@@ -617,7 +636,8 @@ alphaWolfRole = Role
 --   A Werewolf may never devour another Werewolf.
 simpleWerewolfRole :: Role
 simpleWerewolfRole = Role
-    { _name         = "Simple Werewolf"
+    { _tag          = "simple-werewolf"
+    , _name         = "Simple Werewolf"
     , _allegiance   = Werewolves
     , _balance      = -4
     , _description  = T.unwords

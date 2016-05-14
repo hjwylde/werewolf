@@ -10,6 +10,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Major*
 
 * Renamed FerinasGrunt to DruidsTurn. ([#155](https://github.com/hjwylde/werewolf/issues/155))
+* Added tag field to Role. ([#155](https://github.com/hjwylde/werewolf/issues/155))
 
 *Minor*
 
