@@ -15,10 +15,9 @@ Roles are split into four categories:
 -}
 
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE Rank2Types        #-}
+{-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE TemplateHaskell   #-}
 
--- TODO (hjw): move name, description and rules to external files
 module Game.Werewolf.Role (
     -- * Role
     Role,
@@ -61,11 +60,11 @@ module Game.Werewolf.Role (
 
 import Control.Lens
 
-import           Data.Function
-import           Data.List
-import           Data.String.Humanise
-import           Data.Text            (Text)
-import qualified Data.Text            as T
+import Data.Function
+import Data.List
+import Data.String.Humanise
+import Data.String.Interpolate.Extra
+import Data.Text                     (Text)
 
 -- | Role definitions require only a few pieces of information.
 --
@@ -150,23 +149,11 @@ restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 orphanRole :: Role
 orphanRole = Role
     { _tag          = "orphan"
-    , _name         = "Orphan"
+    , _name         = [iFile|messages/role/orphan/name.text|]
     , _allegiance   = Villagers
     , _balance      = -1
-    , _description  = T.unwords
-        [ "Abandoned by their parents as a child, with no-one wanting to look after another mouth"
-        , "to feed, the Orphan was left to fend for themself. No-one looked twice at the Orphan and"
-        , "even fewer showed kindness towards the lonely child. One day however, one townsperson"
-        , "changed all this. He offered the Orphan food, water and a roof over their head. Grateful"
-        , "for his chairty and affection, the Orphan made him their role model. Pray that no ill"
-        , "should befall their role model, for they are the only one conforming the Orphan as a"
-        , "Villager."
-        ]
-    , _rules        = T.unwords
-        [ "On the first night, the Orphan chooses a player to become their role model. So long as"
-        , "the role model is alive, the Orphan is a Villager. If however the role model is"
-        , "eliminated, then the Orphan becomes a Werewolf."
-        ]
+    , _description  = [iFile|messages/role/orphan/description.text|]
+    , _rules        = [iFile|messages/role/orphan/rules.text|]
     }
 
 -- | /Hah, maybe not as liked as the Jester, but the Drunk sure does their fair share of stupid/
@@ -182,23 +169,11 @@ orphanRole = Role
 villageDrunkRole :: Role
 villageDrunkRole = Role
     { _tag          = "village-drunk"
-    , _name         = "Village Drunk"
+    , _name         = [iFile|messages/role/village-drunk/name.text|]
     , _allegiance   = Villagers
     , _balance      = -1
-    , _description  = T.unwords
-        [ "Hah, maybe not as liked as the Jester, but the Drunk sure does their fair share of"
-        , "stupid things in the night! No-one knows if they even actually make it home; sometimes"
-        , "people see them sleeping outside the Blacksmith's home, others say they see them"
-        , "wandering towards the woods. It's pointless quizzing the Village Drunk in the morning"
-        , "about their doings; they can never remember what they did!"
-        ]
-    , _rules        = T.intercalate "\n"
-        [ "The Village Drunk is initially aligned with the Villagers."
-        , T.unwords
-            [ "On the third night the Village Drunk sobers up and is randomly assigned a new"
-            , "alignment, either Villagers or Werewolves."
-            ]
-        ]
+    , _description  = [iFile|messages/role/village-drunk/description.text|]
+    , _rules        = [iFile|messages/role/village-drunk/rules.text|]
     }
 
 -- | /Long ago during the War in Heaven, angels fell from the sky as one by one those that followed/
@@ -212,20 +187,11 @@ villageDrunkRole = Role
 fallenAngelRole :: Role
 fallenAngelRole = Role
     { _tag          = "fallen-angel"
-    , _name         = "Fallen Angel"
+    , _name         = [iFile|messages/role/fallen-angel/name.text|]
     , _allegiance   = NoOne
     , _balance      = 0
-    , _description  = T.unwords
-        [ "Long ago during the War in Heaven, angels fell from the sky as one by one those that"
-        , "followed Lucifer were defeated. For centuries they lived amongst mortal Villagers as"
-        , "punishment for their sins and wrongdoings. The Fallen Angel was one such being and is"
-        , "now one of the few angels left on Earth. Nothing is worse punishment for them, the"
-        , "Fallen Angel yearns for death to once again be free!"
-        ]
-    , _rules        = T.unwords
-        [ "The Fallen Angel wins if they manage to get lynched by the Villagers before the end of"
-        , "the game."
-        ]
+    , _description  = [iFile|messages/role/fallen-angel/description.text|]
+    , _rules        = [iFile|messages/role/fallen-angel/rules.text|]
     }
 
 -- | /In this time of turmoil, it would seem unlikely for the Villagers of Fougères to unanimously/
@@ -238,20 +204,11 @@ fallenAngelRole = Role
 spitefulGhostRole :: Role
 spitefulGhostRole = Role
     { _tag          = "spiteful-ghost"
-    , _name         = "Spiteful Ghost"
+    , _name         = [iFile|messages/role/spiteful-ghost/name.text|]
     , _allegiance   = NoOne
     , _balance      = 0
-    , _description  = T.unwords
-        [ "In this time of turmoil, it would seem unlikely for the Villagers of Fougères to"
-        , "unanimously agree on anything. Yet this is not so, for they all agree the village is"
-        , "haunted by a ghost. The vindictive Spiteful Ghost never moved on, rather they remain"
-        , "with the sole purpose of haunting the village and ensuring that the Villagers never"
-        , "forget what they have done."
-        ]
-    , _rules        = T.unwords
-        [ "The Spiteful ghost is dead and cannot win, however they know the game's role allocations"
-        , "and may haunt the village as they wish."
-        ]
+    , _description  = [iFile|messages/role/spiteful-ghost/description.text|]
+    , _rules        = [iFile|messages/role/spiteful-ghost/rules.text|]
     }
 
 -- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
@@ -263,16 +220,11 @@ spitefulGhostRole = Role
 beholderRole :: Role
 beholderRole = Role
     { _tag          = "beholder"
-    , _name         = "Beholder"
+    , _name         = [iFile|messages/role/beholder/name.text|]
     , _allegiance   = Villagers
     , _balance      = 1
-    , _description  = T.unwords
-        [ "Awareness comes easy to the Beholder. They listen to their senses and trust their"
-        , "hunches. Over the years the Beholder has grown to know a certain few of the village just"
-        , "by paying attention. Little cues here and there, the way someone talks, the way they"
-        , "move - it all gives clues as to their true nature and role."
-        ]
-    , _rules        = "At the start of the game the Beholder is informed the Seer's identity."
+    , _description  = [iFile|messages/role/beholder/description.text|]
+    , _rules        = [iFile|messages/role/beholder/rules.text|]
     }
 
 -- | /Never trust a politician. Nor a Crooked Senator for that matter. The Crooked Senator may seem/
@@ -284,16 +236,11 @@ beholderRole = Role
 crookedSenatorRole :: Role
 crookedSenatorRole = Role
     { _tag          = "crooked-senator"
-    , _name         = "Crooked Senator"
+    , _name         = [iFile|messages/role/crooked-senator/name.text|]
     , _allegiance   = Villagers
     , _balance      = 1
-    , _description  = T.unwords
-        [ "Never trust a politician. Nor a Crooked Senator for that matter. The Crooked Senator may"
-        , "seem like he has the village's best interests at heart, but let's be honest, when put in"
-        , "a tough situation he looks after no-one but himself. Even when safe, the Crooked Senator"
-        , "may decide to toy with the Villagers' emotions and try pit them against one another."
-        ]
-    , _rules        = "The Crooked Senator looks at the village votes as they come in."
+    , _description  = [iFile|messages/role/crooked-senator/description.text|]
+    , _rules        = [iFile|messages/role/crooked-senator/rules.text|]
     }
 
 -- | /How honoured we are to be in the presence of such a noble leader. The return of the Druid/
@@ -307,21 +254,11 @@ crookedSenatorRole = Role
 druidRole :: Role
 druidRole = Role
     { _tag          = "druid"
-    , _name         = "Druid"
+    , _name         = [iFile|messages/role/druid/name.text|]
     , _allegiance   = Villagers
     , _balance      = 3
-    , _description  = T.unwords
-        [ "How honoured we are to be in the presence of such a noble leader. The return of the"
-        , "Druid marks an exceptional time in Fougères's history! Friend of the woodland creatures,"
-        , "practiced philosopher and now, with the help of Ferina their companion, a bane to the"
-        , "Werewolves themselves! My does she have a nose on her, strong enough to sniff out"
-        , "lycanthropes in close proximity! Listen for her grunt and heed her warning for she will"
-        , "not let you down."
-        ]
-    , _rules        = T.unwords
-        [ "Each morning when Ferina wakes from her slumber she will be alert and cautious. If the"
-        , "Druid is next to a Werewolf in the player `circle` then Ferina will grunt in warning."
-        ]
+    , _description  = [iFile|messages/role/druid/description.text|]
+    , _rules        = [iFile|messages/role/druid/rules.text|]
     }
 
 -- | /A skilled marksman with quick reflexes. In the unfortunate situation that they are jumped and/
@@ -333,18 +270,11 @@ druidRole = Role
 hunterRole :: Role
 hunterRole = Role
     { _tag          = "hunter"
-    , _name         = "Hunter"
+    , _name         = [iFile|messages/role/hunter/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.unwords
-        [ "A skilled marksman with quick reflexes. In the unfortunate situation that they are"
-        , "jumped and killed unjustly, they let off a shot at their attacker, killing them"
-        , "instantly. The Hunter never misses."
-        ]
-    , _rules        = T.unwords
-        [ "If the Hunter is killed they choose one player, believed to be an attacker, to kill"
-        , "immediately."
-        ]
+    , _description  = [iFile|messages/role/hunter/description.text|]
+    , _rules        = [iFile|messages/role/hunter/rules.text|]
     }
 
 -- | /Every village needs a Jester; they're so stupid, but provide so much entertainment! The/
@@ -358,21 +288,11 @@ hunterRole = Role
 jesterRole :: Role
 jesterRole = Role
     { _tag          = "jester"
-    , _name         = "Jester"
+    , _name         = [iFile|messages/role/jester/name.text|]
     , _allegiance   = Villagers
     , _balance      = 0
-    , _description  = T.unwords
-        [ "Every village needs a Jester; they're so stupid, but provide so much entertainment! The"
-        , "Jester may not have any special abilities, but at least no-one in the village wants to"
-        , "hurt them."
-        ]
-    , _rules        = T.intercalate "\n"
-        [ T.unwords
-            [ "If the village votes to lynch the Jester, their identity is revealed. The village"
-            , "realise there's no point in burning them and so they are set free."
-            ]
-        , "The Jester continues to play but may no longer vote as no-one can take them seriously."
-        ]
+    , _description  = [iFile|messages/role/jester/description.text|]
+    , _rules        = [iFile|messages/role/jester/rules.text|]
     }
 
 -- | /Traditionally a Werewolf once transformed loses all memories and personality. Over years of/
@@ -385,19 +305,11 @@ jesterRole = Role
 lycanRole :: Role
 lycanRole = Role
     { _tag          = "lycan"
-    , _name         = "Lycan"
+    , _name         = [iFile|messages/role/lycan/name.text|]
     , _allegiance   = Villagers
     , _balance      = 0
-    , _description  = T.unwords
-        [ "Traditionally a Werewolf once transformed loses all memories and personality. Over years"
-        , "of transforming, the Lycan has slowly evolved and learnt how to retain themself. Night"
-        , "after night of devouring with the other Werewolves took its toll. The screams alone were"
-        , "enough to turn the Lycan and make them question their true nature."
-        ]
-    , _rules        = T.unwords
-        [ "The Lycan is aligned with the Villagers, but appears to nature-seeing roles (e.g., the"
-        , "Seer) as a Werewolf."
-        ]
+    , _description  = [iFile|messages/role/lycan/description.text|]
+    , _rules        = [iFile|messages/role/lycan/rules.text|]
     }
 
 -- | /A beautiful flirt, the Medusa is aligned with the Villagers but harbours a terrifying secret./
@@ -412,22 +324,11 @@ lycanRole = Role
 medusaRole :: Role
 medusaRole = Role
     { _tag          = "medusa"
-    , _name         = "Medusa"
+    , _name         = [iFile|messages/role/medusa/name.text|]
     , _allegiance   = Villagers
     , _balance      = 3
-    , _description  = T.unwords
-        [ "A beautiful flirt, the Medusa is aligned with the Villagers but harbours a terrifying"
-        , "secret. During the day they are well known in the village of Fougères for their stunning"
-        , "appearance which captures the eye and love of all the townsfolk. However when their"
-        , "secret takes ahold at sundown, their true self is revealed. Any who gaze upon her true"
-        , "form would see live snakes for hair and the few that further look into her eyes are"
-        , "turned to stone."
-        ]
-    , _rules        = T.unwords
-        [ "If Medusa attracts the attention of a Werewolf during the night and is devoured, the"
-        , "first Werewolf to their left in the player `circle` will catch their gaze and turn to"
-        , "stone, instantly killing the lupine predator."
-        ]
+    , _description  = [iFile|messages/role/medusa/description.text|]
+    , _rules        = [iFile|messages/role/medusa/rules.text|]
     }
 
 -- | /Originally rejected by the townsfolk, the Oracle's prophetic divinations has earned trust/
@@ -439,19 +340,11 @@ medusaRole = Role
 oracleRole :: Role
 oracleRole = Role
     { _tag          = "oracle"
-    , _name         = "Oracle"
+    , _name         = [iFile|messages/role/oracle/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.unwords
-        [ "Originally rejected by the townsfolk, the Oracle's prophetic divinations has earned"
-        , "trust within the village. With constant precognition - and concern for the future - the"
-        , "Oracle knows the village will only live if they work together."
-        ]
-    , _rules        = T.unwords
-        [ "Each night the Oracle chooses a player to divine. They are then informed of the player's"
-        , "role the following morning. This wisdom is for the Oracle to use to ensure the future of"
-        , "Fougères."
-        ]
+    , _description  = [iFile|messages/role/oracle/description.text|]
+    , _rules        = [iFile|messages/role/oracle/rules.text|]
     }
 
 -- | /The Protector is one of the few pure of heart and altruistic Villagers; they are forever/
@@ -465,21 +358,11 @@ oracleRole = Role
 protectorRole :: Role
 protectorRole = Role
     { _tag          = "protector"
-    , _name         = "Protector"
+    , _name         = [iFile|messages/role/protector/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.unwords
-        [ "The Protector is one of the few pure of heart and altruistic Villagers; they are forever"
-        , "putting others needs above their own. Each night they fight against the Werewolves with"
-        , "naught but a sword and shield, potentially saving an innocents life."
-        ]
-    , _rules        = T.intercalate "\n"
-        [ T.unwords
-            [ "Each night the Protector chooses a player deemed worthy of their protection. That"
-            , "player is safe for that night (and only that night) against the Werewolves."
-            ]
-        , "The Protector may not protect the same player two nights in a row."
-        ]
+    , _description  = [iFile|messages/role/protector/description.text|]
+    , _rules        = [iFile|messages/role/protector/rules.text|]
     }
 
 -- | /Werewolves don't just spring up out of the ground! That's where dwarves come from. Clearly/
@@ -493,25 +376,11 @@ protectorRole = Role
 scapegoatRole :: Role
 scapegoatRole = Role
     { _tag          = "scapegoat"
-    , _name         = "Scapegoat"
+    , _name         = [iFile|messages/role/scapegoat/name.text|]
     , _allegiance   = Villagers
     , _balance      = 0
-    , _description  = T.unwords
-        [ "Werewolves don't just spring up out of the ground! That's where dwarves come from."
-        , "Clearly someone is to blame for this affliction to Fougères. Unluckily for the"
-        , "Scapegoat, since no-one actually knows who brought them here, the blame is always laid"
-        , "upon them!"
-        ]
-    , _rules        = T.intercalate "\n"
-        [ T.unwords
-            [ "If the village's vote ends in a tie, it's the Scapegoat who is eliminated instead of"
-            , "no-one."
-            ]
-        , T.unwords
-            [ "In this event, the Scapegoat has one last task to complete: they must choose whom is"
-            , "permitted to vote or not on the next day."
-            ]
-        ]
+    , _description  = [iFile|messages/role/scapegoat/description.text|]
+    , _rules        = [iFile|messages/role/scapegoat/rules.text|]
     }
 
 -- | /The Seer has the ability to see into fellow townsfolk and determine their true nature. This/
@@ -522,19 +391,11 @@ scapegoatRole = Role
 seerRole :: Role
 seerRole = Role
     { _tag          = "seer"
-    , _name         = "Seer"
+    , _name         = [iFile|messages/role/seer/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.unwords
-        [ "The Seer has the ability to see into fellow townsfolk and determine their true nature."
-        , "This ability to see is not given out lightly, for certain it is a gift! The visions will"
-        , "always be true, but only for the present as not even the Seer knows what the future"
-        , "holds."
-        ]
-    , _rules        = T.unwords
-        [ "Each night the Seer chooses a player to see. They are then informed of the player's"
-        , "allegiance the following morning."
-        ]
+    , _description  = [iFile|messages/role/seer/description.text|]
+    , _rules        = [iFile|messages/role/seer/rules.text|]
     }
 
 -- | /A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even/
@@ -546,18 +407,11 @@ seerRole = Role
 simpleVillagerRole :: Role
 simpleVillagerRole = Role
     { _tag          = "simple-villager"
-    , _name         = "Simple Villager"
+    , _name         = [iFile|messages/role/simple-villager/name.text|]
     , _allegiance   = Villagers
     , _balance      = 1
-    , _description  = T.unwords
-        [ "A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even"
-        , "nobles. No matter their differences though, the plight of Werewolves in Fougères unites"
-        , "all the Villagers in this unfortunate time."
-        ]
-    , _rules        = T.unwords
-        [ "The Simple Villager has no special abilities, they must use their guile to determine"
-        , "whom among them is not who they say they are."
-        ]
+    , _description  = [iFile|messages/role/simple-villager/description.text|]
+    , _rules        = [iFile|messages/role/simple-villager/rules.text|]
     }
 
 -- | /The True Villager has a heart and soul as clear as day! Their allegiance and devotion to the/
@@ -568,15 +422,11 @@ simpleVillagerRole = Role
 trueVillagerRole :: Role
 trueVillagerRole = Role
     { _tag          = "true-villager"
-    , _name         = "True Villager"
+    , _name         = [iFile|messages/role/true-villager/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.unwords
-        [ "The True Villager has a heart and soul as clear as day! Their allegiance and devotion to"
-        , "the village are beyond reproach. If there is one person whom you should confide in,"
-        , "listen to and trust, it is the True Villager."
-        ]
-    , _rules        = "At the start of the game the True Villager's identity is revealed."
+    , _description  = [iFile|messages/role/true-villager/description.text|]
+    , _rules        = [iFile|messages/role/true-villager/rules.text|]
     }
 
 -- | /Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove themself/
@@ -589,21 +439,11 @@ trueVillagerRole = Role
 witchRole :: Role
 witchRole = Role
     { _tag          = "witch"
-    , _name         = "Witch"
+    , _name         = [iFile|messages/role/witch/name.text|]
     , _allegiance   = Villagers
     , _balance      = 3
-    , _description  = T.unwords
-        [ "Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove"
-        , "themself valuable to the village and maybe abolish the absurd pastime of burning and"
-        , "drowning their cult. The Witch is blessed (or maybe cursed) with the ability to make two"
-        , "powerful potions; one of which heals a victim of the Werewolves, the other poisons a"
-        , "player."
-        ]
-    , _rules        = T.unwords
-        [ "The Witch is called after the Werewolves. They are able to heal and poison one player"
-        , "per game. There is no restriction on using both potions in one night or on healing"
-        , "themself."
-        ]
+    , _description  = [iFile|messages/role/witch/description.text|]
+    , _rules        = [iFile|messages/role/witch/rules.text|]
     }
 
 -- | /The Alpha Wolf leads the Werewolves in the raids against Fougères each night and not even the/
@@ -615,17 +455,11 @@ witchRole = Role
 alphaWolfRole :: Role
 alphaWolfRole = Role
     { _tag          = "alpha-wolf"
-    , _name         = "Alpha Wolf"
+    , _name         = [iFile|messages/role/alpha-wolf/name.text|]
     , _allegiance   = Werewolves
     , _balance      = -5
-    , _description  = T.unwords
-        [ "The Alpha Wolf leads the Werewolves in the raids against Fougères each night and not"
-        , "even the Seer can see them coming. If the Werewolves caused the Villagers to question"
-        , "and accuse one another beforehand, the Alpha Wolf eliminates any shred of humanity left."
-        , "No-one can be trusted anymore and no-one knows the truth."
-        ]
-    , _rules        =
-        "The Alpha Wolf appears to nature-seeing roles (e.g., the Seer) as a Villager."
+    , _description  = [iFile|messages/role/alpha-wolf/description.text|]
+    , _rules        = [iFile|messages/role/alpha-wolf/rules.text|]
     }
 
 -- | /The Simple Werewolf is a fearsome lupine, cunning like no other creature that roams the/
@@ -637,15 +471,9 @@ alphaWolfRole = Role
 simpleWerewolfRole :: Role
 simpleWerewolfRole = Role
     { _tag          = "simple-werewolf"
-    , _name         = "Simple Werewolf"
+    , _name         = [iFile|messages/role/simple-werewolf/name.text|]
     , _allegiance   = Werewolves
     , _balance      = -4
-    , _description  = T.unwords
-        [ "The Simple Werewolf is a fearsome lupine, cunning like no other creature that roams the"
-        , "forest. Their origin is unknown, but that matters little, for they present a grave"
-        , "threat to Fougères. While each day they hide in plain sight as an ordinary Villager,"
-        , "each night they transform and devour an innocent. There is little hope left for the"
-        , "village."
-        ]
-    , _rules        = "A Werewolf may never devour another Werewolf."
+    , _description  = [iFile|messages/role/simple-werewolf/description.text|]
+    , _rules        = [iFile|messages/role/simple-werewolf/rules.text|]
     }

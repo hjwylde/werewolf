@@ -29,7 +29,6 @@ executable werewolf
     hs-source-dirs: app/
     ghc-options:    -threaded -with-rtsopts=-N
     other-modules:
-        Data.String.Interpolate.Extra
         Game.Werewolf.Command
         Game.Werewolf.Command.Global
         Game.Werewolf.Command.Hunter
@@ -77,7 +76,7 @@ executable werewolf
         FlexibleContexts,
         MultiParamTypeClasses,
         OverloadedStrings,
-        QuasiQuotes
+        QuasiQuotes,
         Rank2Types
     build-depends:
         aeson >= 0.8 && < 0.12,
@@ -86,13 +85,11 @@ executable werewolf
         directory == 1.2.*,
         extra == 1.4.*,
         filepath == 1.4.*,
-        interpolate == 0.1.*,
         lens >= 4.12 && < 4.15,
         MonadRandom == 0.4.*,
         mtl == 2.2.*,
         optparse-applicative >= 0.11 && < 0.13,
         random-shuffle,
-        template-haskell == 2.10.*,
         text == 1.2.*,
         transformers == 0.4.*,
         werewolf
@@ -102,6 +99,7 @@ library
     exposed-modules:
         Control.Lens.Extra
         Data.String.Humanise
+        Data.String.Interpolate.Extra
         Game.Werewolf
         Game.Werewolf.Game
         Game.Werewolf.Player
@@ -114,6 +112,7 @@ library
         DeriveGeneric,
         FlexibleContexts,
         OverloadedStrings,
+        QuasiQuotes,
         Rank2Types,
         TemplateHaskell
     build-depends:
@@ -121,7 +120,9 @@ library
         base >= 4.8 && < 5,
         containers == 0.5.*,
         extra == 1.4.*,
+        interpolate == 0.1.*,
         lens >= 4.12 && < 4.15,
         mtl == 2.2.*,
+        template-haskell == 2.10.*,
         text == 1.2.*,
         transformers == 0.4.*
