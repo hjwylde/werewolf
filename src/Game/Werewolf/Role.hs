@@ -22,7 +22,7 @@ Roles are split into four categories:
 module Game.Werewolf.Role (
     -- * Role
     Role,
-    id, name, allegiance, balance, description, rules,
+    tag, name, allegiance, balance, description, rules,
 
     Allegiance(..),
     _NoOne, _Villagers, _Werewolves,
