@@ -70,103 +70,103 @@ import Game.Werewolf.Role     hiding (name)
 import Werewolf.Version
 
 playerQuitMessage :: Player -> Message
-playerQuitMessage caller = publicMessage [iFile|variant/standard/command/quit/player-quit.text|]
+playerQuitMessage caller = publicMessage [iFile|variant/standard/command/quit/player-quit.txt|]
 
 playerVotedToBootMessage :: Player -> Player -> Message
-playerVotedToBootMessage caller target = publicMessage [iFile|variant/standard/command/boot/player-voted-boot.text|]
+playerVotedToBootMessage caller target = publicMessage [iFile|variant/standard/command/boot/player-voted-boot.txt|]
 
 circleMessage :: Text -> [Player] -> Message
-circleMessage to players = privateMessage to [iFile|variant/standard/command/circle/circle.text|]
+circleMessage to players = privateMessage to [iFile|variant/standard/command/circle/circle.txt|]
 
 playerShotMessage :: Player -> Message
-playerShotMessage player = publicMessage [iFile|variant/standard/command/choose/player-shot.text|]
+playerShotMessage player = publicMessage [iFile|variant/standard/command/choose/player-shot.txt|]
 
 gameEndedMessage :: Text -> Message
-gameEndedMessage callerName = publicMessage [iFile|variant/standard/command/end/game-ended.text|]
+gameEndedMessage callerName = publicMessage [iFile|variant/standard/command/end/game-ended.txt|]
 
 gameDescriptionMessage :: Text -> Message
-gameDescriptionMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/game-description.text|]
+gameDescriptionMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/game-description.txt|]
 
 globalCommandsMessage :: Text -> Message
-globalCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/global-commands.text|]
+globalCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/global-commands.txt|]
 
 helpCommandsMessage :: Text -> Message
-helpCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/help-commands.text|]
+helpCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/help-commands.txt|]
 
 hunterCommandsMessage :: Text -> Message
-hunterCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/hunter-commands.text|]
+hunterCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/hunter-commands.txt|]
 
 oracleCommandsMessage :: Text -> Message
-oracleCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/oracle-commands.text|]
+oracleCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/oracle-commands.txt|]
 
 orphanCommandsMessage :: Text -> Message
-orphanCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/orphan-commands.text|]
+orphanCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/orphan-commands.txt|]
 
 protectorCommandsMessage :: Text -> Message
-protectorCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/protector-commands.text|]
+protectorCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/protector-commands.txt|]
 
 roleMessage :: Text -> Role -> Message
-roleMessage callerName role = privateMessage callerName [iFile|variant/standard/command/help/role.text|]
+roleMessage callerName role = privateMessage callerName [iFile|variant/standard/command/help/role.txt|]
 
 rulesMessage :: Text -> Message
-rulesMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/rules.text|]
+rulesMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/rules.txt|]
 
 scapegoatCommandsMessage :: Text -> Message
-scapegoatCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/scapegoat-commands.text|]
+scapegoatCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/scapegoat-commands.txt|]
 
 seerCommandsMessage :: Text -> Message
-seerCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/seer-commands.text|]
+seerCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/seer-commands.txt|]
 
 stagesMessage :: Text -> Maybe Game -> Message
 stagesMessage callerName mGame = privateMessage callerName . T.concat $
-    [ [iFile|variant/standard/command/help/standard-cycle.text|]
-    , [iFile|variant/standard/command/help/sunset.text|]
-    ] ++ [ [iFile|variant/standard/command/help/orphans-turn.text|]
+    [ [iFile|variant/standard/command/help/standard-cycle.txt|]
+    , [iFile|variant/standard/command/help/sunset.txt|]
+    ] ++ [ [iFile|variant/standard/command/help/orphans-turn.txt|]
     | isNothing mGame || has (players . orphans . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/village-drunks-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/village-drunks-turn.txt|]
     | isNothing mGame || has (players . villageDrunks . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/seers-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/seers-turn.txt|]
     | isNothing mGame || has (players . seers . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/oracles-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/oracles-turn.txt|]
     | isNothing mGame || has (players . oracles . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/protectors-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/protectors-turn.txt|]
     | isNothing mGame || has (players . protectors . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/werewolves-turn.text|]
-    ] ++ [ [iFile|variant/standard/command/help/witchs-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/werewolves-turn.txt|]
+    ] ++ [ [iFile|variant/standard/command/help/witchs-turn.txt|]
     | isNothing mGame || has (players . witches . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/sunrise.text|]
-    ] ++ [ [iFile|variant/standard/command/help/hunters-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/sunrise.txt|]
+    ] ++ [ [iFile|variant/standard/command/help/hunters-turn.txt|]
     | isNothing mGame || has (players . hunters . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/druids-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/druids-turn.txt|]
     | isNothing mGame || has (players . druids . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/villages-turn.text|]
-    ] ++ [ [iFile|variant/standard/command/help/hunters-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/villages-turn.txt|]
+    ] ++ [ [iFile|variant/standard/command/help/hunters-turn.txt|]
     | isNothing mGame || has (players . hunters . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/scapegoats-turn.text|]
+    ] ++ [ [iFile|variant/standard/command/help/scapegoats-turn.txt|]
     | isNothing mGame || has (players . scapegoats . named callerName) (fromJust mGame)
-    ] ++ [ [iFile|variant/standard/command/help/game-over.text|]
+    ] ++ [ [iFile|variant/standard/command/help/game-over.txt|]
     ]
 
 standardCommandsMessage :: Text -> Message
-standardCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/standard-commands.text|]
+standardCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/standard-commands.txt|]
 
 statusCommandsMessage :: Text -> Message
-statusCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/status-commands.text|]
+statusCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/status-commands.txt|]
 
 witchCommandsMessage :: Text -> Message
-witchCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/witch-commands.text|]
+witchCommandsMessage callerName = privateMessage callerName [iFile|variant/standard/command/help/witch-commands.txt|]
 
 pingPlayerMessage :: Text -> Message
-pingPlayerMessage to = privateMessage to [iFile|variant/standard/command/ping/player-pinged.text|]
+pingPlayerMessage to = privateMessage to [iFile|variant/standard/command/ping/player-pinged.txt|]
 
 pingRoleMessage :: Role -> Message
-pingRoleMessage role = publicMessage [iFile|variant/standard/command/ping/role-pinged.text|]
+pingRoleMessage role = publicMessage [iFile|variant/standard/command/ping/role-pinged.txt|]
 
 pingVillageMessage :: Message
-pingVillageMessage = publicMessage [iFile|variant/standard/command/ping/village-pinged.text|]
+pingVillageMessage = publicMessage [iFile|variant/standard/command/ping/village-pinged.txt|]
 
 pingWerewolvesMessage :: Message
-pingWerewolvesMessage = publicMessage [iFile|variant/standard/command/ping/werewolves-pinged.text|]
+pingWerewolvesMessage = publicMessage [iFile|variant/standard/command/ping/werewolves-pinged.txt|]
 
 currentStageMessages :: Text -> Game -> [Message]
 currentStageMessages to game
@@ -177,26 +177,26 @@ currentStageMessages to game
         , _Sunrise
         , _Sunset
         ]                           = []
-    | otherwise                     = [privateMessage to [iFile|variant/standard/command/status/current-turn.text|]]
+    | otherwise                     = [privateMessage to [iFile|variant/standard/command/status/current-turn.txt|]]
 
 gameIsOverMessage :: Text -> Message
-gameIsOverMessage to = privateMessage to [iFile|variant/standard/command/status/game-over.text|]
+gameIsOverMessage to = privateMessage to [iFile|variant/standard/command/status/game-over.txt|]
 
 playersInGameMessage :: Text -> Game -> Message
 playersInGameMessage to game = privateMessage to . T.intercalate "\n" $
     alivePlayersText : [deadPlayersText | has (players . traverse . dead) game]
     where
-        alivePlayersText    = [iFile|variant/standard/command/status/alive-players.text|]
-        deadPlayersText     = [iFile|variant/standard/command/status/dead-players.text|]
+        alivePlayersText    = [iFile|variant/standard/command/status/alive-players.txt|]
+        deadPlayersText     = [iFile|variant/standard/command/status/dead-players.txt|]
 
 playerRescindedVoteMessage :: Text -> Text -> Message
-playerRescindedVoteMessage to caller = privateMessage to [iFile|variant/standard/command/unvote/player-rescinded-vote.text|]
+playerRescindedVoteMessage to caller = privateMessage to [iFile|variant/standard/command/unvote/player-rescinded-vote.txt|]
 
 engineVersionMessage :: Text -> Message
-engineVersionMessage to = privateMessage to [iFile|variant/standard/command/version/engine-version.text|]
+engineVersionMessage to = privateMessage to [iFile|variant/standard/command/version/engine-version.txt|]
 
 playerMadeDevourVoteMessage :: Text -> Player -> Player -> Message
-playerMadeDevourVoteMessage to caller target = privateMessage to [iFile|variant/standard/command/vote/player-made-devour-vote.text|]
+playerMadeDevourVoteMessage to caller target = privateMessage to [iFile|variant/standard/command/vote/player-made-devour-vote.txt|]
 
 playerMadeLynchVoteMessage :: Maybe Text -> Text -> Text -> Message
-playerMadeLynchVoteMessage mTo caller target = Message mTo [iFile|variant/standard/command/vote/player-made-lynch-vote.text|]
+playerMadeLynchVoteMessage mTo caller target = Message mTo [iFile|variant/standard/command/vote/player-made-lynch-vote.txt|]

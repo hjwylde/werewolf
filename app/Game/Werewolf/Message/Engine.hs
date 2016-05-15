@@ -35,7 +35,7 @@ import Game.Werewolf.Response
 import Game.Werewolf.Role     hiding (name)
 
 playerBootedMessage :: Player -> Message
-playerBootedMessage player = publicMessage [iFile|variant/standard/engine/general/player-booted.text|]
+playerBootedMessage player = publicMessage [iFile|variant/standard/engine/general/player-booted.txt|]
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
@@ -68,13 +68,13 @@ gameOverMessages game
         fallenAngelsName = game ^?! players . fallenAngels . name
 
 fallenAngelWonMessage :: Message
-fallenAngelWonMessage = publicMessage [iFile|variant/standard/engine/game-over/fallen-angel-won.text|]
+fallenAngelWonMessage = publicMessage [iFile|variant/standard/engine/game-over/fallen-angel-won.txt|]
 
 allegianceWonMessage :: Allegiance -> Message
-allegianceWonMessage allegiance = publicMessage [iFile|variant/standard/engine/game-over/allegiance-won.text|]
+allegianceWonMessage allegiance = publicMessage [iFile|variant/standard/engine/game-over/allegiance-won.txt|]
 
 playerRolesMessage :: Game -> Message
-playerRolesMessage game = publicMessage [iFile|variant/standard/engine/game-over/player-roles.text|]
+playerRolesMessage game = publicMessage [iFile|variant/standard/engine/game-over/player-roles.txt|]
 
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
@@ -103,29 +103,29 @@ newGameMessages game = concat
             else []
 
 newPlayersInGameMessage :: Game -> Message
-newPlayersInGameMessage game = publicMessage [iFile|variant/standard/engine/new-game/players-in-game.text|]
+newPlayersInGameMessage game = publicMessage [iFile|variant/standard/engine/new-game/players-in-game.txt|]
 
 rolesInGameMessage :: Maybe Text -> Game -> Message
-rolesInGameMessage mTo game = Message mTo [iFile|variant/standard/engine/new-game/roles-in-game.text|]
+rolesInGameMessage mTo game = Message mTo [iFile|variant/standard/engine/new-game/roles-in-game.txt|]
     where
         roles           = game ^.. players . traverse . role
         roleCounts      = map (head &&& length) (groupSortOn humanise roles)
         totalBalance    = sumOf (traverse . balance) roles
 
 newPlayerMessage :: Player -> Message
-newPlayerMessage player = privateMessage (player ^. name) [iFile|variant/standard/engine/new-game/new-player.text|]
+newPlayerMessage player = privateMessage (player ^. name) [iFile|variant/standard/engine/new-game/new-player.txt|]
 
 beholderMessage :: Text -> Player -> Message
-beholderMessage to seer = privateMessage to [iFile|variant/standard/engine/new-game/beholder.text|]
+beholderMessage to seer = privateMessage to [iFile|variant/standard/engine/new-game/beholder.txt|]
 
 spitefulGhostMessage :: Text -> Game -> Message
-spitefulGhostMessage to game = privateMessage to [iFile|variant/standard/engine/new-game/spiteful-ghost.text|]
+spitefulGhostMessage to game = privateMessage to [iFile|variant/standard/engine/new-game/spiteful-ghost.txt|]
 
 trueVillagerMessage :: Player -> Message
-trueVillagerMessage trueVillager = publicMessage [iFile|variant/standard/engine/new-game/true-villager.text|]
+trueVillagerMessage trueVillager = publicMessage [iFile|variant/standard/engine/new-game/true-villager.txt|]
 
 fallenAngelMessage :: Message
-fallenAngelMessage = publicMessage [iFile|variant/standard/engine/new-game/fallen-angel.text|]
+fallenAngelMessage = publicMessage [iFile|variant/standard/engine/new-game/fallen-angel.txt|]
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
@@ -159,52 +159,52 @@ stageMessages game = case game ^. stage of
 
 huntersTurnMessages :: Player -> [Message]
 huntersTurnMessages hunter =
-    [ publicMessage [iFile|variant/standard/engine/hunters-turn/start-public.text|]
-    , privateMessage (hunter ^. name) [iFile|variant/standard/engine/hunters-turn/start-private.text|]
+    [ publicMessage [iFile|variant/standard/engine/hunters-turn/start-public.txt|]
+    , privateMessage (hunter ^. name) [iFile|variant/standard/engine/hunters-turn/start-private.txt|]
     ]
 
 oraclesTurnMessages :: Text -> [Message]
 oraclesTurnMessages to =
-    [ publicMessage [iFile|variant/standard/engine/oracles-turn/start-public.text|]
-    , privateMessage to [iFile|variant/standard/engine/oracles-turn/start-private.text|]
+    [ publicMessage [iFile|variant/standard/engine/oracles-turn/start-public.txt|]
+    , privateMessage to [iFile|variant/standard/engine/oracles-turn/start-private.txt|]
     ]
 
 orphansTurnMessages :: Text -> [Message]
 orphansTurnMessages to =
-    [ publicMessage [iFile|variant/standard/engine/orphans-turn/start-public.text|]
-    , privateMessage to [iFile|variant/standard/engine/orphans-turn/start-private.text|]
+    [ publicMessage [iFile|variant/standard/engine/orphans-turn/start-public.txt|]
+    , privateMessage to [iFile|variant/standard/engine/orphans-turn/start-private.txt|]
     ]
 
 protectorsTurnMessages :: Text -> [Message]
 protectorsTurnMessages to =
-    [ publicMessage [iFile|variant/standard/engine/protectors-turn/start-public.text|]
-    , privateMessage to [iFile|variant/standard/engine/protectors-turn/start-private.text|]
+    [ publicMessage [iFile|variant/standard/engine/protectors-turn/start-public.txt|]
+    , privateMessage to [iFile|variant/standard/engine/protectors-turn/start-private.txt|]
     ]
 
 scapegoatsTurnMessage :: Player -> Message
-scapegoatsTurnMessage scapegoat = publicMessage [iFile|variant/standard/engine/scapegoats-turn/start.text|]
+scapegoatsTurnMessage scapegoat = publicMessage [iFile|variant/standard/engine/scapegoats-turn/start.txt|]
 
 seersTurnMessages :: Text -> [Message]
 seersTurnMessages to =
-    [ publicMessage [iFile|variant/standard/engine/seers-turn/start-public.text|]
-    , privateMessage to [iFile|variant/standard/engine/seers-turn/start-private.text|]
+    [ publicMessage [iFile|variant/standard/engine/seers-turn/start-public.txt|]
+    , privateMessage to [iFile|variant/standard/engine/seers-turn/start-private.txt|]
     ]
 
 villageDrunksTurnMessage :: Message
-villageDrunksTurnMessage = publicMessage [iFile|variant/standard/engine/village-drunks-turn/start.text|]
+villageDrunksTurnMessage = publicMessage [iFile|variant/standard/engine/village-drunks-turn/start.txt|]
 
 sunriseMessage :: Message
-sunriseMessage = publicMessage [iFile|variant/standard/engine/sunrise/start.text|]
+sunriseMessage = publicMessage [iFile|variant/standard/engine/sunrise/start.txt|]
 
 nightFallsMessage :: Message
-nightFallsMessage = publicMessage [iFile|variant/standard/engine/sunset/start.text|]
+nightFallsMessage = publicMessage [iFile|variant/standard/engine/sunset/start.txt|]
 
 villagesTurnMessage :: Message
-villagesTurnMessage = publicMessage [iFile|variant/standard/engine/villages-turn/start.text|]
+villagesTurnMessage = publicMessage [iFile|variant/standard/engine/villages-turn/start.txt|]
 
 firstWerewolvesTurnMessages :: Game -> [Message]
 firstWerewolvesTurnMessages game =
-    [privateMessage (player ^. name) [iFile|variant/standard/engine/werewolves-turn/start-first-round-private.text|]
+    [privateMessage (player ^. name) [iFile|variant/standard/engine/werewolves-turn/start-first-round-private.txt|]
         | length werewolves > 1, player <- werewolves]
     ++ werewolvesTurnMessages (map (view name) werewolves)
     where
@@ -212,8 +212,8 @@ firstWerewolvesTurnMessages game =
 
 werewolvesTurnMessages :: [Text] -> [Message]
 werewolvesTurnMessages tos =
-    publicMessage [iFile|variant/standard/engine/werewolves-turn/start-public.text|]
-    : groupMessages tos [iFile|variant/standard/engine/werewolves-turn/start-private.text|]
+    publicMessage [iFile|variant/standard/engine/werewolves-turn/start-public.txt|]
+    : groupMessages tos [iFile|variant/standard/engine/werewolves-turn/start-private.txt|]
 
 witchsTurnMessages :: Game -> [Message]
 witchsTurnMessages game = concat
@@ -225,87 +225,87 @@ witchsTurnMessages game = concat
     where
         to              = game ^?! players . witches . name
         victim          = game ^?! votee
-        wakeUpMessage   = publicMessage [iFile|variant/standard/engine/witchs-turn/start-public.text|]
-        passMessage     = privateMessage to [iFile|variant/standard/engine/witchs-turn/start-pass.text|]
+        wakeUpMessage   = publicMessage [iFile|variant/standard/engine/witchs-turn/start-public.txt|]
+        passMessage     = privateMessage to [iFile|variant/standard/engine/witchs-turn/start-pass.txt|]
         healMessages
             | game ^. healUsed  = []
             | hasn't votee game = []
-            | otherwise         = [privateMessage to [iFile|variant/standard/engine/witchs-turn/start-heal.text|]]
+            | otherwise         = [privateMessage to [iFile|variant/standard/engine/witchs-turn/start-heal.txt|]]
         poisonMessages
             | game ^. poisonUsed    = []
-            | otherwise             = [privateMessage to [iFile|variant/standard/engine/witchs-turn/start-poison.text|]]
+            | otherwise             = [privateMessage to [iFile|variant/standard/engine/witchs-turn/start-poison.txt|]]
 
 playerWonMessage :: Text -> Message
-playerWonMessage to = privateMessage to [iFile|variant/standard/engine/game-over/player-won.text|]
+playerWonMessage to = privateMessage to [iFile|variant/standard/engine/game-over/player-won.txt|]
 
 playerContributedMessage :: Text -> Message
-playerContributedMessage to = privateMessage to [iFile|variant/standard/engine/game-over/player-contributed.text|]
+playerContributedMessage to = privateMessage to [iFile|variant/standard/engine/game-over/player-contributed.txt|]
 
 playerLostMessage :: Text -> Message
-playerLostMessage to = privateMessage to [iFile|variant/standard/engine/game-over/player-lost.text|]
+playerLostMessage to = privateMessage to [iFile|variant/standard/engine/game-over/player-lost.txt|]
 
 playerKilledMessage :: Text -> Message
-playerKilledMessage to = privateMessage to [iFile|variant/standard/engine/general/player-killed.text|]
+playerKilledMessage to = privateMessage to [iFile|variant/standard/engine/general/player-killed.txt|]
 
 orphanJoinedPackMessages :: Text -> Game -> [Message]
 orphanJoinedPackMessages to game =
-    privateMessage to [iFile|variant/standard/engine/orphans-turn/player-joined-werewolves-private.text|]
-    : groupMessages (map (view name) werewolves) [iFile|variant/standard/engine/orphans-turn/player-joined-werewolves-group.text|]
+    privateMessage to [iFile|variant/standard/engine/orphans-turn/player-joined-werewolves-private.txt|]
+    : groupMessages (map (view name) werewolves) [iFile|variant/standard/engine/orphans-turn/player-joined-werewolves-group.txt|]
     where
         orphan      = game ^?! players . villageDrunks
         werewolves  = game ^.. players . traverse . alive . filtered (is werewolf) \\ [orphan]
 
 ferinaGruntsMessage :: Message
-ferinaGruntsMessage = publicMessage [iFile|variant/standard/engine/druids-turn/start.text|]
+ferinaGruntsMessage = publicMessage [iFile|variant/standard/engine/druids-turn/start.txt|]
 
 jesterLynchedMessage :: Player -> Message
-jesterLynchedMessage jester = publicMessage [iFile|variant/standard/engine/lynching/jester-lynched.text|]
+jesterLynchedMessage jester = publicMessage [iFile|variant/standard/engine/lynching/jester-lynched.txt|]
 
 noPlayerLynchedMessage :: Message
-noPlayerLynchedMessage = publicMessage [iFile|variant/standard/engine/lynching/no-player-lynched.text|]
+noPlayerLynchedMessage = publicMessage [iFile|variant/standard/engine/lynching/no-player-lynched.txt|]
 
 playerLynchedMessage :: Player -> Message
 playerLynchedMessage player
     | is simpleWerewolf player
-        || is alphaWolf player  = publicMessage [iFile|variant/standard/engine/lynching/werewolf-lynched.text|]
-    | otherwise                 = publicMessage [iFile|variant/standard/engine/lynching/player-lynched.text|]
+        || is alphaWolf player  = publicMessage [iFile|variant/standard/engine/lynching/werewolf-lynched.txt|]
+    | otherwise                 = publicMessage [iFile|variant/standard/engine/lynching/player-lynched.txt|]
 
 scapegoatLynchedMessage :: Player -> Message
-scapegoatLynchedMessage scapegoat = publicMessage [iFile|variant/standard/engine/lynching/scapegoat-lynched.text|]
+scapegoatLynchedMessage scapegoat = publicMessage [iFile|variant/standard/engine/lynching/scapegoat-lynched.txt|]
 
 scapegoatChoseAllowedVotersMessage :: Game -> Message
-scapegoatChoseAllowedVotersMessage game = publicMessage [iFile|variant/standard/engine/scapegoats-turn/end.text|]
+scapegoatChoseAllowedVotersMessage game = publicMessage [iFile|variant/standard/engine/scapegoats-turn/end.txt|]
 
 noPlayerDevouredMessage :: Message
-noPlayerDevouredMessage = publicMessage [iFile|variant/standard/engine/sunrise/no-player-devoured.text|]
+noPlayerDevouredMessage = publicMessage [iFile|variant/standard/engine/sunrise/no-player-devoured.txt|]
 
 playerDevouredMessage :: Player -> Message
-playerDevouredMessage player = publicMessage [iFile|variant/standard/engine/sunrise/player-devoured.text|]
+playerDevouredMessage player = publicMessage [iFile|variant/standard/engine/sunrise/player-devoured.txt|]
 
 playerDivinedMessage :: Text -> Player -> Message
-playerDivinedMessage to player = privateMessage to [iFile|variant/standard/engine/sunrise/player-divined.text|]
+playerDivinedMessage to player = privateMessage to [iFile|variant/standard/engine/sunrise/player-divined.txt|]
 
 playerPoisonedMessage :: Player -> Message
-playerPoisonedMessage player = publicMessage [iFile|variant/standard/engine/sunrise/player-poisoned.text|]
+playerPoisonedMessage player = publicMessage [iFile|variant/standard/engine/sunrise/player-poisoned.txt|]
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to player
-    | is alphaWolf player   = privateMessage to [iFile|variant/standard/engine/sunrise/alpha-wolf-seen.text|]
-    | is lycan player       = privateMessage to [iFile|variant/standard/engine/sunrise/lycan-seen.text|]
-    | otherwise             = privateMessage to [iFile|variant/standard/engine/sunrise/player-seen.text|]
+    | is alphaWolf player   = privateMessage to [iFile|variant/standard/engine/sunrise/alpha-wolf-seen.txt|]
+    | is lycan player       = privateMessage to [iFile|variant/standard/engine/sunrise/lycan-seen.txt|]
+    | otherwise             = privateMessage to [iFile|variant/standard/engine/sunrise/player-seen.txt|]
     where
         article = if is loner player then "" else "the " :: Text
 
 playerTurnedToStoneMessage :: Player -> Message
-playerTurnedToStoneMessage player = publicMessage [iFile|variant/standard/engine/sunrise/player-turned-to-stone.text|]
+playerTurnedToStoneMessage player = publicMessage [iFile|variant/standard/engine/sunrise/player-turned-to-stone.txt|]
 
 villageDrunkJoinedVillageMessage :: Text -> Message
-villageDrunkJoinedVillageMessage to = privateMessage to [iFile|variant/standard/engine/village-drunks-turn/player-joined-village.text|]
+villageDrunkJoinedVillageMessage to = privateMessage to [iFile|variant/standard/engine/village-drunks-turn/player-joined-village.txt|]
 
 villageDrunkJoinedPackMessages :: Text -> Game -> [Message]
 villageDrunkJoinedPackMessages to game =
-    privateMessage to [iFile|variant/standard/engine/village-drunks-turn/player-joined-werewolves-private.text|]
-    : groupMessages (map (view name) werewolves) [iFile|variant/standard/engine/village-drunks-turn/player-joined-werewolves-group.text|]
+    privateMessage to [iFile|variant/standard/engine/village-drunks-turn/player-joined-werewolves-private.txt|]
+    : groupMessages (map (view name) werewolves) [iFile|variant/standard/engine/village-drunks-turn/player-joined-werewolves-group.txt|]
     where
         villageDrunk    = game ^?! players . villageDrunks
         werewolves      = game ^.. players . traverse . alive . filtered (is werewolf) \\ [villageDrunk]
