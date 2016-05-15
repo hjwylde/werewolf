@@ -178,10 +178,6 @@ see = See . See.Options <$> playerArgument
 start :: Parser Command
 start = fmap Start $ Start.Options
     <$> (extraRolesOption <|> randomExtraRolesOption)
-    <*> switch (mconcat
-        [ long "include-seer"
-        , help "Always include the Seer"
-        ])
     <*> some (T.pack <$> strArgument (metavar "PLAYER..."))
     where
         extraRolesOption = fmap (Start.Use . filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat

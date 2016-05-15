@@ -28,7 +28,6 @@ import Control.Monad.Random
 import Control.Monad.State
 import Control.Monad.Writer
 
-import Data.List
 import Data.Text (Text)
 
 import Game.Werewolf
@@ -40,16 +39,15 @@ import System.Random.Shuffle
 import Werewolf.System
 
 data Options = Options
-    { optExtraRoles  :: ExtraRoles
-    , optIncludeSeer :: Bool
-    , argPlayers     :: [Text]
+    { optExtraRoles :: ExtraRoles
+    , argPlayers    :: [Text]
     } deriving (Eq, Show)
 
 data ExtraRoles = None | Random | Use [Text]
     deriving (Eq, Show)
 
 handle :: (MonadIO m, MonadRandom m) => Text -> Text -> Options -> m ()
-handle callerName tag (Options extraRoles includeSeer playerNames) = do
+handle callerName tag (Options extraRoles playerNames) = do
     whenM (doesGameExist tag &&^ (hasn't (stage . _GameOver) <$> readGame tag)) $ exitWith failure
         { messages = [gameAlreadyRunningMessage callerName]
         }
@@ -60,8 +58,7 @@ handle callerName tag (Options extraRoles includeSeer playerNames) = do
             Random          -> randomExtraRoles $ length playerNames
             Use roleNames   -> useExtraRoles callerName roleNames
 
-        let extraRoles''    = if includeSeer then nub (seerRole:extraRoles') else extraRoles'
-        let roles           = padRoles extraRoles'' (length playerNames + 1)
+        let roles = padRoles extraRoles' (length playerNames + 1)
 
         players <- createPlayers (callerName:playerNames) <$> shuffleM roles
 
