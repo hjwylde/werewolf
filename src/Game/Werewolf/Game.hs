@@ -10,8 +10,9 @@ game state only changes when a /command/ is issued. Thus, this module defines th
 structure and any fields required to keep track of the current state.
 -}
 
-{-# LANGUAGE Rank2Types      #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE Rank2Types        #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module Game.Werewolf.Game (
     -- * Game
@@ -21,7 +22,7 @@ module Game.Werewolf.Game (
     scapegoatBlamed, see, votes,
 
     Stage(..),
-    _FerinasGrunt, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
+    _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
     _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillageDrunksTurn,
     _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
 
@@ -50,7 +51,6 @@ import           Data.List.Extra
 import           Data.Map             (Map)
 import qualified Data.Map             as Map
 import           Data.Maybe
-import           Data.String
 import           Data.String.Humanise
 import           Data.Text            (Text)
 
@@ -95,28 +95,28 @@ data Game = Game
 --
 --   Once the game reaches a turn stage, it requires a /command/ to help push it past. Often only
 --   certain roles and commands may be performed at any given stage.
-data Stage  = FerinasGrunt | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OraclesTurn
+data Stage  = DruidsTurn | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OraclesTurn
             | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
             | VillageDrunksTurn | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
 instance Humanise Stage where
-    humanise FerinasGrunt       = fromString "Ferina's Grunt"
-    humanise GameOver           = fromString "Game over"
-    humanise HuntersTurn1       = fromString "Hunter's turn"
-    humanise HuntersTurn2       = fromString "Hunter's turn"
-    humanise Lynching           = fromString "Lynching"
-    humanise OraclesTurn        = fromString "Oracle's turn"
-    humanise OrphansTurn        = fromString "Orphan's turn"
-    humanise ProtectorsTurn     = fromString "Protector's turn"
-    humanise ScapegoatsTurn     = fromString "Scapegoat's turn"
-    humanise SeersTurn          = fromString "Seer's turn"
-    humanise Sunrise            = fromString "Sunrise"
-    humanise Sunset             = fromString "Sunset"
-    humanise VillageDrunksTurn  = fromString "Village Drunk's turn"
-    humanise VillagesTurn       = fromString "village's turn"
-    humanise WerewolvesTurn     = fromString "Werewolves' turn"
-    humanise WitchsTurn         = fromString "Witch's turn"
+    humanise DruidsTurn         = "Druid's turn"
+    humanise GameOver           = "Game over"
+    humanise HuntersTurn1       = "Hunter's turn"
+    humanise HuntersTurn2       = "Hunter's turn"
+    humanise Lynching           = "Lynching"
+    humanise OraclesTurn        = "Oracle's turn"
+    humanise OrphansTurn        = "Orphan's turn"
+    humanise ProtectorsTurn     = "Protector's turn"
+    humanise ScapegoatsTurn     = "Scapegoat's turn"
+    humanise SeersTurn          = "Seer's turn"
+    humanise Sunrise            = "Sunrise"
+    humanise Sunset             = "Sunset"
+    humanise VillageDrunksTurn  = "Village Drunk's turn"
+    humanise VillagesTurn       = "village's turn"
+    humanise WerewolvesTurn     = "Werewolves' turn"
+    humanise WitchsTurn         = "Witch's turn"
 
 makeLenses ''Game
 
@@ -135,7 +135,7 @@ allStages =
     , WitchsTurn
     , Sunrise
     , HuntersTurn2
-    , FerinasGrunt
+    , DruidsTurn
     , VillagesTurn
     , Lynching
     , HuntersTurn1
@@ -153,7 +153,7 @@ stageCycle = cycle allStages
 --   One of the more complex checks here is for the 'VillagesTurn'. If the Fallen Angel is in play,
 --   then the 'VillagesTurn' is available on the first day rather than only after the first night.
 stageAvailable :: Game -> Stage -> Bool
-stageAvailable game FerinasGrunt        = has (players . druids . alive) game
+stageAvailable game DruidsTurn          = has (players . druids . alive) game
 stageAvailable _ GameOver               = False
 stageAvailable game HuntersTurn1        =
     has (players . hunters . dead) game

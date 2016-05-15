@@ -11,7 +11,6 @@ Status commands.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings     #-}
 
 module Game.Werewolf.Command.Status (
     -- * Commands
@@ -25,11 +24,12 @@ import Control.Monad.Writer
 import Data.List
 import Data.Text (Text)
 
-import           Game.Werewolf          hiding (getPendingVoters)
-import           Game.Werewolf.Command
-import           Game.Werewolf.Messages
-import qualified Game.Werewolf.Role     as Role
-import           Game.Werewolf.Util
+-- TODO (hjw): remove Message.Engine
+import Game.Werewolf                 hiding (getPendingVoters)
+import Game.Werewolf.Command
+import Game.Werewolf.Message.Command
+import Game.Werewolf.Message.Engine
+import Game.Werewolf.Util
 
 circleCommand :: Text -> Bool -> Command
 circleCommand callerName includeDead = Command $ do
@@ -39,7 +39,7 @@ circleCommand callerName includeDead = Command $ do
 
 pingCommand :: Text -> Command
 pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    FerinasGrunt        -> return ()
+    DruidsTurn          -> return ()
     GameOver            -> tell [gameIsOverMessage callerName]
     HuntersTurn1        -> pingRole hunterRole
     HuntersTurn2        -> pingRole hunterRole
@@ -60,7 +60,7 @@ pingRole :: (MonadState Game m, MonadWriter [Message] m) => Role -> m ()
 pingRole role' = do
     player <- findPlayerBy_ role role'
 
-    tell [pingRoleMessage $ role' ^. Role.name]
+    tell [pingRoleMessage role']
     tell [pingPlayerMessage $ player ^. name]
 
 pingVillagers :: (MonadState Game m, MonadWriter [Message] m) => m ()
@@ -68,23 +68,20 @@ pingVillagers = do
     allowedVoterNames <- use allowedVoters
     pendingVoterNames <- toListOf names <$> getPendingVoters
 
-    tell [pingRoleMessage "village"]
+    tell [pingVillageMessage]
     tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
 
 pingWerewolves :: (MonadState Game m, MonadWriter [Message] m) => m ()
 pingWerewolves = do
     pendingVoters <- getPendingVoters
 
-    tell [pingRoleMessage "Werewolves"]
+    tell [pingWerewolvesMessage]
     tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
 
 statusCommand :: Text -> Command
-statusCommand callerName = Command $ use stage >>= \stage' -> case stage' of
-    GameOver    -> tell [gameIsOverMessage callerName]
-    _           -> tell . statusMessages stage' =<< use players
-    where
-        statusMessages stage players =
-            currentStageMessages callerName stage ++
-            [ rolesInGameMessage (Just callerName) (players ^.. roles)
-            , playersInGameMessage callerName players
-            ]
+statusCommand callerName = Command $ do
+    game <- get
+
+    tell $ currentStageMessages callerName game
+    tell $ [rolesInGameMessage (Just callerName) game]
+    tell $ [playersInGameMessage callerName game]

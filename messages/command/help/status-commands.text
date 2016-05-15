@@ -1,0 +1,4 @@
+Status commands:
+- `ping` ping the status of the current game publicly
+- `status` get the status of the current game privately
+- `circle [-a|--include-dead]` get the game circle

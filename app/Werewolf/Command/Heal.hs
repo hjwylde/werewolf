@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Handler for the heal subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Command.Heal (
     -- * Handle
     handle,
@@ -28,8 +26,8 @@ import Game.Werewolf
 import Game.Werewolf.Command
 import Game.Werewolf.Command.Witch
 import Game.Werewolf.Engine
+import Game.Werewolf.Message.Error
 
-import Werewolf.Messages
 import Werewolf.System
 
 handle :: (MonadIO m, MonadRandom m) => Text -> Text -> m ()

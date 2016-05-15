@@ -50,13 +50,14 @@ import qualified Data.Map   as Map
 import           Data.Maybe
 import           Data.Text  (Text)
 
-import           Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
-                                         hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
-import qualified Game.Werewolf.Game     as Game
-import           Game.Werewolf.Messages
+import           Game.Werewolf.Game           hiding (getAllowedVoters, getPendingVoters,
+                                               hasAnyoneWon, hasFallenAngelWon, hasVillagersWon,
+                                               hasWerewolvesWon)
+import qualified Game.Werewolf.Game           as Game
+import           Game.Werewolf.Message.Engine
 import           Game.Werewolf.Player
 import           Game.Werewolf.Response
-import           Game.Werewolf.Role     hiding (name)
+import           Game.Werewolf.Role           hiding (name)
 
 import Prelude hiding (round)
 

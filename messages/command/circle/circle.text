@@ -1,0 +1,2 @@
+The players are sitting in the following order:
+#{T.intercalate " <-> " (map humanisePlayerWithState (players ++ [head players]))}

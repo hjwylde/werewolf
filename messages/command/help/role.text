@@ -1,0 +1,3 @@
+#{humanise role} (#{T.pack . show $ role ^. balance}):
+#{role ^. description}
+#{role ^. rules}

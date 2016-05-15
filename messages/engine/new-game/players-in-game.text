@@ -1,0 +1,1 @@
+A new game of Werewolf is starting with #{humanise $ game ^.. players}!

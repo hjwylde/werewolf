@@ -27,7 +27,7 @@ module Game.Werewolf.Player (
     alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, lycan, medusa, oracle,
     orphan, protector, scapegoat, seer, simpleVillager, simpleWerewolf, spitefulGhost, trueVillager,
     villageDrunk, witch,
-    villager, werewolf,
+    loner, villager, werewolf,
 
     -- | The following traversals are provided just as a bit of sugar to avoid continually writing
     --   @'traverse' .@.
@@ -38,7 +38,7 @@ module Game.Werewolf.Player (
     alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
     medusas, oracles, orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves,
     spitefulGhosts, trueVillagers, villageDrunks, witches,
-    villagers, werewolves,
+    loners, villagers, werewolves,
     alive, dead,
 ) where
 
@@ -46,7 +46,6 @@ import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import Data.Function
-import Data.String
 import Data.String.Humanise
 import Data.Text            as T
 
@@ -72,7 +71,7 @@ instance Eq Player where
     (==) = (==) `on` view name
 
 instance Humanise Player where
-    humanise player = fromString . T.unpack $ player ^. name
+    humanise = view name
 
 makePrisms ''State
 
@@ -241,6 +240,14 @@ villageDrunk = role . only villageDrunkRole
 -- @
 witch :: Traversal' Player ()
 witch = role . only witchRole
+
+-- | The traversal of 'Player's aligned with 'NoOne'.
+--
+-- @
+-- 'loner' = 'role' . 'allegiance' . '_NoOne'
+-- @
+loner :: Traversal' Player ()
+loner = role . allegiance . _NoOne
 
 -- | The traversal of 'Player's aligned with the 'Villagers'.
 --
@@ -449,6 +456,14 @@ villageDrunks = traverse . filtered (is villageDrunk)
 -- @
 witches :: Traversable t => Traversal' (t Player) Player
 witches = traverse . filtered (is witch)
+
+-- | This 'Traversal' provides the traversal of 'loner' 'Player's.
+--
+-- @
+-- 'loners' = 'traverse' . 'filtered' . ('is' 'loner')
+-- @
+loners :: Traversable t => Traversal' (t Player) Player
+loners = traverse . filtered (is loner)
 
 -- | This 'Traversal' provides the traversal of 'villager' 'Player's.
 --

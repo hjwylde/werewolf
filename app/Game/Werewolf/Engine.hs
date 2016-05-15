@@ -29,12 +29,14 @@ import           Data.List.Extra
 import qualified Data.Map        as Map
 import           Data.Maybe
 
-import Game.Werewolf.Game     hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
-                               hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
-import Game.Werewolf.Messages
+-- TODO (hjw): remove Message.Command
+import Game.Werewolf.Game            hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
+                                      hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
+import Game.Werewolf.Message.Command
+import Game.Werewolf.Message.Engine
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (name)
+import Game.Werewolf.Role            hiding (name)
 import Game.Werewolf.Util
 
 import Prelude hiding (round)
@@ -61,7 +63,7 @@ checkBoots = do
 
 checkStage' :: (MonadRandom m, MonadState Game m, MonadWriter [Message] m) => m ()
 checkStage' = use stage >>= \stage' -> case stage' of
-    FerinasGrunt -> do
+    DruidsTurn -> do
         druid       <- findPlayerBy_ role druidRole
         players'    <- filter (isn't alphaWolf) <$> getAdjacentAlivePlayers (druid ^. name)
 
@@ -103,8 +105,8 @@ checkStage' = use stage >>= \stage' -> case stage' of
         whenM (isJust <$> use protect) advanceStage
 
     ScapegoatsTurn -> unlessM (use scapegoatBlamed) $ do
-        allowedVoters' <- use allowedVoters
-        tell [scapegoatChoseAllowedVotersMessage allowedVoters']
+        game <- get
+        tell [scapegoatChoseAllowedVotersMessage game]
 
         advanceStage
 
@@ -147,17 +149,13 @@ checkStage' = use stage >>= \stage' -> case stage' of
             orphan <- findPlayerBy_ role orphanRole
 
             whenM (isPlayerDead roleModelsName &&^ return (is alive orphan) &&^ return (is villager orphan)) $ do
-                aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
-
                 setPlayerAllegiance (orphan ^. name) Werewolves
 
-                tell $ orphanJoinedPackMessages (orphan ^. name) aliveWerewolfNames
+                tell . orphanJoinedPackMessages (orphan ^. name) =<< get
 
         advanceStage
 
     VillageDrunksTurn -> do
-        aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
-
         randomAllegiance <- getRandomAllegiance
         players . villageDrunks . role . allegiance .= randomAllegiance
 
@@ -165,7 +163,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         if is villager villageDrunk
             then tell [villageDrunkJoinedVillageMessage $ villageDrunk ^. name]
-            else tell $ villageDrunkJoinedPackMessages (villageDrunk ^. name) aliveWerewolfNames
+            else tell . villageDrunkJoinedPackMessages (villageDrunk ^. name) =<< get
 
         advanceStage
 
@@ -190,7 +188,7 @@ lynchVotee (Just votee)
     | is jester votee       = do
         jesterRevealed .= True
 
-        tell [jesterLynchedMessage $ votee ^. name]
+        tell [jesterLynchedMessage votee]
     | is fallenAngel votee  = do
         fallenAngelLynched .= True
 
@@ -203,7 +201,7 @@ lynchVotee _            = preuse (players . scapegoats . alive) >>= \mScapegoat 
         scapegoatBlamed .= True
 
         killPlayer (scapegoat ^. name)
-        tell [scapegoatLynchedMessage (scapegoat ^. name)]
+        tell [scapegoatLynchedMessage scapegoat]
     _               -> tell [noPlayerLynchedMessage]
 
 devourVotee :: (MonadState Game m, MonadWriter [Message] m) => Maybe Player -> m ()

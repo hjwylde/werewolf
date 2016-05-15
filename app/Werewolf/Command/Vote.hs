@@ -31,9 +31,8 @@ import Game.Werewolf.Command
 import Game.Werewolf.Command.Villager as Villager
 import Game.Werewolf.Command.Werewolf as Werewolf
 import Game.Werewolf.Engine
-import Game.Werewolf.Messages
+import Game.Werewolf.Message.Error
 
-import Werewolf.Messages
 import Werewolf.System
 
 data Options = Options

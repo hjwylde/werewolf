@@ -29,8 +29,8 @@ import Game.Werewolf
 import Game.Werewolf.Command
 import Game.Werewolf.Command.Oracle
 import Game.Werewolf.Engine
+import Game.Werewolf.Message.Error
 
-import Werewolf.Messages
 import Werewolf.System
 
 data Options = Options

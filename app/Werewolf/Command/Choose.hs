@@ -9,8 +9,6 @@ Maintainer  : public@hjwylde.com
 Options and handler for the choose subcommand.
 -}
 
-{-# LANGUAGE OverloadedStrings #-}
-
 module Werewolf.Command.Choose (
     -- * Options
     Options(..),
@@ -34,9 +32,8 @@ import Game.Werewolf.Command.Hunter    as Hunter
 import Game.Werewolf.Command.Orphan    as Orphan
 import Game.Werewolf.Command.Scapegoat as Scapegoat
 import Game.Werewolf.Engine
-import Game.Werewolf.Messages
+import Game.Werewolf.Message.Error
 
-import Werewolf.Messages
 import Werewolf.System
 
 data Options = Options

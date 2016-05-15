@@ -1,0 +1,1 @@
+As you open them you notice a door broken down and #{humanise player}'s guts half devoured and spilling out over the cobblestones. From the look of their personal effects, you deduce they were #{article $ player ^. role} #{humanise $ player ^. role}.

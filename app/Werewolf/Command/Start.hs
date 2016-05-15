@@ -11,7 +11,6 @@ Options and handler for the start subcommand.
 
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings     #-}
 
 module Werewolf.Command.Start (
     -- * Options
@@ -22,23 +21,22 @@ module Werewolf.Command.Start (
 ) where
 
 import Control.Lens
+import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Random
 import Control.Monad.State
 import Control.Monad.Writer
 
-import           Data.List
-import           Data.Text (Text)
-import qualified Data.Text as T
+import Data.List
+import Data.Text (Text)
 
 import Game.Werewolf
 import Game.Werewolf.Engine
-import Game.Werewolf.Role   as Role
+import Game.Werewolf.Message.Error
 
 import System.Random.Shuffle
 
-import Werewolf.Messages
 import Werewolf.System
 
 data Options = Options
@@ -83,14 +81,12 @@ randomExtraRoles n = do
     take count <$> shuffleM restrictedRoles
 
 useExtraRoles :: MonadError [Message] m => Text -> [Text] -> m [Role]
-useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByName roleName of
+useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByTag roleName of
     Just role   -> return role
     Nothing     -> throwError [roleDoesNotExistMessage callerName roleName]
 
-findByName :: Text -> Maybe Role
-findByName name' = restrictedRoles ^? traverse . filtered ((sanitise name' ==) . T.toLower . sanitise . view Role.name)
-    where
-        sanitise = T.replace " " "-"
+findByTag :: Text -> Maybe Role
+findByTag tag' = restrictedRoles ^? traverse . filteredBy tag tag'
 
 padRoles :: [Role] -> Int -> [Role]
 padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles

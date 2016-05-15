@@ -29,7 +29,8 @@ import           Data.Text  (Text)
 
 import Game.Werewolf
 import Game.Werewolf.Command
-import Game.Werewolf.Messages
+import Game.Werewolf.Message.Command
+import Game.Werewolf.Message.Error
 import Game.Werewolf.Util
 
 unvoteCommand :: Text -> Command
