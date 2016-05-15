@@ -1,5 +1,5 @@
 Global commands:
-- `start ([-e|--extra-roles ROLE,...] | [-r|--random-extra-roles]) [--include-seer] PLAYER...`
+- `start ([-e|--extra-roles ROLE,...] | [-r|--random-extra-roles]) PLAYER...`
 - `end [-f|--force]`
 - `boot PLAYER`
 - `quit`
