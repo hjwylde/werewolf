@@ -1,6 +1,6 @@
 Global commands:
 - `start ([-e|--extra-roles ROLE,...] | [-r|--random-extra-roles]) [--include-seer] PLAYER...`
-- `end [-f|--force]`
+- `end`
 - `boot PLAYER`
 - `quit`
 - `version`
