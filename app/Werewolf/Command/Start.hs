@@ -40,6 +40,7 @@ import Werewolf.System
 
 data Options = Options
     { optExtraRoles :: ExtraRoles
+    , optVariant    :: Variant
     , argPlayers    :: [Text]
     } deriving (Eq, Show)
 
@@ -47,7 +48,7 @@ data ExtraRoles = None | Random | Use [Text]
     deriving (Eq, Show)
 
 handle :: (MonadIO m, MonadRandom m) => Text -> Text -> Options -> m ()
-handle callerName tag (Options extraRoles playerNames) = do
+handle callerName tag (Options extraRoles variant playerNames) = do
     whenM (doesGameExist tag &&^ (hasn't (stage . _GameOver) <$> readGame tag)) $ exitWith failure
         { messages = [gameAlreadyRunningMessage callerName]
         }
@@ -62,7 +63,7 @@ handle callerName tag (Options extraRoles playerNames) = do
 
         players <- createPlayers (callerName:playerNames) <$> shuffleM roles
 
-        runWriterT $ startGame callerName players >>= execStateT checkStage
+        runWriterT $ startGame callerName variant players >>= execStateT checkStage
 
     case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }

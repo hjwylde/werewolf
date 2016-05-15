@@ -23,6 +23,11 @@ import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version (showVersion)
 
+import Game.Werewolf (Variant (..))
+
+import Options.Applicative
+import Options.Applicative.Types
+
 import qualified Werewolf.Command.Boot      as Boot
 import qualified Werewolf.Command.Choose    as Choose
 import qualified Werewolf.Command.Circle    as Circle
@@ -35,8 +40,6 @@ import qualified Werewolf.Command.See       as See
 import qualified Werewolf.Command.Start     as Start
 import qualified Werewolf.Command.Vote      as Vote
 import qualified Werewolf.Version           as This
-
-import Options.Applicative
 
 data Options = Options
     { optCaller  :: Text
@@ -173,8 +176,17 @@ see = See . See.Options <$> playerArgument
 start :: Parser Command
 start = fmap Start $ Start.Options
     <$> (extraRolesOption <|> randomExtraRolesOption)
+    <*> variantOption (mconcat [
+        long "variant", short 'v', metavar "VARIANT",
+        value Standard, showDefaultWith $ const "standard",
+        help "Specify the game variant"
+        ])
     <*> some (T.pack <$> strArgument (metavar "PLAYER..."))
     where
+        variantOption = option $ readerAsk >>= \opt -> case opt of
+            "standard"  -> return Standard
+            _           -> readerError $ "unrecognised variant `" ++ opt ++ "'"
+
         extraRolesOption = fmap (Start.Use . filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
             [ long "extra-roles", short 'e', metavar "ROLE,..."
             , value []

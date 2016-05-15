@@ -17,9 +17,12 @@ structure and any fields required to keep track of the current state.
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    stage, round, players, boots, allowedVoters, divine, fallenAngelLynched, healUsed,
+    variant, stage, round, players, boots, allowedVoters, divine, fallenAngelLynched, healUsed,
     hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
     scapegoatBlamed, see, votes,
+
+    Variant(..),
+    _Standard,
 
     Stage(..),
     _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
@@ -68,7 +71,8 @@ import Prelude hiding (round)
 --   Some of the additional fields are reset each round (e.g., the Seer's 'see') while others are
 --   kept around for the whole game (e.g., the Orphan's 'roleModel').
 data Game = Game
-    { _stage              :: Stage
+    { _variant            :: Variant
+    , _stage              :: Stage
     , _round              :: Int
     , _players            :: [Player]
     , _boots              :: Map Text [Text]
@@ -88,6 +92,12 @@ data Game = Game
     , _see                :: Maybe Text       -- ^ Seer
     , _votes              :: Map Text Text    -- ^ Villagers and Werewolves
     } deriving (Eq, Read, Show)
+
+data Variant = Standard
+    deriving (Eq, Read, Show)
+
+instance Humanise Variant where
+    humanise Standard = "standard"
 
 -- | Most of these are fairly self-explainable (the turn stages). 'Sunrise' and 'Sunset' are
 --   provided as meaningful breaks between the day and night as, for example, a 'VillagesTurn' may
@@ -119,6 +129,8 @@ instance Humanise Stage where
     humanise WitchsTurn         = "Witch's turn"
 
 makeLenses ''Game
+
+makePrisms ''Variant
 
 makePrisms ''Stage
 
@@ -182,9 +194,10 @@ stageAvailable game WitchsTurn          =
 
 -- | Creates a new 'Game' with the given players. No validations are performed here, those are left
 --   to the binary.
-newGame :: [Player] -> Game
-newGame players = Game
-    { _stage                = head stageCycle
+newGame :: Variant -> [Player] -> Game
+newGame variant players = Game
+    { _variant              = variant
+    , _stage                = head stageCycle
     , _round                = 0
     , _players              = players
     , _boots                = Map.empty
