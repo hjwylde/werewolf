@@ -29,6 +29,12 @@ module Game.Werewolf.Message.Command (
     -- * End
     gameEndedMessage,
 
+    -- * Help
+    gameDescriptionMessage, globalCommandsMessage, helpCommandsMessage, hunterCommandsMessage,
+    oracleCommandsMessage, orphanCommandsMessage, protectorCommandsMessage, roleMessage,
+    rulesMessage, scapegoatCommandsMessage, seerCommandsMessage, stagesMessage,
+    standardCommandsMessage, statusCommandsMessage, witchCommandsMessage,
+
     -- * Ping
     pingPlayerMessage, pingRoleMessage, pingVillageMessage, pingWerewolvesMessage,
 
@@ -48,6 +54,7 @@ module Game.Werewolf.Message.Command (
 import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
+import           Data.Maybe
 import           Data.String.Humanise
 import           Data.String.Interpolate.Extra
 import           Data.Text                     (Text)
@@ -76,6 +83,78 @@ playerShotMessage player = publicMessage [iFile|messages/command/choose/player-s
 
 gameEndedMessage :: Text -> Message
 gameEndedMessage callerName = publicMessage [iFile|messages/command/end/game-ended.text|]
+
+gameDescriptionMessage :: Text -> Message
+gameDescriptionMessage callerName = privateMessage callerName [iFile|messages/command/help/game-description.text|]
+
+globalCommandsMessage :: Text -> Message
+globalCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/global-commands.text|]
+
+helpCommandsMessage :: Text -> Message
+helpCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/help-commands.text|]
+
+hunterCommandsMessage :: Text -> Message
+hunterCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/hunter-commands.text|]
+
+oracleCommandsMessage :: Text -> Message
+oracleCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/oracle-commands.text|]
+
+orphanCommandsMessage :: Text -> Message
+orphanCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/orphan-commands.text|]
+
+protectorCommandsMessage :: Text -> Message
+protectorCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/protector-commands.text|]
+
+roleMessage :: Text -> Role -> Message
+roleMessage callerName role = privateMessage callerName [iFile|messages/command/help/role.text|]
+
+rulesMessage :: Text -> Message
+rulesMessage callerName = privateMessage callerName [iFile|messages/command/help/rules.text|]
+
+scapegoatCommandsMessage :: Text -> Message
+scapegoatCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/scapegoat-commands.text|]
+
+seerCommandsMessage :: Text -> Message
+seerCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/seer-commands.text|]
+
+stagesMessage :: Text -> Maybe Game -> Message
+stagesMessage callerName mGame = privateMessage callerName . T.concat $
+    [ [iFile|messages/command/help/standard-cycle.text|]
+    , [iFile|messages/command/help/sunset.text|]
+    ] ++ [ [iFile|messages/command/help/orphans-turn.text|]
+    | isNothing mGame || has (players . orphans . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/village-drunks-turn.text|]
+    | isNothing mGame || has (players . villageDrunks . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/seers-turn.text|]
+    | isNothing mGame || has (players . seers . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/oracles-turn.text|]
+    | isNothing mGame || has (players . oracles . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/protectors-turn.text|]
+    | isNothing mGame || has (players . protectors . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/werewolves-turn.text|]
+    ] ++ [ [iFile|messages/command/help/witchs-turn.text|]
+    | isNothing mGame || has (players . witches . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/sunrise.text|]
+    ] ++ [ [iFile|messages/command/help/hunters-turn.text|]
+    | isNothing mGame || has (players . hunters . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/druids-turn.text|]
+    | isNothing mGame || has (players . druids . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/villages-turn.text|]
+    ] ++ [ [iFile|messages/command/help/hunters-turn.text|]
+    | isNothing mGame || has (players . hunters . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/scapegoats-turn.text|]
+    | isNothing mGame || has (players . scapegoats . named callerName) (fromJust mGame)
+    ] ++ [ [iFile|messages/command/help/game-over.text|]
+    ]
+
+standardCommandsMessage :: Text -> Message
+standardCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/standard-commands.text|]
+
+statusCommandsMessage :: Text -> Message
+statusCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/status-commands.text|]
+
+witchCommandsMessage :: Text -> Message
+witchCommandsMessage callerName = privateMessage callerName [iFile|messages/command/help/witch-commands.text|]
 
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to [iFile|messages/command/ping/player-pinged.text|]

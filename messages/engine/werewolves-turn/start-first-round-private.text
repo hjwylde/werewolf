@@ -1,1 +1,1 @@
-You feel restless, like an old curse is keeping you from sleep. It seems you're not the only one...  #{humanise (werewolves \\ [player])} #{conjugateToBe (length werewolves - 1)} also emerging from their #{pluralise (length werewolves - 1) "home"}.
+You feel restless, like an old curse is keeping you from sleep. It seems you're not the only one... #{humanise (werewolves \\ [player])} #{conjugateToBe (length werewolves - 1)} also emerging from their #{pluralise (length werewolves - 1) "home"}.
