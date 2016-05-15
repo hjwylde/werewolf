@@ -27,7 +27,6 @@ import qualified Werewolf.Command.Boot      as Boot
 import qualified Werewolf.Command.Choose    as Choose
 import qualified Werewolf.Command.Circle    as Circle
 import qualified Werewolf.Command.Divine    as Divine
-import qualified Werewolf.Command.End       as End
 import qualified Werewolf.Command.Help      as Help
 import qualified Werewolf.Command.Interpret as Interpret
 import qualified Werewolf.Command.Poison    as Poison
@@ -50,7 +49,7 @@ data Command
     | Choose Choose.Options
     | Circle Circle.Options
     | Divine Divine.Options
-    | End End.Options
+    | End
     | Heal
     | Help Help.Options
     | Interpret Interpret.Options
@@ -134,11 +133,7 @@ divine :: Parser Command
 divine = Divine . Divine.Options <$> playerArgument
 
 end :: Parser Command
-end = End . End.Options
-    <$> switch (mconcat
-        [ long "force", short 'f'
-        , help "Force the game to end"
-        ])
+end = pure End
 
 heal :: Parser Command
 heal = pure Heal

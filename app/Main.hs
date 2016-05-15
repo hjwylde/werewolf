@@ -61,7 +61,7 @@ handle (Options callerName tag command) = case command of
     Boot options                        -> Boot.handle callerName tag options
     Circle options                      -> Circle.handle callerName tag options
     Divine options                      -> Divine.handle callerName tag options
-    End options                         -> End.handle callerName tag options
+    End                                 -> End.handle callerName tag
     Heal                                -> Heal.handle callerName tag
     Help options                        -> Help.handle callerName tag options
     Interpret (Interpret.Options args)  -> interpret callerName tag args
