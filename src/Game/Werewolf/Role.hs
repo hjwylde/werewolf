@@ -149,11 +149,11 @@ restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
 orphanRole :: Role
 orphanRole = Role
     { _tag          = "orphan"
-    , _name         = T.strip [iFile|messages/role/orphan/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/orphan/name.text|]
     , _allegiance   = Villagers
     , _balance      = -1
-    , _description  = T.strip [iFile|messages/role/orphan/description.text|]
-    , _rules        = T.strip [iFile|messages/role/orphan/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/orphan/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/orphan/rules.text|]
     }
 
 -- | /Hah, maybe not as liked as the Jester, but the Drunk sure does their fair share of stupid/
@@ -169,11 +169,11 @@ orphanRole = Role
 villageDrunkRole :: Role
 villageDrunkRole = Role
     { _tag          = "village-drunk"
-    , _name         = T.strip [iFile|messages/role/village-drunk/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/village-drunk/name.text|]
     , _allegiance   = Villagers
     , _balance      = -1
-    , _description  = T.strip [iFile|messages/role/village-drunk/description.text|]
-    , _rules        = T.strip [iFile|messages/role/village-drunk/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/village-drunk/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/village-drunk/rules.text|]
     }
 
 -- | /Long ago during the War in Heaven, angels fell from the sky as one by one those that followed/
@@ -187,11 +187,11 @@ villageDrunkRole = Role
 fallenAngelRole :: Role
 fallenAngelRole = Role
     { _tag          = "fallen-angel"
-    , _name         = T.strip [iFile|messages/role/fallen-angel/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/fallen-angel/name.text|]
     , _allegiance   = NoOne
     , _balance      = 0
-    , _description  = T.strip [iFile|messages/role/fallen-angel/description.text|]
-    , _rules        = T.strip [iFile|messages/role/fallen-angel/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/fallen-angel/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/fallen-angel/rules.text|]
     }
 
 -- | /In this time of turmoil, it would seem unlikely for the Villagers of Fougères to unanimously/
@@ -204,11 +204,11 @@ fallenAngelRole = Role
 spitefulGhostRole :: Role
 spitefulGhostRole = Role
     { _tag          = "spiteful-ghost"
-    , _name         = T.strip [iFile|messages/role/spiteful-ghost/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/spiteful-ghost/name.text|]
     , _allegiance   = NoOne
     , _balance      = 0
-    , _description  = T.strip [iFile|messages/role/spiteful-ghost/description.text|]
-    , _rules        = T.strip [iFile|messages/role/spiteful-ghost/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/spiteful-ghost/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/spiteful-ghost/rules.text|]
     }
 
 -- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
@@ -220,11 +220,11 @@ spitefulGhostRole = Role
 beholderRole :: Role
 beholderRole = Role
     { _tag          = "beholder"
-    , _name         = T.strip [iFile|messages/role/beholder/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/beholder/name.text|]
     , _allegiance   = Villagers
     , _balance      = 1
-    , _description  = T.strip [iFile|messages/role/beholder/description.text|]
-    , _rules        = T.strip [iFile|messages/role/beholder/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/beholder/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/beholder/rules.text|]
     }
 
 -- | /Never trust a politician. Nor a Crooked Senator for that matter. The Crooked Senator may seem/
@@ -236,11 +236,11 @@ beholderRole = Role
 crookedSenatorRole :: Role
 crookedSenatorRole = Role
     { _tag          = "crooked-senator"
-    , _name         = T.strip [iFile|messages/role/crooked-senator/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/crooked-senator/name.text|]
     , _allegiance   = Villagers
     , _balance      = 1
-    , _description  = T.strip [iFile|messages/role/crooked-senator/description.text|]
-    , _rules        = T.strip [iFile|messages/role/crooked-senator/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/crooked-senator/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/crooked-senator/rules.text|]
     }
 
 -- | /How honoured we are to be in the presence of such a noble leader. The return of the Druid/
@@ -254,11 +254,11 @@ crookedSenatorRole = Role
 druidRole :: Role
 druidRole = Role
     { _tag          = "druid"
-    , _name         = T.strip [iFile|messages/role/druid/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/druid/name.text|]
     , _allegiance   = Villagers
     , _balance      = 3
-    , _description  = T.strip [iFile|messages/role/druid/description.text|]
-    , _rules        = T.strip [iFile|messages/role/druid/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/druid/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/druid/rules.text|]
     }
 
 -- | /A skilled marksman with quick reflexes. In the unfortunate situation that they are jumped and/
@@ -270,11 +270,11 @@ druidRole = Role
 hunterRole :: Role
 hunterRole = Role
     { _tag          = "hunter"
-    , _name         = T.strip [iFile|messages/role/hunter/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/hunter/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.strip [iFile|messages/role/hunter/description.text|]
-    , _rules        = T.strip [iFile|messages/role/hunter/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/hunter/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/hunter/rules.text|]
     }
 
 -- | /Every village needs a Jester; they're so stupid, but provide so much entertainment! The/
@@ -288,11 +288,11 @@ hunterRole = Role
 jesterRole :: Role
 jesterRole = Role
     { _tag          = "jester"
-    , _name         = T.strip [iFile|messages/role/jester/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/jester/name.text|]
     , _allegiance   = Villagers
     , _balance      = 0
-    , _description  = T.strip [iFile|messages/role/jester/description.text|]
-    , _rules        = T.strip [iFile|messages/role/jester/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/jester/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/jester/rules.text|]
     }
 
 -- | /Traditionally a Werewolf once transformed loses all memories and personality. Over years of/
@@ -305,11 +305,11 @@ jesterRole = Role
 lycanRole :: Role
 lycanRole = Role
     { _tag          = "lycan"
-    , _name         = T.strip [iFile|messages/role/lycan/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/lycan/name.text|]
     , _allegiance   = Villagers
     , _balance      = 0
-    , _description  = T.strip [iFile|messages/role/lycan/description.text|]
-    , _rules        = T.strip [iFile|messages/role/lycan/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/lycan/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/lycan/rules.text|]
     }
 
 -- | /A beautiful flirt, the Medusa is aligned with the Villagers but harbours a terrifying secret./
@@ -324,11 +324,11 @@ lycanRole = Role
 medusaRole :: Role
 medusaRole = Role
     { _tag          = "medusa"
-    , _name         = T.strip [iFile|messages/role/medusa/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/medusa/name.text|]
     , _allegiance   = Villagers
     , _balance      = 3
-    , _description  = T.strip [iFile|messages/role/medusa/description.text|]
-    , _rules        = T.strip [iFile|messages/role/medusa/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/medusa/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/medusa/rules.text|]
     }
 
 -- | /Originally rejected by the townsfolk, the Oracle's prophetic divinations has earned trust/
@@ -340,11 +340,11 @@ medusaRole = Role
 oracleRole :: Role
 oracleRole = Role
     { _tag          = "oracle"
-    , _name         = T.strip [iFile|messages/role/oracle/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/oracle/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.strip [iFile|messages/role/oracle/description.text|]
-    , _rules        = T.strip [iFile|messages/role/oracle/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/oracle/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/oracle/rules.text|]
     }
 
 -- | /The Protector is one of the few pure of heart and altruistic Villagers; they are forever/
@@ -358,11 +358,11 @@ oracleRole = Role
 protectorRole :: Role
 protectorRole = Role
     { _tag          = "protector"
-    , _name         = T.strip [iFile|messages/role/protector/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/protector/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.strip [iFile|messages/role/protector/description.text|]
-    , _rules        = T.strip [iFile|messages/role/protector/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/protector/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/protector/rules.text|]
     }
 
 -- | /Werewolves don't just spring up out of the ground! That's where dwarves come from. Clearly/
@@ -376,11 +376,11 @@ protectorRole = Role
 scapegoatRole :: Role
 scapegoatRole = Role
     { _tag          = "scapegoat"
-    , _name         = T.strip [iFile|messages/role/scapegoat/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/scapegoat/name.text|]
     , _allegiance   = Villagers
     , _balance      = 0
-    , _description  = T.strip [iFile|messages/role/scapegoat/description.text|]
-    , _rules        = T.strip [iFile|messages/role/scapegoat/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/scapegoat/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/scapegoat/rules.text|]
     }
 
 -- | /The Seer has the ability to see into fellow townsfolk and determine their true nature. This/
@@ -391,11 +391,11 @@ scapegoatRole = Role
 seerRole :: Role
 seerRole = Role
     { _tag          = "seer"
-    , _name         = T.strip [iFile|messages/role/seer/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/seer/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.strip [iFile|messages/role/seer/description.text|]
-    , _rules        = T.strip [iFile|messages/role/seer/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/seer/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/seer/rules.text|]
     }
 
 -- | /A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even/
@@ -407,11 +407,11 @@ seerRole = Role
 simpleVillagerRole :: Role
 simpleVillagerRole = Role
     { _tag          = "simple-villager"
-    , _name         = T.strip [iFile|messages/role/simple-villager/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/simple-villager/name.text|]
     , _allegiance   = Villagers
     , _balance      = 1
-    , _description  = T.strip [iFile|messages/role/simple-villager/description.text|]
-    , _rules        = T.strip [iFile|messages/role/simple-villager/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/simple-villager/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/simple-villager/rules.text|]
     }
 
 -- | /The True Villager has a heart and soul as clear as day! Their allegiance and devotion to the/
@@ -422,11 +422,11 @@ simpleVillagerRole = Role
 trueVillagerRole :: Role
 trueVillagerRole = Role
     { _tag          = "true-villager"
-    , _name         = T.strip [iFile|messages/role/true-villager/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/true-villager/name.text|]
     , _allegiance   = Villagers
     , _balance      = 2
-    , _description  = T.strip [iFile|messages/role/true-villager/description.text|]
-    , _rules        = T.strip [iFile|messages/role/true-villager/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/true-villager/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/true-villager/rules.text|]
     }
 
 -- | /Somehow forgotten with the coming of the Werewolves, the Witch has a chance to prove themself/
@@ -439,11 +439,11 @@ trueVillagerRole = Role
 witchRole :: Role
 witchRole = Role
     { _tag          = "witch"
-    , _name         = T.strip [iFile|messages/role/witch/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/witch/name.text|]
     , _allegiance   = Villagers
     , _balance      = 3
-    , _description  = T.strip [iFile|messages/role/witch/description.text|]
-    , _rules        = T.strip [iFile|messages/role/witch/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/witch/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/witch/rules.text|]
     }
 
 -- | /The Alpha Wolf leads the Werewolves in the raids against Fougères each night and not even the/
@@ -455,11 +455,11 @@ witchRole = Role
 alphaWolfRole :: Role
 alphaWolfRole = Role
     { _tag          = "alpha-wolf"
-    , _name         = T.strip [iFile|messages/role/alpha-wolf/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/alpha-wolf/name.text|]
     , _allegiance   = Werewolves
     , _balance      = -5
-    , _description  = T.strip [iFile|messages/role/alpha-wolf/description.text|]
-    , _rules        = T.strip [iFile|messages/role/alpha-wolf/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/alpha-wolf/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/alpha-wolf/rules.text|]
     }
 
 -- | /The Simple Werewolf is a fearsome lupine, cunning like no other creature that roams the/
@@ -471,9 +471,9 @@ alphaWolfRole = Role
 simpleWerewolfRole :: Role
 simpleWerewolfRole = Role
     { _tag          = "simple-werewolf"
-    , _name         = T.strip [iFile|messages/role/simple-werewolf/name.text|]
+    , _name         = T.strip [iFile|variant/standard/role/simple-werewolf/name.text|]
     , _allegiance   = Werewolves
     , _balance      = -4
-    , _description  = T.strip [iFile|messages/role/simple-werewolf/description.text|]
-    , _rules        = T.strip [iFile|messages/role/simple-werewolf/rules.text|]
+    , _description  = T.strip [iFile|variant/standard/role/simple-werewolf/description.text|]
+    , _rules        = T.strip [iFile|variant/standard/role/simple-werewolf/rules.text|]
     }
