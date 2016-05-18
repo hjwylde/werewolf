@@ -44,9 +44,10 @@ unvoteCommand callerName = Command $ do
 
     votes %= Map.delete callerName
 
-    aliveWerewolfNames <- toListOf (players . werewolves . alive . name) <$> get
+    aliveWerewolfNames  <- toListOf (players . werewolves . alive . name) <$> get
+    caller              <- findPlayerBy_ name callerName
 
-    tell [playerRescindedVoteMessage werewolfName callerName | werewolfName <- aliveWerewolfNames \\ [callerName]]
+    tell [playerRescindedVoteMessage werewolfName caller | werewolfName <- aliveWerewolfNames \\ [callerName]]
 
 voteCommand :: Text -> Text -> Command
 voteCommand callerName targetName = Command $ do
