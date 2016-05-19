@@ -11,6 +11,12 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 * Added player roles message when the game is force ended. ([#225](https://github.com/hjwylde/werewolf/issues/225))
 
+### v1.2.0.1
+
+*Revisions*
+
+* Added missing files to extra-source-files.
+
 ### v1.2.0.0
 
 *Major*
