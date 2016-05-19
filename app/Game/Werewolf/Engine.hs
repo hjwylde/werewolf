@@ -168,7 +168,12 @@ checkStage' = use stage >>= \stage' -> case stage' of
         advanceStage
 
     VillagesTurn -> whenM (null <$> liftM2 intersect getAllowedVoters getPendingVoters) $ do
-        tell . map (uncurry $ playerMadeLynchVoteMessage Nothing) =<< uses votes Map.toList
+        uses votes Map.toList >>= mapM_ (\(voterName, voteeName) -> do
+            voter <- findPlayerBy_ name voterName
+            votee <- findPlayerBy_ name voteeName
+
+            tell [playerMadeLynchVoteMessage Nothing voter votee]
+            )
 
         advanceStage
 
@@ -188,7 +193,7 @@ lynchVotee (Just votee)
     | is jester votee       = do
         jesterRevealed .= True
 
-        tell [jesterLynchedMessage votee]
+        tell . (:[]) . jesterLynchedMessage =<< get
     | is fallenAngel votee  = do
         fallenAngelLynched .= True
 
@@ -201,7 +206,7 @@ lynchVotee _            = preuse (players . scapegoats . alive) >>= \mScapegoat 
         scapegoatBlamed .= True
 
         killPlayer (scapegoat ^. name)
-        tell [scapegoatLynchedMessage scapegoat]
+        tell . (:[]) . scapegoatLynchedMessage =<< get
     _               -> tell [noPlayerLynchedMessage]
 
 devourVotee :: (MonadState Game m, MonadWriter [Message] m) => Maybe Player -> m ()

@@ -10,8 +10,6 @@ A 'Message' is used to relay information back to either all players or a single 
 defines suite of error messages used throughout the werewolf game.
 -}
 
-{-# LANGUAGE QuasiQuotes #-}
-
 module Game.Werewolf.Message.Error (
     -- * Command
 
@@ -46,73 +44,72 @@ module Game.Werewolf.Message.Error (
     playerHasAlreadyVotedMessage, playerCannotDevourAnotherWerewolfMessage,
 ) where
 
-import Data.String.Humanise
-import Data.String.Interpolate.Extra
-import Data.Text                     (Text)
+import Data.Text (Text)
 
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role     hiding (name)
+import Game.Werewolf.Role                   hiding (name)
+import Game.Werewolf.Variant.Standard.Error
 
 playerHasAlreadyVotedToBootMessage :: Text -> Player -> Message
-playerHasAlreadyVotedToBootMessage to target = privateMessage to [iFile|messages/error/command/boot/player-already-voted-boot.text|]
+playerHasAlreadyVotedToBootMessage to = privateMessage to . callerAlreadyVotedBootText
 
 playerCannotChooseSelfMessage :: Text -> Message
-playerCannotChooseSelfMessage to = privateMessage to [iFile|messages/error/command/choose/player-cannot-choose-self.text|]
+playerCannotChooseSelfMessage to = privateMessage to callerCannotChooseSelfText
 
 playerCannotChooseJesterMessage :: Text -> Message
-playerCannotChooseJesterMessage to = privateMessage to [iFile|messages/error/command/choose/player-cannot-choose-jester.text|]
+playerCannotChooseJesterMessage to = privateMessage to callerCannotChooseJesterText
 
 playerMustChooseAtLeastOneTargetMessage :: Text -> Message
-playerMustChooseAtLeastOneTargetMessage to = privateMessage to [iFile|messages/error/command/choose/player-must-choose-at-least-one-target.text|]
+playerMustChooseAtLeastOneTargetMessage to = privateMessage to noTargetText
 
 noGameRunningMessage :: Text -> Message
-noGameRunningMessage to = privateMessage to [iFile|messages/error/command/general/no-game-running.text|]
+noGameRunningMessage to = privateMessage to noGameRunningText
 
 playerCannotDoThatMessage :: Text -> Message
-playerCannotDoThatMessage to = privateMessage to [iFile|messages/error/command/general/player-cannot-do-that.text|]
+playerCannotDoThatMessage to = privateMessage to callerCannotDoThatText
 
 playerCannotDoThatRightNowMessage :: Text -> Message
-playerCannotDoThatRightNowMessage to = privateMessage to [iFile|messages/error/command/general/player-cannot-do-that-right-now.text|]
+playerCannotDoThatRightNowMessage to = privateMessage to callerCannotDoThatRightNowText
 
 playerIsDeadMessage :: Text -> Message
-playerIsDeadMessage to = privateMessage to [iFile|messages/error/command/general/player-dead.text|]
+playerIsDeadMessage to = privateMessage to callerDeadText
 
 playerDoesNotExistMessage :: Text -> Text -> Message
-playerDoesNotExistMessage to name = privateMessage to [iFile|messages/error/command/general/player-does-not-exist.text|]
+playerDoesNotExistMessage to = privateMessage to . playerDoesNotExistText
 
 targetIsDeadMessage :: Text -> Player -> Message
-targetIsDeadMessage to target = privateMessage to [iFile|messages/error/command/general/target-dead.text|]
+targetIsDeadMessage to = privateMessage to . targetDeadText
 
 playerHasAlreadyHealedMessage :: Text -> Message
-playerHasAlreadyHealedMessage to = privateMessage to [iFile|messages/error/command/heal/player-already-healed.text|]
+playerHasAlreadyHealedMessage to = privateMessage to callerAlreadyHealedText
 
 playerHasAlreadyPoisonedMessage :: Text -> Message
-playerHasAlreadyPoisonedMessage to = privateMessage to [iFile|messages/error/command/poison/player-already-poisoned.text|]
+playerHasAlreadyPoisonedMessage to = privateMessage to callerAlreadyPoisonedText
 
 playerCannotProtectSamePlayerTwiceInARowMessage :: Text -> Message
-playerCannotProtectSamePlayerTwiceInARowMessage to = privateMessage to [iFile|messages/error/command/protect/player-cannot-protect-same-player-twice-in-a-row.text|]
+playerCannotProtectSamePlayerTwiceInARowMessage to = privateMessage to callerCannotProtectSamePlayerText
 
 gameAlreadyRunningMessage :: Text -> Message
-gameAlreadyRunningMessage to = privateMessage to [iFile|messages/error/command/start/game-already-running.text|]
+gameAlreadyRunningMessage to = privateMessage to gameAlreadyRunningText
 
 mustHaveAtLeast7PlayersMessage :: Text -> Message
-mustHaveAtLeast7PlayersMessage to = privateMessage to [iFile|messages/error/command/start/must-have-at-least-7-players.text|]
+mustHaveAtLeast7PlayersMessage to = privateMessage to playerCountTooLowText
 
 playerNamesMustBeUniqueMessage :: Text -> Message
-playerNamesMustBeUniqueMessage to = privateMessage to [iFile|messages/error/command/start/player-names-must-be-unique.text|]
+playerNamesMustBeUniqueMessage to = privateMessage to playerNamesNotUniqueText
 
 roleCountRestrictedMessage :: Text -> Role -> Message
-roleCountRestrictedMessage to role = privateMessage to [iFile|messages/error/command/start/role-count-restricted.text|]
+roleCountRestrictedMessage to = privateMessage to . roleCountRestrictedText
 
 roleDoesNotExistMessage :: Text -> Text -> Message
-roleDoesNotExistMessage to roleName = privateMessage to [iFile|messages/error/command/start/role-does-not-exist.text|]
+roleDoesNotExistMessage to = privateMessage to . roleDoesNotExistText
 
 playerHasNotVotedMessage :: Text -> Message
-playerHasNotVotedMessage to = privateMessage to [iFile|messages/error/command/unvote/player-not-voted.text|]
+playerHasNotVotedMessage to = privateMessage to callerNotVotedText
 
 playerHasAlreadyVotedMessage :: Text -> Message
-playerHasAlreadyVotedMessage to = privateMessage to [iFile|messages/error/command/vote/player-already-voted.text|]
+playerHasAlreadyVotedMessage to = privateMessage to callerAlreadyVotedText
 
 playerCannotDevourAnotherWerewolfMessage :: Text -> Message
-playerCannotDevourAnotherWerewolfMessage to = privateMessage to [iFile|messages/error/command/vote/player-cannot-devour-werewolf.text|]
+playerCannotDevourAnotherWerewolfMessage to = privateMessage to callerCannotDevourAnotherWerewolfText

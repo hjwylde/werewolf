@@ -1,1 +1,0 @@
-#{humanise player} is tied up to a pyre and set alight. As they scream their body starts to contort and writhe, transforming into #{article $ player ^. role} #{humanise $ player ^. role}. Thankfully they go limp before breaking free of their restraints.

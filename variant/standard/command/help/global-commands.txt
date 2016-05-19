@@ -1,0 +1,6 @@
+Global commands:
+- `start ([-e|--extra-roles ROLE,...] | [-r|--random-extra-roles]) [-v|--variant VARIANT] PLAYER...`
+- `end`
+- `boot PLAYER`
+- `quit`
+- `version`

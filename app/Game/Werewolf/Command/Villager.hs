@@ -40,8 +40,10 @@ unvoteCommand callerName = Command $ do
 
     votes %= Map.delete callerName
 
+    caller <- findPlayerBy_ name callerName
+
     whenJustM (preuse $ players . crookedSenators . alive) $ \crookedSenator ->
-        tell [playerRescindedVoteMessage (crookedSenator ^. name) callerName]
+        tell [playerRescindedVoteMessage (crookedSenator ^. name) caller]
 
 voteCommand :: Text -> Text -> Command
 voteCommand callerName targetName = Command $ do
@@ -51,8 +53,11 @@ voteCommand callerName targetName = Command $ do
 
     votes %= Map.insert callerName targetName
 
+    caller <- findPlayerBy_ name callerName
+    target <- findPlayerBy_ name targetName
+
     whenJustM (preuse $ players . crookedSenators . alive) $ \crookedSenator ->
-        tell [playerMadeLynchVoteMessage (Just $ crookedSenator ^. name) callerName targetName]
+        tell [playerMadeLynchVoteMessage (Just $ crookedSenator ^. name) caller target]
 
 validateCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
 validateCommand callerName = do

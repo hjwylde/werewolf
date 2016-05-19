@@ -82,6 +82,7 @@ statusCommand :: Text -> Command
 statusCommand callerName = Command $ do
     game <- get
 
-    tell $ currentStageMessages callerName game
-    tell $ [rolesInGameMessage (Just callerName) game]
-    tell $ [playersInGameMessage callerName game]
+    tell [ currentStageMessage callerName game
+        , rolesInGameMessage (Just callerName) game
+        , playersInGameMessage callerName game
+        ]

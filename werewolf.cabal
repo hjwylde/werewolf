@@ -47,6 +47,9 @@ executable werewolf
         Game.Werewolf.Message.Engine
         Game.Werewolf.Message.Error
         Game.Werewolf.Util
+        Game.Werewolf.Variant.Standard.Command
+        Game.Werewolf.Variant.Standard.Engine
+        Game.Werewolf.Variant.Standard.Error
         Paths_werewolf
         Werewolf.Command.Boot
         Werewolf.Command.Choose

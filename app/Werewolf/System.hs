@@ -39,15 +39,15 @@ import Prelude hiding (round)
 import System.Directory
 import System.FilePath
 
-startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> [Player] -> m Game
-startGame callerName players = do
+startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> Variant -> [Player] -> m Game
+startGame callerName variant players = do
     when (playerNames /= nub playerNames)   $ throwError [playerNamesMustBeUniqueMessage callerName]
     when (length players < 7)               $ throwError [mustHaveAtLeast7PlayersMessage callerName]
     forM_ restrictedRoles $ \role ->
         when (length (players ^.. roles . only role) > 1) $
             throwError [roleCountRestrictedMessage callerName role]
 
-    let game = newGame players
+    let game = newGame variant players
 
     tell $ newGameMessages game
 
