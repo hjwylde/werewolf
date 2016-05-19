@@ -23,8 +23,8 @@ import Data.Text (Text)
 -- TODO (hjw): remove Message.Engine
 import Game.Werewolf
 import Game.Werewolf.Message.Command
-import Game.Werewolf.Message.Error
 import Game.Werewolf.Message.Engine
+import Game.Werewolf.Message.Error
 
 import Werewolf.System
 
