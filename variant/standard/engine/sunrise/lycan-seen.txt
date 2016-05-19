@@ -1,1 +1,1 @@
-#{humanise player} is aligned with the Werewolves.
+#{humanise lycan} is aligned with the Werewolves.

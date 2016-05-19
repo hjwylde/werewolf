@@ -33,6 +33,8 @@ import qualified Data.Text            as T
 import Game.Werewolf.Player
 import Game.Werewolf.Role   hiding (name)
 
+-- TODO (hjw): tidy up all of the messages
+
 humanisePlayerWithRole :: Player -> Text
 humanisePlayerWithRole player = T.concat [humanise player, " (", humanise $ player ^. role, ")"]
 

@@ -193,7 +193,7 @@ lynchVotee (Just votee)
     | is jester votee       = do
         jesterRevealed .= True
 
-        tell [jesterLynchedMessage votee]
+        tell . (:[]) . jesterLynchedMessage =<< get
     | is fallenAngel votee  = do
         fallenAngelLynched .= True
 
@@ -206,7 +206,7 @@ lynchVotee _            = preuse (players . scapegoats . alive) >>= \mScapegoat 
         scapegoatBlamed .= True
 
         killPlayer (scapegoat ^. name)
-        tell [scapegoatLynchedMessage scapegoat]
+        tell . (:[]) . scapegoatLynchedMessage =<< get
     _               -> tell [noPlayerLynchedMessage]
 
 devourVotee :: (MonadState Game m, MonadWriter [Message] m) => Maybe Player -> m ()

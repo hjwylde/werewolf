@@ -1,1 +1,1 @@
-#{humanise player} is aligned with the Villagers.
+#{humanise alphaWolf} is aligned with the Villagers.
