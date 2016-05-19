@@ -12,10 +12,21 @@ defines suite of engine messages used throughout the werewolf game.
 
 -- TODO (hjw): sort this file
 module Game.Werewolf.Message.Engine (
-    playerBootedMessage, villageDrunkJoinedPackMessages, villageDrunkJoinedVillageMessage, playerTurnedToStoneMessage, playerSeenMessage, playerDivinedMessage, playerDevouredMessage, noPlayerDevouredMessage, scapegoatChoseAllowedVotersMessage, playerPoisonedMessage, scapegoatLynchedMessage, playerLynchedMessage, noPlayerLynchedMessage, jesterLynchedMessage, ferinaGruntsMessage, orphanJoinedPackMessages, playerKilledMessage, playerLostMessage, playerContributedMessage, playerWonMessage, witchsTurnMessages, firstWerewolvesTurnMessages, villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessage, seersTurnMessages, scapegoatsTurnMessage, protectorsTurnMessages, orphansTurnMessages, oraclesTurnMessages, huntersTurnMessages, stageMessages, fallenAngelMessage, trueVillagerMessage, spitefulGhostMessage, beholderMessage, newPlayerMessage, rolesInGameMessage, newPlayersInGameMessage, newGameMessages, gameOverMessages, fallenAngelWonMessage,
+    playerBootedMessage, villageDrunkJoinedPackMessages, villageDrunkJoinedVillageMessage,
+    playerTurnedToStoneMessage, playerSeenMessage, playerDivinedMessage, playerDevouredMessage,
+    noPlayerDevouredMessage, scapegoatChoseAllowedVotersMessage, playerPoisonedMessage,
+    scapegoatLynchedMessage, playerLynchedMessage, noPlayerLynchedMessage, jesterLynchedMessage,
+    ferinaGruntsMessage, orphanJoinedPackMessages, playerKilledMessage, playerLostMessage,
+    playerContributedMessage, playerWonMessage, witchsTurnMessages, firstWerewolvesTurnMessages,
+    villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages,
+    seersTurnMessages, scapegoatsTurnMessage, protectorsTurnMessages, orphansTurnMessages,
+    oraclesTurnMessages, huntersTurnMessages, stageMessages, fallenAngelMessage,
+    trueVillagerMessage, spitefulGhostMessage, beholderMessage, newPlayerMessage,
+    rolesInGameMessage, newPlayersInGameMessage, newGameMessages, gameOverMessages,
+    fallenAngelWonMessage,
 ) where
 
-import Control.Lens       hiding (isn't)
+import Control.Lens
 import Control.Lens.Extra
 
 import Data.List.Extra
@@ -24,8 +35,9 @@ import Data.Text       (Text)
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role                    hiding (name)
-import Game.Werewolf.Variant.Standard.Engine
+import Game.Werewolf.Role                           hiding (name)
+import Game.Werewolf.Variant.NoRoleKnowledge.Engine as NoRoleKnowledge
+import Game.Werewolf.Variant.Standard.Engine        as Standard
 
 playerBootedMessage :: Player -> Message
 playerBootedMessage = publicMessage . playerBootedText
@@ -97,7 +109,9 @@ newPlayersInGameMessage :: Game -> Message
 newPlayersInGameMessage = publicMessage . playersInGameText
 
 rolesInGameMessage :: Maybe Text -> Game -> Message
-rolesInGameMessage mTo = Message mTo . rolesInGameText
+rolesInGameMessage mTo game
+    | has (variant . _NoRoleKnowledge) game = Message mTo $ NoRoleKnowledge.rolesInGameText game
+    | otherwise                             = Message mTo $ Standard.rolesInGameText game
 
 newPlayerMessage :: Player -> Message
 newPlayerMessage player = privateMessage (player ^. name) $ newPlayerText player
@@ -121,18 +135,18 @@ stageMessages game = case game ^. stage of
     HuntersTurn1        -> huntersTurnMessages game
     HuntersTurn2        -> huntersTurnMessages game
     Lynching            -> []
-    OraclesTurn         -> oraclesTurnMessages oraclesName
-    OrphansTurn         -> orphansTurnMessages orphansName
-    ProtectorsTurn      -> protectorsTurnMessages protectorsName
+    OraclesTurn         -> oraclesTurnMessages oraclesName game
+    OrphansTurn         -> orphansTurnMessages orphansName game
+    ProtectorsTurn      -> protectorsTurnMessages protectorsName game
     ScapegoatsTurn      -> [scapegoatsTurnMessage game]
-    SeersTurn           -> seersTurnMessages seersName
+    SeersTurn           -> seersTurnMessages seersName game
     Sunrise             -> [sunriseMessage]
     Sunset              -> [nightFallsMessage]
-    VillageDrunksTurn   -> [villageDrunksTurnMessage]
+    VillageDrunksTurn   -> villageDrunksTurnMessages game
     VillagesTurn        -> [villagesTurnMessage]
     WerewolvesTurn      -> if is firstRound game
         then firstWerewolvesTurnMessages game
-        else werewolvesTurnMessages aliveWerewolfNames
+        else werewolvesTurnMessages aliveWerewolfNames game
     WitchsTurn          -> witchsTurnMessages game
     where
         players'            = game ^. players
@@ -150,35 +164,49 @@ huntersTurnMessages game =
     where
         hunterName = game ^?! players . hunters . name
 
-oraclesTurnMessages :: Text -> [Message]
-oraclesTurnMessages to =
-    [ publicMessage oraclesTurnPublicText
-    , privateMessage to oraclesTurnPrivateText
-    ]
+oraclesTurnMessages :: Text -> Game -> [Message]
+oraclesTurnMessages to game
+    | has (variant . _NoRoleKnowledge) game =
+        [ privateMessage to oraclesTurnPrivateText ]
+    | otherwise                             =
+        [ publicMessage oraclesTurnPublicText
+        , privateMessage to oraclesTurnPrivateText
+        ]
 
-orphansTurnMessages :: Text -> [Message]
-orphansTurnMessages to =
-    [ publicMessage orphansTurnPublicText
-    , privateMessage to orphansTurnPrivateText
-    ]
+orphansTurnMessages :: Text -> Game -> [Message]
+orphansTurnMessages to game
+    | has (variant . _NoRoleKnowledge) game =
+        [ privateMessage to orphansTurnPrivateText ]
+    | otherwise                             =
+        [ publicMessage orphansTurnPublicText
+        , privateMessage to orphansTurnPrivateText
+        ]
 
-protectorsTurnMessages :: Text -> [Message]
-protectorsTurnMessages to =
-    [ publicMessage protectorsTurnPublicText
-    , privateMessage to protectorsTurnPrivateText
-    ]
+protectorsTurnMessages :: Text -> Game -> [Message]
+protectorsTurnMessages to game
+    | has (variant . _NoRoleKnowledge) game =
+        [ privateMessage to protectorsTurnPrivateText ]
+    | otherwise                             =
+        [ publicMessage protectorsTurnPublicText
+        , privateMessage to protectorsTurnPrivateText
+        ]
 
 scapegoatsTurnMessage :: Game -> Message
 scapegoatsTurnMessage = publicMessage . scapegoatsTurnText
 
-seersTurnMessages :: Text -> [Message]
-seersTurnMessages to =
-    [ publicMessage seersTurnPublicText
-    , privateMessage to seersTurnPrivateText
-    ]
+seersTurnMessages :: Text -> Game -> [Message]
+seersTurnMessages to game
+    | has (variant . _NoRoleKnowledge) game =
+        [ privateMessage to seersTurnPrivateText ]
+    | otherwise                             =
+        [ publicMessage seersTurnPublicText
+        , privateMessage to seersTurnPrivateText
+        ]
 
-villageDrunksTurnMessage :: Message
-villageDrunksTurnMessage = publicMessage villageDrunksTurnText
+villageDrunksTurnMessages :: Game -> [Message]
+villageDrunksTurnMessages game
+    | has (variant . _NoRoleKnowledge) game = []
+    | otherwise                             = [publicMessage villageDrunksTurnText]
 
 sunriseMessage :: Message
 sunriseMessage = publicMessage sunriseText
@@ -193,25 +221,30 @@ firstWerewolvesTurnMessages :: Game -> [Message]
 firstWerewolvesTurnMessages game =
     [privateMessage (player ^. name) (firstWerewolvesTurnText player game)
         | length werewolves > 1, player <- werewolves]
-    ++ werewolvesTurnMessages (map (view name) werewolves)
+    ++ werewolvesTurnMessages (map (view name) werewolves) game
     where
         werewolves = game ^.. players . traverse . alive . filtered (is werewolf)
 
-werewolvesTurnMessages :: [Text] -> [Message]
-werewolvesTurnMessages tos =
-    publicMessage werewolvesTurnPublicText
-    : groupMessages tos werewolvesTurnPrivateText
+werewolvesTurnMessages :: [Text] -> Game -> [Message]
+werewolvesTurnMessages tos game
+    | has (variant . _NoRoleKnowledge) game =
+        groupMessages tos werewolvesTurnPrivateText
+    | otherwise                             =
+        publicMessage werewolvesTurnPublicText
+        : groupMessages tos werewolvesTurnPrivateText
 
 witchsTurnMessages :: Game -> [Message]
 witchsTurnMessages game = concat
-    [ [wakeUpMessage]
+    [ wakeUpMessages
     , healMessages
     , poisonMessages
     , [passMessage]
     ]
     where
         to              = game ^?! players . witches . name
-        wakeUpMessage   = publicMessage witchsTurnText
+        wakeUpMessages
+            | has (variant . _NoRoleKnowledge) game = []
+            | otherwise                             = [publicMessage witchsTurnText]
         passMessage     = privateMessage to passText
         healMessages
             | game ^. healUsed  = []

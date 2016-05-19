@@ -82,10 +82,8 @@ import           Data.String.Interpolate.Extra
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T
 
-import Game.Werewolf.Game
+import Game.Werewolf
 import Game.Werewolf.Message
-import Game.Werewolf.Player
-import Game.Werewolf.Role    hiding (name)
 
 druidsTurnText :: Text
 druidsTurnText = [iFile|variant/standard/engine/druids-turn/start.txt|]

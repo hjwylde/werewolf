@@ -48,7 +48,7 @@ import Data.Text (Text)
 
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role                   hiding (name)
+import Game.Werewolf.Role
 import Game.Werewolf.Variant.Standard.Error
 
 playerHasAlreadyVotedToBootMessage :: Text -> Player -> Message

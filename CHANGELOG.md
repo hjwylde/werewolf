@@ -19,6 +19,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Moved role names, descriptions and rules to external files using QuasiQuotes. ([#155](https://github.com/hjwylde/werewolf/issues/155))
 * Removed `--include-seer` option from `start`. ([#223](https://github.com/hjwylde/werewolf/issues/223))
 * Removed `--force` option from `end`. ([#224](https://github.com/hjwylde/werewolf/issues/224))
+* Added the no-role-knowledge variant. ([#182](https://github.com/hjwylde/werewolf/issues/182))
 
 *Revisions*
 

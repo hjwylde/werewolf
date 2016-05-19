@@ -57,8 +57,9 @@ import qualified Data.Text  as T
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role                     hiding (name)
-import Game.Werewolf.Variant.Standard.Command
+import Game.Werewolf.Role
+import Game.Werewolf.Variant.NoRoleKnowledge.Command as NoRoleKnowledge
+import Game.Werewolf.Variant.Standard.Command        as Standard
 
 playerQuitMessage :: Player -> Message
 playerQuitMessage = publicMessage . callerQuitText
@@ -150,19 +151,24 @@ witchCommandsMessage to = privateMessage to witchCommandsText
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to playerPingedText
 
-pingRoleMessage :: Role -> Message
-pingRoleMessage = publicMessage . rolePingedText
+pingRoleMessage :: Role -> Game -> Message
+pingRoleMessage role game
+    | has (variant . _NoRoleKnowledge) game = publicMessage $ NoRoleKnowledge.rolePingedText role
+    | otherwise                             = publicMessage $ Standard.rolePingedText role
 
 pingVillageMessage :: Message
 pingVillageMessage = publicMessage villagePingedText
 
-pingWerewolvesMessage :: Message
-pingWerewolvesMessage = publicMessage werewolvesPingedText
+pingWerewolvesMessage :: Game -> Message
+pingWerewolvesMessage game
+    | has (variant . _NoRoleKnowledge) game = publicMessage NoRoleKnowledge.werewolvesPingedText
+    | otherwise                             = publicMessage Standard.werewolvesPingedText
 
 currentStageMessage :: Text -> Game -> Message
 currentStageMessage to game
-    | has (stage . _GameOver) game  = gameIsOverMessage to
-    | otherwise                     = privateMessage to $ currentTurnText game
+    | has (stage . _GameOver) game          = gameIsOverMessage to
+    | has (variant . _NoRoleKnowledge) game = privateMessage to $ NoRoleKnowledge.currentTurnText game
+    | otherwise                             = privateMessage to $ Standard.currentTurnText game
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to gameOverText

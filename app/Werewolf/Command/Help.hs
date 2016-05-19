@@ -18,7 +18,6 @@ module Werewolf.Command.Help (
 ) where
 
 import Control.Lens
-import Control.Monad.Extra
 import Control.Monad.IO.Class
 
 import Data.Function
@@ -46,21 +45,23 @@ data Command = Commands
 
 handle :: MonadIO m => Text -> Text -> Options -> m ()
 handle callerName tag (Options (Just (Commands optAll))) = do
-    mGame <- ifM (doesGameExist tag &&^ return (not optAll)) (Just <$> readGame tag) (return Nothing)
+    mGame <- getGame tag optAll
 
     exitWith success
         { messages = commandsMessages callerName mGame
         }
 handle callerName tag (Options (Just (Roles optAll))) = do
-    roles <- (sortBy (compare `on` humanise) . nub) <$> ifM (doesGameExist tag &&^ return (not optAll))
-        (toListOf (players . roles) <$> readGame tag)
-        (return allRoles)
+    mGame <- getGame tag optAll
+
+    let roles' = sortBy (compare `on` humanise) . nub $ case mGame of
+            Just game   -> game ^.. players . roles
+            Nothing     -> allRoles
 
     exitWith success
-        { messages = map (roleMessage callerName) roles
+        { messages = map (roleMessage callerName) roles'
         }
 handle callerName tag (Options (Just (Rules optAll))) = do
-    mGame <- ifM (doesGameExist tag &&^ return (not optAll)) (Just <$> readGame tag) (return Nothing)
+    mGame <- getGame tag optAll
 
     exitWith success
         { messages = rulesMessages callerName mGame
@@ -101,3 +102,12 @@ helpMessages callerName =
     [ gameDescriptionMessage callerName
     , helpCommandsMessage callerName
     ]
+
+getGame :: MonadIO m => Text -> Bool -> m (Maybe Game)
+getGame _ True  = return Nothing
+getGame tag _   = do
+    game <- readGame tag
+
+    return $ case game ^. variant of
+        NoRoleKnowledge -> Nothing
+        _               -> Just game

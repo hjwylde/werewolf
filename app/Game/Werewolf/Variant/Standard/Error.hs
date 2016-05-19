@@ -49,8 +49,7 @@ import Data.String.Humanise
 import Data.String.Interpolate.Extra
 import Data.Text                     (Text)
 
-import Game.Werewolf.Player
-import Game.Werewolf.Role   hiding (name)
+import Game.Werewolf
 
 callerAlreadyVotedBootText :: Player -> Text
 callerAlreadyVotedBootText target = [iFile|variant/standard/error/command/boot/caller-already-voted-boot.txt|]
