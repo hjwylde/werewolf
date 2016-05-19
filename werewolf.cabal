@@ -1,5 +1,5 @@
 name:           werewolf
-version:        1.2.0.1
+version:        1.2.0.2
 
 author:         Henry J. Wylde
 maintainer:     public@hjwylde.com
@@ -21,6 +21,10 @@ build-type:     Simple
 extra-source-files:
     CHANGELOG.md
     README.md
+    variant/no-role-knowledge/command/ping/role-pinged.txt
+    variant/no-role-knowledge/command/ping/werewolves-pinged.txt
+    variant/no-role-knowledge/command/status/current-turn.txt
+    variant/no-role-knowledge/engine/new-game/roles-in-game.txt
     variant/standard/command/boot/player-voted-boot.txt
     variant/standard/command/choose/player-shot.txt
     variant/standard/command/circle/game-circle.txt
