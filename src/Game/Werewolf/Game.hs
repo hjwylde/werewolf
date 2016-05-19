@@ -22,7 +22,7 @@ module Game.Werewolf.Game (
     scapegoatBlamed, see, votes,
 
     Variant(..),
-    _Standard,
+    _Standard, _NoRoleKnowledge,
 
     Stage(..),
     _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
@@ -93,11 +93,12 @@ data Game = Game
     , _votes              :: Map Text Text    -- ^ Villagers and Werewolves
     } deriving (Eq, Read, Show)
 
-data Variant = Standard
+data Variant = Standard | NoRoleKnowledge
     deriving (Eq, Read, Show)
 
 instance Humanise Variant where
-    humanise Standard = "standard"
+    humanise Standard           = "standard"
+    humanise NoRoleKnowledge    = "no role knowledge"
 
 -- | Most of these are fairly self-explainable (the turn stages). 'Sunrise' and 'Sunset' are
 --   provided as meaningful breaks between the day and night as, for example, a 'VillagesTurn' may

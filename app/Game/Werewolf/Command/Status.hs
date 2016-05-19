@@ -60,7 +60,7 @@ pingRole :: (MonadState Game m, MonadWriter [Message] m) => Role -> m ()
 pingRole role' = do
     player <- findPlayerBy_ role role'
 
-    tell [pingRoleMessage role']
+    tell . (:[]) . pingRoleMessage role' =<< get
     tell [pingPlayerMessage $ player ^. name]
 
 pingVillagers :: (MonadState Game m, MonadWriter [Message] m) => m ()
@@ -75,7 +75,7 @@ pingWerewolves :: (MonadState Game m, MonadWriter [Message] m) => m ()
 pingWerewolves = do
     pendingVoters <- getPendingVoters
 
-    tell [pingWerewolvesMessage]
+    tell . (:[]) . pingWerewolvesMessage =<< get
     tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
 
 statusCommand :: Text -> Command

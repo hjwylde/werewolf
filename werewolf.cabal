@@ -47,6 +47,8 @@ executable werewolf
         Game.Werewolf.Message.Engine
         Game.Werewolf.Message.Error
         Game.Werewolf.Util
+        Game.Werewolf.Variant.NoRoleKnowledge.Command
+        Game.Werewolf.Variant.NoRoleKnowledge.Engine
         Game.Werewolf.Variant.Standard.Command
         Game.Werewolf.Variant.Standard.Engine
         Game.Werewolf.Variant.Standard.Error

@@ -54,7 +54,7 @@ module Game.Werewolf.Variant.Standard.Command (
     callerVotedDevourText, callerVotedLynchText,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens
 
 import           Data.String.Humanise
 import           Data.String.Interpolate.Extra
@@ -62,10 +62,8 @@ import           Data.Text                     (Text)
 import qualified Data.Text                     as T
 import           Data.Version
 
-import Game.Werewolf.Game
+import Game.Werewolf
 import Game.Werewolf.Message
-import Game.Werewolf.Player
-import Game.Werewolf.Role    hiding (name)
 
 import Werewolf.Version
 
