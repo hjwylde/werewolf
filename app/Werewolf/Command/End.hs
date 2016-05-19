@@ -20,9 +20,11 @@ import Control.Monad.IO.Class
 
 import Data.Text (Text)
 
+-- TODO (hjw): remove Message.Engine
 import Game.Werewolf
 import Game.Werewolf.Message.Command
 import Game.Werewolf.Message.Error
+import Game.Werewolf.Message.Engine
 
 import Werewolf.System
 
@@ -37,4 +39,7 @@ handle callerName tag = do
 
     deleteGame tag
 
-    exitWith success { messages = [gameEndedMessage callerName] }
+    exitWith success { messages =
+        [ gameEndedMessage callerName
+        , playerRolesMessage game
+        ] }

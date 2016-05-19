@@ -12,7 +12,7 @@ defines suite of engine messages used throughout the werewolf game.
 
 -- TODO (hjw): sort this file
 module Game.Werewolf.Message.Engine (
-    playerBootedMessage, villageDrunkJoinedPackMessages, villageDrunkJoinedVillageMessage,
+    playerRolesMessage, playerBootedMessage, villageDrunkJoinedPackMessages, villageDrunkJoinedVillageMessage,
     playerTurnedToStoneMessage, playerSeenMessage, playerDivinedMessage, playerDevouredMessage,
     noPlayerDevouredMessage, scapegoatChoseAllowedVotersMessage, playerPoisonedMessage,
     scapegoatLynchedMessage, playerLynchedMessage, noPlayerLynchedMessage, jesterLynchedMessage,
