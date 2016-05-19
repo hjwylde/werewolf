@@ -7,6 +7,8 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+### v1.2.0.2
+
 *Revisions*
 
 * Added further missing files to extra-source-files.
