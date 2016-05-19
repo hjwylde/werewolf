@@ -20,6 +20,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Removed `--include-seer` option from `start`. ([#223](https://github.com/hjwylde/werewolf/issues/223))
 * Removed `--force` option from `end`. ([#224](https://github.com/hjwylde/werewolf/issues/224))
 
+*Revisions*
+
+* Updated Crooked Senator's balance to 2.
+
 ### v1.1.1.0
 
 *Revisions*

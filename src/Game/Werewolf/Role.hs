@@ -238,7 +238,7 @@ crookedSenatorRole = Role
     { _tag          = "crooked-senator"
     , _name         = T.strip [iFile|variant/standard/role/crooked-senator/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 1
+    , _balance      = 2
     , _description  = T.strip [iFile|variant/standard/role/crooked-senator/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/crooked-senator/rules.txt|]
     }
