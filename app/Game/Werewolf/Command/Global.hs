@@ -17,6 +17,7 @@ module Game.Werewolf.Command.Global (
 import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
+import Control.Monad.State
 import Control.Monad.Writer
 
 import qualified Data.Map   as Map
@@ -50,6 +51,6 @@ quitCommand callerName = Command $ do
 
     caller <- findPlayerBy_ name callerName
 
-    tell [playerQuitMessage caller]
+    tell . (:[]) . playerQuitMessage caller =<< get
 
     removePlayer callerName

@@ -59,10 +59,13 @@ import Game.Werewolf.Player
 import Game.Werewolf.Response
 import Game.Werewolf.Role
 import Game.Werewolf.Variant.NoRoleKnowledge.Command as NoRoleKnowledge
+import Game.Werewolf.Variant.NoRoleReveal.Command    as NoRoleReveal
 import Game.Werewolf.Variant.Standard.Command        as Standard
 
-playerQuitMessage :: Player -> Message
-playerQuitMessage = publicMessage . callerQuitText
+playerQuitMessage :: Player -> Game -> Message
+playerQuitMessage player game
+    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.callerQuitText player
+    | otherwise                             = publicMessage $ Standard.callerQuitText player
 
 playerVotedToBootMessage :: Player -> Player -> Message
 playerVotedToBootMessage caller = publicMessage . callerVotedBootText caller
@@ -70,8 +73,10 @@ playerVotedToBootMessage caller = publicMessage . callerVotedBootText caller
 circleMessage :: Text -> [Player] -> Message
 circleMessage to = privateMessage to . gameCircleText
 
-playerShotMessage :: Player -> Message
-playerShotMessage = publicMessage . playerShotText
+playerShotMessage :: Player -> Game -> Message
+playerShotMessage player game
+    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.playerShotText player
+    | otherwise                             = publicMessage $ Standard.playerShotText player
 
 gameEndedMessage :: Text -> Message
 gameEndedMessage = publicMessage . gameEndedText
@@ -154,6 +159,7 @@ pingPlayerMessage to = privateMessage to playerPingedText
 pingRoleMessage :: Role -> Game -> Message
 pingRoleMessage role game
     | has (variant . _NoRoleKnowledge) game = publicMessage $ NoRoleKnowledge.rolePingedText role
+    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.rolePingedText role
     | otherwise                             = publicMessage $ Standard.rolePingedText role
 
 pingVillageMessage :: Message
@@ -162,12 +168,14 @@ pingVillageMessage = publicMessage villagePingedText
 pingWerewolvesMessage :: Game -> Message
 pingWerewolvesMessage game
     | has (variant . _NoRoleKnowledge) game = publicMessage NoRoleKnowledge.werewolvesPingedText
+    | has (variant . _NoRoleReveal) game    = publicMessage NoRoleReveal.werewolvesPingedText
     | otherwise                             = publicMessage Standard.werewolvesPingedText
 
 currentStageMessage :: Text -> Game -> Message
 currentStageMessage to game
     | has (stage . _GameOver) game          = gameIsOverMessage to
     | has (variant . _NoRoleKnowledge) game = privateMessage to $ NoRoleKnowledge.currentTurnText game
+    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.currentTurnText game
     | otherwise                             = privateMessage to $ Standard.currentTurnText game
 
 gameIsOverMessage :: Text -> Message
@@ -178,8 +186,9 @@ playersInGameMessage to game = privateMessage to $ T.append alivePlayersText' de
     where
         alivePlayersText' = alivePlayersText game
         deadPlayersText'
-            | has (players . traverse . dead) game  = deadPlayersText game
-            | otherwise                             = T.empty
+            | hasn't (players . traverse . dead) game   = T.empty
+            | has (variant . _NoRoleReveal) game        = NoRoleReveal.deadPlayersText game
+            | otherwise                                 = Standard.deadPlayersText game
 
 playerRescindedVoteMessage :: Text -> Player -> Message
 playerRescindedVoteMessage to = privateMessage to . callerRescindedVoteText

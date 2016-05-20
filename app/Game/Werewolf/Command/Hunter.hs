@@ -17,6 +17,7 @@ module Game.Werewolf.Command.Hunter (
 import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
+import Control.Monad.State
 import Control.Monad.Writer
 
 import Data.Text (Text)
@@ -37,7 +38,7 @@ chooseCommand callerName targetName = Command $ do
 
     target <- findPlayerBy_ name targetName
 
-    tell [playerShotMessage target]
+    tell . (:[]) . playerShotMessage target =<< get
     killPlayer targetName
 
     hunterRetaliated .= True
