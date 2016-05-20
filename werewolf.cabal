@@ -25,6 +25,18 @@ extra-source-files:
     variant/no-role-knowledge/command/ping/werewolves-pinged.txt
     variant/no-role-knowledge/command/status/current-turn.txt
     variant/no-role-knowledge/engine/new-game/roles-in-game.txt
+    variant/no-role-reveal/command/choose/player-shot.txt
+    variant/no-role-reveal/command/ping/role-pinged.txt
+    variant/no-role-reveal/command/ping/werewolves-pinged.txt
+    variant/no-role-reveal/command/quit/caller-quit.txt
+    variant/no-role-reveal/command/status/current-turn.txt
+    variant/no-role-reveal/command/status/dead-players.txt
+    variant/no-role-reveal/engine/general/player-booted.txt
+    variant/no-role-reveal/engine/lynching/player-lynched.txt
+    variant/no-role-reveal/engine/lynching/werewolf-lynched.txt
+    variant/no-role-reveal/engine/sunrise/player-devoured.txt
+    variant/no-role-reveal/engine/sunrise/player-poisoned.txt
+    variant/no-role-reveal/engine/sunrise/player-turned-to-stone.txt
     variant/standard/command/boot/player-voted-boot.txt
     variant/standard/command/choose/player-shot.txt
     variant/standard/command/circle/game-circle.txt
@@ -239,6 +251,8 @@ executable werewolf
         Game.Werewolf.Util
         Game.Werewolf.Variant.NoRoleKnowledge.Command
         Game.Werewolf.Variant.NoRoleKnowledge.Engine
+        Game.Werewolf.Variant.NoRoleReveal.Command
+        Game.Werewolf.Variant.NoRoleReveal.Engine
         Game.Werewolf.Variant.Standard.Command
         Game.Werewolf.Variant.Standard.Engine
         Game.Werewolf.Variant.Standard.Error

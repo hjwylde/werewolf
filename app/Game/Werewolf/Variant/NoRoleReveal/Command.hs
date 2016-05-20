@@ -1,0 +1,55 @@
+{-|
+Module      : Game.Werewolf.Variant.NoRoleReveal.Command
+Description : Suite of command messages used throughout the game.
+
+Copyright   : (c) Henry J. Wylde, 2016
+License     : BSD3
+Maintainer  : public@hjwylde.com
+
+A 'Message' is used to relay information back to either all players or a single player. This module
+defines suite of command messages used throughout the werewolf game for the 'NoRoleReveal' variant.
+-}
+
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
+
+module Game.Werewolf.Variant.NoRoleReveal.Command (
+    -- * Choose
+    playerShotText,
+
+    -- * Ping
+    rolePingedText, werewolvesPingedText,
+
+    -- * Quit
+    callerQuitText,
+
+    -- * Status
+    currentTurnText, deadPlayersText,
+) where
+
+import Control.Lens
+
+import Data.String.Humanise
+import Data.String.Interpolate.Extra
+import Data.Text                     (Text)
+
+import Game.Werewolf
+import Game.Werewolf.Message
+
+playerShotText :: Player -> Text
+playerShotText player = [iFile|variant/no-role-reveal/command/choose/player-shot.txt|]
+
+rolePingedText :: Role -> Text
+rolePingedText _ = [iFile|variant/no-role-reveal/command/ping/role-pinged.txt|]
+
+werewolvesPingedText :: Text
+werewolvesPingedText = [iFile|variant/no-role-reveal/command/ping/werewolves-pinged.txt|]
+
+callerQuitText :: Player -> Text
+callerQuitText caller = [iFile|variant/no-role-reveal/command/quit/caller-quit.txt|]
+
+currentTurnText :: Game -> Text
+currentTurnText _ = [iFile|variant/no-role-reveal/command/status/current-turn.txt|]
+
+deadPlayersText :: Game -> Text
+deadPlayersText game = [iFile|variant/no-role-reveal/command/status/dead-players.txt|]

@@ -10,6 +10,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Minor*
 
 * Added player roles message when the game is force ended. ([#225](https://github.com/hjwylde/werewolf/issues/225))
+* Added the no-role-reveal variant. ([#181](https://github.com/hjwylde/werewolf/issues/181))
 
 ### v1.2.0.2
 

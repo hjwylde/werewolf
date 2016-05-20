@@ -1,0 +1,1 @@
+#{humanise player} has been booted from the game!

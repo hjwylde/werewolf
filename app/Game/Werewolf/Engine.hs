@@ -57,7 +57,7 @@ checkBoots = do
     bootees     <- mapM (findPlayerBy_ name) booteeNames
 
     forM_ (filter (is alive) bootees) $ \bootee -> do
-        tell [playerBootedMessage bootee]
+        tell . (:[]) . playerBootedMessage bootee =<< get
 
         removePlayer (bootee ^. name)
 
@@ -124,7 +124,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
             target <- findPlayerBy_ name targetName
 
             killPlayer targetName
-            tell [playerPoisonedMessage target]
+            tell . (:[]) . playerPoisonedMessage target =<< get
 
         whenJustM (preuse $ players . seers . alive) $ \seer -> do
             target <- use see >>= findPlayerBy_ name . fromJust
@@ -197,10 +197,13 @@ lynchVotee (Just votee)
     | is fallenAngel votee  = do
         fallenAngelLynched .= True
 
-        tell [playerLynchedMessage votee]
+        tell . (:[]) . playerLynchedMessage votee =<< get
+    | is werewolf votee     = do
+        killPlayer (votee ^. name)
+        tell . (:[]) . werewolfLynchedMessage votee =<< get
     | otherwise             = do
         killPlayer (votee ^. name)
-        tell [playerLynchedMessage votee]
+        tell . (:[]) . playerLynchedMessage votee =<< get
 lynchVotee _            = preuse (players . scapegoats . alive) >>= \mScapegoat -> case mScapegoat of
     Just scapegoat  -> do
         scapegoatBlamed .= True
@@ -213,11 +216,11 @@ devourVotee :: (MonadState Game m, MonadWriter [Message] m) => Maybe Player -> m
 devourVotee Nothing         = tell [noPlayerDevouredMessage]
 devourVotee (Just votee)    = do
     killPlayer (votee ^. name)
-    tell [playerDevouredMessage votee]
+    tell . (:[]) . playerDevouredMessage votee =<< get
 
     when (is medusa votee) . whenJustM (getFirstAdjacentAliveWerewolf $ votee ^. name) $ \werewolf -> do
         killPlayer (werewolf ^. name)
-        tell [playerTurnedToStoneMessage werewolf]
+        tell . (:[]) . playerTurnedToStoneMessage werewolf =<< get
 
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
