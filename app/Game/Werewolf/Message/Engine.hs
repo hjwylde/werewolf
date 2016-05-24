@@ -20,7 +20,7 @@ module Game.Werewolf.Message.Engine (
     playerContributedMessage, playerWonMessage, witchsTurnMessages, firstWerewolvesTurnMessages,
     villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages,
     seersTurnMessages, scapegoatsTurnMessage, protectorsTurnMessages, orphansTurnMessages,
-    oraclesTurnMessages, huntersTurnMessages, stageMessages, fallenAngelMessage,
+    oraclesTurnMessages, huntersTurnMessages, stageMessages,
     trueVillagerMessage, beholderMessage, newPlayerMessage, rolesInGameMessage,
     newPlayersInGameMessage, newGameMessages, gameOverMessages, fallenAngelWonMessage,
     werewolfLynchedMessage,
@@ -92,7 +92,6 @@ newGameMessages game = concat
     , beholderMessages
     , spitefulGhostMessages'
     , trueVillagerMessages
-    , fallenAngelMessages
     , stageMessages game
     ]
     where
@@ -111,10 +110,6 @@ newGameMessages game = concat
         trueVillagerMessages    =
             [ trueVillagerMessage game
             | has trueVillagers players'
-            ]
-        fallenAngelMessages     =
-            [ fallenAngelMessage
-            | has fallenAngels players'
             ]
 
 newPlayersInGameMessage :: Game -> Message
@@ -139,9 +134,6 @@ spitefulGhostMessages to game =
 
 trueVillagerMessage :: Game -> Message
 trueVillagerMessage = publicMessage . trueVillagerText
-
-fallenAngelMessage :: Message
-fallenAngelMessage = publicMessage fallenAngelText
 
 stageMessages :: Game -> [Message]
 stageMessages game = case game ^. stage of
