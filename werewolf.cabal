@@ -104,7 +104,8 @@ extra-source-files:
     variant/standard/engine/new-game/new-player.txt
     variant/standard/engine/new-game/players-in-game.txt
     variant/standard/engine/new-game/roles-in-game.txt
-    variant/standard/engine/new-game/spiteful-ghost.txt
+    variant/standard/engine/new-game/spiteful-ghost-private.txt
+    variant/standard/engine/new-game/spiteful-ghost-public.txt
     variant/standard/engine/new-game/true-villager.txt
     variant/standard/engine/oracles-turn/start-private.txt
     variant/standard/engine/oracles-turn/start-public.txt

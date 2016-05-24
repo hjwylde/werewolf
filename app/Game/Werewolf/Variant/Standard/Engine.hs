@@ -33,7 +33,7 @@ module Game.Werewolf.Variant.Standard.Engine (
 
     -- * New game
     beholderText, fallenAngelText, newPlayerText, playersInGameText, rolesInGameText,
-    spitefulGhostText, trueVillagerText,
+    spitefulGhostPrivateText, spitefulGhostPublicText, trueVillagerText,
 
     -- * Oracle's turn
     oraclesTurnPrivateText, oraclesTurnPublicText,
@@ -160,8 +160,13 @@ rolesInGameText game = [iFile|variant/standard/engine/new-game/roles-in-game.txt
         roleCounts      = map (head &&& length) (groupSortOn humanise roles)
         totalBalance    = sumOf (traverse . balance) roles
 
-spitefulGhostText :: Game -> Text
-spitefulGhostText game = [iFile|variant/standard/engine/new-game/spiteful-ghost.txt|]
+spitefulGhostPrivateText :: Game -> Text
+spitefulGhostPrivateText game = [iFile|variant/standard/engine/new-game/spiteful-ghost-private.txt|]
+
+spitefulGhostPublicText :: Game -> Text
+spitefulGhostPublicText game = [iFile|variant/standard/engine/new-game/spiteful-ghost-public.txt|]
+    where
+        spitefulGhost = game ^?! players . spitefulGhosts
 
 trueVillagerText :: Game -> Text
 trueVillagerText game = [iFile|variant/standard/engine/new-game/true-villager.txt|]

@@ -21,9 +21,9 @@ module Game.Werewolf.Message.Engine (
     villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages,
     seersTurnMessages, scapegoatsTurnMessage, protectorsTurnMessages, orphansTurnMessages,
     oraclesTurnMessages, huntersTurnMessages, stageMessages, fallenAngelMessage,
-    trueVillagerMessage, spitefulGhostMessage, beholderMessage, newPlayerMessage,
-    rolesInGameMessage, newPlayersInGameMessage, newGameMessages, gameOverMessages,
-    fallenAngelWonMessage, werewolfLynchedMessage,
+    trueVillagerMessage, beholderMessage, newPlayerMessage, rolesInGameMessage,
+    newPlayersInGameMessage, newGameMessages, gameOverMessages, fallenAngelWonMessage,
+    werewolfLynchedMessage,
 ) where
 
 import Control.Lens
@@ -90,23 +90,32 @@ newGameMessages game = concat
     , [rolesInGameMessage Nothing game]
     , map newPlayerMessage players'
     , beholderMessages
-    , spitefulGhostMessages
+    , spitefulGhostMessages'
     , trueVillagerMessages
     , fallenAngelMessages
     , stageMessages game
     ]
     where
         players'                = game ^. players
-        beholderMessages        = case (,) <$> players' ^? beholders <*> players' ^? seers of
-            Just (beholder, _)  -> [beholderMessage (beholder ^. name) game]
-            _                   -> []
-        spitefulGhostMessages   = case players' ^? spitefulGhosts of
-            Just spitefulGhost  -> [spitefulGhostMessage (spitefulGhost ^. name) game]
-            _                   -> []
-        trueVillagerMessages    = [trueVillagerMessage game | has trueVillagers players']
-        fallenAngelMessages     = if has fallenAngels players'
-            then [fallenAngelMessage]
-            else []
+        beholderMessages        =
+            [ beholderMessage beholderName game
+            | has beholders players'
+            , has seers players'
+            , beholderName <- players' ^.. beholders . name
+            ]
+        spitefulGhostMessages'
+            | has spitefulGhosts players'   = spitefulGhostMessages spitefulGhostName game
+            | otherwise                     = []
+            where
+                spitefulGhostName = players' ^?! spitefulGhosts . name
+        trueVillagerMessages    =
+            [ trueVillagerMessage game
+            | has trueVillagers players'
+            ]
+        fallenAngelMessages     =
+            [ fallenAngelMessage
+            | has fallenAngels players'
+            ]
 
 newPlayersInGameMessage :: Game -> Message
 newPlayersInGameMessage = publicMessage . playersInGameText
@@ -122,8 +131,11 @@ newPlayerMessage player = privateMessage (player ^. name) $ newPlayerText player
 beholderMessage :: Text -> Game -> Message
 beholderMessage to = privateMessage to . beholderText
 
-spitefulGhostMessage :: Text -> Game -> Message
-spitefulGhostMessage to = privateMessage to . spitefulGhostText
+spitefulGhostMessages :: Text -> Game -> [Message]
+spitefulGhostMessages to game =
+    [ privateMessage to $ spitefulGhostPrivateText game
+    , publicMessage $ spitefulGhostPublicText game
+    ]
 
 trueVillagerMessage :: Game -> Message
 trueVillagerMessage = publicMessage . trueVillagerText
