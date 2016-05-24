@@ -60,8 +60,12 @@ pingRole :: (MonadState Game m, MonadWriter [Message] m) => Role -> m ()
 pingRole role' = do
     player <- findPlayerBy_ role role'
 
-    tell . (:[]) . pingRoleMessage role' =<< get
+    tell . (:[]) . pingRoleMessage =<< get
     tell [pingPlayerMessage $ player ^. name]
+    where
+        pingRoleMessage game
+            | has (activity . _Diurnal) role'   = pingDiurnalRoleMessage role'
+            | otherwise                         = pingNocturnalRoleMessage role' game
 
 pingVillagers :: (MonadState Game m, MonadWriter [Message] m) => m ()
 pingVillagers = do

@@ -36,7 +36,8 @@ module Game.Werewolf.Variant.Standard.Command (
     witchCommandsText, witchsTurnText,
 
     -- * Ping
-    playerPingedText, rolePingedText, villagePingedText, werewolvesPingedText,
+    diurnalRolePingedText, nocturnalRolePingedText, playerPingedText, villagePingedText,
+    werewolvesPingedText,
 
     -- * Quit
     callerQuitText,
@@ -166,11 +167,14 @@ witchCommandsText = [iFile|variant/standard/command/help/witch-commands.txt|]
 witchsTurnText :: Text
 witchsTurnText = [iFile|variant/standard/command/help/witchs-turn.txt|]
 
+diurnalRolePingedText :: Role -> Text
+diurnalRolePingedText role = [iFile|variant/standard/command/ping/diurnal-role-pinged.txt|]
+
+nocturnalRolePingedText :: Role -> Text
+nocturnalRolePingedText role = [iFile|variant/standard/command/ping/nocturnal-role-pinged.txt|]
+
 playerPingedText :: Text
 playerPingedText = [iFile|variant/standard/command/ping/player-pinged.txt|]
-
-rolePingedText :: Role -> Text
-rolePingedText role = [iFile|variant/standard/command/ping/role-pinged.txt|]
 
 villagePingedText :: Text
 villagePingedText = [iFile|variant/standard/command/ping/village-pinged.txt|]

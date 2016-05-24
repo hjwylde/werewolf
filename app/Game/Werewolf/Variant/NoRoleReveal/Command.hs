@@ -18,7 +18,7 @@ module Game.Werewolf.Variant.NoRoleReveal.Command (
     playerShotText,
 
     -- * Ping
-    rolePingedText, werewolvesPingedText,
+    nocturnalRolePingedText, werewolvesPingedText,
 
     -- * Quit
     callerQuitText,
@@ -39,8 +39,8 @@ import Game.Werewolf.Message
 playerShotText :: Player -> Text
 playerShotText player = [iFile|variant/no-role-reveal/command/choose/player-shot.txt|]
 
-rolePingedText :: Role -> Text
-rolePingedText _ = [iFile|variant/no-role-reveal/command/ping/role-pinged.txt|]
+nocturnalRolePingedText :: Role -> Text
+nocturnalRolePingedText _ = [iFile|variant/no-role-reveal/command/ping/nocturnal-role-pinged.txt|]
 
 werewolvesPingedText :: Text
 werewolvesPingedText = [iFile|variant/no-role-reveal/command/ping/werewolves-pinged.txt|]

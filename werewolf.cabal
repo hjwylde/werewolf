@@ -21,12 +21,12 @@ build-type:     Simple
 extra-source-files:
     CHANGELOG.md
     README.md
-    variant/no-role-knowledge/command/ping/role-pinged.txt
+    variant/no-role-knowledge/command/ping/nocturnal-role-pinged.txt
     variant/no-role-knowledge/command/ping/werewolves-pinged.txt
     variant/no-role-knowledge/command/status/current-turn.txt
     variant/no-role-knowledge/engine/new-game/roles-in-game.txt
     variant/no-role-reveal/command/choose/player-shot.txt
-    variant/no-role-reveal/command/ping/role-pinged.txt
+    variant/no-role-reveal/command/ping/nocturnal-role-pinged.txt
     variant/no-role-reveal/command/ping/werewolves-pinged.txt
     variant/no-role-reveal/command/quit/caller-quit.txt
     variant/no-role-reveal/command/status/current-turn.txt
@@ -70,8 +70,9 @@ extra-source-files:
     variant/standard/command/help/win-condition.txt
     variant/standard/command/help/witch-commands.txt
     variant/standard/command/help/witchs-turn.txt
+    variant/standard/command/ping/diurnal-role-pinged.txt
+    variant/standard/command/ping/nocturnal-role-pinged.txt
     variant/standard/command/ping/player-pinged.txt
-    variant/standard/command/ping/role-pinged.txt
     variant/standard/command/ping/village-pinged.txt
     variant/standard/command/ping/werewolves-pinged.txt
     variant/standard/command/quit/caller-quit.txt

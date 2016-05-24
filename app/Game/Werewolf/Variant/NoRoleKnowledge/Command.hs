@@ -15,7 +15,7 @@ variant.
 
 module Game.Werewolf.Variant.NoRoleKnowledge.Command (
     -- * Ping
-    rolePingedText, werewolvesPingedText,
+    nocturnalRolePingedText, werewolvesPingedText,
 
     -- * Status
     currentTurnText,
@@ -26,8 +26,8 @@ import Data.Text                     (Text)
 
 import Game.Werewolf
 
-rolePingedText :: Role -> Text
-rolePingedText _ = [iFile|variant/no-role-knowledge/command/ping/role-pinged.txt|]
+nocturnalRolePingedText :: Role -> Text
+nocturnalRolePingedText _ = [iFile|variant/no-role-knowledge/command/ping/nocturnal-role-pinged.txt|]
 
 werewolvesPingedText :: Text
 werewolvesPingedText = [iFile|variant/no-role-knowledge/command/ping/werewolves-pinged.txt|]
