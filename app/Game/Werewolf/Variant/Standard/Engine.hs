@@ -32,8 +32,8 @@ module Game.Werewolf.Variant.Standard.Engine (
     werewolfLynchedText,
 
     -- * New game
-    beholderText, fallenAngelText, newPlayerText, playersInGameText, rolesInGameText,
-    spitefulGhostPrivateText, spitefulGhostPublicText, trueVillagerText,
+    beholderText, newPlayerText, playersInGameText, rolesInGameText, spitefulGhostPrivateText,
+    spitefulGhostPublicText, trueVillagerText,
 
     -- * Oracle's turn
     oraclesTurnPrivateText, oraclesTurnPublicText,
@@ -143,9 +143,6 @@ beholderText :: Game -> Text
 beholderText game = [iFile|variant/standard/engine/new-game/beholder.txt|]
     where
         seer = game ^?! players . seers
-
-fallenAngelText :: Text
-fallenAngelText = [iFile|variant/standard/engine/new-game/fallen-angel.txt|]
 
 newPlayerText :: Player -> Text
 newPlayerText player = [iFile|variant/standard/engine/new-game/new-player.txt|]
