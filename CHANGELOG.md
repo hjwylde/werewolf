@@ -7,6 +7,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Major*
+
+* Added activity field to Role. ([#231](https://github.com/hjwylde/werewolf/issues/231))
+
 *Minor*
 
 * Added player roles message when the game is force ended. ([#225](https://github.com/hjwylde/werewolf/issues/225))
