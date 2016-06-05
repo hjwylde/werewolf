@@ -186,6 +186,7 @@ start = fmap Start $ Start.Options
         variantOption = option $ readerAsk >>= \opt -> case opt of
             "standard"          -> return Standard
             "no-role-knowledge" -> return NoRoleKnowledge
+            "no-role-reveal"    -> return NoRoleReveal
             _                   -> readerError $ "unrecognised variant `" ++ opt ++ "'"
 
         extraRolesOption = fmap (Start.Use . filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
