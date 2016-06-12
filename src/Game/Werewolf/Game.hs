@@ -10,6 +10,7 @@ game state only changes when a /command/ is issued. Thus, this module defines th
 structure and any fields required to keep track of the current state.
 -}
 
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE Rank2Types        #-}
 {-# LANGUAGE TemplateHaskell   #-}
@@ -138,7 +139,11 @@ makePrisms ''Variant
 
 makePrisms ''Stage
 
+#if __GLASGOW_HASKELL__ >= 800
+activity :: Contravariant f => (Activity -> f Activity) -> Stage -> f Stage
+#else
 activity :: Getter Stage Activity
+#endif
 activity = to getter
     where
         getter DruidsTurn           = Diurnal
