@@ -18,7 +18,7 @@ module Game.Werewolf.Variant.NoRoleKnowledge.Command (
     nocturnalRolePingedText, werewolvesPingedText,
 
     -- * Status
-    currentTurnText,
+    currentNocturnalTurnText,
 ) where
 
 import Data.String.Interpolate.Extra
@@ -32,5 +32,5 @@ nocturnalRolePingedText _ = [iFile|variant/no-role-knowledge/command/ping/noctur
 werewolvesPingedText :: Text
 werewolvesPingedText = [iFile|variant/no-role-knowledge/command/ping/werewolves-pinged.txt|]
 
-currentTurnText :: Game -> Text
-currentTurnText _ = [iFile|variant/no-role-knowledge/command/status/current-turn.txt|]
+currentNocturnalTurnText :: Game -> Text
+currentNocturnalTurnText _ = [iFile|variant/no-role-knowledge/command/status/current-nocturnal-turn.txt|]

@@ -24,4 +24,4 @@ module Game.Werewolf (
 import Game.Werewolf.Game     as Werewolf
 import Game.Werewolf.Player   as Werewolf
 import Game.Werewolf.Response as Werewolf
-import Game.Werewolf.Role     as Werewolf hiding (name)
+import Game.Werewolf.Role     as Werewolf hiding (activity, name)

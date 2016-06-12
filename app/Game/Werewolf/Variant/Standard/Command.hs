@@ -43,7 +43,8 @@ module Game.Werewolf.Variant.Standard.Command (
     callerQuitText,
 
     -- * Status
-    alivePlayersText, currentTurnText, deadPlayersText, gameOverText,
+    alivePlayersText, currentDiurnalTurnText, currentNocturnalTurnText, deadPlayersText,
+    gameOverText,
 
     -- * Unvote
     callerRescindedVoteText,
@@ -188,8 +189,11 @@ callerQuitText caller = [iFile|variant/standard/command/quit/caller-quit.txt|]
 alivePlayersText :: Game -> Text
 alivePlayersText game = [iFile|variant/standard/command/status/alive-players.txt|]
 
-currentTurnText :: Game -> Text
-currentTurnText game = [iFile|variant/standard/command/status/current-turn.txt|]
+currentDiurnalTurnText :: Game -> Text
+currentDiurnalTurnText game = [iFile|variant/standard/command/status/current-diurnal-turn.txt|]
+
+currentNocturnalTurnText :: Game -> Text
+currentNocturnalTurnText game = [iFile|variant/standard/command/status/current-nocturnal-turn.txt|]
 
 deadPlayersText :: Game -> Text
 deadPlayersText game = [iFile|variant/standard/command/status/dead-players.txt|]

@@ -37,7 +37,7 @@ module Game.Werewolf.Message.Command (
     pingWerewolvesMessage,
 
     -- * Status
-    currentStageMessage, gameIsOverMessage, playersInGameMessage,
+    currentDiurnalTurnMessage, currentNocturnalTurnMessage, gameIsOverMessage, playersInGameMessage,
 
     -- * Unvote
     playerRescindedVoteMessage,
@@ -175,12 +175,14 @@ pingWerewolvesMessage game
     | has (variant . _NoRoleReveal) game    = publicMessage NoRoleReveal.werewolvesPingedText
     | otherwise                             = publicMessage Standard.werewolvesPingedText
 
-currentStageMessage :: Text -> Game -> Message
-currentStageMessage to game
-    | has (stage . _GameOver) game          = gameIsOverMessage to
-    | has (variant . _NoRoleKnowledge) game = privateMessage to $ NoRoleKnowledge.currentTurnText game
-    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.currentTurnText game
-    | otherwise                             = privateMessage to $ Standard.currentTurnText game
+currentDiurnalTurnMessage :: Text -> Game -> Message
+currentDiurnalTurnMessage to game = privateMessage to $ Standard.currentDiurnalTurnText game
+
+currentNocturnalTurnMessage :: Text -> Game -> Message
+currentNocturnalTurnMessage to game
+    | has (variant . _NoRoleKnowledge) game = privateMessage to $ NoRoleKnowledge.currentNocturnalTurnText game
+    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.currentNocturnalTurnText game
+    | otherwise                             = privateMessage to $ Standard.currentNocturnalTurnText game
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to gameOverText

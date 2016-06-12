@@ -19,6 +19,11 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Removed the public start-of-game message for the Fallen Angel. ([#229](https://github.com/hjwylde/werewolf/issues/229))
 * Updated role balances based on Simple Werewolf being -5. ([#233](https://github.com/hjwylde/werewolf/issues/233))
 
+*Revisions*
+
+* Fixed current stage command to declare diurnal turns. ([#231](https://github.com/hjwylde/werewolf/issues/231))
+* Fixed ping command to declare diurnal roles. ([#231](https://github.com/hjwylde/werewolf/issues/231))
+
 ### v1.2.0.3
 
 *Revisions*
