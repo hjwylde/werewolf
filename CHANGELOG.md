@@ -15,6 +15,13 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Removed the public start-of-game message for the Fallen Angel. ([#229](https://github.com/hjwylde/werewolf/issues/229))
 * Updated role balances based on Simple Werewolf being -5. ([#233](https://github.com/hjwylde/werewolf/issues/233))
 
+### v1.2.0.3
+
+*Revisions*
+
+* Fixed help subcommands from causing an error when a game doesn't exist. ([#230](https://github.com/hjwylde/werewolf/issues/230))
+* Fixed help subcommands for no-role-knowledge variant. ([#232](https://github.com/hjwylde/werewolf/issues/232))
+
 ### v1.2.0.2
 
 *Revisions*
