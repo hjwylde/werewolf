@@ -10,6 +10,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Major*
 
 * Added activity field to Role. ([#231](https://github.com/hjwylde/werewolf/issues/231))
+* Added the Dullahan role. ([#202](https://github.com/hjwylde/werewolf/issues/202))
 
 *Minor*
 

@@ -42,7 +42,7 @@ module Game.Werewolf.Role (
     -- | The Loners look out for themselves and themselves alone.
 
     --   The Loners must complete their own objective.
-    fallenAngelRole, spitefulGhostRole,
+    dullahanRole, fallenAngelRole, spitefulGhostRole,
 
     -- *** The Villagers
     -- | Fraught with fear of the unseen enemy, the Villagers must work together to determine the
@@ -125,6 +125,7 @@ allRoles =
     , beholderRole
     , crookedSenatorRole
     , druidRole
+    , dullahanRole
     , fallenAngelRole
     , hunterRole
     , jesterRole
@@ -191,6 +192,17 @@ villageDrunkRole = Role
     , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/village-drunk/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/village-drunk/rules.txt|]
+    }
+
+dullahanRole :: Role
+dullahanRole = Role
+    { _tag          = "dullahan"
+    , _name         = T.strip [iFile|variant/standard/role/dullahan/name.txt|]
+    , _allegiance   = NoOne
+    , _balance      = 0
+    , _activity     = Diurnal
+    , _description  = T.strip [iFile|variant/standard/role/dullahan/description.txt|]
+    , _rules        = T.strip [iFile|variant/standard/role/dullahan/rules.txt|]
     }
 
 -- | /Long ago during the War in Heaven, angels fell from the sky as one by one those that followed/

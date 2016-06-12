@@ -175,6 +175,9 @@ extra-source-files:
     variant/standard/role/druid/description.txt
     variant/standard/role/druid/name.txt
     variant/standard/role/druid/rules.txt
+    variant/standard/role/dullahan/description.txt
+    variant/standard/role/dullahan/name.txt
+    variant/standard/role/dullahan/rules.txt
     variant/standard/role/fallen-angel/description.txt
     variant/standard/role/fallen-angel/name.txt
     variant/standard/role/fallen-angel/rules.txt
