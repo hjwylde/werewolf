@@ -10,6 +10,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Revisions*
 
 * Fixed help subcommands from causing an error when a game doesn't exist. ([#230](https://github.com/hjwylde/werewolf/issues/230))
+* Fixed help subcommands for no-role-knowledge variant. ([#232](https://github.com/hjwylde/werewolf/issues/232))
 
 ### v1.2.0.2
 
