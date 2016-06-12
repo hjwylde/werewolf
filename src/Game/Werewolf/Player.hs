@@ -24,9 +24,9 @@ module Game.Werewolf.Player (
     newPlayer,
 
     -- ** Traversals
-    alphaWolf, beholder, crookedSenator, druid, fallenAngel, hunter, jester, lycan, medusa, oracle,
-    orphan, protector, scapegoat, seer, simpleVillager, simpleWerewolf, spitefulGhost, trueVillager,
-    villageDrunk, witch,
+    alphaWolf, beholder, crookedSenator, druid, dullahan, fallenAngel, hunter, jester, lycan,
+    medusa, oracle, orphan, protector, scapegoat, seer, simpleVillager, simpleWerewolf,
+    spitefulGhost, trueVillager, villageDrunk, witch,
     loner, villager, werewolf,
 
     -- | The following traversals are provided just as a bit of sugar to avoid continually writing
@@ -35,14 +35,13 @@ module Game.Werewolf.Player (
 
     -- | N.B., the following traversals are not legal for the same reason 'filtered' isn't!
     named,
-    alphaWolves, beholders, crookedSenators, druids, fallenAngels, hunters, jesters, lycans,
-    medusas, oracles, orphans, protectors, scapegoats, seers, simpleVillagers, simpleWerewolves,
-    spitefulGhosts, trueVillagers, villageDrunks, witches,
+    alphaWolves, beholders, crookedSenators, druids, dullahans, fallenAngels, hunters, jesters,
+    lycans, medusas, oracles, orphans, protectors, scapegoats, seers, simpleVillagers,
+    simpleWerewolves, spitefulGhosts, trueVillagers, villageDrunks, witches,
     loners, villagers, werewolves,
     alive, dead,
 ) where
 
-import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import Data.Function
@@ -104,6 +103,14 @@ beholder = role . only beholderRole
 -- @
 crookedSenator :: Traversal' Player ()
 crookedSenator = role . only crookedSenatorRole
+
+-- | The traversal of 'Player's with a 'dullahanRole'.
+--
+-- @
+-- 'dullahan' = 'role' . 'only' 'dullahanRole'
+-- @
+dullahan :: Traversal' Player ()
+dullahan = role . only dullahanRole
 
 -- | The traversal of 'Player's with a 'druidRole'.
 --
@@ -320,6 +327,14 @@ beholders = traverse . filtered (is beholder)
 -- @
 crookedSenators :: Traversable t => Traversal' (t Player) Player
 crookedSenators = traverse . filtered (is crookedSenator)
+
+-- | This 'Traversal' provides the traversal of 'dullahan' 'Player's.
+--
+-- @
+-- 'dullahans' = 'traverse' . 'filtered' ('is' 'dullahan')
+-- @
+dullahans :: Traversable t => Traversal' (t Player) Player
+dullahans = traverse . filtered (is dullahan)
 
 -- | This 'Traversal' provides the traversal of 'druid' 'Player's.
 --

@@ -26,7 +26,7 @@ module Game.Werewolf.Util (
     -- ** Queries
     isGameOver, isHuntersTurn, isOraclesTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn,
     isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-    hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
+    hasAnyoneWon, hasVillagersWon, hasWerewolvesWon,
 
     -- * Player
 
@@ -38,7 +38,6 @@ module Game.Werewolf.Util (
     isPlayerAlive, isPlayerDead,
 ) where
 
-import Control.Lens         hiding (isn't)
 import Control.Lens.Extra
 import Control.Monad.Extra
 import Control.Monad.Random
@@ -51,8 +50,7 @@ import           Data.Maybe
 import           Data.Text  (Text)
 
 import           Game.Werewolf.Game           hiding (getAllowedVoters, getPendingVoters,
-                                               hasAnyoneWon, hasFallenAngelWon, hasVillagersWon,
-                                               hasWerewolvesWon)
+                                               hasAnyoneWon, hasVillagersWon, hasWerewolvesWon)
 import qualified Game.Werewolf.Game           as Game
 import           Game.Werewolf.Message.Engine
 import           Game.Werewolf.Player
@@ -162,9 +160,6 @@ isWitchsTurn = hasuse $ stage . _WitchsTurn
 
 hasAnyoneWon :: MonadState Game m => m Bool
 hasAnyoneWon = gets Game.hasAnyoneWon
-
-hasFallenAngelWon :: MonadState Game m => m Bool
-hasFallenAngelWon = gets Game.hasFallenAngelWon
 
 hasVillagersWon :: MonadState Game m => m Bool
 hasVillagersWon = gets Game.hasVillagersWon

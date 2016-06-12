@@ -20,7 +20,6 @@ module Werewolf.Command.Start (
     handle,
 ) where
 
-import Control.Lens
 import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra

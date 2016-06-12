@@ -14,7 +14,6 @@ module Game.Werewolf.Command.Protector (
     protectCommand,
 ) where
 
-import Control.Lens
 import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra

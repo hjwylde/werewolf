@@ -1,0 +1,2 @@
+The roads are owned by the #{humanise dullahanRole}. Foolishly #{humanise $ game ^. marks} tried to cross them, but to no avail.
+The game is over! The #{humanise dullahanRole} has won.

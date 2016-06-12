@@ -21,8 +21,8 @@ module Game.Werewolf.Variant.Standard.Engine (
     playerBootedText, playerKilledText,
 
     -- * Game over
-    allegianceWonText, fallenAngelWonText, playerContributedText, playerLostText, playerRolesText,
-    playerWonText,
+    allegianceWonText, dullahanWonText, fallenAngelWonText, playerContributedText, playerLostText,
+    playerRolesText, playerWonText,
 
     -- * Hunter's turn
     huntersTurnPrivateText, huntersTurnPublicText,
@@ -32,8 +32,8 @@ module Game.Werewolf.Variant.Standard.Engine (
     werewolfLynchedText,
 
     -- * New game
-    beholderText, newPlayerText, playersInGameText, rolesInGameText, spitefulGhostPrivateText,
-    spitefulGhostPublicText, trueVillagerText,
+    beholderText, dullahanText, newPlayerText, playersInGameText, rolesInGameText,
+    spitefulGhostPrivateText, spitefulGhostPublicText, trueVillagerText,
 
     -- * Oracle's turn
     oraclesTurnPrivateText, oraclesTurnPublicText,
@@ -73,7 +73,6 @@ module Game.Werewolf.Variant.Standard.Engine (
 ) where
 
 import Control.Arrow
-import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import           Data.List.Extra
@@ -96,6 +95,9 @@ playerKilledText = [iFile|variant/standard/engine/general/player-killed.txt|]
 
 allegianceWonText :: Allegiance -> Text
 allegianceWonText allegiance = [iFile|variant/standard/engine/game-over/allegiance-won.txt|]
+
+dullahanWonText :: Game -> Text
+dullahanWonText game = [iFile|variant/standard/engine/game-over/dullahan-won.txt|]
 
 fallenAngelWonText :: Text
 fallenAngelWonText = [iFile|variant/standard/engine/game-over/fallen-angel-won.txt|]
@@ -143,6 +145,9 @@ beholderText :: Game -> Text
 beholderText game = [iFile|variant/standard/engine/new-game/beholder.txt|]
     where
         seer = game ^?! players . seers
+
+dullahanText :: Game -> Text
+dullahanText game = [iFile|variant/standard/engine/new-game/dullahan.txt|]
 
 newPlayerText :: Player -> Text
 newPlayerText player = [iFile|variant/standard/engine/new-game/new-player.txt|]
