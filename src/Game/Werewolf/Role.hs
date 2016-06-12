@@ -151,7 +151,7 @@ orphanRole = Role
     { _tag          = "orphan"
     , _name         = T.strip [iFile|variant/standard/role/orphan/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = -1
+    , _balance      = -3
     , _description  = T.strip [iFile|variant/standard/role/orphan/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/orphan/rules.txt|]
     }
@@ -171,7 +171,7 @@ villageDrunkRole = Role
     { _tag          = "village-drunk"
     , _name         = T.strip [iFile|variant/standard/role/village-drunk/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = -1
+    , _balance      = -3
     , _description  = T.strip [iFile|variant/standard/role/village-drunk/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/village-drunk/rules.txt|]
     }
@@ -222,7 +222,7 @@ beholderRole = Role
     { _tag          = "beholder"
     , _name         = T.strip [iFile|variant/standard/role/beholder/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 1
+    , _balance      = 2
     , _description  = T.strip [iFile|variant/standard/role/beholder/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/beholder/rules.txt|]
     }
@@ -238,7 +238,7 @@ crookedSenatorRole = Role
     { _tag          = "crooked-senator"
     , _name         = T.strip [iFile|variant/standard/role/crooked-senator/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 2
+    , _balance      = 3
     , _description  = T.strip [iFile|variant/standard/role/crooked-senator/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/crooked-senator/rules.txt|]
     }
@@ -256,7 +256,7 @@ druidRole = Role
     { _tag          = "druid"
     , _name         = T.strip [iFile|variant/standard/role/druid/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 3
+    , _balance      = 6
     , _description  = T.strip [iFile|variant/standard/role/druid/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/druid/rules.txt|]
     }
@@ -272,7 +272,7 @@ hunterRole = Role
     { _tag          = "hunter"
     , _name         = T.strip [iFile|variant/standard/role/hunter/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 2
+    , _balance      = 3
     , _description  = T.strip [iFile|variant/standard/role/hunter/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/hunter/rules.txt|]
     }
@@ -290,7 +290,7 @@ jesterRole = Role
     { _tag          = "jester"
     , _name         = T.strip [iFile|variant/standard/role/jester/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 0
+    , _balance      = 1
     , _description  = T.strip [iFile|variant/standard/role/jester/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/jester/rules.txt|]
     }
@@ -307,7 +307,7 @@ lycanRole = Role
     { _tag          = "lycan"
     , _name         = T.strip [iFile|variant/standard/role/lycan/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 0
+    , _balance      = -1
     , _description  = T.strip [iFile|variant/standard/role/lycan/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/lycan/rules.txt|]
     }
@@ -326,7 +326,7 @@ medusaRole = Role
     { _tag          = "medusa"
     , _name         = T.strip [iFile|variant/standard/role/medusa/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 3
+    , _balance      = 5
     , _description  = T.strip [iFile|variant/standard/role/medusa/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/medusa/rules.txt|]
     }
@@ -342,7 +342,7 @@ oracleRole = Role
     { _tag          = "oracle"
     , _name         = T.strip [iFile|variant/standard/role/oracle/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 2
+    , _balance      = 5
     , _description  = T.strip [iFile|variant/standard/role/oracle/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/oracle/rules.txt|]
     }
@@ -360,7 +360,7 @@ protectorRole = Role
     { _tag          = "protector"
     , _name         = T.strip [iFile|variant/standard/role/protector/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 2
+    , _balance      = 4
     , _description  = T.strip [iFile|variant/standard/role/protector/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/protector/rules.txt|]
     }
@@ -393,7 +393,7 @@ seerRole = Role
     { _tag          = "seer"
     , _name         = T.strip [iFile|variant/standard/role/seer/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 2
+    , _balance      = 5
     , _description  = T.strip [iFile|variant/standard/role/seer/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/seer/rules.txt|]
     }
@@ -441,7 +441,7 @@ witchRole = Role
     { _tag          = "witch"
     , _name         = T.strip [iFile|variant/standard/role/witch/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 3
+    , _balance      = 4
     , _description  = T.strip [iFile|variant/standard/role/witch/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/witch/rules.txt|]
     }
@@ -457,7 +457,7 @@ alphaWolfRole = Role
     { _tag          = "alpha-wolf"
     , _name         = T.strip [iFile|variant/standard/role/alpha-wolf/name.txt|]
     , _allegiance   = Werewolves
-    , _balance      = -5
+    , _balance      = -8
     , _description  = T.strip [iFile|variant/standard/role/alpha-wolf/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/alpha-wolf/rules.txt|]
     }
@@ -473,7 +473,7 @@ simpleWerewolfRole = Role
     { _tag          = "simple-werewolf"
     , _name         = T.strip [iFile|variant/standard/role/simple-werewolf/name.txt|]
     , _allegiance   = Werewolves
-    , _balance      = -4
+    , _balance      = -6
     , _description  = T.strip [iFile|variant/standard/role/simple-werewolf/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/simple-werewolf/rules.txt|]
     }

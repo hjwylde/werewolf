@@ -89,13 +89,13 @@ findByTag tag' = restrictedRoles ^? traverse . filteredBy tag tag'
 padRoles :: [Role] -> Int -> [Role]
 padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
     where
-        goal                    = 3
+        goal                    = 4
         m                       = max (n - length roles) 0
         startingBalance         = sumOf (traverse . balance) roles
         simpleWerewolfBalance   = simpleWerewolfRole ^. balance
 
         -- Little magic here to calculate how many Werewolves and Villagers we want.
-        -- This tries to ensure that the balance of the game is between -2 and 2.
+        -- This tries to ensure that the balance of the game is between -3 and 3.
         simpleWerewolvesCount   = (goal - m - startingBalance) `div` (simpleWerewolfBalance - 1) + 1
         simpleVillagersCount    = m - simpleWerewolvesCount
 
