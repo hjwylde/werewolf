@@ -286,7 +286,7 @@ executable werewolf
         optparse-applicative >= 0.11 && < 0.13,
         random-shuffle,
         text == 1.2.*,
-        transformers == 0.4.*,
+        transformers >= 0.4 && < 0.6,
         werewolf
 
 library
@@ -318,6 +318,6 @@ library
         interpolate == 0.1.*,
         lens >= 4.12 && < 4.15,
         mtl == 2.2.*,
-        template-haskell == 2.10.*,
+        template-haskell >= 2.10 && < 2.12,
         text == 1.2.*,
-        transformers == 0.4.*
+        transformers >= 0.4 && < 0.6
