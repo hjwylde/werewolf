@@ -17,7 +17,6 @@ module Game.Werewolf.Command.Witch (
     healCommand, passCommand, poisonCommand,
 ) where
 
-import Control.Lens
 import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra

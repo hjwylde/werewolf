@@ -18,8 +18,8 @@ module Game.Werewolf.Game (
     -- * Game
     Game,
     variant, stage, round, players, boots, allowedVoters, divine, fallenAngelLynched, healUsed,
-    hunterRetaliated, jesterRevealed, passed, poison, poisonUsed, priorProtect, protect, roleModel,
-    scapegoatBlamed, see, votes,
+    hunterRetaliated, jesterRevealed, marks, passed, poison, poisonUsed, priorProtect, protect,
+    roleModel, scapegoatBlamed, see, votes,
 
     Variant(..),
     _Standard, _NoRoleKnowledge, _NoRoleReveal,
@@ -42,13 +42,12 @@ module Game.Werewolf.Game (
     firstRound, secondRound, thirdRound,
 
     -- ** Searches
-    getAllowedVoters, getPendingVoters,
+    getAllowedVoters, getPendingVoters, getMarks,
 
     -- ** Queries
-    hasAnyoneWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
+    hasAnyoneWon, hasDullahanWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
 ) where
 
-import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import           Data.List.Extra
@@ -84,6 +83,7 @@ data Game = Game
     , _healUsed           :: Bool             -- ^ Witch
     , _hunterRetaliated   :: Bool             -- ^ Hunter
     , _jesterRevealed     :: Bool             -- ^ Jester
+    , _marks              :: [Text]           -- ^ Dullahan
     , _passed             :: Bool             -- ^ Witch
     , _poison             :: Maybe Text       -- ^ Witch
     , _poisonUsed         :: Bool             -- ^ Witch
@@ -232,6 +232,7 @@ newGame variant players = Game
     , _healUsed             = False
     , _hunterRetaliated     = False
     , _jesterRevealed       = False
+    , _marks                = []
     , _poison               = Nothing
     , _poisonUsed           = False
     , _priorProtect         = Nothing
@@ -283,9 +284,23 @@ getPendingVoters game =
     where
         votes' = game ^. votes
 
+-- | Gets all the 'marks' in a game (which is names only) and maps them to their player.
+getMarks :: Game -> [Player]
+getMarks game = map (\name -> game ^?! players . traverse . named name) (game ^. marks)
+
 -- | Queries whether anyone has won.
 hasAnyoneWon :: Game -> Bool
-hasAnyoneWon game = any ($ game) [hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon]
+hasAnyoneWon game = any ($ game)
+    [ hasDullahanWon
+    , hasFallenAngelWon
+    , hasVillagersWon
+    , hasWerewolvesWon
+    ]
+
+-- | Queries whether the Dullahan has won. The Dullahan wins if they manage to eliminate all their
+--   marks.
+hasDullahanWon :: Game -> Bool
+hasDullahanWon game = has (players . dullahans . alive) game && all (is dead) (getMarks game)
 
 -- | Queries whether the Fallen Angel has won. The Fallen Angel wins if they manage to get
 --   themselves lynched by the Villagers.
@@ -295,9 +310,11 @@ hasFallenAngelWon game = game ^. fallenAngelLynched
 -- | Queries whether the 'Villagers' have won. The 'Villagers' win if they are the only players
 --   surviving.
 --
---   N.B., the Fallen Angel is not considered when determining whether the 'Villagers' have won.
+--   N.B., the Dullahan and Fallen Angel are not considered when determining whether the 'Villagers'
+--   have won.
 hasVillagersWon :: Game -> Bool
-hasVillagersWon = allOf (players . traverse . alive) (\player -> any ($ player) [is villager, is fallenAngel])
+hasVillagersWon = allOf (players . traverse . alive)
+    (\player -> any ($ player) [is villager, is dullahan, is fallenAngel])
 
 -- | Queries whether the 'Werewolves' have won. The 'Werewolves' win if they are the only players
 --   surviving.

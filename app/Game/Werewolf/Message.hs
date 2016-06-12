@@ -23,7 +23,6 @@ module Game.Werewolf.Message (
     humanisePlayerWithState, article, conjugateToBe, pluralise,
 ) where
 
-import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import           Data.String.Humanise

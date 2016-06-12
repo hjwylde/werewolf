@@ -12,6 +12,8 @@ Extra utility functions for working with lenses.
 {-# LANGUAGE Rank2Types #-}
 
 module Control.Lens.Extra (
+    module Control.Lens,
+
     -- * Folds
     is, isn't, hasuse, hasn'tuse,
 

@@ -17,7 +17,6 @@ module Game.Werewolf.Engine (
     checkStage, checkGameOver,
 ) where
 
-import Control.Lens         hiding (cons, isn't)
 import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra
@@ -30,8 +29,7 @@ import qualified Data.Map        as Map
 import           Data.Maybe
 
 -- TODO (hjw): remove Message.Command
-import Game.Werewolf.Game            hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
-                                      hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon)
+import Game.Werewolf.Game            hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon)
 import Game.Werewolf.Message.Command
 import Game.Werewolf.Message.Engine
 import Game.Werewolf.Player

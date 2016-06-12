@@ -26,7 +26,6 @@ module Game.Werewolf.Message.Engine (
     werewolfLynchedMessage,
 ) where
 
-import Control.Lens
 import Control.Lens.Extra
 
 import Data.List.Extra
@@ -47,6 +46,12 @@ playerBootedMessage player game
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
+    | hasDullahanWon game    = concat
+        [ [dullahanWonMessage game]
+        , [playerRolesMessage game]
+        , [playerWonMessage dullahansName]
+        , map playerLostMessage (game ^.. players . names \\ [dullahansName])
+        ]
     | hasFallenAngelWon game    = concat
         [ [fallenAngelWonMessage]
         , [playerRolesMessage game]
@@ -73,7 +78,11 @@ gameOverMessages game
         playerContributedMessages   = map playerContributedMessage (winningPlayers ^.. traverse . dead . name)
         playerLostMessages          = map playerLostMessage (losingPlayers ^.. names)
 
-        fallenAngelsName = game ^?! players . fallenAngels . name
+        dullahansName       = game ^?! players . dullahans . name
+        fallenAngelsName    = game ^?! players . fallenAngels . name
+
+dullahanWonMessage :: Game -> Message
+dullahanWonMessage = publicMessage . dullahanWonText
 
 fallenAngelWonMessage :: Message
 fallenAngelWonMessage = publicMessage fallenAngelWonText
@@ -90,6 +99,7 @@ newGameMessages game = concat
     , [rolesInGameMessage Nothing game]
     , map newPlayerMessage players'
     , beholderMessages
+    , dullahanMessages
     , spitefulGhostMessages'
     , trueVillagerMessages
     , stageMessages game
@@ -101,6 +111,11 @@ newGameMessages game = concat
             | has beholders players'
             , has seers players'
             , beholderName <- players' ^.. beholders . name
+            ]
+        dullahanMessages        =
+            [ dullahanMessage dullahanName game
+            | has dullahans players'
+            , dullahanName <- players' ^.. dullahans . name
             ]
         spitefulGhostMessages'
             | has spitefulGhosts players'   = spitefulGhostMessages spitefulGhostName game
@@ -125,6 +140,9 @@ newPlayerMessage player = privateMessage (player ^. name) $ newPlayerText player
 
 beholderMessage :: Text -> Game -> Message
 beholderMessage to = privateMessage to . beholderText
+
+dullahanMessage :: Text -> Game -> Message
+dullahanMessage to = privateMessage to . dullahanText
 
 spitefulGhostMessages :: Text -> Game -> [Message]
 spitefulGhostMessages to game =

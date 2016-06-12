@@ -22,8 +22,9 @@ module Werewolf.System (
     filePath, readGame, writeGame, deleteGame, writeOrDeleteGame, doesGameExist,
 ) where
 
-import Control.Lens         hiding (cons)
+import Control.Lens.Extra   hiding (cons)
 import Control.Monad.Except
+import Control.Monad.Random
 import Control.Monad.Writer
 
 import           Data.List
@@ -38,22 +39,32 @@ import Prelude hiding (round)
 
 import System.Directory
 import System.FilePath
+import System.Random.Shuffle
 
-startGame :: (MonadError [Message] m, MonadWriter [Message] m) => Text -> Variant -> [Player] -> m Game
-startGame callerName variant players = do
+startGame :: (MonadError [Message] m, MonadRandom m, MonadWriter [Message] m) => Text -> Variant -> [Player] -> m Game
+startGame callerName variant players' = do
     when (playerNames /= nub playerNames)   $ throwError [playerNamesMustBeUniqueMessage callerName]
-    when (length players < 7)               $ throwError [mustHaveAtLeast7PlayersMessage callerName]
+    when (length players' < 7)              $ throwError [mustHaveAtLeast7PlayersMessage callerName]
     forM_ restrictedRoles $ \role ->
-        when (length (players ^.. roles . only role) > 1) $
+        when (length (players' ^.. roles . only role) > 1) $
             throwError [roleCountRestrictedMessage callerName role]
 
-    let game = newGame variant players
+    let game    = newGame variant players'
+    game'       <- (\marks' -> game & marks .~ marks' ^.. names) <$> randomMarks game
 
-    tell $ newGameMessages game
+    tell $ newGameMessages game'
 
-    return game
+    return game'
     where
-        playerNames = players ^.. names
+        playerNames = players' ^.. names
+
+randomMarks :: MonadRandom m => Game -> m [Player]
+randomMarks game = do
+    let count = length potentialMarks `div` 3 + 1
+
+    take count <$> shuffleM potentialMarks
+    where
+        potentialMarks = game ^.. players . traverse . filtered (isn't dullahan)
 
 filePath :: MonadIO m => Text -> m FilePath
 filePath tag = (</> ".werewolf" </> T.unpack tag) <$> liftIO getHomeDirectory

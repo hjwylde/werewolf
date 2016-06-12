@@ -42,7 +42,6 @@ module Game.Werewolf.Player (
     alive, dead,
 ) where
 
-import Control.Lens       hiding (isn't)
 import Control.Lens.Extra
 
 import Data.Function

@@ -87,6 +87,7 @@ extra-source-files:
     variant/standard/command/vote/player-made-lynch-vote.txt
     variant/standard/engine/druids-turn/start.txt
     variant/standard/engine/game-over/allegiance-won.txt
+    variant/standard/engine/game-over/dullahan-won.txt
     variant/standard/engine/game-over/fallen-angel-won.txt
     variant/standard/engine/game-over/player-contributed.txt
     variant/standard/engine/game-over/player-lost.txt
@@ -102,6 +103,7 @@ extra-source-files:
     variant/standard/engine/lynching/scapegoat-lynched.txt
     variant/standard/engine/lynching/werewolf-lynched.txt
     variant/standard/engine/new-game/beholder.txt
+    variant/standard/engine/new-game/dullahan.txt
     variant/standard/engine/new-game/new-player.txt
     variant/standard/engine/new-game/players-in-game.txt
     variant/standard/engine/new-game/roles-in-game.txt
