@@ -18,13 +18,13 @@ module Game.Werewolf.Variant.NoRoleReveal.Command (
     playerShotText,
 
     -- * Ping
-    rolePingedText, werewolvesPingedText,
+    nocturnalRolePingedText, werewolvesPingedText,
 
     -- * Quit
     callerQuitText,
 
     -- * Status
-    currentTurnText, deadPlayersText,
+    currentNocturnalTurnText, deadPlayersText,
 ) where
 
 import Control.Lens
@@ -39,8 +39,8 @@ import Game.Werewolf.Message
 playerShotText :: Player -> Text
 playerShotText player = [iFile|variant/no-role-reveal/command/choose/player-shot.txt|]
 
-rolePingedText :: Role -> Text
-rolePingedText _ = [iFile|variant/no-role-reveal/command/ping/role-pinged.txt|]
+nocturnalRolePingedText :: Role -> Text
+nocturnalRolePingedText _ = [iFile|variant/no-role-reveal/command/ping/nocturnal-role-pinged.txt|]
 
 werewolvesPingedText :: Text
 werewolvesPingedText = [iFile|variant/no-role-reveal/command/ping/werewolves-pinged.txt|]
@@ -48,8 +48,8 @@ werewolvesPingedText = [iFile|variant/no-role-reveal/command/ping/werewolves-pin
 callerQuitText :: Player -> Text
 callerQuitText caller = [iFile|variant/no-role-reveal/command/quit/caller-quit.txt|]
 
-currentTurnText :: Game -> Text
-currentTurnText _ = [iFile|variant/no-role-reveal/command/status/current-turn.txt|]
+currentNocturnalTurnText :: Game -> Text
+currentNocturnalTurnText _ = [iFile|variant/no-role-reveal/command/status/current-nocturnal-turn.txt|]
 
 deadPlayersText :: Game -> Text
 deadPlayersText game = [iFile|variant/no-role-reveal/command/status/dead-players.txt|]

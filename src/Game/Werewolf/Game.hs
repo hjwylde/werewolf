@@ -28,6 +28,7 @@ module Game.Werewolf.Game (
     _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
     _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillageDrunksTurn,
     _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
+    activity,
 
     allStages,
     stageCycle, stageAvailable,
@@ -58,6 +59,7 @@ import           Data.String.Humanise
 import           Data.Text            (Text)
 
 import Game.Werewolf.Player
+import Game.Werewolf.Role   hiding (activity, name)
 
 import Prelude hiding (round)
 
@@ -135,6 +137,26 @@ makeLenses ''Game
 makePrisms ''Variant
 
 makePrisms ''Stage
+
+activity :: Getter Stage Activity
+activity = to getter
+    where
+        getter DruidsTurn           = Diurnal
+        getter GameOver             = Diurnal
+        getter HuntersTurn1         = Diurnal
+        getter HuntersTurn2         = Diurnal
+        getter Lynching             = Diurnal
+        getter OraclesTurn          = Nocturnal
+        getter OrphansTurn          = Nocturnal
+        getter ProtectorsTurn       = Nocturnal
+        getter ScapegoatsTurn       = Diurnal
+        getter SeersTurn            = Nocturnal
+        getter Sunrise              = Diurnal
+        getter Sunset               = Diurnal
+        getter VillageDrunksTurn    = Nocturnal
+        getter VillagesTurn         = Diurnal
+        getter WerewolvesTurn       = Nocturnal
+        getter WitchsTurn           = Nocturnal
 
 -- | All of the 'Stage's in the order that they should occur.
 allStages :: [Stage]
@@ -275,7 +297,7 @@ hasFallenAngelWon game = game ^. fallenAngelLynched
 --
 --   N.B., the Fallen Angel is not considered when determining whether the 'Villagers' have won.
 hasVillagersWon :: Game -> Bool
-hasVillagersWon = allOf (players . traverse . alive) (\player -> is villager player || is fallenAngel player)
+hasVillagersWon = allOf (players . traverse . alive) (\player -> any ($ player) [is villager, is fallenAngel])
 
 -- | Queries whether the 'Werewolves' have won. The 'Werewolves' win if they are the only players
 --   surviving.

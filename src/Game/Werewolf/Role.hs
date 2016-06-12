@@ -21,10 +21,13 @@ Roles are split into four categories:
 module Game.Werewolf.Role (
     -- * Role
     Role,
-    tag, name, allegiance, balance, description, rules,
+    tag, name, allegiance, balance, activity, description, rules,
 
     Allegiance(..),
     _NoOne, _Villagers, _Werewolves,
+
+    Activity(..),
+    _Diurnal, _Nocturnal,
 
     -- ** Instances
     allRoles, restrictedRoles,
@@ -79,6 +82,7 @@ data Role = Role
     , _name        :: Text
     , _allegiance  :: Allegiance
     , _balance     :: Int
+    , _activity    :: Activity
     , _description :: Text
     , _rules       :: Text
     } deriving (Read, Show)
@@ -93,6 +97,19 @@ instance Humanise Allegiance where
     humanise Villagers  = "Villagers"
     humanise Werewolves = "Werewolves"
 
+-- | Defines whether a role is diurnal or nocturnal. I.e., if the role's turn occurs during the day
+--   or night.
+data Activity = Diurnal | Nocturnal
+    deriving (Eq, Read, Show)
+
+instance Humanise Activity where
+    humanise Diurnal    = "diurnal"
+    humanise Nocturnal  = "nocturnal"
+
+makePrisms ''Allegiance
+
+makePrisms ''Activity
+
 makeLenses ''Role
 
 instance Eq Role where
@@ -100,8 +117,6 @@ instance Eq Role where
 
 instance Humanise Role where
     humanise = view name
-
-makePrisms ''Allegiance
 
 -- | A list containing all the roles defined in this file.
 allRoles :: [Role]
@@ -152,6 +167,7 @@ orphanRole = Role
     , _name         = T.strip [iFile|variant/standard/role/orphan/name.txt|]
     , _allegiance   = Villagers
     , _balance      = -3
+    , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/orphan/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/orphan/rules.txt|]
     }
@@ -172,6 +188,7 @@ villageDrunkRole = Role
     , _name         = T.strip [iFile|variant/standard/role/village-drunk/name.txt|]
     , _allegiance   = Villagers
     , _balance      = -3
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/village-drunk/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/village-drunk/rules.txt|]
     }
@@ -190,6 +207,7 @@ fallenAngelRole = Role
     , _name         = T.strip [iFile|variant/standard/role/fallen-angel/name.txt|]
     , _allegiance   = NoOne
     , _balance      = 0
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/fallen-angel/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/fallen-angel/rules.txt|]
     }
@@ -207,6 +225,7 @@ spitefulGhostRole = Role
     , _name         = T.strip [iFile|variant/standard/role/spiteful-ghost/name.txt|]
     , _allegiance   = NoOne
     , _balance      = 0
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/spiteful-ghost/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/spiteful-ghost/rules.txt|]
     }
@@ -223,6 +242,7 @@ beholderRole = Role
     , _name         = T.strip [iFile|variant/standard/role/beholder/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 2
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/beholder/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/beholder/rules.txt|]
     }
@@ -239,6 +259,7 @@ crookedSenatorRole = Role
     , _name         = T.strip [iFile|variant/standard/role/crooked-senator/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 2
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/crooked-senator/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/crooked-senator/rules.txt|]
     }
@@ -257,6 +278,7 @@ druidRole = Role
     , _name         = T.strip [iFile|variant/standard/role/druid/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 5
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/druid/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/druid/rules.txt|]
     }
@@ -273,6 +295,7 @@ hunterRole = Role
     , _name         = T.strip [iFile|variant/standard/role/hunter/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 3
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/hunter/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/hunter/rules.txt|]
     }
@@ -291,6 +314,7 @@ jesterRole = Role
     , _name         = T.strip [iFile|variant/standard/role/jester/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 1
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/jester/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/jester/rules.txt|]
     }
@@ -308,6 +332,7 @@ lycanRole = Role
     , _name         = T.strip [iFile|variant/standard/role/lycan/name.txt|]
     , _allegiance   = Villagers
     , _balance      = -1
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/lycan/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/lycan/rules.txt|]
     }
@@ -327,6 +352,7 @@ medusaRole = Role
     , _name         = T.strip [iFile|variant/standard/role/medusa/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 4
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/medusa/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/medusa/rules.txt|]
     }
@@ -343,6 +369,7 @@ oracleRole = Role
     , _name         = T.strip [iFile|variant/standard/role/oracle/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 4
+    , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/oracle/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/oracle/rules.txt|]
     }
@@ -361,6 +388,7 @@ protectorRole = Role
     , _name         = T.strip [iFile|variant/standard/role/protector/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 3
+    , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/protector/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/protector/rules.txt|]
     }
@@ -379,6 +407,7 @@ scapegoatRole = Role
     , _name         = T.strip [iFile|variant/standard/role/scapegoat/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 0
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/scapegoat/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/scapegoat/rules.txt|]
     }
@@ -394,6 +423,7 @@ seerRole = Role
     , _name         = T.strip [iFile|variant/standard/role/seer/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 4
+    , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/seer/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/seer/rules.txt|]
     }
@@ -410,6 +440,7 @@ simpleVillagerRole = Role
     , _name         = T.strip [iFile|variant/standard/role/simple-villager/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 1
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/simple-villager/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/simple-villager/rules.txt|]
     }
@@ -425,6 +456,7 @@ trueVillagerRole = Role
     , _name         = T.strip [iFile|variant/standard/role/true-villager/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 2
+    , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/true-villager/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/true-villager/rules.txt|]
     }
@@ -442,6 +474,7 @@ witchRole = Role
     , _name         = T.strip [iFile|variant/standard/role/witch/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 3
+    , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/witch/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/witch/rules.txt|]
     }
@@ -458,6 +491,7 @@ alphaWolfRole = Role
     , _name         = T.strip [iFile|variant/standard/role/alpha-wolf/name.txt|]
     , _allegiance   = Werewolves
     , _balance      = -7
+    , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/alpha-wolf/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/alpha-wolf/rules.txt|]
     }
@@ -474,6 +508,7 @@ simpleWerewolfRole = Role
     , _name         = T.strip [iFile|variant/standard/role/simple-werewolf/name.txt|]
     , _allegiance   = Werewolves
     , _balance      = -5
+    , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/simple-werewolf/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/simple-werewolf/rules.txt|]
     }

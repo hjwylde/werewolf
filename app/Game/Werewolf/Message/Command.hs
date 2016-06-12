@@ -33,10 +33,11 @@ module Game.Werewolf.Message.Command (
     standardCommandsMessage, statusCommandsMessage, witchCommandsMessage,
 
     -- * Ping
-    pingPlayerMessage, pingRoleMessage, pingVillageMessage, pingWerewolvesMessage,
+    pingDiurnalRoleMessage, pingNocturnalRoleMessage, pingPlayerMessage, pingVillageMessage,
+    pingWerewolvesMessage,
 
     -- * Status
-    currentStageMessage, gameIsOverMessage, playersInGameMessage,
+    currentDiurnalTurnMessage, currentNocturnalTurnMessage, gameIsOverMessage, playersInGameMessage,
 
     -- * Unvote
     playerRescindedVoteMessage,
@@ -153,14 +154,17 @@ statusCommandsMessage to = privateMessage to statusCommandsText
 witchCommandsMessage :: Text -> Message
 witchCommandsMessage to = privateMessage to witchCommandsText
 
+pingDiurnalRoleMessage :: Role -> Message
+pingDiurnalRoleMessage role = publicMessage $ diurnalRolePingedText role
+
+pingNocturnalRoleMessage :: Role -> Game -> Message
+pingNocturnalRoleMessage role game
+    | has (variant . _NoRoleKnowledge) game = publicMessage $ NoRoleKnowledge.nocturnalRolePingedText role
+    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.nocturnalRolePingedText role
+    | otherwise                             = publicMessage $ Standard.nocturnalRolePingedText role
+
 pingPlayerMessage :: Text -> Message
 pingPlayerMessage to = privateMessage to playerPingedText
-
-pingRoleMessage :: Role -> Game -> Message
-pingRoleMessage role game
-    | has (variant . _NoRoleKnowledge) game = publicMessage $ NoRoleKnowledge.rolePingedText role
-    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.rolePingedText role
-    | otherwise                             = publicMessage $ Standard.rolePingedText role
 
 pingVillageMessage :: Message
 pingVillageMessage = publicMessage villagePingedText
@@ -171,12 +175,14 @@ pingWerewolvesMessage game
     | has (variant . _NoRoleReveal) game    = publicMessage NoRoleReveal.werewolvesPingedText
     | otherwise                             = publicMessage Standard.werewolvesPingedText
 
-currentStageMessage :: Text -> Game -> Message
-currentStageMessage to game
-    | has (stage . _GameOver) game          = gameIsOverMessage to
-    | has (variant . _NoRoleKnowledge) game = privateMessage to $ NoRoleKnowledge.currentTurnText game
-    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.currentTurnText game
-    | otherwise                             = privateMessage to $ Standard.currentTurnText game
+currentDiurnalTurnMessage :: Text -> Game -> Message
+currentDiurnalTurnMessage to game = privateMessage to $ Standard.currentDiurnalTurnText game
+
+currentNocturnalTurnMessage :: Text -> Game -> Message
+currentNocturnalTurnMessage to game
+    | has (variant . _NoRoleKnowledge) game = privateMessage to $ NoRoleKnowledge.currentNocturnalTurnText game
+    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.currentNocturnalTurnText game
+    | otherwise                             = privateMessage to $ Standard.currentNocturnalTurnText game
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to gameOverText

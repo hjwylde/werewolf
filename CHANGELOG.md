@@ -7,6 +7,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Major*
+
+* Added activity field to Role. ([#231](https://github.com/hjwylde/werewolf/issues/231))
+
 *Minor*
 
 * Added player roles message when the game is force ended. ([#225](https://github.com/hjwylde/werewolf/issues/225))
@@ -14,6 +18,11 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Added a public start-of-game message for the Spiteful Ghost. ([#220](https://github.com/hjwylde/werewolf/issues/220))
 * Removed the public start-of-game message for the Fallen Angel. ([#229](https://github.com/hjwylde/werewolf/issues/229))
 * Updated role balances based on Simple Werewolf being -5. ([#233](https://github.com/hjwylde/werewolf/issues/233))
+
+*Revisions*
+
+* Fixed current stage command to declare diurnal turns. ([#231](https://github.com/hjwylde/werewolf/issues/231))
+* Fixed ping command to declare diurnal roles. ([#231](https://github.com/hjwylde/werewolf/issues/231))
 
 ### v1.2.0.3
 
