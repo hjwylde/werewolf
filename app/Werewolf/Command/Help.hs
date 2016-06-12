@@ -52,20 +52,24 @@ handle callerName tag (Options (Just (Commands optAll))) = do
         { messages = commandsMessages callerName mGame
         }
 handle callerName tag (Options (Just (Roles optAll))) = do
-    mGame <- getGame tag optAll
+    mGame       <- getGame tag optAll
+    let mGame'  = mGame >>= \game -> case game ^. variant of
+            NoRoleKnowledge -> Nothing
+            _               -> Just game
 
-    let roles' = sortBy (compare `on` humanise) . nub $ case mGame of
-            Just game   -> game ^.. players . roles
-            Nothing     -> allRoles
+    let roles' = sortBy (compare `on` humanise) . nub $ maybe allRoles (toListOf $ players . roles) mGame'
 
     exitWith success
         { messages = map (roleMessage callerName) roles'
         }
 handle callerName tag (Options (Just (Rules optAll))) = do
-    mGame <- getGame tag optAll
+    mGame       <- getGame tag optAll
+    let mGame'  = mGame >>= \game -> case game ^. variant of
+            NoRoleKnowledge -> Nothing
+            _               -> Just game
 
     exitWith success
-        { messages = rulesMessages callerName mGame
+        { messages = rulesMessages callerName mGame'
         }
 handle callerName _ (Options Nothing) = exitWith success
     { messages = helpMessages callerName
@@ -106,9 +110,4 @@ helpMessages callerName =
 
 getGame :: MonadIO m => Text -> Bool -> m (Maybe Game)
 getGame _ True  = return Nothing
-getGame tag _   = ifM (not <$> doesGameExist tag) (return Nothing) $ do
-    game <- readGame tag
-
-    return $ case game ^. variant of
-        NoRoleKnowledge -> Nothing
-        _               -> Just game
+getGame tag _   = ifM (doesGameExist tag) (Just <$> readGame tag) (return Nothing)
