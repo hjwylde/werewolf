@@ -18,6 +18,7 @@ module Werewolf.Command.Help (
 ) where
 
 import Control.Lens
+import Control.Monad.Extra
 import Control.Monad.IO.Class
 
 import Data.Function
@@ -105,7 +106,7 @@ helpMessages callerName =
 
 getGame :: MonadIO m => Text -> Bool -> m (Maybe Game)
 getGame _ True  = return Nothing
-getGame tag _   = do
+getGame tag _   = ifM (not <$> doesGameExist tag) (return Nothing) $ do
     game <- readGame tag
 
     return $ case game ^. variant of
