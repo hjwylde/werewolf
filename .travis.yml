@@ -25,11 +25,6 @@ before_install:
 install:
 - travis_wait stack $ARGS --no-terminal --skip-ghc-check setup
 - travis_wait stack $ARGS --no-terminal --skip-ghc-check test --only-snapshot
-- travis_wait stack $ARGS --no-terminal --skip-ghc-check install hlint git-fmt stylish-haskell
 
 script:
 - stack $ARGS --no-terminal --skip-ghc-check build
-
-after_script:
-- hlint .
-- git fmt -m dry-run --operate-on-tracked
