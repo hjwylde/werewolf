@@ -1,4 +1,4 @@
-resolver: lts-5.12
+resolver: lts-6.2
 ghc-options:
     werewolf: -Werror -Wall -fno-warn-name-shadowing
 
