@@ -13,7 +13,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Added the no-role-reveal variant. ([#181](https://github.com/hjwylde/werewolf/issues/181))
 * Added a public start-of-game message for the Spiteful Ghost. ([#220](https://github.com/hjwylde/werewolf/issues/220))
 * Removed the public start-of-game message for the Fallen Angel. ([#229](https://github.com/hjwylde/werewolf/issues/229))
-* Updated role balances based on Simple Werewolf being -6. ([#233](https://github.com/hjwylde/werewolf/issues/233))
+* Updated role balances based on Simple Werewolf being -5. ([#233](https://github.com/hjwylde/werewolf/issues/233))
 
 ### v1.2.0.2
 
