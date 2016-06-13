@@ -96,6 +96,7 @@ playerRolesMessage = publicMessage . playerRolesText
 newGameMessages :: Game -> [Message]
 newGameMessages game = concat
     [ [newPlayersInGameMessage game]
+    , gameVariantMessages
     , [rolesInGameMessage Nothing game]
     , map newPlayerMessage players'
     , beholderMessages
@@ -106,6 +107,10 @@ newGameMessages game = concat
     ]
     where
         players'                = game ^. players
+        gameVariantMessages     =
+            [ gameVariantMessage game
+            | hasn't (variant . _Standard) game
+            ]
         beholderMessages        =
             [ beholderMessage beholderName game
             | has beholders players'
@@ -129,6 +134,9 @@ newGameMessages game = concat
 
 newPlayersInGameMessage :: Game -> Message
 newPlayersInGameMessage = publicMessage . playersInGameText
+
+gameVariantMessage :: Game -> Message
+gameVariantMessage = publicMessage . gameVariantText
 
 rolesInGameMessage :: Maybe Text -> Game -> Message
 rolesInGameMessage mTo game

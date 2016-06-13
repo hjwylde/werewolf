@@ -32,7 +32,7 @@ module Game.Werewolf.Variant.Standard.Engine (
     werewolfLynchedText,
 
     -- * New game
-    beholderText, dullahanText, newPlayerText, playersInGameText, rolesInGameText,
+    beholderText, dullahanText, gameVariantText, newPlayerText, playersInGameText, rolesInGameText,
     spitefulGhostPrivateText, spitefulGhostPublicText, trueVillagerText,
 
     -- * Oracle's turn
@@ -148,6 +148,9 @@ beholderText game = [iFile|variant/standard/engine/new-game/beholder.txt|]
 
 dullahanText :: Game -> Text
 dullahanText game = [iFile|variant/standard/engine/new-game/dullahan.txt|]
+
+gameVariantText :: Game -> Text
+gameVariantText game = [iFile|variant/standard/engine/new-game/game-variant.txt|]
 
 newPlayerText :: Player -> Text
 newPlayerText player = [iFile|variant/standard/engine/new-game/new-player.txt|]
