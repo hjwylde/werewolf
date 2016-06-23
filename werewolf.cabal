@@ -77,9 +77,11 @@ extra-source-files:
     variant/standard/command/ping/village-pinged.txt
     variant/standard/command/ping/werewolves-pinged.txt
     variant/standard/command/quit/caller-quit.txt
+    variant/standard/command/status/alive-marks.txt
     variant/standard/command/status/alive-players.txt
     variant/standard/command/status/current-diurnal-turn.txt
     variant/standard/command/status/current-nocturnal-turn.txt
+    variant/standard/command/status/dead-marks.txt
     variant/standard/command/status/dead-players.txt
     variant/standard/command/status/game-over.txt
     variant/standard/command/unvote/player-rescinded-vote.txt

@@ -32,8 +32,8 @@ module Game.Werewolf.Util (
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerHunter, isPlayerJester, isPlayerOracle, isPlayerOrphan, isPlayerProtector,
-    isPlayerScapegoat, isPlayerSeer, isPlayerWitch,
+    isPlayerDullahan, isPlayerHunter, isPlayerJester, isPlayerOracle, isPlayerOrphan,
+    isPlayerProtector, isPlayerScapegoat, isPlayerSeer, isPlayerWitch,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -173,6 +173,9 @@ hasEveryoneLost = gets Game.hasEveryoneLost
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = hasuse $ players . traverse . named name
+
+isPlayerDullahan :: MonadState Game m => Text -> m Bool
+isPlayerDullahan name' = is dullahan <$> findPlayerBy_ name name'
 
 isPlayerHunter :: MonadState Game m => Text -> m Bool
 isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'

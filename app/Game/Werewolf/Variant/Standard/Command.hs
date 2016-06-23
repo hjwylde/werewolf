@@ -43,8 +43,8 @@ module Game.Werewolf.Variant.Standard.Command (
     callerQuitText,
 
     -- * Status
-    alivePlayersText, currentDiurnalTurnText, currentNocturnalTurnText, deadPlayersText,
-    gameOverText,
+    aliveMarksText, alivePlayersText, currentDiurnalTurnText, currentNocturnalTurnText,
+    deadMarksText, deadPlayersText, gameOverText,
 
     -- * Unvote
     callerRescindedVoteText,
@@ -186,6 +186,11 @@ werewolvesPingedText = [iFile|variant/standard/command/ping/werewolves-pinged.tx
 callerQuitText :: Player -> Text
 callerQuitText caller = [iFile|variant/standard/command/quit/caller-quit.txt|]
 
+aliveMarksText :: Game -> Text
+aliveMarksText game = [iFile|variant/standard/command/status/alive-marks.txt|]
+    where
+        aliveMarks = game ^.. players . traverse . alive . filtered (\player -> player ^. name `elem` game ^. marks)
+
 alivePlayersText :: Game -> Text
 alivePlayersText game = [iFile|variant/standard/command/status/alive-players.txt|]
 
@@ -194,6 +199,11 @@ currentDiurnalTurnText game = [iFile|variant/standard/command/status/current-diu
 
 currentNocturnalTurnText :: Game -> Text
 currentNocturnalTurnText game = [iFile|variant/standard/command/status/current-nocturnal-turn.txt|]
+
+deadMarksText :: Game -> Text
+deadMarksText game = [iFile|variant/standard/command/status/dead-marks.txt|]
+    where
+        deadMarks = game ^.. players . traverse . dead . filtered (\player -> player ^. name `elem` game ^. marks)
 
 deadPlayersText :: Game -> Text
 deadPlayersText game = [iFile|variant/standard/command/status/dead-players.txt|]
