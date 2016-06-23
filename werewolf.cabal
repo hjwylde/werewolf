@@ -33,6 +33,7 @@ extra-source-files:
     variant/no-role-reveal/command/status/dead-players.txt
     variant/no-role-reveal/engine/general/player-booted.txt
     variant/no-role-reveal/engine/lynching/player-lynched.txt
+    variant/no-role-reveal/engine/lynching/saint-lynched.txt
     variant/no-role-reveal/engine/lynching/werewolf-lynched.txt
     variant/no-role-reveal/engine/sunrise/player-devoured.txt
     variant/no-role-reveal/engine/sunrise/player-poisoned.txt
@@ -88,6 +89,7 @@ extra-source-files:
     variant/standard/engine/druids-turn/start.txt
     variant/standard/engine/game-over/allegiance-won.txt
     variant/standard/engine/game-over/dullahan-won.txt
+    variant/standard/engine/game-over/everyone-lost.txt
     variant/standard/engine/game-over/fallen-angel-won.txt
     variant/standard/engine/game-over/player-contributed.txt
     variant/standard/engine/game-over/player-lost.txt
@@ -100,6 +102,7 @@ extra-source-files:
     variant/standard/engine/lynching/jester-lynched.txt
     variant/standard/engine/lynching/no-player-lynched.txt
     variant/standard/engine/lynching/player-lynched.txt
+    variant/standard/engine/lynching/saint-lynched.txt
     variant/standard/engine/lynching/scapegoat-lynched.txt
     variant/standard/engine/lynching/werewolf-lynched.txt
     variant/standard/engine/new-game/beholder.txt
@@ -205,6 +208,9 @@ extra-source-files:
     variant/standard/role/protector/description.txt
     variant/standard/role/protector/name.txt
     variant/standard/role/protector/rules.txt
+    variant/standard/role/saint/description.txt
+    variant/standard/role/saint/name.txt
+    variant/standard/role/saint/rules.txt
     variant/standard/role/scapegoat/description.txt
     variant/standard/role/scapegoat/name.txt
     variant/standard/role/scapegoat/rules.txt

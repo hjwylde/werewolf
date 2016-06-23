@@ -15,7 +15,7 @@ module Game.Werewolf.Message.Engine (
     playerRolesMessage, playerBootedMessage, villageDrunkJoinedPackMessages, villageDrunkJoinedVillageMessage,
     playerTurnedToStoneMessage, playerSeenMessage, playerDivinedMessage, playerDevouredMessage,
     noPlayerDevouredMessage, scapegoatChoseAllowedVotersMessage, playerPoisonedMessage,
-    scapegoatLynchedMessage, playerLynchedMessage, noPlayerLynchedMessage, jesterLynchedMessage,
+    scapegoatLynchedMessage, saintLynchedMessage, playerLynchedMessage, noPlayerLynchedMessage, jesterLynchedMessage,
     ferinaGruntsMessage, orphanJoinedPackMessages, playerKilledMessage, playerLostMessage,
     playerContributedMessage, playerWonMessage, witchsTurnMessages, firstWerewolvesTurnMessages,
     villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages,
@@ -58,6 +58,11 @@ gameOverMessages game
         , [playerWonMessage fallenAngelsName]
         , map playerLostMessage (game ^.. players . names \\ [fallenAngelsName])
         ]
+    | hasEveryoneLost game      = concat
+        [ [everyoneLostMessage]
+        , [playerRolesMessage game]
+        , map playerLostMessage (game ^.. players . names)
+        ]
     | otherwise                 = concat
         [ [allegianceWonMessage winningAllegiance]
         , [playerRolesMessage game]
@@ -83,6 +88,9 @@ gameOverMessages game
 
 dullahanWonMessage :: Game -> Message
 dullahanWonMessage = publicMessage . dullahanWonText
+
+everyoneLostMessage :: Message
+everyoneLostMessage = publicMessage everyoneLostText
 
 fallenAngelWonMessage :: Message
 fallenAngelWonMessage = publicMessage fallenAngelWonText
@@ -337,6 +345,11 @@ playerLynchedMessage :: Player -> Game -> Message
 playerLynchedMessage player game
     | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.playerLynchedText player
     | otherwise                             = publicMessage $ Standard.playerLynchedText player
+
+saintLynchedMessage :: [Player] -> Game -> Message
+saintLynchedMessage voters game
+    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.saintLynchedText voters
+    | otherwise                             = publicMessage $ Standard.saintLynchedText voters
 
 scapegoatLynchedMessage :: Game -> Message
 scapegoatLynchedMessage = publicMessage . scapegoatLynchedText

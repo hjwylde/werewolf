@@ -47,6 +47,7 @@ module Game.Werewolf.Game (
 
     -- ** Queries
     hasAnyoneWon, hasDullahanWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
+    hasEveryoneLost,
 ) where
 
 import Control.Lens.Extra
@@ -305,7 +306,9 @@ hasAnyoneWon game = any ($ game)
 -- | Queries whether the Dullahan has won. The Dullahan wins if they manage to eliminate all their
 --   marks.
 hasDullahanWon :: Game -> Bool
-hasDullahanWon game = has (players . dullahans . alive) game && all (is dead) (getMarks game)
+hasDullahanWon game =
+    has (players . dullahans . alive) game
+    && all (is dead) (getMarks game)
 
 -- | Queries whether the Fallen Angel has won. The Fallen Angel wins if they manage to get
 --   themselves lynched by the Villagers.
@@ -318,10 +321,18 @@ hasFallenAngelWon game = game ^. fallenAngelLynched
 --   N.B., the Dullahan and Fallen Angel are not considered when determining whether the 'Villagers'
 --   have won.
 hasVillagersWon :: Game -> Bool
-hasVillagersWon = allOf (players . traverse . alive)
-    (\player -> any ($ player) [is villager, is dullahan, is fallenAngel])
+hasVillagersWon game =
+    not (hasEveryoneLost game)
+    && allOf (players . traverse . alive)
+        (\player -> any ($ player) [is villager, is dullahan, is fallenAngel]) game
 
 -- | Queries whether the 'Werewolves' have won. The 'Werewolves' win if they are the only players
 --   surviving.
 hasWerewolvesWon :: Game -> Bool
-hasWerewolvesWon = allOf (players . traverse . alive) (is werewolf)
+hasWerewolvesWon game =
+    not (hasEveryoneLost game)
+    && allOf (players . traverse . alive) (is werewolf) game
+
+-- | Queries whether everyone has lost.
+hasEveryoneLost :: Game -> Bool
+hasEveryoneLost = allOf (players . traverse) (is dead)

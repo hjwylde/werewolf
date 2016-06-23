@@ -201,8 +201,8 @@ villageDrunkRole = Role
 --   /Dullahan knows your name, for you are then marked for death and you should avoid them at all/
 --   /costs.
 --
---   The Dullahan is given a list of player names at the start of the game. They must eliminate all
---   of them before the end of the game.
+--   The Dullahan is given a list of player names at the start of the game. To win, they must
+--   eliminate all of them before the end of the game.
 dullahanRole :: Role
 dullahanRole = Role
     { _tag          = "dullahan"
@@ -414,6 +414,11 @@ protectorRole = Role
     , _rules        = T.strip [iFile|variant/standard/role/protector/rules.txt|]
     }
 
+-- | /The Saint, also historically known as a hallow, is recognized as having an exceptional degree of/
+--   /holiness and likeness to God. They are a humble Villager and shine light on these dark times./
+--   /Extinguishing this light would not be wise/
+--
+--   If the Saint is lynched by the village, all who voted for them die.
 saintRole :: Role
 saintRole = Role
     { _tag          = "saint"
