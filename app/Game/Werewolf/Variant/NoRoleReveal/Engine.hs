@@ -17,7 +17,7 @@ module Game.Werewolf.Variant.NoRoleReveal.Engine (
     playerBootedText,
 
     -- * Lynching
-    playerLynchedText, werewolfLynchedText,
+    playerLynchedText, saintLynchedText, werewolfLynchedText,
 
     -- * Sunrise
     playerDevouredText, playerPoisonedText, playerTurnedToStoneText,
@@ -34,6 +34,9 @@ playerBootedText player = [iFile|variant/no-role-reveal/engine/general/player-bo
 
 playerLynchedText :: Player -> Text
 playerLynchedText player = [iFile|variant/no-role-reveal/engine/lynching/player-lynched.txt|]
+
+saintLynchedText :: [Player] -> Text
+saintLynchedText voters = [iFile|variant/no-role-reveal/engine/lynching/saint-lynched.txt|]
 
 werewolfLynchedText :: Player -> Text
 werewolfLynchedText werewolf = [iFile|variant/no-role-reveal/engine/lynching/werewolf-lynched.txt|]

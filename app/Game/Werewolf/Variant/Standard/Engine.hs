@@ -21,15 +21,15 @@ module Game.Werewolf.Variant.Standard.Engine (
     playerBootedText, playerKilledText,
 
     -- * Game over
-    allegianceWonText, dullahanWonText, fallenAngelWonText, playerContributedText, playerLostText,
-    playerRolesText, playerWonText,
+    allegianceWonText, dullahanWonText, everyoneLostText, fallenAngelWonText, playerContributedText,
+    playerLostText, playerRolesText, playerWonText,
 
     -- * Hunter's turn
     huntersTurnPrivateText, huntersTurnPublicText,
 
     -- * Lynching
-    jesterLynchedText, noPlayerLynchedText, playerLynchedText, scapegoatLynchedText,
-    werewolfLynchedText,
+    jesterLynchedText, noPlayerLynchedText, playerLynchedText, saintLynchedText,
+    scapegoatLynchedText, werewolfLynchedText,
 
     -- * New game
     beholderText, dullahanText, gameVariantText, newPlayerText, playersInGameText, rolesInGameText,
@@ -99,6 +99,9 @@ allegianceWonText allegiance = [iFile|variant/standard/engine/game-over/allegian
 dullahanWonText :: Game -> Text
 dullahanWonText game = [iFile|variant/standard/engine/game-over/dullahan-won.txt|]
 
+everyoneLostText :: Text
+everyoneLostText = [iFile|variant/standard/engine/game-over/everyone-lost.txt|]
+
 fallenAngelWonText :: Text
 fallenAngelWonText = [iFile|variant/standard/engine/game-over/fallen-angel-won.txt|]
 
@@ -132,6 +135,9 @@ noPlayerLynchedText = [iFile|variant/standard/engine/lynching/no-player-lynched.
 
 playerLynchedText :: Player -> Text
 playerLynchedText player = [iFile|variant/standard/engine/lynching/player-lynched.txt|]
+
+saintLynchedText :: [Player] -> Text
+saintLynchedText voters = [iFile|variant/standard/engine/lynching/saint-lynched.txt|]
 
 scapegoatLynchedText :: Game -> Text
 scapegoatLynchedText game = [iFile|variant/standard/engine/lynching/scapegoat-lynched.txt|]

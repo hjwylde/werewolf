@@ -26,7 +26,7 @@ module Game.Werewolf.Util (
     -- ** Queries
     isGameOver, isHuntersTurn, isOraclesTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn,
     isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-    hasAnyoneWon, hasVillagersWon, hasWerewolvesWon,
+    hasAnyoneWon, hasVillagersWon, hasWerewolvesWon, hasEveryoneLost,
 
     -- * Player
 
@@ -50,7 +50,8 @@ import           Data.Maybe
 import           Data.Text  (Text)
 
 import           Game.Werewolf.Game           hiding (getAllowedVoters, getPendingVoters,
-                                               hasAnyoneWon, hasVillagersWon, hasWerewolvesWon)
+                                               hasAnyoneWon, hasEveryoneLost, hasVillagersWon,
+                                               hasWerewolvesWon)
 import qualified Game.Werewolf.Game           as Game
 import           Game.Werewolf.Message.Engine
 import           Game.Werewolf.Player
@@ -166,6 +167,9 @@ hasVillagersWon = gets Game.hasVillagersWon
 
 hasWerewolvesWon :: MonadState Game m => m Bool
 hasWerewolvesWon = gets Game.hasWerewolvesWon
+
+hasEveryoneLost :: MonadState Game m => m Bool
+hasEveryoneLost = gets Game.hasEveryoneLost
 
 doesPlayerExist :: MonadState Game m => Text -> m Bool
 doesPlayerExist name = hasuse $ players . traverse . named name

@@ -51,8 +51,8 @@ module Game.Werewolf.Role (
 
     --   The Villagers must lynch all of the Werewolves.
     beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, medusaRole,
-    oracleRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole,
-    witchRole,
+    oracleRole, protectorRole, saintRole, scapegoatRole, seerRole, simpleVillagerRole,
+    trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -134,6 +134,7 @@ allRoles =
     , oracleRole
     , orphanRole
     , protectorRole
+    , saintRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
@@ -200,8 +201,8 @@ villageDrunkRole = Role
 --   /Dullahan knows your name, for you are then marked for death and you should avoid them at all/
 --   /costs.
 --
---   The Dullahan is given a list of player names at the start of the game. They must eliminate all
---   of them before the end of the game.
+--   The Dullahan is given a list of player names at the start of the game. To win, they must
+--   eliminate all of them before the end of the game.
 dullahanRole :: Role
 dullahanRole = Role
     { _tag          = "dullahan"
@@ -411,6 +412,22 @@ protectorRole = Role
     , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/protector/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/protector/rules.txt|]
+    }
+
+-- | /The Saint, also historically known as a hallow, is recognized as having an exceptional degree of/
+--   /holiness and likeness to God. They are a humble Villager and shine light on these dark times./
+--   /Extinguishing this light would not be wise/
+--
+--   If the Saint is lynched by the village, all who voted for them die.
+saintRole :: Role
+saintRole = Role
+    { _tag          = "saint"
+    , _name         = T.strip [iFile|variant/standard/role/saint/name.txt|]
+    , _allegiance   = Villagers
+    , _balance      = 3
+    , _activity     = Diurnal
+    , _description  = T.strip [iFile|variant/standard/role/saint/description.txt|]
+    , _rules        = T.strip [iFile|variant/standard/role/saint/rules.txt|]
     }
 
 -- | /Werewolves don't just spring up out of the ground! That's where dwarves come from. Clearly/

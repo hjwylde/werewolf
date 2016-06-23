@@ -29,7 +29,8 @@ import qualified Data.Map        as Map
 import           Data.Maybe
 
 -- TODO (hjw): remove Message.Command
-import Game.Werewolf.Game            hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon)
+import Game.Werewolf.Game            hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
+                                      hasEveryoneLost)
 import Game.Werewolf.Message.Command
 import Game.Werewolf.Message.Engine
 import Game.Werewolf.Player
@@ -196,6 +197,15 @@ lynchVotee (Just votee)
         fallenAngelLynched .= True
 
         tell . (:[]) . playerLynchedMessage votee =<< get
+    | is saint votee        = do
+        killPlayer (votee ^. name)
+        tell . (:[]) . playerLynchedMessage votee =<< get
+
+        voterNames <- uses votes (filter (/= votee ^. name) . Map.keys . Map.filter (== votee ^. name))
+        forM_ voterNames killPlayer
+
+        voters <- mapM (findPlayerBy_ name) voterNames
+        tell . (:[]) . saintLynchedMessage voters =<< get
     | is werewolf votee     = do
         killPlayer (votee ^. name)
         tell . (:[]) . werewolfLynchedMessage votee =<< get
@@ -223,7 +233,7 @@ devourVotee (Just votee)    = do
 advanceStage :: (MonadState Game m, MonadWriter [Message] m) => m ()
 advanceStage = do
     game        <- get
-    nextStage   <- ifM hasAnyoneWon
+    nextStage   <- ifM (hasAnyoneWon ||^ hasEveryoneLost)
         (return GameOver)
         (return . head $ filter (stageAvailable game) (drop1 $ dropWhile (game ^. stage /=) stageCycle))
 
@@ -234,4 +244,5 @@ advanceStage = do
     tell . stageMessages =<< get
 
 checkGameOver :: (MonadState Game m, MonadWriter [Message] m) => m ()
-checkGameOver = whenM hasAnyoneWon $ stage .= GameOver >> get >>= tell . gameOverMessages
+checkGameOver = whenM (hasAnyoneWon ||^ hasEveryoneLost) $
+    stage .= GameOver >> get >>= tell . gameOverMessages
