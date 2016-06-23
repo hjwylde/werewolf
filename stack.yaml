@@ -5,4 +5,4 @@ ghc-options:
 packages:
 - '.'
 extra-deps:
-- 'interpolate-0.1.0'
+- interpolate-0.1.0
