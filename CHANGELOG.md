@@ -11,6 +11,12 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 * Added a game variant message at the start of a game. ([#235](https://github.com/hjwylde/werewolf/issues/235))
 
+### v1.3.0.1
+
+*Revisions*
+
+* Fixed Fallen Angel won message to not refer to a warning. ([#237](https://github.com/hjwylde/werewolf/issues/237))
+
 ### v1.3.0.0
 
 *Major*
