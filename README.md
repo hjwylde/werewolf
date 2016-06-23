@@ -70,6 +70,7 @@ The Villagers must lynch all of the Werewolves.
 * Medusa
 * Oracle
 * Protector
+* Saint
 * Scapegoat
 * Seer
 * Simple Villager

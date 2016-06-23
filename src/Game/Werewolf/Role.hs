@@ -51,8 +51,8 @@ module Game.Werewolf.Role (
 
     --   The Villagers must lynch all of the Werewolves.
     beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, medusaRole,
-    oracleRole, protectorRole, scapegoatRole, seerRole, simpleVillagerRole, trueVillagerRole,
-    witchRole,
+    oracleRole, protectorRole, saintRole, scapegoatRole, seerRole, simpleVillagerRole,
+    trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -134,6 +134,7 @@ allRoles =
     , oracleRole
     , orphanRole
     , protectorRole
+    , saintRole
     , scapegoatRole
     , seerRole
     , simpleVillagerRole
@@ -411,6 +412,17 @@ protectorRole = Role
     , _activity     = Nocturnal
     , _description  = T.strip [iFile|variant/standard/role/protector/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/protector/rules.txt|]
+    }
+
+saintRole :: Role
+saintRole = Role
+    { _tag          = "saint"
+    , _name         = T.strip [iFile|variant/standard/role/saint/name.txt|]
+    , _allegiance   = Villagers
+    , _balance      = 3
+    , _activity     = Diurnal
+    , _description  = T.strip [iFile|variant/standard/role/saint/description.txt|]
+    , _rules        = T.strip [iFile|variant/standard/role/saint/rules.txt|]
     }
 
 -- | /Werewolves don't just spring up out of the ground! That's where dwarves come from. Clearly/

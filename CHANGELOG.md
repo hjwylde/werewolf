@@ -10,6 +10,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Minor*
 
 * Added a game variant message at the start of a game. ([#235](https://github.com/hjwylde/werewolf/issues/235))
+* Added the Saint role. ([#178](https://github.com/hjwylde/werewolf/issues/178))
 
 ### v1.3.0.1
 

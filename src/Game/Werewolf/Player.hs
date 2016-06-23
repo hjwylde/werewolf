@@ -25,7 +25,7 @@ module Game.Werewolf.Player (
 
     -- ** Traversals
     alphaWolf, beholder, crookedSenator, druid, dullahan, fallenAngel, hunter, jester, lycan,
-    medusa, oracle, orphan, protector, scapegoat, seer, simpleVillager, simpleWerewolf,
+    medusa, oracle, orphan, protector, saint, scapegoat, seer, simpleVillager, simpleWerewolf,
     spitefulGhost, trueVillager, villageDrunk, witch,
     loner, villager, werewolf,
 
@@ -36,7 +36,7 @@ module Game.Werewolf.Player (
     -- | N.B., the following traversals are not legal for the same reason 'filtered' isn't!
     named,
     alphaWolves, beholders, crookedSenators, druids, dullahans, fallenAngels, hunters, jesters,
-    lycans, medusas, oracles, orphans, protectors, scapegoats, seers, simpleVillagers,
+    lycans, medusas, oracles, orphans, protectors, saints, scapegoats, seers, simpleVillagers,
     simpleWerewolves, spitefulGhosts, trueVillagers, villageDrunks, witches,
     loners, villagers, werewolves,
     alive, dead,
@@ -183,6 +183,14 @@ orphan = role . only orphanRole
 -- @
 protector :: Traversal' Player ()
 protector = role . only protectorRole
+
+-- | The traversal of 'Player's with a 'saintRole'.
+--
+-- @
+-- 'saint' = 'role' . 'only' 'saintRole'
+-- @
+saint :: Traversal' Player ()
+saint = role . only saintRole
 
 -- | The traversal of 'Player's with a 'scapegoatRole'.
 --
@@ -407,6 +415,14 @@ orphans = traverse . filtered (is orphan)
 -- @
 protectors :: Traversable t => Traversal' (t Player) Player
 protectors = traverse . filtered (is protector)
+
+-- | This 'Traversal' provides the traversal of 'saint' 'Player's.
+--
+-- @
+-- 'saints' = 'traverse' . 'filtered' ('is' 'saint')
+-- @
+saints :: Traversable t => Traversal' (t Player) Player
+saints = traverse . filtered (is saint)
 
 -- | This 'Traversal' provides the traversal of 'scapegoat' 'Player's.
 --
