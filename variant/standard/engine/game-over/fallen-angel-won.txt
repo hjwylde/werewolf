@@ -1,2 +1,2 @@
-You should have heeded my warning, for now the #{humanise fallenAngelRole} has been set free!
+Foolish mortals, now you have set the #{humanise fallenAngelRole} free!
 The game is over! The #{humanise fallenAngelRole} has won.
