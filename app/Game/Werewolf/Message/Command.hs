@@ -37,7 +37,8 @@ module Game.Werewolf.Message.Command (
     pingWerewolvesMessage,
 
     -- * Status
-    currentDiurnalTurnMessage, currentNocturnalTurnMessage, gameIsOverMessage, playersInGameMessage,
+    currentDiurnalTurnMessage, currentNocturnalTurnMessage, gameIsOverMessage, marksInGameMessage,
+    playersInGameMessage,
 
     -- * Unvote
     playerRescindedVoteMessage,
@@ -186,6 +187,14 @@ currentNocturnalTurnMessage to game
 
 gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to gameOverText
+
+marksInGameMessage :: Text -> Game -> Message
+marksInGameMessage to game = privateMessage to $ T.append aliveMarksText' deadMarksText'
+    where
+        aliveMarksText' = aliveMarksText game
+        deadMarksText'
+            | hasn't (players . traverse . dead) game   = T.empty
+            | otherwise                                 = deadMarksText game
 
 playersInGameMessage :: Text -> Game -> Message
 playersInGameMessage to game = privateMessage to $ T.append alivePlayersText' deadPlayersText'

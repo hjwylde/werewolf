@@ -18,6 +18,7 @@ module Game.Werewolf.Command.Status (
 ) where
 
 import Control.Lens
+import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
@@ -91,6 +92,8 @@ statusCommand callerName = Command $ do
         , rolesInGameMessage (Just callerName) game
         , playersInGameMessage callerName game
         ]
+
+    whenM (isPlayerDullahan callerName) $ tell [marksInGameMessage callerName game]
     where
         currentStageMessage game
             | has (stage . _GameOver) game              = gameIsOverMessage callerName
