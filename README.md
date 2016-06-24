@@ -86,6 +86,15 @@ The Werewolves must devour all of the Villagers.
 * Alpha Wolf
 * Simple Werewolf
 
+#### Variants
+
+Variants alter how the game plays out.
+
+* Standard
+* No role knowledge (players are not informed of the roles in play at the start of a game)
+* No role reveal (player roles are not revealed upon death)
+* Spiteful Villagers (the default Villager role becomes the Spiteful Villager)
+
 ### Installing
 
 Installing werewolf is easiest done using either

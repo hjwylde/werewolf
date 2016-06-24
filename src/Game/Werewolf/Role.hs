@@ -148,10 +148,10 @@ allRoles =
 -- | A list containing roles that are restricted to a single instance per 'Game'.
 --
 --   @
---   'restrictedRoles' = 'allRoles' \\\\ ['simpleVillagerRole', 'simpleWerewolfRole']
+--   'restrictedRoles' = 'allRoles' \\\\ ['simpleVillagerRole', 'simpleWerewolfRole', 'spitefulVillagerRole']
 --   @
 restrictedRoles :: [Role]
-restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole]
+restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole, spitefulVillagerRole]
 
 -- | /Abandoned by their parents as a child, with no-one wanting to look after another mouth to/
 --   /feed, the Orphan was left to fend for themself. No-one looked twice at the Orphan and even/

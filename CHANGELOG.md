@@ -14,6 +14,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Added marks to the Dullahan's status command. ([#236](https://github.com/hjwylde/werewolf/issues/236))
 * Changed Spiteful Ghost to be aligned with the Villagers and to start off alive. ([#238](https://github.com/hjwylde/werewolf/issues/238))
 * Renamed Spiteful Ghost to Spiteful Villager. ([#241](https://github.com/hjwylde/werewolf/issues/241))
+* Added the spiteful-villagers variant. ([#240](https://github.com/hjwylde/werewolf/issues/240))
 
 *Revisions*
 

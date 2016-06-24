@@ -58,7 +58,8 @@ handle callerName tag (Options extraRoles variant playerNames) = do
             Random          -> randomExtraRoles $ length playerNames
             Use roleNames   -> useExtraRoles callerName roleNames
 
-        let roles = padRoles extraRoles' (length playerNames + 1)
+        let defaultVillagerRole = if variant == SpitefulVillagers then spitefulVillagerRole else simpleVillagerRole
+        let roles = padRoles extraRoles' (length playerNames + 1) defaultVillagerRole
 
         players <- createPlayers (callerName:playerNames) <$> shuffleM roles
 
@@ -85,8 +86,8 @@ useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByTa
 findByTag :: Text -> Maybe Role
 findByTag tag' = restrictedRoles ^? traverse . filteredBy tag tag'
 
-padRoles :: [Role] -> Int -> [Role]
-padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
+padRoles :: [Role] -> Int -> Role -> [Role]
+padRoles roles n defaultVillagerRole = roles ++ villagerRoles ++ simpleWerewolfRoles
     where
         goal                    = 3
         m                       = max (n - length roles) 0
@@ -96,10 +97,10 @@ padRoles roles n = roles ++ simpleVillagerRoles ++ simpleWerewolfRoles
         -- Little magic here to calculate how many Werewolves and Villagers we want.
         -- This tries to ensure that the balance of the game is between -3 and 2.
         simpleWerewolvesCount   = (goal - m - startingBalance) `div` (simpleWerewolfBalance - 1) + 1
-        simpleVillagersCount    = m - simpleWerewolvesCount
+        villagersCount          = m - simpleWerewolvesCount
 
         -- N.B., if roles is quite unbalanced then one list will be empty.
-        simpleVillagerRoles = replicate simpleVillagersCount simpleVillagerRole
+        villagerRoles       = replicate villagersCount defaultVillagerRole
         simpleWerewolfRoles = replicate simpleWerewolvesCount simpleWerewolfRole
 
 createPlayers :: [Text] -> [Role] -> [Player]

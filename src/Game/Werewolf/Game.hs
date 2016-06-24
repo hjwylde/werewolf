@@ -97,13 +97,14 @@ data Game = Game
     , _votes              :: Map Text Text    -- ^ Villagers and Werewolves
     } deriving (Eq, Read, Show)
 
-data Variant = Standard | NoRoleKnowledge | NoRoleReveal
+data Variant = Standard | NoRoleKnowledge | NoRoleReveal | SpitefulVillagers
     deriving (Eq, Read, Show)
 
 instance Humanise Variant where
     humanise Standard           = "standard"
     humanise NoRoleKnowledge    = "no role knowledge"
     humanise NoRoleReveal       = "no role reveal"
+    humanise SpitefulVillagers  = "spiteful villagers"
 
 -- | Most of these are fairly self-explainable (the turn stages). 'Sunrise' and 'Sunset' are
 --   provided as meaningful breaks between the day and night as, for example, a 'VillagesTurn' may
