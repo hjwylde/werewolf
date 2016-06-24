@@ -201,6 +201,9 @@ extra-source-files:
     variant/standard/role/medusa/description.txt
     variant/standard/role/medusa/name.txt
     variant/standard/role/medusa/rules.txt
+    variant/standard/role/necromancer/description.txt
+    variant/standard/role/necromancer/name.txt
+    variant/standard/role/necromancer/rules.txt
     variant/standard/role/oracle/description.txt
     variant/standard/role/oracle/name.txt
     variant/standard/role/oracle/rules.txt
@@ -237,6 +240,9 @@ extra-source-files:
     variant/standard/role/witch/description.txt
     variant/standard/role/witch/name.txt
     variant/standard/role/witch/rules.txt
+    variant/standard/role/zombie/description.txt
+    variant/standard/role/zombie/name.txt
+    variant/standard/role/zombie/rules.txt
 
 source-repository head
     type:       git

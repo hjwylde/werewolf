@@ -25,8 +25,8 @@ module Game.Werewolf.Player (
 
     -- ** Traversals
     alphaWolf, beholder, crookedSenator, druid, dullahan, fallenAngel, hunter, jester, lycan,
-    medusa, oracle, orphan, protector, saint, scapegoat, seer, simpleVillager, simpleWerewolf,
-    spitefulVillager, trueVillager, villageDrunk, witch,
+    medusa, necromancer, oracle, orphan, protector, saint, scapegoat, seer, simpleVillager,
+    simpleWerewolf, spitefulVillager, trueVillager, villageDrunk, witch, zombie,
     loner, villager, werewolf,
 
     -- | The following traversals are provided just as a bit of sugar to avoid continually writing
@@ -36,8 +36,9 @@ module Game.Werewolf.Player (
     -- | N.B., the following traversals are not legal for the same reason 'filtered' isn't!
     named,
     alphaWolves, beholders, crookedSenators, druids, dullahans, fallenAngels, hunters, jesters,
-    lycans, medusas, oracles, orphans, protectors, saints, scapegoats, seers, simpleVillagers,
-    simpleWerewolves, spitefulVillagers, trueVillagers, villageDrunks, witches,
+    lycans, medusas, necromancers, oracles, orphans, protectors, saints, scapegoats, seers,
+    simpleVillagers, simpleWerewolves, spitefulVillagers, trueVillagers, villageDrunks, witches,
+    zombies,
     loners, villagers, werewolves,
     alive, dead,
 ) where
@@ -158,6 +159,14 @@ lycan = role . only lycanRole
 medusa :: Traversal' Player ()
 medusa = role . only medusaRole
 
+-- | The traversal of 'Player's with a 'necromancerRole'.
+--
+-- @
+-- 'necromancer' = 'role' . 'only' 'necromancerRole'
+-- @
+necromancer :: Traversal' Player ()
+necromancer = role . only necromancerRole
+
 -- | The traversal of 'Player's with a 'oracleRole'.
 --
 -- @
@@ -253,6 +262,14 @@ villageDrunk = role . only villageDrunkRole
 -- @
 witch :: Traversal' Player ()
 witch = role . only witchRole
+
+-- | The traversal of 'Player's with a 'zombieRole'.
+--
+-- @
+-- 'zombie' = 'role' . 'only' 'zombieRole'
+-- @
+zombie :: Traversal' Player ()
+zombie = role . only zombieRole
 
 -- | The traversal of 'Player's aligned with 'NoOne'.
 --
@@ -390,6 +407,14 @@ lycans = traverse . filtered (is lycan)
 medusas :: Traversable t => Traversal' (t Player) Player
 medusas = traverse . filtered (is medusa)
 
+-- | This 'Traversal' provides the traversal of 'necromancer' 'Player's.
+--
+-- @
+-- 'necromancers' = 'traverse' . 'filtered' ('is' 'necromancer')
+-- @
+necromancers :: Traversable t => Traversal' (t Player) Player
+necromancers = traverse . filtered (is necromancer)
+
 -- | This 'Traversal' provides the traversal of 'oracle' 'Player's.
 --
 -- @
@@ -485,6 +510,14 @@ villageDrunks = traverse . filtered (is villageDrunk)
 -- @
 witches :: Traversable t => Traversal' (t Player) Player
 witches = traverse . filtered (is witch)
+
+-- | This 'Traversal' provides the traversal of 'zombie' 'Player's.
+--
+-- @
+-- 'zombies' = 'traverse' . 'filtered' ('is' 'zombie')
+-- @
+zombies :: Traversable t => Traversal' (t Player) Player
+zombies = traverse . filtered (is zombie)
 
 -- | This 'Traversal' provides the traversal of 'loner' 'Player's.
 --

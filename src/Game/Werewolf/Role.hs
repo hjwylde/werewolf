@@ -42,7 +42,7 @@ module Game.Werewolf.Role (
     -- | The Loners look out for themselves and themselves alone.
 
     --   The Loners must complete their own objective.
-    dullahanRole, fallenAngelRole,
+    dullahanRole, fallenAngelRole, necromancerRole, zombieRole,
 
     -- *** The Villagers
     -- | Fraught with fear of the unseen enemy, the Villagers must work together to determine the
@@ -89,13 +89,14 @@ data Role = Role
 
 -- | The 'NoOne' allegiance is used for the Loners. It is not used to determine who has won (i.e.,
 --   if one Loner wins, the others still lose).
-data Allegiance = NoOne | Villagers | Werewolves
+data Allegiance = NoOne | Necromancer | Villagers | Werewolves
     deriving (Eq, Read, Show)
 
 instance Humanise Allegiance where
-    humanise NoOne      = "no-one"
-    humanise Villagers  = "Villagers"
-    humanise Werewolves = "Werewolves"
+    humanise NoOne          = "no-one"
+    humanise Necromancer    = "Necromancer"
+    humanise Villagers      = "Villagers"
+    humanise Werewolves     = "Werewolves"
 
 -- | Defines whether a role is diurnal or nocturnal. I.e., if the role's turn occurs during the day
 --   or night.
@@ -131,6 +132,7 @@ allRoles =
     , jesterRole
     , lycanRole
     , medusaRole
+    , necromancerRole
     , oracleRole
     , orphanRole
     , protectorRole
@@ -143,15 +145,16 @@ allRoles =
     , trueVillagerRole
     , villageDrunkRole
     , witchRole
+    , zombieRole
     ]
 
 -- | A list containing roles that are restricted to a single instance per 'Game'.
 --
 --   @
---   'restrictedRoles' = 'allRoles' \\\\ ['simpleVillagerRole', 'simpleWerewolfRole', 'spitefulVillagerRole']
+--   'restrictedRoles' = 'allRoles' \\\\ ['simpleVillagerRole', 'simpleWerewolfRole', 'spitefulVillagerRole', 'zombieRole']
 --   @
 restrictedRoles :: [Role]
-restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole, spitefulVillagerRole]
+restrictedRoles = allRoles \\ [simpleVillagerRole, simpleWerewolfRole, spitefulVillagerRole, zombieRole]
 
 -- | /Abandoned by their parents as a child, with no-one wanting to look after another mouth to/
 --   /feed, the Orphan was left to fend for themself. No-one looked twice at the Orphan and even/
@@ -231,6 +234,44 @@ fallenAngelRole = Role
     , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/fallen-angel/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/fallen-angel/rules.txt|]
+    }
+
+-- | /The dead are feared among the living; the dead outnumber the living. In most villages the/
+--   /dead remain that way, but not when the Necromancer is present. The Necromancer devoted their/
+--   /life to learning black magic and methods of bringing people back to life. Unfortunately this/
+--   /art is hard to perfect and all they can manage to bring back are soulless Zombies./
+--
+--   Once per game the Necromancer can choose to resurrect all dead players as Zombies. The Zombies
+--   are aligned with the Necromancer and they cannot be lynched or devoured.
+--
+--   If the Necromancer is killed, all Zombies die with them.
+--
+--   The Necromancer and Zombies win if they are the last ones alive.
+necromancerRole :: Role
+necromancerRole = Role
+    { _tag          = "necromancer"
+    , _name         = T.strip [iFile|variant/standard/role/necromancer/name.txt|]
+    , _allegiance   = NoOne
+    , _balance      = 0
+    , _activity     = Nocturnal
+    , _description  = T.strip [iFile|variant/standard/role/necromancer/description.txt|]
+    , _rules        = T.strip [iFile|variant/standard/role/necromancer/rules.txt|]
+    }
+
+-- | /A loyal follower of the Necromancer. A Zombie has no mind of its own and blindly obeys every/
+--   /command of their master./
+--
+--   A Zombie wins with the Necromancer. They cannot be killed, however they die when the
+--   Necromancer dies.
+zombieRole :: Role
+zombieRole = Role
+    { _tag          = "zombie"
+    , _name         = T.strip [iFile|variant/standard/role/zombie/name.txt|]
+    , _allegiance   = Necromancer
+    , _balance      = 0
+    , _activity     = Nocturnal
+    , _description  = T.strip [iFile|variant/standard/role/zombie/description.txt|]
+    , _rules        = T.strip [iFile|variant/standard/role/zombie/rules.txt|]
     }
 
 -- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
