@@ -32,7 +32,7 @@ extra-source-files:
     variant/no-role-reveal/command/status/current-nocturnal-turn.txt
     variant/no-role-reveal/command/status/dead-players.txt
     variant/no-role-reveal/engine/general/player-booted.txt
-    variant/no-role-reveal/engine/general/spiteful-ghost-killed.txt
+    variant/no-role-reveal/engine/general/spiteful-villager-killed.txt
     variant/no-role-reveal/engine/lynching/player-lynched.txt
     variant/no-role-reveal/engine/lynching/saint-lynched.txt
     variant/no-role-reveal/engine/lynching/werewolf-lynched.txt
@@ -100,7 +100,7 @@ extra-source-files:
     variant/standard/engine/game-over/player-won.txt
     variant/standard/engine/general/player-booted.txt
     variant/standard/engine/general/player-killed.txt
-    variant/standard/engine/general/spiteful-ghost-killed.txt
+    variant/standard/engine/general/spiteful-villager-killed.txt
     variant/standard/engine/hunters-turn/start-private.txt
     variant/standard/engine/hunters-turn/start-public.txt
     variant/standard/engine/lynching/jester-lynched.txt
@@ -225,9 +225,9 @@ extra-source-files:
     variant/standard/role/simple-werewolf/description.txt
     variant/standard/role/simple-werewolf/name.txt
     variant/standard/role/simple-werewolf/rules.txt
-    variant/standard/role/spiteful-ghost/description.txt
-    variant/standard/role/spiteful-ghost/name.txt
-    variant/standard/role/spiteful-ghost/rules.txt
+    variant/standard/role/spiteful-villager/description.txt
+    variant/standard/role/spiteful-villager/name.txt
+    variant/standard/role/spiteful-villager/rules.txt
     variant/standard/role/true-villager/description.txt
     variant/standard/role/true-villager/name.txt
     variant/standard/role/true-villager/rules.txt

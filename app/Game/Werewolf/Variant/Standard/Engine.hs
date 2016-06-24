@@ -18,7 +18,7 @@ module Game.Werewolf.Variant.Standard.Engine (
     druidsTurnText,
 
     -- * General
-    playerBootedText, playerKilledText, spitefulGhostKilledText,
+    playerBootedText, playerKilledText, spitefulVillagerKilledText,
 
     -- * Game over
     allegianceWonText, dullahanWonText, everyoneLostText, fallenAngelWonText, playerContributedText,
@@ -93,8 +93,8 @@ playerBootedText player = [iFile|variant/standard/engine/general/player-booted.t
 playerKilledText :: Text
 playerKilledText = [iFile|variant/standard/engine/general/player-killed.txt|]
 
-spitefulGhostKilledText :: Game -> Text
-spitefulGhostKilledText game = [iFile|variant/standard/engine/general/spiteful-ghost-killed.txt|]
+spitefulVillagerKilledText :: Game -> Text
+spitefulVillagerKilledText game = [iFile|variant/standard/engine/general/spiteful-villager-killed.txt|]
 
 allegianceWonText :: Allegiance -> Text
 allegianceWonText allegiance = [iFile|variant/standard/engine/game-over/allegiance-won.txt|]

@@ -14,7 +14,7 @@ defines suite of engine messages used throughout the werewolf game for the 'NoRo
 
 module Game.Werewolf.Variant.NoRoleReveal.Engine (
     -- * General
-    playerBootedText, spitefulGhostKilledText,
+    playerBootedText, spitefulVillagerKilledText,
 
     -- * Lynching
     playerLynchedText, saintLynchedText, werewolfLynchedText,
@@ -35,8 +35,8 @@ import Game.Werewolf.Message
 playerBootedText :: Player -> Text
 playerBootedText player = [iFile|variant/no-role-reveal/engine/general/player-booted.txt|]
 
-spitefulGhostKilledText :: Game -> Text
-spitefulGhostKilledText game = [iFile|variant/no-role-reveal/engine/general/spiteful-ghost-killed.txt|]
+spitefulVillagerKilledText :: Game -> Text
+spitefulVillagerKilledText game = [iFile|variant/no-role-reveal/engine/general/spiteful-villager-killed.txt|]
 
 playerLynchedText :: Player -> Text
 playerLynchedText player = [iFile|variant/no-role-reveal/engine/lynching/player-lynched.txt|]

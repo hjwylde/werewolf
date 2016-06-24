@@ -52,7 +52,7 @@ module Game.Werewolf.Role (
     --   The Villagers must lynch all of the Werewolves.
     beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, medusaRole,
     oracleRole, protectorRole, saintRole, scapegoatRole, seerRole, simpleVillagerRole,
-    spitefulGhostRole, trueVillagerRole, witchRole,
+    spitefulVillagerRole, trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -139,7 +139,7 @@ allRoles =
     , seerRole
     , simpleVillagerRole
     , simpleWerewolfRole
-    , spitefulGhostRole
+    , spitefulVillagerRole
     , trueVillagerRole
     , villageDrunkRole
     , witchRole
@@ -464,22 +464,24 @@ simpleVillagerRole = Role
     , _rules        = T.strip [iFile|variant/standard/role/simple-villager/rules.txt|]
     }
 
--- | /In this time of turmoil, it would seem unlikely for the Villagers of Fougères to unanimously/
---   /agree on anything. Yet this is not so, for they all agree the village is haunted by a ghost./
---   /The vindictive Spiteful Ghost never moved on, rather they remain with the sole purpose of/
---   /haunting the village and ensuring that the Villagers never forget what they have done./
+-- | /A simple, ordinary townsperson in every way. Some may be cobblers, others bakers or even/
+--   /nobles. No matter their differences though, the plight of Werewolves in Fougères unites all/
+--   /the Villagers in this unfortunate time./
 --
---   When the Spiteful Ghost is killed, they are informed of everyone's roles and may haunt the
+--   /Yet the Spiteful Villager has no loyalty in the afterlife; whoever causes them harm may find/
+--   /themselves in trouble./
+--
+--   When the Spiteful Villager is killed, they are informed of everyone's roles and may haunt the
 --   village as they wish.
-spitefulGhostRole :: Role
-spitefulGhostRole = Role
-    { _tag          = "spiteful-ghost"
-    , _name         = T.strip [iFile|variant/standard/role/spiteful-ghost/name.txt|]
+spitefulVillagerRole :: Role
+spitefulVillagerRole = Role
+    { _tag          = "spiteful-villager"
+    , _name         = T.strip [iFile|variant/standard/role/spiteful-villager/name.txt|]
     , _allegiance   = Villagers
     , _balance      = 1
     , _activity     = Diurnal
-    , _description  = T.strip [iFile|variant/standard/role/spiteful-ghost/description.txt|]
-    , _rules        = T.strip [iFile|variant/standard/role/spiteful-ghost/rules.txt|]
+    , _description  = T.strip [iFile|variant/standard/role/spiteful-villager/description.txt|]
+    , _rules        = T.strip [iFile|variant/standard/role/spiteful-villager/rules.txt|]
     }
 
 -- | /The True Villager has a heart and soul as clear as day! Their allegiance and devotion to the/
