@@ -73,7 +73,7 @@ The Villagers must lynch all of the Werewolves.
 * Scapegoat
 * Seer
 * Simple Villager
-* Spiteful Ghost
+* Spiteful Villager
 * True Villager
 * Witch
 

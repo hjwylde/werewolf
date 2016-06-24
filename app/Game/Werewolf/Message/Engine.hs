@@ -18,7 +18,7 @@ module Game.Werewolf.Message.Engine (
     scapegoatLynchedMessage, saintLynchedMessage, playerLynchedMessage, noPlayerLynchedMessage, jesterLynchedMessage,
     ferinaGruntsMessage, orphanJoinedPackMessages, playerKilledMessage, playerLostMessage,
     playerContributedMessage, playerWonMessage, witchsTurnMessages, firstWerewolvesTurnMessages,
-    villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages, spitefulGhostKilledMessage,
+    villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages, spitefulVillagerKilledMessage,
     seersTurnMessages, scapegoatsTurnMessage, protectorsTurnMessages, orphansTurnMessages,
     oraclesTurnMessages, huntersTurnMessages, stageMessages,
     trueVillagerMessage, beholderMessage, newPlayerMessage, rolesInGameMessage,
@@ -154,10 +154,10 @@ beholderMessage to = privateMessage to . beholderText
 dullahanMessage :: Text -> Game -> Message
 dullahanMessage to = privateMessage to . dullahanText
 
-spitefulGhostKilledMessage :: Text -> Game -> Message
-spitefulGhostKilledMessage to game
-    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.spitefulGhostKilledText game
-    | otherwise                             = privateMessage to $ Standard.spitefulGhostKilledText game
+spitefulVillagerKilledMessage :: Text -> Game -> Message
+spitefulVillagerKilledMessage to game
+    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.spitefulVillagerKilledText game
+    | otherwise                             = privateMessage to $ Standard.spitefulVillagerKilledText game
 
 trueVillagerMessage :: Game -> Message
 trueVillagerMessage = publicMessage . trueVillagerText

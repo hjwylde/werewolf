@@ -66,7 +66,7 @@ killPlayer name = do
 
     players . traverse . named name . state .= Dead
 
-    whenM (isPlayerSpitefulGhost name) $ tell . (:[]) . spitefulGhostKilledMessage name =<< get
+    whenM (isPlayerSpitefulVillager name) $ tell . (:[]) . spitefulVillagerKilledMessage name =<< get
 
 removePlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
 removePlayer name' = do
@@ -200,8 +200,8 @@ isPlayerScapegoat name' = is scapegoat <$> findPlayerBy_ name name'
 isPlayerSeer :: MonadState Game m => Text -> m Bool
 isPlayerSeer name' = is seer <$> findPlayerBy_ name name'
 
-isPlayerSpitefulGhost :: MonadState Game m => Text -> m Bool
-isPlayerSpitefulGhost name' = is spitefulGhost <$> findPlayerBy_ name name'
+isPlayerSpitefulVillager :: MonadState Game m => Text -> m Bool
+isPlayerSpitefulVillager name' = is spitefulVillager <$> findPlayerBy_ name name'
 
 isPlayerWitch :: MonadState Game m => Text -> m Bool
 isPlayerWitch name' = is witch <$> findPlayerBy_ name name'
