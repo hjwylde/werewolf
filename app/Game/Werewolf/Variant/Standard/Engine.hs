@@ -18,7 +18,7 @@ module Game.Werewolf.Variant.Standard.Engine (
     druidsTurnText,
 
     -- * General
-    playerBootedText, playerKilledText,
+    playerBootedText, playerKilledText, spitefulGhostKilledText,
 
     -- * Game over
     allegianceWonText, dullahanWonText, everyoneLostText, fallenAngelWonText, playerContributedText,
@@ -33,7 +33,7 @@ module Game.Werewolf.Variant.Standard.Engine (
 
     -- * New game
     beholderText, dullahanText, gameVariantText, newPlayerText, playersInGameText, rolesInGameText,
-    spitefulGhostPrivateText, spitefulGhostPublicText, trueVillagerText,
+    trueVillagerText,
 
     -- * Oracle's turn
     oraclesTurnPrivateText, oraclesTurnPublicText,
@@ -92,6 +92,9 @@ playerBootedText player = [iFile|variant/standard/engine/general/player-booted.t
 
 playerKilledText :: Text
 playerKilledText = [iFile|variant/standard/engine/general/player-killed.txt|]
+
+spitefulGhostKilledText :: Game -> Text
+spitefulGhostKilledText game = [iFile|variant/standard/engine/general/spiteful-ghost-killed.txt|]
 
 allegianceWonText :: Allegiance -> Text
 allegianceWonText allegiance = [iFile|variant/standard/engine/game-over/allegiance-won.txt|]
@@ -170,14 +173,6 @@ rolesInGameText game = [iFile|variant/standard/engine/new-game/roles-in-game.txt
         roles           = game ^.. players . traverse . role
         roleCounts      = map (head &&& length) (groupSortOn humanise roles)
         totalBalance    = sumOf (traverse . balance) roles
-
-spitefulGhostPrivateText :: Game -> Text
-spitefulGhostPrivateText game = [iFile|variant/standard/engine/new-game/spiteful-ghost-private.txt|]
-
-spitefulGhostPublicText :: Game -> Text
-spitefulGhostPublicText game = [iFile|variant/standard/engine/new-game/spiteful-ghost-public.txt|]
-    where
-        spitefulGhost = game ^?! players . spitefulGhosts
 
 trueVillagerText :: Game -> Text
 trueVillagerText game = [iFile|variant/standard/engine/new-game/true-villager.txt|]

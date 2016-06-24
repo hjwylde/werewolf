@@ -74,11 +74,9 @@ instance Humanise Player where
 
 makePrisms ''State
 
--- | Creates a new 'Alive' player, with one exception: a 'spitefulGhost' always starts 'Dead'.
+-- | Creates a new 'Alive' player.
 newPlayer :: Text -> Role -> Player
-newPlayer name role = Player name role state
-    where
-        state = if role == spitefulGhostRole then Dead else Alive
+newPlayer name role = Player name role Alive
 
 -- | The traversal of 'Player's with an 'alphaWolfRole'.
 --

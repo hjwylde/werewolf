@@ -42,7 +42,7 @@ module Game.Werewolf.Role (
     -- | The Loners look out for themselves and themselves alone.
 
     --   The Loners must complete their own objective.
-    dullahanRole, fallenAngelRole, spitefulGhostRole,
+    dullahanRole, fallenAngelRole,
 
     -- *** The Villagers
     -- | Fraught with fear of the unseen enemy, the Villagers must work together to determine the
@@ -52,7 +52,7 @@ module Game.Werewolf.Role (
     --   The Villagers must lynch all of the Werewolves.
     beholderRole, crookedSenatorRole, druidRole, hunterRole, jesterRole, lycanRole, medusaRole,
     oracleRole, protectorRole, saintRole, scapegoatRole, seerRole, simpleVillagerRole,
-    trueVillagerRole, witchRole,
+    spitefulGhostRole, trueVillagerRole, witchRole,
 
     -- *** The Werewolves
     -- | Hiding in plain sight, the Werewolves are not a small trifle.
@@ -231,24 +231,6 @@ fallenAngelRole = Role
     , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/fallen-angel/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/fallen-angel/rules.txt|]
-    }
-
--- | /In this time of turmoil, it would seem unlikely for the Villagers of Fougères to unanimously/
---   /agree on anything. Yet this is not so, for they all agree the village is haunted by a ghost./
---   /The vindictive Spiteful Ghost never moved on, rather they remain with the sole purpose of/
---   /haunting the village and ensuring that the Villagers never forget what they have done./
---
---   The Spiteful ghost is dead and cannot win, however they know the game's role allocations and
---   may haunt the village as they wish.
-spitefulGhostRole :: Role
-spitefulGhostRole = Role
-    { _tag          = "spiteful-ghost"
-    , _name         = T.strip [iFile|variant/standard/role/spiteful-ghost/name.txt|]
-    , _allegiance   = NoOne
-    , _balance      = 0
-    , _activity     = Diurnal
-    , _description  = T.strip [iFile|variant/standard/role/spiteful-ghost/description.txt|]
-    , _rules        = T.strip [iFile|variant/standard/role/spiteful-ghost/rules.txt|]
     }
 
 -- | /Awareness comes easy to the Beholder. They listen to their senses and trust their hunches./
@@ -480,6 +462,24 @@ simpleVillagerRole = Role
     , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/simple-villager/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/simple-villager/rules.txt|]
+    }
+
+-- | /In this time of turmoil, it would seem unlikely for the Villagers of Fougères to unanimously/
+--   /agree on anything. Yet this is not so, for they all agree the village is haunted by a ghost./
+--   /The vindictive Spiteful Ghost never moved on, rather they remain with the sole purpose of/
+--   /haunting the village and ensuring that the Villagers never forget what they have done./
+--
+--   When the Spiteful Ghost is killed, they are informed of everyone's roles and may haunt the
+--   village as they wish.
+spitefulGhostRole :: Role
+spitefulGhostRole = Role
+    { _tag          = "spiteful-ghost"
+    , _name         = T.strip [iFile|variant/standard/role/spiteful-ghost/name.txt|]
+    , _allegiance   = Villagers
+    , _balance      = 1
+    , _activity     = Diurnal
+    , _description  = T.strip [iFile|variant/standard/role/spiteful-ghost/description.txt|]
+    , _rules        = T.strip [iFile|variant/standard/role/spiteful-ghost/rules.txt|]
     }
 
 -- | /The True Villager has a heart and soul as clear as day! Their allegiance and devotion to the/

@@ -50,7 +50,6 @@ The Loners must complete their own objective.
 
 * Dullahan
 * Fallen Angel
-* Spiteful Ghost
 
 **The Villagers:**
 
@@ -74,6 +73,7 @@ The Villagers must lynch all of the Werewolves.
 * Scapegoat
 * Seer
 * Simple Villager
+* Spiteful Ghost
 * True Villager
 * Witch
 

@@ -32,6 +32,7 @@ extra-source-files:
     variant/no-role-reveal/command/status/current-nocturnal-turn.txt
     variant/no-role-reveal/command/status/dead-players.txt
     variant/no-role-reveal/engine/general/player-booted.txt
+    variant/no-role-reveal/engine/general/spiteful-ghost-killed.txt
     variant/no-role-reveal/engine/lynching/player-lynched.txt
     variant/no-role-reveal/engine/lynching/saint-lynched.txt
     variant/no-role-reveal/engine/lynching/werewolf-lynched.txt
@@ -99,6 +100,7 @@ extra-source-files:
     variant/standard/engine/game-over/player-won.txt
     variant/standard/engine/general/player-booted.txt
     variant/standard/engine/general/player-killed.txt
+    variant/standard/engine/general/spiteful-ghost-killed.txt
     variant/standard/engine/hunters-turn/start-private.txt
     variant/standard/engine/hunters-turn/start-public.txt
     variant/standard/engine/lynching/jester-lynched.txt
@@ -113,8 +115,6 @@ extra-source-files:
     variant/standard/engine/new-game/new-player.txt
     variant/standard/engine/new-game/players-in-game.txt
     variant/standard/engine/new-game/roles-in-game.txt
-    variant/standard/engine/new-game/spiteful-ghost-private.txt
-    variant/standard/engine/new-game/spiteful-ghost-public.txt
     variant/standard/engine/new-game/true-villager.txt
     variant/standard/engine/oracles-turn/start-private.txt
     variant/standard/engine/oracles-turn/start-public.txt
