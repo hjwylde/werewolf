@@ -7,6 +7,8 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+### v1.3.1.0
+
 *Minor*
 
 * Added a game variant message at the start of a game. ([#235](https://github.com/hjwylde/werewolf/issues/235))
