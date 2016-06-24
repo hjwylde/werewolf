@@ -203,7 +203,7 @@ stageAvailable game HuntersTurn1        =
 stageAvailable game HuntersTurn2        =
     has (players . hunters . dead) game
     && not (game ^. hunterRetaliated)
-stageAvailable game Lynching            = Map.size (game ^. votes) > 0
+stageAvailable _ Lynching               = True
 stageAvailable game OraclesTurn         = has (players . oracles . alive) game
 stageAvailable game OrphansTurn         =
     has (players . orphans . alive) game
