@@ -18,7 +18,7 @@ module Game.Werewolf.Message.Engine (
     scapegoatLynchedMessage, saintLynchedMessage, playerLynchedMessage, noPlayerLynchedMessage, jesterLynchedMessage,
     ferinaGruntsMessage, orphanJoinedPackMessages, playerKilledMessage, playerLostMessage,
     playerContributedMessage, playerWonMessage, witchsTurnMessages, firstWerewolvesTurnMessages,
-    villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages,
+    villagesTurnMessage, nightFallsMessage, sunriseMessage, villageDrunksTurnMessages, spitefulGhostKilledMessage,
     seersTurnMessages, scapegoatsTurnMessage, protectorsTurnMessages, orphansTurnMessages,
     oraclesTurnMessages, huntersTurnMessages, stageMessages,
     trueVillagerMessage, beholderMessage, newPlayerMessage, rolesInGameMessage,
@@ -109,7 +109,6 @@ newGameMessages game = concat
     , map newPlayerMessage players'
     , beholderMessages
     , dullahanMessages
-    , spitefulGhostMessages'
     , trueVillagerMessages
     , stageMessages game
     ]
@@ -130,11 +129,6 @@ newGameMessages game = concat
             | has dullahans players'
             , dullahanName <- players' ^.. dullahans . name
             ]
-        spitefulGhostMessages'
-            | has spitefulGhosts players'   = spitefulGhostMessages spitefulGhostName game
-            | otherwise                     = []
-            where
-                spitefulGhostName = players' ^?! spitefulGhosts . name
         trueVillagerMessages    =
             [ trueVillagerMessage game
             | has trueVillagers players'
@@ -160,11 +154,10 @@ beholderMessage to = privateMessage to . beholderText
 dullahanMessage :: Text -> Game -> Message
 dullahanMessage to = privateMessage to . dullahanText
 
-spitefulGhostMessages :: Text -> Game -> [Message]
-spitefulGhostMessages to game =
-    [ privateMessage to $ spitefulGhostPrivateText game
-    , publicMessage $ spitefulGhostPublicText game
-    ]
+spitefulGhostKilledMessage :: Text -> Game -> Message
+spitefulGhostKilledMessage to game
+    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.spitefulGhostKilledText game
+    | otherwise                             = privateMessage to $ Standard.spitefulGhostKilledText game
 
 trueVillagerMessage :: Game -> Message
 trueVillagerMessage = publicMessage . trueVillagerText
