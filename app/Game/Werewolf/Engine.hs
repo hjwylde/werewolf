@@ -77,7 +77,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
     HuntersTurn2 -> whenM (use hunterRetaliated) advanceStage
 
     Lynching -> do
-        lynchVotee =<< preuse votee
+        unlessM (Map.null <$> use votes) $ lynchVotee =<< preuse votee
 
         allVoters       <- ifM (use jesterRevealed)
             (uses players $ filter (isn't jester))

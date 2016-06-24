@@ -13,6 +13,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Added the Saint role. ([#178](https://github.com/hjwylde/werewolf/issues/178))
 * Added marks to the Dullahan's status command. ([#236](https://github.com/hjwylde/werewolf/issues/236))
 
+*Revisions*
+
+* Fix a bug where due to Scapegoat picking 1 player the day never comes again. ([#239](https://github.com/hjwylde/werewolf/issues/239))
+
 ### v1.3.0.1
 
 *Revisions*
