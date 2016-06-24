@@ -184,10 +184,11 @@ start = fmap Start $ Start.Options
     <*> some (T.pack <$> strArgument (metavar "PLAYER..."))
     where
         variantOption = option $ readerAsk >>= \opt -> case opt of
-            "standard"          -> return Standard
-            "no-role-knowledge" -> return NoRoleKnowledge
-            "no-role-reveal"    -> return NoRoleReveal
-            _                   -> readerError $ "unrecognised variant `" ++ opt ++ "'"
+            "standard"              -> return Standard
+            "no-role-knowledge"     -> return NoRoleKnowledge
+            "no-role-reveal"        -> return NoRoleReveal
+            "spiteful-villagers"    -> return SpitefulVillagers
+            _                       -> readerError $ "unrecognised variant `" ++ opt ++ "'"
 
         extraRolesOption = fmap (Start.Use . filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
             [ long "extra-roles", short 'e', metavar "ROLE,..."
