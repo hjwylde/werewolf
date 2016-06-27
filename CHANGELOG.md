@@ -7,6 +7,8 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+### v1.4.0.0
+
 *Major*
 
 * Added the Necromancer role. ([#211](https://github.com/hjwylde/werewolf/issues/211))
