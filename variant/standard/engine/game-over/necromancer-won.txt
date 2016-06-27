@@ -1,0 +1,2 @@
+Long live the dead!
+The game is over! The #{humanise necromancerRole} has won.

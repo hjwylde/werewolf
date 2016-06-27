@@ -19,7 +19,7 @@ includes features such as emoji support.
 
 module Game.Werewolf.Message (
     -- * Utility functions
-    humanisePlayerWithRole, humanisePlayersWithRoles, humanisePlayerWithRoleIfTrueVillager,
+    humanisePlayerWithRole, humanisePlayersWithRoles, humanisePlayerWithRoleIfKnown,
     humanisePlayerWithState, article, conjugateToBe, pluralise,
 ) where
 
@@ -40,10 +40,10 @@ humanisePlayerWithRole player = T.concat [humanise player, " (", humanise $ play
 humanisePlayersWithRoles :: [Player] -> Text
 humanisePlayersWithRoles = humanise . map humanisePlayerWithRole
 
-humanisePlayerWithRoleIfTrueVillager :: Player -> Text
-humanisePlayerWithRoleIfTrueVillager player
-    | is trueVillager player    = humanisePlayerWithRole player
-    | otherwise                 = humanise player
+humanisePlayerWithRoleIfKnown :: Player -> Text
+humanisePlayerWithRoleIfKnown player
+    | any ($ player) [is trueVillager, is zombie]   = humanisePlayerWithRole player
+    | otherwise                                     = humanise player
 
 humanisePlayerWithState :: Player -> Text
 humanisePlayerWithState player

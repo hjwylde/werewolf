@@ -35,6 +35,7 @@ chooseCommand callerName targetName = Command $ do
     unlessM (isPlayerHunter callerName)     $ throwError [playerCannotDoThatMessage callerName]
     unlessM isHuntersTurn                   $ throwError [playerCannotDoThatRightNowMessage callerName]
     validatePlayer callerName targetName
+    whenM (isPlayerZombie targetName)       $ throwError [playerCannotChooseZombieMessage callerName]
 
     target <- findPlayerBy_ name targetName
 

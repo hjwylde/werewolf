@@ -50,6 +50,7 @@ poisonCommand callerName targetName = Command $ do
     validateCommand callerName
     whenM (use poisonUsed)                      $ throwError [playerHasAlreadyPoisonedMessage callerName]
     validatePlayer callerName targetName
+    whenM (isPlayerZombie targetName)           $ throwError [playerCannotChooseZombieMessage callerName]
     whenM (hasuse $ votee . named targetName)   $ throwError [playerCannotDoThatMessage callerName]
 
     poison      .= Just targetName

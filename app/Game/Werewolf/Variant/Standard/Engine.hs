@@ -18,11 +18,11 @@ module Game.Werewolf.Variant.Standard.Engine (
     druidsTurnText,
 
     -- * General
-    playerBootedText, playerKilledText, spitefulVillagerKilledText,
+    playerBootedText, playerKilledText, spitefulVillagerKilledText, zombiesReturnedToGraveText,
 
     -- * Game over
-    allegianceWonText, dullahanWonText, everyoneLostText, fallenAngelWonText, playerContributedText,
-    playerLostText, playerRolesText, playerWonText,
+    allegianceWonText, dullahanWonText, everyoneLostText, fallenAngelWonText, necromancerWonText,
+    playerContributedText, playerLostText, playerRolesText, playerWonText,
 
     -- * Hunter's turn
     huntersTurnPrivateText, huntersTurnPublicText,
@@ -30,6 +30,9 @@ module Game.Werewolf.Variant.Standard.Engine (
     -- * Lynching
     jesterLynchedText, noPlayerLynchedText, playerLynchedText, saintLynchedText,
     scapegoatLynchedText, werewolfLynchedText,
+
+    -- * Necromancer's turn
+    necromancersTurnPrivateText, necromancersTurnPublicText,
 
     -- * New game
     beholderText, dullahanText, gameVariantText, newPlayerText, playersInGameText, rolesInGameText,
@@ -96,6 +99,9 @@ playerKilledText = [iFile|variant/standard/engine/general/player-killed.txt|]
 spitefulVillagerKilledText :: Game -> Text
 spitefulVillagerKilledText game = [iFile|variant/standard/engine/general/spiteful-villager-killed.txt|]
 
+zombiesReturnedToGraveText :: Game -> Text
+zombiesReturnedToGraveText game = [iFile|variant/standard/engine/general/zombies-returned-to-grave.txt|]
+
 allegianceWonText :: Allegiance -> Text
 allegianceWonText allegiance = [iFile|variant/standard/engine/game-over/allegiance-won.txt|]
 
@@ -107,6 +113,9 @@ everyoneLostText = [iFile|variant/standard/engine/game-over/everyone-lost.txt|]
 
 fallenAngelWonText :: Text
 fallenAngelWonText = [iFile|variant/standard/engine/game-over/fallen-angel-won.txt|]
+
+necromancerWonText :: Text
+necromancerWonText = [iFile|variant/standard/engine/game-over/necromancer-won.txt|]
 
 playerContributedText :: Text
 playerContributedText = [iFile|variant/standard/engine/game-over/player-contributed.txt|]
@@ -149,6 +158,12 @@ scapegoatLynchedText game = [iFile|variant/standard/engine/lynching/scapegoat-ly
 
 werewolfLynchedText :: Player -> Text
 werewolfLynchedText werewolf = [iFile|variant/standard/engine/lynching/werewolf-lynched.txt|]
+
+necromancersTurnPrivateText :: Text
+necromancersTurnPrivateText = [iFile|variant/standard/engine/necromancers-turn/start-private.txt|]
+
+necromancersTurnPublicText :: Text
+necromancersTurnPublicText = [iFile|variant/standard/engine/necromancers-turn/start-public.txt|]
 
 beholderText :: Game -> Text
 beholderText game = [iFile|variant/standard/engine/new-game/beholder.txt|]

@@ -24,7 +24,7 @@ module Game.Werewolf.Role (
     tag, name, allegiance, balance, activity, description, rules,
 
     Allegiance(..),
-    _NoOne, _Villagers, _Werewolves,
+    _NoOne, _Necromancer, _Villagers, _Werewolves,
 
     Activity(..),
     _Diurnal, _Nocturnal,
@@ -466,7 +466,7 @@ scapegoatRole = Role
     { _tag          = "scapegoat"
     , _name         = T.strip [iFile|variant/standard/role/scapegoat/name.txt|]
     , _allegiance   = Villagers
-    , _balance      = 0
+    , _balance      = 1
     , _activity     = Diurnal
     , _description  = T.strip [iFile|variant/standard/role/scapegoat/description.txt|]
     , _rules        = T.strip [iFile|variant/standard/role/scapegoat/rules.txt|]

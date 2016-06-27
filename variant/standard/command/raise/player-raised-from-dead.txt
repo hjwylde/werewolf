@@ -1,0 +1,1 @@
+#{humanise necromancer'} has raised you from the dead, bringing you back as a #{humanise zombieRole}. Abandon your past life and embrace your new master; follow them to victory!

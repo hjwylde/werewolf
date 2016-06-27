@@ -19,7 +19,8 @@ module Game.Werewolf.Variant.Standard.Error (
     callerAlreadyVotedBootText,
 
     -- ** Choose
-    callerCannotChooseJesterText, callerCannotChooseSelfText, noTargetText,
+    callerCannotChooseJesterText, callerCannotChooseSelfText, callerCannotChooseZombieText,
+    noTargetText,
 
     -- ** General
     callerCannotDoThatText, callerCannotDoThatRightNowText, callerDeadText, noGameRunningText,
@@ -59,6 +60,9 @@ callerCannotChooseJesterText = [iFile|variant/standard/error/command/choose/call
 
 callerCannotChooseSelfText :: Text
 callerCannotChooseSelfText = [iFile|variant/standard/error/command/choose/caller-cannot-choose-self.txt|]
+
+callerCannotChooseZombieText :: Text
+callerCannotChooseZombieText = [iFile|variant/standard/error/command/choose/caller-cannot-choose-zombie.txt|]
 
 noTargetText :: Text
 noTargetText = [iFile|variant/standard/error/command/choose/no-target.txt|]

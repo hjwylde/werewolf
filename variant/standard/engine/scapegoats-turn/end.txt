@@ -1,1 +1,1 @@
-On the next day only #{humanise $ game ^. allowedVoters} shall be allowed to vote. The Town Crier, realising how foolish it was to kill the #{humanise scapegoatRole}, grants them this wish.
+On the next day only #{humanise $ game ^. chosenVoters} shall be allowed to vote. The Town Crier, realising how foolish it was to kill the #{humanise scapegoatRole}, grants them this wish.

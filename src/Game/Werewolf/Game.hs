@@ -18,17 +18,17 @@ structure and any fields required to keep track of the current state.
 module Game.Werewolf.Game (
     -- * Game
     Game,
-    variant, stage, round, players, boots, allowedVoters, divine, fallenAngelLynched, healUsed,
-    hunterRetaliated, jesterRevealed, marks, passed, poison, poisonUsed, priorProtect, protect,
-    roleModel, scapegoatBlamed, see, votes,
+    variant, stage, round, players, boots, chosenVoters, deadRaised, divine, fallenAngelLynched,
+    healUsed, hunterRetaliated, jesterRevealed, marks, passed, poison, poisonUsed, priorProtect,
+    protect, roleModel, scapegoatBlamed, see, votes,
 
     Variant(..),
     _Standard, _NoRoleKnowledge, _NoRoleReveal,
 
     Stage(..),
-    _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _OraclesTurn, _OrphansTurn,
-    _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset, _VillageDrunksTurn,
-    _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
+    _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _NecromancersTurn,
+    _OraclesTurn, _OrphansTurn, _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset,
+    _VillageDrunksTurn, _VillagesTurn, _WerewolvesTurn, _WitchsTurn,
     activity,
 
     allStages,
@@ -37,17 +37,17 @@ module Game.Werewolf.Game (
     newGame,
 
     -- ** Folds
-    votee,
+    votee, allowedVoters, pendingVoters,
 
     -- ** Prisms
     firstRound, secondRound, thirdRound,
 
     -- ** Searches
-    getAllowedVoters, getPendingVoters, getMarks,
+    getMarks,
 
     -- ** Queries
-    hasAnyoneWon, hasDullahanWon, hasFallenAngelWon, hasVillagersWon, hasWerewolvesWon,
-    hasEveryoneLost,
+    hasAnyoneWon, hasDullahanWon, hasFallenAngelWon, hasNecromancerWon, hasVillagersWon,
+    hasWerewolvesWon, hasEveryoneLost,
 ) where
 
 import Control.Lens.Extra
@@ -79,7 +79,8 @@ data Game = Game
     , _round              :: Int
     , _players            :: [Player]
     , _boots              :: Map Text [Text]
-    , _allowedVoters      :: [Text]           -- ^ Jester, Scapegoat
+    , _chosenVoters       :: [Text]           -- ^ Scapegoat
+    , _deadRaised         :: Bool             -- ^ Necromancer
     , _divine             :: Maybe Text       -- ^ Oracle
     , _fallenAngelLynched :: Bool             -- ^ Fallen Angel
     , _healUsed           :: Bool             -- ^ Witch
@@ -112,9 +113,9 @@ instance Humanise Variant where
 --
 --   Once the game reaches a turn stage, it requires a /command/ to help push it past. Often only
 --   certain roles and commands may be performed at any given stage.
-data Stage  = DruidsTurn | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | OraclesTurn
-            | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise | Sunset
-            | VillageDrunksTurn | VillagesTurn | WerewolvesTurn | WitchsTurn
+data Stage  = DruidsTurn | GameOver | HuntersTurn1 | HuntersTurn2 | Lynching | NecromancersTurn
+            | OraclesTurn | OrphansTurn | ProtectorsTurn | ScapegoatsTurn | SeersTurn | Sunrise
+            | Sunset | VillageDrunksTurn | VillagesTurn | WerewolvesTurn | WitchsTurn
     deriving (Eq, Read, Show)
 
 instance Humanise Stage where
@@ -123,6 +124,7 @@ instance Humanise Stage where
     humanise HuntersTurn1       = "Hunter's turn"
     humanise HuntersTurn2       = "Hunter's turn"
     humanise Lynching           = "Lynching"
+    humanise NecromancersTurn   = "Necromancer's turn"
     humanise OraclesTurn        = "Oracle's turn"
     humanise OrphansTurn        = "Orphan's turn"
     humanise ProtectorsTurn     = "Protector's turn"
@@ -153,6 +155,7 @@ activity = to getter
         getter HuntersTurn1         = Diurnal
         getter HuntersTurn2         = Diurnal
         getter Lynching             = Diurnal
+        getter NecromancersTurn     = Nocturnal
         getter OraclesTurn          = Nocturnal
         getter OrphansTurn          = Nocturnal
         getter ProtectorsTurn       = Nocturnal
@@ -171,6 +174,7 @@ allStages =
     [ Sunset
     , OrphansTurn
     , VillageDrunksTurn
+    , NecromancersTurn
     , SeersTurn
     , OraclesTurn
     , ProtectorsTurn
@@ -205,6 +209,9 @@ stageAvailable game HuntersTurn2        =
     has (players . hunters . dead) game
     && not (game ^. hunterRetaliated)
 stageAvailable _ Lynching               = True
+stageAvailable game NecromancersTurn    =
+    has (players . necromancers . alive) game
+    && not (game ^. deadRaised)
 stageAvailable game OraclesTurn         = has (players . oracles . alive) game
 stageAvailable game OrphansTurn         =
     has (players . orphans . alive) game
@@ -217,8 +224,8 @@ stageAvailable _ Sunset                 = True
 stageAvailable game VillageDrunksTurn   =
     has (players . villageDrunks . alive) game
     && is thirdRound game
-stageAvailable game VillagesTurn        = any (is alive) (getAllowedVoters game)
-stageAvailable game WerewolvesTurn      = has (players . werewolves . alive) game
+stageAvailable game VillagesTurn        = has allowedVoters game
+stageAvailable game WerewolvesTurn      = has (allowedVoters . werewolf) game
 stageAvailable game WitchsTurn          =
     has (players . witches . alive) game
     && (not (game ^. healUsed) || not (game ^. poisonUsed))
@@ -233,7 +240,8 @@ newGame variant players = Game
     , _players              = players
     , _boots                = Map.empty
     , _passed               = False
-    , _allowedVoters        = players ^.. names
+    , _chosenVoters         = []
+    , _deadRaised           = False
     , _divine               = Nothing
     , _fallenAngelLynched   = False
     , _healUsed             = False
@@ -267,6 +275,43 @@ getVotee game
         votees = Map.elems $ game ^. votes
         result = last $ groupSortOn (length . (`elemIndices` votees)) (nub votees)
 
+-- | The traversal of the allowed voters during the 'VillagesTurn' or 'WerewolvesTurn'. In a
+--   standard game, this is all 'Alive' players. However there are two scenarios for the
+--   'VillagesTurn' that may change this:
+--
+--   1) if the 'scapegoat' has chosen some 'chosenVoters', it is these players.
+--   2) if the 'jester' has been revealed, he may not vote.
+allowedVoters :: Fold Game Player
+allowedVoters = folding getAllowedVoters
+
+-- | Gets the allowed voters during the 'VillagesTurn' or 'WerewolvesTurn'. In a standard game, this
+--   is all 'Alive' players. However there are two scenarios for the 'VillagesTurn' that may change
+--   this:
+--
+--   1) if the 'scapegoat' has chosen some 'chosenVoters', it is these players.
+--   2) if the 'jester' has been revealed, he may not vote.
+getAllowedVoters :: Game -> [Player]
+getAllowedVoters game
+    | not . null $ game ^. chosenVoters = filter ((`elem` game ^. chosenVoters) . view name) players'
+    | game ^. jesterRevealed            = filter (isn't jester) players'
+    | otherwise                         = players'
+    where
+        players'
+            | has (stage . _WerewolvesTurn) game    = game ^.. players . werewolves . alive
+            | otherwise                             = game ^.. players . traverse . alive
+
+-- | The traversal of all 'Alive' players that have yet to vote. This is synonymous to @voters -
+--   Map.keys votes@
+pendingVoters :: Fold Game Player
+pendingVoters = folding getPendingVoters
+
+-- | Gets all 'Alive' players that have yet to vote. This is synonymous to @voters - Map.keys
+--   votes@
+getPendingVoters :: Game -> [Player]
+getPendingVoters game = game ^.. allowedVoters . filtered ((`Map.notMember` votes') . view name)
+    where
+        votes' = game ^. votes
+
 -- | The traversal of 'Game's on the first round.
 firstRound :: Prism' Game Game
 firstRound = prism (set round 0) $ \game -> (if game ^. round == 0 then Right else Left) game
@@ -279,18 +324,6 @@ secondRound = prism (set round 1) $ \game -> (if game ^. round == 1 then Right e
 thirdRound :: Prism' Game Game
 thirdRound = prism (set round 2) $ \game -> (if game ^. round == 2 then Right else Left) game
 
--- | Gets all the 'allowedVoters' in a game (which is names only) and maps them to their player.
-getAllowedVoters :: Game -> [Player]
-getAllowedVoters game =
-    map (\name -> game ^?! players . traverse . named name) (game ^. allowedVoters)
-
--- | Gets all 'Alive' players that have yet to vote.
-getPendingVoters :: Game -> [Player]
-getPendingVoters game =
-    game ^.. players . traverse . alive . filtered ((`Map.notMember` votes') . view name)
-    where
-        votes' = game ^. votes
-
 -- | Gets all the 'marks' in a game (which is names only) and maps them to their player.
 getMarks :: Game -> [Player]
 getMarks game = map (\name -> game ^?! players . traverse . named name) (game ^. marks)
@@ -300,6 +333,7 @@ hasAnyoneWon :: Game -> Bool
 hasAnyoneWon game = any ($ game)
     [ hasDullahanWon
     , hasFallenAngelWon
+    , hasNecromancerWon
     , hasVillagersWon
     , hasWerewolvesWon
     ]
@@ -315,6 +349,14 @@ hasDullahanWon game =
 --   themselves lynched by the Villagers.
 hasFallenAngelWon :: Game -> Bool
 hasFallenAngelWon game = game ^. fallenAngelLynched
+
+-- | Queries whether the Necromancer has won. The 'Necromancer' wins if they and their zombies are
+--   the only players surviving.
+hasNecromancerWon :: Game -> Bool
+hasNecromancerWon game =
+    not (hasEveryoneLost game)
+    && allOf (players . traverse . alive)
+        (\player -> any ($ player) [is necromancer, is zombie]) game
 
 -- | Queries whether the 'Villagers' have won. The 'Villagers' win if they are the only players
 --   surviving.

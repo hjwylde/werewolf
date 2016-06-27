@@ -49,6 +49,8 @@ extra-source-files:
     variant/standard/command/help/help-commands.txt
     variant/standard/command/help/hunter-commands.txt
     variant/standard/command/help/hunters-turn.txt
+    variant/standard/command/help/necromancer-commands.txt
+    variant/standard/command/help/necromancers-turn.txt
     variant/standard/command/help/oracle-commands.txt
     variant/standard/command/help/oracles-turn.txt
     variant/standard/command/help/orphan-commands.txt
@@ -78,13 +80,14 @@ extra-source-files:
     variant/standard/command/ping/village-pinged.txt
     variant/standard/command/ping/werewolves-pinged.txt
     variant/standard/command/quit/caller-quit.txt
-    variant/standard/command/status/alive-marks.txt
+    variant/standard/command/raise/necromancer-raised-dead.txt
+    variant/standard/command/raise/player-raised-from-dead.txt
     variant/standard/command/status/alive-players.txt
     variant/standard/command/status/current-diurnal-turn.txt
     variant/standard/command/status/current-nocturnal-turn.txt
-    variant/standard/command/status/dead-marks.txt
     variant/standard/command/status/dead-players.txt
     variant/standard/command/status/game-over.txt
+    variant/standard/command/status/marks.txt
     variant/standard/command/unvote/player-rescinded-vote.txt
     variant/standard/command/version/engine-version.txt
     variant/standard/command/vote/player-made-devour-vote.txt
@@ -94,6 +97,7 @@ extra-source-files:
     variant/standard/engine/game-over/dullahan-won.txt
     variant/standard/engine/game-over/everyone-lost.txt
     variant/standard/engine/game-over/fallen-angel-won.txt
+    variant/standard/engine/game-over/necromancer-won.txt
     variant/standard/engine/game-over/player-contributed.txt
     variant/standard/engine/game-over/player-lost.txt
     variant/standard/engine/game-over/player-roles.txt
@@ -101,6 +105,7 @@ extra-source-files:
     variant/standard/engine/general/player-booted.txt
     variant/standard/engine/general/player-killed.txt
     variant/standard/engine/general/spiteful-villager-killed.txt
+    variant/standard/engine/general/zombies-returned-to-grave.txt
     variant/standard/engine/hunters-turn/start-private.txt
     variant/standard/engine/hunters-turn/start-public.txt
     variant/standard/engine/lynching/jester-lynched.txt
@@ -109,6 +114,8 @@ extra-source-files:
     variant/standard/engine/lynching/saint-lynched.txt
     variant/standard/engine/lynching/scapegoat-lynched.txt
     variant/standard/engine/lynching/werewolf-lynched.txt
+    variant/standard/engine/necromancers-turn/start-private.txt
+    variant/standard/engine/necromancers-turn/start-public.txt
     variant/standard/engine/new-game/beholder.txt
     variant/standard/engine/new-game/dullahan.txt
     variant/standard/engine/new-game/game-variant.txt
@@ -153,6 +160,7 @@ extra-source-files:
     variant/standard/error/command/boot/caller-already-voted-boot.txt
     variant/standard/error/command/choose/caller-cannot-choose-jester.txt
     variant/standard/error/command/choose/caller-cannot-choose-self.txt
+    variant/standard/error/command/choose/caller-cannot-choose-zombie.txt
     variant/standard/error/command/choose/no-target.txt
     variant/standard/error/command/general/caller-cannot-do-that-right-now.txt
     variant/standard/error/command/general/caller-cannot-do-that.txt
@@ -256,6 +264,7 @@ executable werewolf
         Game.Werewolf.Command
         Game.Werewolf.Command.Global
         Game.Werewolf.Command.Hunter
+        Game.Werewolf.Command.Necromancer
         Game.Werewolf.Command.Oracle
         Game.Werewolf.Command.Orphan
         Game.Werewolf.Command.Protector
@@ -292,6 +301,7 @@ executable werewolf
         Werewolf.Command.Poison
         Werewolf.Command.Protect
         Werewolf.Command.Quit
+        Werewolf.Command.Raise
         Werewolf.Command.See
         Werewolf.Command.Start
         Werewolf.Command.Status
