@@ -17,7 +17,7 @@ module Game.Werewolf.Command.Villager (
     unvoteCommand, voteCommand,
 ) where
 
-import Control.Lens
+import Control.Lens.Extra
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.State
@@ -50,6 +50,7 @@ voteCommand callerName targetName = Command $ do
     validateCommand callerName
     whenM (isJust <$> getPlayerVote callerName) $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
+    whenM (isPlayerZombie targetName)           $ throwError [playerCannotChooseZombieMessage callerName]
 
     votes %= Map.insert callerName targetName
 
@@ -62,5 +63,5 @@ voteCommand callerName targetName = Command $ do
 validateCommand :: (MonadError [Message] m, MonadState Game m) => Text -> m ()
 validateCommand callerName = do
     validatePlayer callerName callerName
-    whenM (uses allowedVoters (callerName `notElem`))   $ throwError [playerCannotDoThatMessage callerName]
-    unlessM isVillagesTurn                              $ throwError [playerCannotDoThatRightNowMessage callerName]
+    whenM (hasn'tuse $ allowedVoters . named callerName)    $ throwError [playerCannotDoThatMessage callerName]
+    unlessM isVillagesTurn                                  $ throwError [playerCannotDoThatRightNowMessage callerName]

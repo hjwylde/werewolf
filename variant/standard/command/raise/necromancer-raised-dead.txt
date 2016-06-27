@@ -1,0 +1,1 @@
+A dark cloud falls upon Fougères, as the #{humanise necromancerRole} begins to raise #{humanise zombies'} from the dead.

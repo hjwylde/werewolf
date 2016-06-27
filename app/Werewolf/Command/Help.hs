@@ -82,6 +82,8 @@ commandsMessages callerName mGame =
     , standardCommandsMessage callerName
     ] ++ [ hunterCommandsMessage callerName
     | isNothing mGame || has (players . hunters . named callerName) (fromJust mGame)
+    ] ++ [ necromancerCommandsMessage callerName
+    | isNothing mGame || has (players . necromancers . named callerName) (fromJust mGame)
     ] ++ [ oracleCommandsMessage callerName
     | isNothing mGame || has (players . oracles . named callerName) (fromJust mGame)
     ] ++ [ orphanCommandsMessage callerName

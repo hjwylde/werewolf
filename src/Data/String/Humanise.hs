@@ -26,6 +26,6 @@ instance Humanise Text where
     humanise = id
 
 instance Humanise a => Humanise [a] where
-    humanise []     = ""
+    humanise []     = "no-one"
     humanise [word] = humanise word
     humanise words  = T.unwords [T.intercalate ", " (map humanise $ init words), "and", humanise $ last words]

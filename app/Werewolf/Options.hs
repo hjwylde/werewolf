@@ -61,6 +61,7 @@ data Command
     | Poison Poison.Options
     | Protect Protect.Options
     | Quit
+    | Raise
     | See See.Options
     | Start Start.Options
     | Status
@@ -111,6 +112,7 @@ werewolf = Options
         , command "poison"      $ info (helper <*> poison)      (fullDesc <> progDesc "Poison a player")
         , command "protect"     $ info (helper <*> protect)     (fullDesc <> progDesc "Protect a player")
         , command "quit"        $ info (helper <*> quit)        (fullDesc <> progDesc "Quit the current game")
+        , command "raise"       $ info (helper <*> raise)       (fullDesc <> progDesc "Raise the dead as Zombies")
         , command "see"         $ info (helper <*> see)         (fullDesc <> progDesc "See a player's allegiance")
         , command "start"       $ info (helper <*> start)       (fullDesc <> progDesc "Start a new game")
         , command "status"      $ info (helper <*> status)      (fullDesc <> progDesc "Get the status of the current game")
@@ -169,6 +171,9 @@ protect = Protect . Protect.Options <$> playerArgument
 
 quit :: Parser Command
 quit = pure Quit
+
+raise :: Parser Command
+raise = pure Raise
 
 see :: Parser Command
 see = See . See.Options <$> playerArgument

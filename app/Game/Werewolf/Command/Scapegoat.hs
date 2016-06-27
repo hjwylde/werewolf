@@ -38,5 +38,5 @@ chooseCommand callerName targetNames = Command $ do
     whenM (use jesterRevealed &&^ anyM isPlayerJester targetNames) $
         throwError [playerCannotChooseJesterMessage callerName]
 
-    allowedVoters   .= targetNames
+    chosenVoters    .= targetNames
     scapegoatBlamed .= False

@@ -1,0 +1,3 @@
+Once per game the Necromancer can choose to resurrect all dead players as Zombies. The Zombies are aligned with the Necromancer and they cannot be lynched or devoured.
+If the Necromancer is killed, all Zombies die with them.
+The Necromancer and Zombies win if they are the last ones alive.

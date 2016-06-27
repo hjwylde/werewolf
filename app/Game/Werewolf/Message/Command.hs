@@ -28,13 +28,17 @@ module Game.Werewolf.Message.Command (
 
     -- * Help
     gameDescriptionMessage, globalCommandsMessage, helpCommandsMessage, hunterCommandsMessage,
-    oracleCommandsMessage, orphanCommandsMessage, protectorCommandsMessage, roleMessage,
-    rulesMessage, scapegoatCommandsMessage, seerCommandsMessage, stagesMessage,
-    standardCommandsMessage, statusCommandsMessage, witchCommandsMessage,
+    necromancerCommandsMessage, oracleCommandsMessage, orphanCommandsMessage,
+    protectorCommandsMessage, roleMessage, rulesMessage, scapegoatCommandsMessage,
+    seerCommandsMessage, stagesMessage, standardCommandsMessage, statusCommandsMessage,
+    witchCommandsMessage,
 
     -- * Ping
     pingDiurnalRoleMessage, pingNocturnalRoleMessage, pingPlayerMessage, pingVillageMessage,
     pingWerewolvesMessage,
+
+    -- * Raise
+    deadRaisedMessages,
 
     -- * Status
     currentDiurnalTurnMessage, currentNocturnalTurnMessage, gameIsOverMessage, marksInGameMessage,
@@ -59,7 +63,7 @@ import qualified Data.Text  as T
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role
+import Game.Werewolf.Role                            hiding (name)
 import Game.Werewolf.Variant.NoRoleKnowledge.Command as NoRoleKnowledge
 import Game.Werewolf.Variant.NoRoleReveal.Command    as NoRoleReveal
 import Game.Werewolf.Variant.Standard.Command        as Standard
@@ -95,6 +99,9 @@ helpCommandsMessage to = privateMessage to helpCommandsText
 hunterCommandsMessage :: Text -> Message
 hunterCommandsMessage to = privateMessage to hunterCommandsText
 
+necromancerCommandsMessage :: Text -> Message
+necromancerCommandsMessage to = privateMessage to necromancerCommandsText
+
 oracleCommandsMessage :: Text -> Message
 oracleCommandsMessage to = privateMessage to oracleCommandsText
 
@@ -124,6 +131,8 @@ stagesMessage to mGame = privateMessage to . T.concat $
     | isNothing mGame || has (players . orphans . named to) (fromJust mGame)
     ] ++ [ villageDrunksTurnText
     | isNothing mGame || has (players . villageDrunks . named to) (fromJust mGame)
+    ] ++ [ necromancersTurnText
+    | isNothing mGame || has (players . necromancers . named to) (fromJust mGame)
     ] ++ [ seersTurnText
     | isNothing mGame || has (players . seers . named to) (fromJust mGame)
     ] ++ [ oraclesTurnText
@@ -176,6 +185,19 @@ pingWerewolvesMessage game
     | has (variant . _NoRoleReveal) game    = publicMessage NoRoleReveal.werewolvesPingedText
     | otherwise                             = publicMessage Standard.werewolvesPingedText
 
+deadRaisedMessages :: Game -> [Message]
+deadRaisedMessages game =
+    necromancerRaisedDeadMessage game
+    : map (`playerRaisedFromDeadMessage` game) zombieNames
+    where
+        zombieNames = game ^.. players . zombies . name
+
+necromancerRaisedDeadMessage :: Game -> Message
+necromancerRaisedDeadMessage = publicMessage . necromancerRaisedDeadText
+
+playerRaisedFromDeadMessage :: Text -> Game -> Message
+playerRaisedFromDeadMessage to = privateMessage to . playerRaisedFromDeadText
+
 currentDiurnalTurnMessage :: Text -> Game -> Message
 currentDiurnalTurnMessage to game = privateMessage to $ Standard.currentDiurnalTurnText game
 
@@ -189,12 +211,7 @@ gameIsOverMessage :: Text -> Message
 gameIsOverMessage to = privateMessage to gameOverText
 
 marksInGameMessage :: Text -> Game -> Message
-marksInGameMessage to game = privateMessage to $ T.append aliveMarksText' deadMarksText'
-    where
-        aliveMarksText' = aliveMarksText game
-        deadMarksText'
-            | hasn't (players . traverse . dead) game   = T.empty
-            | otherwise                                 = deadMarksText game
+marksInGameMessage to game = privateMessage to $ marksText game
 
 playersInGameMessage :: Text -> Game -> Message
 playersInGameMessage to game = privateMessage to $ T.append alivePlayersText' deadPlayersText'

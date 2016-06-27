@@ -50,6 +50,7 @@ The Loners must complete their own objective.
 
 * Dullahan
 * Fallen Angel
+* Necromancer (and Zombie)
 
 **The Villagers:**
 

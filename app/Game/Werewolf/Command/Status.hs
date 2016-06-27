@@ -22,11 +22,10 @@ import Control.Monad.Extra
 import Control.Monad.State
 import Control.Monad.Writer
 
-import Data.List
 import Data.Text (Text)
 
 -- TODO (hjw): remove Message.Engine
-import           Game.Werewolf                 hiding (getPendingVoters)
+import           Game.Werewolf
 import           Game.Werewolf.Command
 import           Game.Werewolf.Message.Command
 import           Game.Werewolf.Message.Engine
@@ -46,6 +45,7 @@ pingCommand callerName = Command $ use stage >>= \stage' -> case stage' of
     HuntersTurn1        -> pingRole hunterRole
     HuntersTurn2        -> pingRole hunterRole
     Lynching            -> return ()
+    NecromancersTurn    -> pingRole necromancerRole
     OraclesTurn         -> pingRole oracleRole
     OrphansTurn         -> pingRole orphanRole
     ProtectorsTurn      -> pingRole protectorRole
@@ -71,18 +71,17 @@ pingRole role' = do
 
 pingVillagers :: (MonadState Game m, MonadWriter [Message] m) => m ()
 pingVillagers = do
-    allowedVoterNames <- use allowedVoters
-    pendingVoterNames <- toListOf names <$> getPendingVoters
+    pendingVoterNames <- toListOf (pendingVoters . name) <$> get
 
     tell [pingVillageMessage]
-    tell $ map pingPlayerMessage (allowedVoterNames `intersect` pendingVoterNames)
+    tell $ map pingPlayerMessage pendingVoterNames
 
 pingWerewolves :: (MonadState Game m, MonadWriter [Message] m) => m ()
 pingWerewolves = do
-    pendingVoters <- getPendingVoters
+    pendingVoterNames <- toListOf (pendingVoters . name) <$> get
 
     tell . (:[]) . pingWerewolvesMessage =<< get
-    tell $ map pingPlayerMessage (pendingVoters ^.. werewolves . name)
+    tell $ map pingPlayerMessage pendingVoterNames
 
 statusCommand :: Text -> Command
 statusCommand callerName = Command $ do

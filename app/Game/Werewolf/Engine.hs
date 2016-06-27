@@ -29,8 +29,7 @@ import qualified Data.Map        as Map
 import           Data.Maybe
 
 -- TODO (hjw): remove Message.Command
-import Game.Werewolf.Game            hiding (getAllowedVoters, getPendingVoters, hasAnyoneWon,
-                                      hasEveryoneLost)
+import Game.Werewolf.Game            hiding (hasAnyoneWon, hasEveryoneLost)
 import Game.Werewolf.Message.Command
 import Game.Werewolf.Message.Engine
 import Game.Werewolf.Player
@@ -79,14 +78,16 @@ checkStage' = use stage >>= \stage' -> case stage' of
     Lynching -> do
         unlessM (Map.null <$> use votes) $ lynchVotee =<< preuse votee
 
-        allVoters       <- ifM (use jesterRevealed)
-            (uses players $ filter (isn't jester))
-            (use players)
-        allowedVoters   .= allVoters ^.. traverse . alive . name
-
-        votes .= Map.empty
+        chosenVoters    .= []
+        votes           .= Map.empty
 
         advanceStage
+
+    NecromancersTurn -> do
+        whenM (hasuse $ players . necromancers . dead) advanceStage
+
+        whenM (use deadRaised)  advanceStage
+        whenM (use passed)      advanceStage
 
     OraclesTurn -> do
         whenM (hasuse $ players . oracles . dead) advanceStage
@@ -166,7 +167,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
-    VillagesTurn -> whenM (null <$> liftM2 intersect getAllowedVoters getPendingVoters) $ do
+    VillagesTurn -> whenM (hasn'tuse pendingVoters) $ do
         uses votes Map.toList >>= mapM_ (\(voterName, voteeName) -> do
             voter <- findPlayerBy_ name voterName
             votee <- findPlayerBy_ name voteeName
@@ -176,7 +177,7 @@ checkStage' = use stage >>= \stage' -> case stage' of
 
         advanceStage
 
-    WerewolvesTurn -> whenM (none (is werewolf) <$> getPendingVoters) $ do
+    WerewolvesTurn -> whenM (hasn'tuse pendingVoters) $ do
         whenM (liftM2 (==) (use protect) (preuses votee $ view name)) $ votes .= Map.empty
 
         advanceStage
@@ -198,8 +199,8 @@ lynchVotee (Just votee)
 
         tell . (:[]) . playerLynchedMessage votee =<< get
     | is saint votee        = do
-        killPlayer (votee ^. name)
         tell . (:[]) . playerLynchedMessage votee =<< get
+        killPlayer (votee ^. name)
 
         voterNames <- uses votes (filter (/= votee ^. name) . Map.keys . Map.filter (== votee ^. name))
         forM_ voterNames killPlayer
@@ -207,11 +208,11 @@ lynchVotee (Just votee)
         voters <- mapM (findPlayerBy_ name) voterNames
         tell . (:[]) . saintLynchedMessage voters =<< get
     | is werewolf votee     = do
-        killPlayer (votee ^. name)
         tell . (:[]) . werewolfLynchedMessage votee =<< get
-    | otherwise             = do
         killPlayer (votee ^. name)
+    | otherwise             = do
         tell . (:[]) . playerLynchedMessage votee =<< get
+        killPlayer (votee ^. name)
 lynchVotee _            = preuse (players . scapegoats . alive) >>= \mScapegoat -> case mScapegoat of
     Just scapegoat  -> do
         scapegoatBlamed .= True

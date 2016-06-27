@@ -1,20 +1,19 @@
 {-|
-Module      : Werewolf.Command.Pass
-Description : Handler for the pass subcommand.
+Module      : Werewolf.Command.Raise
+Description : Handler for the raise subcommand.
 
 Copyright   : (c) Henry J. Wylde, 2016
 License     : BSD3
 Maintainer  : public@hjwylde.com
 
-Handler for the pass subcommand.
+Handler for the raise subcommand.
 -}
 
-module Werewolf.Command.Pass (
+module Werewolf.Command.Raise (
     -- * Handle
     handle,
 ) where
 
-import Control.Lens
 import Control.Monad.Except
 import Control.Monad.Extra
 import Control.Monad.Random
@@ -25,8 +24,7 @@ import Data.Text (Text)
 
 import Game.Werewolf
 import Game.Werewolf.Command
-import Game.Werewolf.Command.Necromancer as Necromancer
-import Game.Werewolf.Command.Witch       as Witch
+import Game.Werewolf.Command.Necromancer
 import Game.Werewolf.Engine
 import Game.Werewolf.Message.Error
 
@@ -40,12 +38,7 @@ handle callerName tag = do
 
     game <- readGame tag
 
-    command <- case game ^. stage of
-            NecromancersTurn    -> return $ Necromancer.passCommand callerName
-            WitchsTurn          -> return $ Witch.passCommand callerName
-            _                   -> exitWith failure
-                { messages = [playerCannotDoThatRightNowMessage callerName]
-                }
+    let command = raiseCommand callerName
 
     result <- runExceptT . runWriterT $ execStateT (apply command >> checkStage >> checkGameOver) game
     case result of

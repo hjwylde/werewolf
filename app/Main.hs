@@ -33,6 +33,7 @@ import qualified Werewolf.Command.Ping      as Ping
 import qualified Werewolf.Command.Poison    as Poison
 import qualified Werewolf.Command.Protect   as Protect
 import qualified Werewolf.Command.Quit      as Quit
+import qualified Werewolf.Command.Raise     as Raise
 import qualified Werewolf.Command.See       as See
 import qualified Werewolf.Command.Start     as Start
 import qualified Werewolf.Command.Status    as Status
@@ -70,6 +71,7 @@ handle (Options callerName tag command) = case command of
     Poison options                      -> Poison.handle callerName tag options
     Protect options                     -> Protect.handle callerName tag options
     Quit                                -> Quit.handle callerName tag
+    Raise                               -> Raise.handle callerName tag
     See options                         -> See.handle callerName tag options
     Start options                       -> Start.handle callerName tag options
     Status                              -> Status.handle callerName tag

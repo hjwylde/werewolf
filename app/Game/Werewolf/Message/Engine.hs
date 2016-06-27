@@ -23,7 +23,7 @@ module Game.Werewolf.Message.Engine (
     oraclesTurnMessages, huntersTurnMessages, stageMessages,
     trueVillagerMessage, beholderMessage, newPlayerMessage, rolesInGameMessage,
     newPlayersInGameMessage, newGameMessages, gameOverMessages, fallenAngelWonMessage,
-    werewolfLynchedMessage,
+    werewolfLynchedMessage, zombiesReturnedToGraveMessage,
 ) where
 
 import Control.Lens.Extra
@@ -58,6 +58,12 @@ gameOverMessages game
         , [playerWonMessage fallenAngelsName]
         , map playerLostMessage (game ^.. players . names \\ [fallenAngelsName])
         ]
+    | hasNecromancerWon game    = concat
+        [ [necromancerWonMessage]
+        , [playerRolesMessage game]
+        , map playerWonMessage (necromancersName:zombieNames)
+        , map playerLostMessage (game ^.. players . names \\ (necromancersName:zombieNames))
+        ]
     | hasEveryoneLost game      = concat
         [ [everyoneLostMessage]
         , [playerRolesMessage game]
@@ -85,6 +91,8 @@ gameOverMessages game
 
         dullahansName       = game ^?! players . dullahans . name
         fallenAngelsName    = game ^?! players . fallenAngels . name
+        necromancersName    = game ^?! players . necromancers . name
+        zombieNames         = game ^.. players . zombies . name
 
 dullahanWonMessage :: Game -> Message
 dullahanWonMessage = publicMessage . dullahanWonText
@@ -94,6 +102,9 @@ everyoneLostMessage = publicMessage everyoneLostText
 
 fallenAngelWonMessage :: Message
 fallenAngelWonMessage = publicMessage fallenAngelWonText
+
+necromancerWonMessage :: Message
+necromancerWonMessage = publicMessage necromancerWonText
 
 allegianceWonMessage :: Allegiance -> Message
 allegianceWonMessage = publicMessage . allegianceWonText
@@ -169,6 +180,7 @@ stageMessages game = case game ^. stage of
     HuntersTurn1        -> huntersTurnMessages game
     HuntersTurn2        -> huntersTurnMessages game
     Lynching            -> []
+    NecromancersTurn    -> necromancersTurnMessages necromancersName game
     OraclesTurn         -> oraclesTurnMessages oraclesName game
     OrphansTurn         -> orphansTurnMessages orphansName game
     ProtectorsTurn      -> protectorsTurnMessages protectorsName game
@@ -184,6 +196,7 @@ stageMessages game = case game ^. stage of
     WitchsTurn          -> witchsTurnMessages game
     where
         players'            = game ^. players
+        necromancersName    = players' ^?! necromancers . name
         oraclesName         = players' ^?! oracles . name
         orphansName         = players' ^?! orphans . name
         protectorsName      = players' ^?! protectors . name
@@ -197,6 +210,17 @@ huntersTurnMessages game =
     ]
     where
         hunterName = game ^?! players . hunters . name
+
+necromancersTurnMessages :: Text -> Game -> [Message]
+necromancersTurnMessages to game
+    | has (variant . _NoRoleKnowledge) game =
+        [ privateMessage to necromancersTurnPrivateText ]
+    | has (variant . _NoRoleReveal) game    =
+        [ privateMessage to necromancersTurnPrivateText ]
+    | otherwise                             =
+        [ publicMessage necromancersTurnPublicText
+        , privateMessage to necromancersTurnPrivateText
+        ]
 
 oraclesTurnMessages :: Text -> Game -> [Message]
 oraclesTurnMessages to game
@@ -387,3 +411,6 @@ villageDrunkJoinedPackMessages to game =
     where
         villageDrunk    = game ^?! players . villageDrunks
         werewolves      = game ^.. players . traverse . alive . filtered (is werewolf) \\ [villageDrunk]
+
+zombiesReturnedToGraveMessage :: Game -> Message
+zombiesReturnedToGraveMessage = publicMessage . zombiesReturnedToGraveText

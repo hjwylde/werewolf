@@ -55,6 +55,7 @@ voteCommand callerName targetName = Command $ do
     whenM (isJust <$> getPlayerVote callerName) $ throwError [playerHasAlreadyVotedMessage callerName]
     validatePlayer callerName targetName
     whenM (isPlayerWerewolf targetName)         $ throwError [playerCannotDevourAnotherWerewolfMessage callerName]
+    whenM (isPlayerZombie targetName)           $ throwError [playerCannotChooseZombieMessage callerName]
 
     votes %= Map.insert callerName targetName
 

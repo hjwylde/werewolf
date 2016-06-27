@@ -1,1 +1,1 @@
-The following players are dead: #{humanise $ map humanisePlayerWithRoleIfTrueVillager (game ^..  players . traverse . dead)}.
+The following players are dead: #{humanise $ map humanisePlayerWithRoleIfKnown (game ^..  players . traverse . dead)}.

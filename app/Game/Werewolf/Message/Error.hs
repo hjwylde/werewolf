@@ -17,7 +17,7 @@ module Game.Werewolf.Message.Error (
     playerHasAlreadyVotedToBootMessage,
 
     -- ** Choose
-    playerCannotChooseSelfMessage, playerCannotChooseJesterMessage,
+    playerCannotChooseJesterMessage, playerCannotChooseSelfMessage, playerCannotChooseZombieMessage,
     playerMustChooseAtLeastOneTargetMessage,
 
     -- ** General
@@ -54,11 +54,14 @@ import Game.Werewolf.Variant.Standard.Error
 playerHasAlreadyVotedToBootMessage :: Text -> Player -> Message
 playerHasAlreadyVotedToBootMessage to = privateMessage to . callerAlreadyVotedBootText
 
+playerCannotChooseJesterMessage :: Text -> Message
+playerCannotChooseJesterMessage to = privateMessage to callerCannotChooseJesterText
+
 playerCannotChooseSelfMessage :: Text -> Message
 playerCannotChooseSelfMessage to = privateMessage to callerCannotChooseSelfText
 
-playerCannotChooseJesterMessage :: Text -> Message
-playerCannotChooseJesterMessage to = privateMessage to callerCannotChooseJesterText
+playerCannotChooseZombieMessage :: Text -> Message
+playerCannotChooseZombieMessage to = privateMessage to callerCannotChooseZombieText
 
 playerMustChooseAtLeastOneTargetMessage :: Text -> Message
 playerMustChooseAtLeastOneTargetMessage to = privateMessage to noTargetText

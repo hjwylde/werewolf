@@ -21,19 +21,19 @@ module Game.Werewolf.Util (
 
     -- ** Searches
     findPlayerBy_, getAdjacentAlivePlayers, getFirstAdjacentAliveWerewolf, getPlayerVote,
-    getAllowedVoters, getPendingVoters,
 
     -- ** Queries
-    isGameOver, isHuntersTurn, isOraclesTurn, isOrphansTurn, isProtectorsTurn, isScapegoatsTurn,
-    isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
-    hasAnyoneWon, hasVillagersWon, hasWerewolvesWon, hasEveryoneLost,
+    isGameOver, isHuntersTurn, isNecromancersTurn, isOraclesTurn, isOrphansTurn, isProtectorsTurn,
+    isScapegoatsTurn, isSeersTurn, isSunrise, isVillagesTurn, isWerewolvesTurn, isWitchsTurn,
+    hasAnyoneWon, hasNecromancerWon, hasVillagersWon, hasWerewolvesWon, hasEveryoneLost,
 
     -- * Player
 
     -- ** Queries
     doesPlayerExist,
-    isPlayerDullahan, isPlayerHunter, isPlayerJester, isPlayerOracle, isPlayerOrphan,
-    isPlayerProtector, isPlayerScapegoat, isPlayerSeer, isPlayerWitch,
+    isPlayerDullahan, isPlayerHunter, isPlayerJester, isPlayerNecromancer, isPlayerOracle,
+    isPlayerOrphan, isPlayerProtector, isPlayerScapegoat, isPlayerSeer, isPlayerWitch,
+    isPlayerZombie,
     isPlayerWerewolf,
     isPlayerAlive, isPlayerDead,
 ) where
@@ -49,9 +49,8 @@ import qualified Data.Map   as Map
 import           Data.Maybe
 import           Data.Text  (Text)
 
-import           Game.Werewolf.Game           hiding (getAllowedVoters, getPendingVoters,
-                                               hasAnyoneWon, hasEveryoneLost, hasVillagersWon,
-                                               hasWerewolvesWon)
+import           Game.Werewolf.Game           hiding (hasAnyoneWon, hasEveryoneLost,
+                                               hasVillagersWon, hasWerewolvesWon)
 import qualified Game.Werewolf.Game           as Game
 import           Game.Werewolf.Message.Engine
 import           Game.Werewolf.Player
@@ -61,12 +60,21 @@ import           Game.Werewolf.Role           hiding (name)
 import Prelude hiding (round)
 
 killPlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
-killPlayer name = do
-    tell [playerKilledMessage name]
+killPlayer name' = do
+    tell [playerKilledMessage name']
 
-    players . traverse . named name . state .= Dead
+    players . traverse . named name' . state .= Dead
 
-    whenM (isPlayerSpitefulVillager name) $ tell . (:[]) . spitefulVillagerKilledMessage name =<< get
+    whenM (isPlayerSpitefulVillager name') $
+        tell . (:[]) . spitefulVillagerKilledMessage name' =<< get
+
+    whenM (isPlayerNecromancer name') $ do
+        zombieNames <- toListOf (players . zombies . name) <$> get
+
+        unless (null zombieNames) $ do
+            mapM_ killPlayer zombieNames
+
+            tell . (:[]) . zombiesReturnedToGraveMessage =<< get
 
 removePlayer :: (MonadState Game m, MonadWriter [Message] m) => Text -> m ()
 removePlayer name' = do
@@ -119,12 +127,6 @@ getFirstAdjacentAliveWerewolf name = do
 getPlayerVote :: MonadState Game m => Text -> m (Maybe Text)
 getPlayerVote playerName = use $ votes . at playerName
 
-getAllowedVoters :: MonadState Game m => m [Player]
-getAllowedVoters = gets Game.getAllowedVoters
-
-getPendingVoters :: MonadState Game m => m [Player]
-getPendingVoters = gets Game.getPendingVoters
-
 isGameOver :: MonadState Game m => m Bool
 isGameOver = hasuse $ stage . _GameOver
 
@@ -133,6 +135,9 @@ isHuntersTurn = orM
     [ hasuse $ stage . _HuntersTurn1
     , hasuse $ stage . _HuntersTurn2
     ]
+
+isNecromancersTurn :: MonadState Game m => m Bool
+isNecromancersTurn = hasuse $ stage . _NecromancersTurn
 
 isOraclesTurn :: MonadState Game m => m Bool
 isOraclesTurn = hasuse $ stage . _OraclesTurn
@@ -185,6 +190,9 @@ isPlayerHunter name' = is hunter <$> findPlayerBy_ name name'
 isPlayerJester :: MonadState Game m => Text -> m Bool
 isPlayerJester name' = is jester <$> findPlayerBy_ name name'
 
+isPlayerNecromancer :: MonadState Game m => Text -> m Bool
+isPlayerNecromancer name' = is necromancer <$> findPlayerBy_ name name'
+
 isPlayerOracle :: MonadState Game m => Text -> m Bool
 isPlayerOracle name' = is oracle <$> findPlayerBy_ name name'
 
@@ -205,6 +213,9 @@ isPlayerSpitefulVillager name' = is spitefulVillager <$> findPlayerBy_ name name
 
 isPlayerWitch :: MonadState Game m => Text -> m Bool
 isPlayerWitch name' = is witch <$> findPlayerBy_ name name'
+
+isPlayerZombie :: MonadState Game m => Text -> m Bool
+isPlayerZombie name' = is zombie <$> findPlayerBy_ name name'
 
 isPlayerWerewolf :: MonadState Game m => Text -> m Bool
 isPlayerWerewolf name' = is werewolf <$> findPlayerBy_ name name'

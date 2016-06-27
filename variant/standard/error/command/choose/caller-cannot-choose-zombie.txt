@@ -1,0 +1,1 @@
+You cannot choose a #{humanise zombieRole}!

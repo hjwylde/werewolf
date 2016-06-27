@@ -28,12 +28,12 @@ module Game.Werewolf.Variant.Standard.Command (
 
     -- * Help
     druidsTurnText, gameDescriptionText, gameRulesText, globalCommandsText, helpCommandsText,
-    hunterCommandsText, huntersTurnText, oracleCommandsText, oraclesTurnText, orphanCommandsText,
-    orphansTurnText, protectorCommandsText, protectorsTurnText, roleDescriptionText,
-    scapegoatCommandsText, scapegoatsTurnText, seerCommandsText, seersTurnText,
-    standardCommandsText, standardCycleText, statusCommandsText, sunriseText, sunsetText,
-    villageDrunksTurnText, villagesTurnText, werewolvesTurnText, winConditionText,
-    witchCommandsText, witchsTurnText,
+    hunterCommandsText, huntersTurnText, necromancerCommandsText, necromancersTurnText,
+    oracleCommandsText, oraclesTurnText, orphanCommandsText, orphansTurnText, protectorCommandsText,
+    protectorsTurnText, roleDescriptionText, scapegoatCommandsText, scapegoatsTurnText,
+    seerCommandsText, seersTurnText, standardCommandsText, standardCycleText, statusCommandsText,
+    sunriseText, sunsetText, villageDrunksTurnText, villagesTurnText, werewolvesTurnText,
+    winConditionText, witchCommandsText, witchsTurnText,
 
     -- * Ping
     diurnalRolePingedText, nocturnalRolePingedText, playerPingedText, villagePingedText,
@@ -42,9 +42,12 @@ module Game.Werewolf.Variant.Standard.Command (
     -- * Quit
     callerQuitText,
 
+    -- * Raise
+    necromancerRaisedDeadText, playerRaisedFromDeadText,
+
     -- * Status
-    aliveMarksText, alivePlayersText, currentDiurnalTurnText, currentNocturnalTurnText,
-    deadMarksText, deadPlayersText, gameOverText,
+    alivePlayersText, currentDiurnalTurnText, currentNocturnalTurnText, deadPlayersText,
+    gameOverText, marksText,
 
     -- * Unvote
     callerRescindedVoteText,
@@ -101,6 +104,12 @@ hunterCommandsText = [iFile|variant/standard/command/help/hunter-commands.txt|]
 
 huntersTurnText :: Text
 huntersTurnText = [iFile|variant/standard/command/help/hunters-turn.txt|]
+
+necromancerCommandsText :: Text
+necromancerCommandsText = [iFile|variant/standard/command/help/necromancer-commands.txt|]
+
+necromancersTurnText :: Text
+necromancersTurnText = [iFile|variant/standard/command/help/necromancers-turn.txt|]
 
 oracleCommandsText :: Text
 oracleCommandsText = [iFile|variant/standard/command/help/oracle-commands.txt|]
@@ -186,10 +195,20 @@ werewolvesPingedText = [iFile|variant/standard/command/ping/werewolves-pinged.tx
 callerQuitText :: Player -> Text
 callerQuitText caller = [iFile|variant/standard/command/quit/caller-quit.txt|]
 
-aliveMarksText :: Game -> Text
-aliveMarksText game = [iFile|variant/standard/command/status/alive-marks.txt|]
+necromancerRaisedDeadText :: Game -> Text
+necromancerRaisedDeadText game = [iFile|variant/standard/command/raise/necromancer-raised-dead.txt|]
     where
-        aliveMarks = game ^.. players . traverse . alive . filtered (\player -> player ^. name `elem` game ^. marks)
+        zombies' = game ^.. players . zombies
+
+playerRaisedFromDeadText :: Game -> Text
+playerRaisedFromDeadText game = [iFile|variant/standard/command/raise/player-raised-from-dead.txt|]
+    where
+        necromancer' = game ^?! players . necromancers
+
+marksText :: Game -> Text
+marksText game = [iFile|variant/standard/command/status/marks.txt|]
+    where
+        marks' = game ^.. players . traverse . filtered (\player -> player ^. name `elem` game ^. marks)
 
 alivePlayersText :: Game -> Text
 alivePlayersText game = [iFile|variant/standard/command/status/alive-players.txt|]
@@ -199,11 +218,6 @@ currentDiurnalTurnText game = [iFile|variant/standard/command/status/current-diu
 
 currentNocturnalTurnText :: Game -> Text
 currentNocturnalTurnText game = [iFile|variant/standard/command/status/current-nocturnal-turn.txt|]
-
-deadMarksText :: Game -> Text
-deadMarksText game = [iFile|variant/standard/command/status/dead-marks.txt|]
-    where
-        deadMarks = game ^.. players . traverse . dead . filtered (\player -> player ^. name `elem` game ^. marks)
 
 deadPlayersText :: Game -> Text
 deadPlayersText game = [iFile|variant/standard/command/status/dead-players.txt|]
