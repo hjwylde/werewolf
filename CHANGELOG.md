@@ -7,6 +7,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Revisions*
+
+* Ignore the Jester when considering Necromancers win condition. ([#244](https://github.com/hjwylde/werewolf/issues/244))
+
 ### v1.4.0.0
 
 *Major*
