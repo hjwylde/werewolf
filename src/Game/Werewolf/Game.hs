@@ -352,11 +352,13 @@ hasFallenAngelWon game = game ^. fallenAngelLynched
 
 -- | Queries whether the Necromancer has won. The 'Necromancer' wins if they and their zombies are
 --   the only players surviving.
+--
+--   N.B., the Jester is not considered when determining whether the 'Necromancer' has won.
 hasNecromancerWon :: Game -> Bool
 hasNecromancerWon game =
     not (hasEveryoneLost game)
     && allOf (players . traverse . alive)
-        (\player -> any ($ player) [is necromancer, is zombie]) game
+        (\player -> any ($ player) [is necromancer, is zombie, is jester]) game
 
 -- | Queries whether the 'Villagers' have won. The 'Villagers' win if they are the only players
 --   surviving.
