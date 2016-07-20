@@ -12,6 +12,12 @@ Post v1 a change is further considered breaking if the state file format is inco
 * Fixed Jester lynched message to be gender neutral. ([#248](https://github.com/hjwylde/werewolf/issues/248))
 * Fixed Medusa description to be gender neutral. ([#247](https://github.com/hjwylde/werewolf/issues/247))
 
+### v1.4.0.1
+
+*Revisions*
+
+* Ignore the Jester when considering Necromancers win condition. ([#244](https://github.com/hjwylde/werewolf/issues/244))
+
 ### v1.4.0.0
 
 *Major*
