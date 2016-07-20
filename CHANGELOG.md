@@ -7,6 +7,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Revisions*
+
+* Fixed Jester lynched message to be gender neutral. ([#248](https://github.com/hjwylde/werewolf/issues/248))
+
 ### v1.4.0.0
 
 *Major*
