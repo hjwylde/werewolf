@@ -1,1 +1,1 @@
-A Zombie wins with the Necromancer. They cannot be killed, however they die when the Necromancer dies.
+A Zombie wins with the #{humanise necromancerRole}. They cannot be killed, however they die when the #{humanise necromancerRole} dies.
