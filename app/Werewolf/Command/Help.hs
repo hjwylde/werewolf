@@ -42,6 +42,8 @@ data Command = Commands
     { optAll :: Bool
     } | Roles
     { optAll :: Bool
+    } | Variants
+    { optAll :: Bool
     } deriving (Eq, Show)
 
 handle :: MonadIO m => Text -> Text -> Options -> m ()
@@ -74,6 +76,16 @@ handle callerName tag (Options (Just (Rules optAll))) = do
 handle callerName _ (Options Nothing) = exitWith success
     { messages = helpMessages callerName
     }
+handle callerName tag (Options (Just (Variants optAll))) = do
+    mGame <- getGame tag optAll
+
+    let variants = sortBy (compare `on` humanise) $ case mGame of
+            Just game   -> [game ^. variant]
+            Nothing     -> allVariants
+
+    exitWith success
+        { messages = map (variantMessage callerName) variants
+        }
 
 commandsMessages :: Text -> Maybe Game -> [Message]
 commandsMessages callerName mGame =

@@ -35,7 +35,7 @@ import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
 import Game.Werewolf.Role                           hiding (name)
-import Game.Werewolf.Variant hiding (name)
+import Game.Werewolf.Variant                        hiding (name)
 import Game.Werewolf.Variant.NoRoleKnowledge.Engine as NoRoleKnowledge
 import Game.Werewolf.Variant.NoRoleReveal.Engine    as NoRoleReveal
 import Game.Werewolf.Variant.Standard.Engine        as Standard

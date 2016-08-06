@@ -1,0 +1,1 @@
+In "No role reveal", players are not informed of each others roles upon death. Further, nocturnal player turns are obscured.

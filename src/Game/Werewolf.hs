@@ -26,4 +26,4 @@ import Game.Werewolf.Game     as Werewolf
 import Game.Werewolf.Player   as Werewolf
 import Game.Werewolf.Response as Werewolf
 import Game.Werewolf.Role     as Werewolf hiding (activity, name)
-import Game.Werewolf.Variant  as Werewolf hiding (name, tag)
+import Game.Werewolf.Variant  as Werewolf hiding (description, name, tag)

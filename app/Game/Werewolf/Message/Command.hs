@@ -31,7 +31,7 @@ module Game.Werewolf.Message.Command (
     necromancerCommandsMessage, oracleCommandsMessage, orphanCommandsMessage,
     protectorCommandsMessage, roleMessage, rulesMessage, scapegoatCommandsMessage,
     seerCommandsMessage, stagesMessage, standardCommandsMessage, statusCommandsMessage,
-    witchCommandsMessage,
+    variantMessage, witchCommandsMessage,
 
     -- * Ping
     pingDiurnalRoleMessage, pingNocturnalRoleMessage, pingPlayerMessage, pingVillageMessage,
@@ -64,7 +64,7 @@ import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
 import Game.Werewolf.Role                            hiding (name)
-import Game.Werewolf.Variant                            hiding (name)
+import Game.Werewolf.Variant                         hiding (name)
 import Game.Werewolf.Variant.NoRoleKnowledge.Command as NoRoleKnowledge
 import Game.Werewolf.Variant.NoRoleReveal.Command    as NoRoleReveal
 import Game.Werewolf.Variant.Standard.Command        as Standard
@@ -161,6 +161,9 @@ standardCommandsMessage to = privateMessage to standardCommandsText
 
 statusCommandsMessage :: Text -> Message
 statusCommandsMessage to = privateMessage to statusCommandsText
+
+variantMessage :: Text -> Variant -> Message
+variantMessage to = privateMessage to . variantDescriptionText
 
 witchCommandsMessage :: Text -> Message
 witchCommandsMessage to = privateMessage to witchCommandsText
