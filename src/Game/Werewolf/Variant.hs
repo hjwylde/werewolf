@@ -17,7 +17,7 @@ game logic.
 module Game.Werewolf.Variant (
     -- * Variant
     Variant,
-    tag, name,
+    tag, name, description,
 
     -- ** Instances
     allVariants,
@@ -34,10 +34,13 @@ import Data.String.Humanise
 import Data.String.Interpolate.Extra
 import Data.Text                     as T
 
+import Game.Werewolf.Role hiding (description, name, tag)
+
 -- | Variant definitions require only a few pieces of information.
 data Variant = Variant
-    { _tag  :: Text
-    , _name :: Text
+    { _tag         :: Text
+    , _name        :: Text
+    , _description :: Text
     } deriving (Eq, Read, Show)
 
 makeLenses ''Variant
@@ -58,24 +61,28 @@ standardVariant :: Variant
 standardVariant = Variant
     { _tag          = "standard"
     , _name         = T.strip [iFile|variant/standard/name.txt|]
+    , _description  = T.strip [iFile|variant/standard/description.txt|]
     }
 
 noRoleKnowledgeVariant :: Variant
 noRoleKnowledgeVariant = Variant
     { _tag          = "no-role-knowledge"
     , _name         = T.strip [iFile|variant/no-role-knowledge/name.txt|]
+    , _description  = T.strip [iFile|variant/no-role-knowledge/description.txt|]
     }
 
 noRoleRevealVariant :: Variant
 noRoleRevealVariant = Variant
     { _tag          = "no-role-reveal"
     , _name         = T.strip [iFile|variant/no-role-reveal/name.txt|]
+    , _description  = T.strip [iFile|variant/no-role-reveal/description.txt|]
     }
 
 spitefulVillageVariant :: Variant
 spitefulVillageVariant = Variant
     { _tag          = "spiteful-village"
     , _name         = T.strip [iFile|variant/spiteful-village/name.txt|]
+    , _description  = T.strip [iFile|variant/spiteful-village/description.txt|]
     }
 
 -- | The traversal of 'standard' 'Variant's.

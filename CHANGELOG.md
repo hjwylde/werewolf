@@ -10,6 +10,7 @@ Post v1 a change is further considered breaking if the state file format is inco
 *Minor*
 
 * Changed name of Spiteful Villagers variant to Spiteful village. ([#242](https://github.com/hjwylde/werewolf/issues/242))
+* Added in a `variants` help subcommand. ([#227](https://github.com/hjwylde/werewolf/issues/227))
 
 *Revisions*
 

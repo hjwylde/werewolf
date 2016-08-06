@@ -29,10 +29,10 @@ import Control.Monad.Writer
 
 import Data.Text (Text)
 
-import Game.Werewolf
-import qualified Game.Werewolf.Variant as Variant
-import Game.Werewolf.Engine
-import Game.Werewolf.Message.Error
+import           Game.Werewolf
+import           Game.Werewolf.Engine
+import           Game.Werewolf.Message.Error
+import qualified Game.Werewolf.Variant       as Variant
 
 import System.Random.Shuffle
 

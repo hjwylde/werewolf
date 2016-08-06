@@ -21,11 +21,13 @@ build-type:     Simple
 extra-source-files:
     CHANGELOG.md
     README.md
+    variant/no-role-knowledge/description.txt
     variant/no-role-knowledge/name.txt
     variant/no-role-knowledge/command/ping/nocturnal-role-pinged.txt
     variant/no-role-knowledge/command/ping/werewolves-pinged.txt
     variant/no-role-knowledge/command/status/current-nocturnal-turn.txt
     variant/no-role-knowledge/engine/new-game/roles-in-game.txt
+    variant/no-role-reveal/description.txt
     variant/no-role-reveal/name.txt
     variant/no-role-reveal/command/choose/player-shot.txt
     variant/no-role-reveal/command/ping/nocturnal-role-pinged.txt
@@ -41,7 +43,9 @@ extra-source-files:
     variant/no-role-reveal/engine/sunrise/player-devoured.txt
     variant/no-role-reveal/engine/sunrise/player-poisoned.txt
     variant/no-role-reveal/engine/sunrise/player-turned-to-stone.txt
+    variant/spiteful-village/description.txt
     variant/spiteful-village/name.txt
+    variant/standard/description.txt
     variant/standard/name.txt
     variant/standard/command/boot/player-voted-boot.txt
     variant/standard/command/choose/player-shot.txt
@@ -72,6 +76,7 @@ extra-source-files:
     variant/standard/command/help/status-commands.txt
     variant/standard/command/help/sunrise.txt
     variant/standard/command/help/sunset.txt
+    variant/standard/command/help/variant.txt
     variant/standard/command/help/village-drunks-turn.txt
     variant/standard/command/help/villages-turn.txt
     variant/standard/command/help/werewolves-turn.txt

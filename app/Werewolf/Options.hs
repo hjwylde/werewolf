@@ -150,6 +150,7 @@ help_ = Help . Help.Options
         [ command "commands"    $ info (Help.Commands <$> allOption)    (fullDesc <> progDesc "Print the in-game commands")
         , command "roles"       $ info (Help.Roles <$> allOption)       (fullDesc <> progDesc "Print the roles and their descriptions")
         , command "rules"       $ info (Help.Rules <$> allOption)       (fullDesc <> progDesc "Print the game rules")
+        , command "variants"    $ info (Help.Variants <$> allOption)    (fullDesc <> progDesc "Print the variants and their descriptions")
         ])
     where
         allOption = switch $ long "all" <> short 'a'

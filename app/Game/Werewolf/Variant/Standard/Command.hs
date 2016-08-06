@@ -32,8 +32,8 @@ module Game.Werewolf.Variant.Standard.Command (
     oracleCommandsText, oraclesTurnText, orphanCommandsText, orphansTurnText, protectorCommandsText,
     protectorsTurnText, roleDescriptionText, scapegoatCommandsText, scapegoatsTurnText,
     seerCommandsText, seersTurnText, standardCommandsText, standardCycleText, statusCommandsText,
-    sunriseText, sunsetText, villageDrunksTurnText, villagesTurnText, werewolvesTurnText,
-    winConditionText, witchCommandsText, witchsTurnText,
+    sunriseText, sunsetText, variantDescriptionText, villageDrunksTurnText, villagesTurnText,
+    werewolvesTurnText, winConditionText, witchCommandsText, witchsTurnText,
 
     -- * Ping
     diurnalRolePingedText, nocturnalRolePingedText, playerPingedText, villagePingedText,
@@ -67,8 +67,9 @@ import           Data.Text                     (Text)
 import qualified Data.Text                     as T
 import           Data.Version
 
-import Game.Werewolf
-import Game.Werewolf.Message
+import           Game.Werewolf
+import           Game.Werewolf.Message
+import qualified Game.Werewolf.Variant as Variant
 
 import Werewolf.Version
 
@@ -158,6 +159,9 @@ sunriseText = [iFile|variant/standard/command/help/sunrise.txt|]
 
 sunsetText :: Text
 sunsetText = [iFile|variant/standard/command/help/sunset.txt|]
+
+variantDescriptionText :: Variant -> Text
+variantDescriptionText variant = [iFile|variant/standard/command/help/variant.txt|]
 
 villageDrunksTurnText :: Text
 villageDrunksTurnText = [iFile|variant/standard/command/help/village-drunks-turn.txt|]
