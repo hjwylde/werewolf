@@ -30,6 +30,7 @@ import Control.Monad.Writer
 import Data.Text (Text)
 
 import Game.Werewolf
+import qualified Game.Werewolf.Variant as Variant
 import Game.Werewolf.Engine
 import Game.Werewolf.Message.Error
 
@@ -39,7 +40,7 @@ import Werewolf.System
 
 data Options = Options
     { optExtraRoles :: ExtraRoles
-    , optVariant    :: Variant
+    , optVariant    :: Text
     , argPlayers    :: [Text]
     } deriving (Eq, Show)
 
@@ -58,12 +59,14 @@ handle callerName tag (Options extraRoles variant playerNames) = do
             Random          -> randomExtraRoles $ length playerNames
             Use roleNames   -> useExtraRoles callerName roleNames
 
-        let defaultVillagerRole = if variant == SpitefulVillagers then spitefulVillagerRole else simpleVillagerRole
+        variant' <- useVariant callerName variant
+
+        let defaultVillagerRole = if is spitefulVillage variant' then spitefulVillagerRole else simpleVillagerRole
         let roles = padRoles extraRoles' (length playerNames + 1) defaultVillagerRole
 
         players <- createPlayers (callerName:playerNames) <$> shuffleM roles
 
-        runWriterT $ startGame callerName variant players >>= execStateT checkStage
+        runWriterT $ startGame callerName variant' players >>= execStateT checkStage
 
     case result of
         Left errorMessages      -> exitWith failure { messages = errorMessages }
@@ -79,12 +82,20 @@ randomExtraRoles n = do
     take count <$> shuffleM restrictedRoles
 
 useExtraRoles :: MonadError [Message] m => Text -> [Text] -> m [Role]
-useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findByTag roleName of
+useExtraRoles callerName roleNames = forM roleNames $ \roleName -> case findRoleByTag roleName of
     Just role   -> return role
     Nothing     -> throwError [roleDoesNotExistMessage callerName roleName]
 
-findByTag :: Text -> Maybe Role
-findByTag tag' = restrictedRoles ^? traverse . filteredBy tag tag'
+findRoleByTag :: Text -> Maybe Role
+findRoleByTag tag' = restrictedRoles ^? traverse . filteredBy tag tag'
+
+useVariant :: MonadError [Message] m => Text -> Text -> m Variant
+useVariant callerName variantName = case findVariantByTag variantName of
+    Just variant   -> return variant
+    Nothing         -> throwError [variantDoesNotExistMessage callerName variantName]
+
+findVariantByTag :: Text -> Maybe Variant
+findVariantByTag tag' = allVariants ^? traverse . filteredBy Variant.tag tag'
 
 padRoles :: [Role] -> Int -> Role -> [Role]
 padRoles roles n defaultVillagerRole = roles ++ villagerRoles ++ simpleWerewolfRoles

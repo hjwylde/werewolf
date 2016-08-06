@@ -37,7 +37,7 @@ module Game.Werewolf.Variant.Standard.Error (
 
     -- ** Start
     gameAlreadyRunningText, playerCountTooLowText, playerNamesNotUniqueText,
-    roleCountRestrictedText, roleDoesNotExistText,
+    roleCountRestrictedText, roleDoesNotExistText, variantDoesNotExistText,
 
     -- ** Unvote
     callerNotVotedText,
@@ -108,6 +108,9 @@ roleCountRestrictedText role = [iFile|variant/standard/error/command/start/role-
 
 roleDoesNotExistText :: Text -> Text
 roleDoesNotExistText roleName = [iFile|variant/standard/error/command/start/role-does-not-exist.txt|]
+
+variantDoesNotExistText :: Text -> Text
+variantDoesNotExistText variantName = [iFile|variant/standard/error/command/start/variant-does-not-exist.txt|]
 
 callerNotVotedText :: Text
 callerNotVotedText = [iFile|variant/standard/error/command/unvote/caller-not-voted.txt|]
