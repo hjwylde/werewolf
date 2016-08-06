@@ -35,7 +35,7 @@ module Game.Werewolf.Message.Error (
 
     -- ** Start
     gameAlreadyRunningMessage, mustHaveAtLeast7PlayersMessage, playerNamesMustBeUniqueMessage,
-    roleCountRestrictedMessage, roleDoesNotExistMessage,
+    roleCountRestrictedMessage, roleDoesNotExistMessage, variantDoesNotExistMessage,
 
     -- ** Unvote
     playerHasNotVotedMessage,
@@ -107,6 +107,9 @@ roleCountRestrictedMessage to = privateMessage to . roleCountRestrictedText
 
 roleDoesNotExistMessage :: Text -> Text -> Message
 roleDoesNotExistMessage to = privateMessage to . roleDoesNotExistText
+
+variantDoesNotExistMessage :: Text -> Text -> Message
+variantDoesNotExistMessage to = privateMessage to . variantDoesNotExistText
 
 playerHasNotVotedMessage :: Text -> Message
 playerHasNotVotedMessage to = privateMessage to callerNotVotedText

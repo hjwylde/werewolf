@@ -22,9 +22,6 @@ module Game.Werewolf.Game (
     healUsed, hunterRetaliated, jesterRevealed, marks, passed, poison, poisonUsed, priorProtect,
     protect, roleModel, scapegoatBlamed, see, votes,
 
-    Variant(..),
-    _Standard, _NoRoleKnowledge, _NoRoleReveal,
-
     Stage(..),
     _DruidsTurn, _GameOver, _HuntersTurn1, _HuntersTurn2, _Lynching, _NecromancersTurn,
     _OraclesTurn, _OrphansTurn, _ProtectorsTurn, _ScapegoatsTurn, _SeersTurn, _Sunrise, _Sunset,
@@ -60,7 +57,8 @@ import           Data.String.Humanise
 import           Data.Text            (Text)
 
 import Game.Werewolf.Player
-import Game.Werewolf.Role   hiding (activity, name)
+import Game.Werewolf.Role    hiding (activity, name)
+import Game.Werewolf.Variant hiding (name)
 
 import Prelude hiding (round)
 
@@ -98,15 +96,6 @@ data Game = Game
     , _votes              :: Map Text Text    -- ^ Villagers and Werewolves
     } deriving (Eq, Read, Show)
 
-data Variant = Standard | NoRoleKnowledge | NoRoleReveal | SpitefulVillagers
-    deriving (Eq, Read, Show)
-
-instance Humanise Variant where
-    humanise Standard           = "standard"
-    humanise NoRoleKnowledge    = "no role knowledge"
-    humanise NoRoleReveal       = "no role reveal"
-    humanise SpitefulVillagers  = "spiteful villagers"
-
 -- | Most of these are fairly self-explainable (the turn stages). 'Sunrise' and 'Sunset' are
 --   provided as meaningful breaks between the day and night as, for example, a 'VillagesTurn' may
 --   not always be available (curse that retched Scapegoat).
@@ -138,8 +127,6 @@ instance Humanise Stage where
     humanise WitchsTurn         = "Witch's turn"
 
 makeLenses ''Game
-
-makePrisms ''Variant
 
 makePrisms ''Stage
 

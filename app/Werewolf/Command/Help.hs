@@ -53,9 +53,9 @@ handle callerName tag (Options (Just (Commands optAll))) = do
         }
 handle callerName tag (Options (Just (Roles optAll))) = do
     mGame       <- getGame tag optAll
-    let mGame'  = mGame >>= \game -> case game ^. variant of
-            NoRoleKnowledge -> Nothing
-            _               -> Just game
+    let mGame'  = mGame >>= \game -> if has (variant . noRoleKnowledge) game
+            then Nothing
+            else Just game
 
     let roles' = sortBy (compare `on` humanise) . nub $ maybe allRoles (toListOf $ players . roles) mGame'
 
@@ -64,9 +64,9 @@ handle callerName tag (Options (Just (Roles optAll))) = do
         }
 handle callerName tag (Options (Just (Rules optAll))) = do
     mGame       <- getGame tag optAll
-    let mGame'  = mGame >>= \game -> case game ^. variant of
-            NoRoleKnowledge -> Nothing
-            _               -> Just game
+    let mGame'  = mGame >>= \game -> if has (variant . noRoleKnowledge) game
+            then Nothing
+            else Just game
 
     exitWith success
         { messages = rulesMessages callerName mGame'

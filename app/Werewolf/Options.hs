@@ -19,14 +19,15 @@ module Werewolf.Options (
     werewolfPrefs, werewolfInfo, werewolf,
 ) where
 
+import Control.Lens
+
 import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version (showVersion)
 
-import Game.Werewolf (Variant (..))
+import Game.Werewolf.Variant
 
 import Options.Applicative
-import Options.Applicative.Types
 
 import qualified Werewolf.Command.Boot      as Boot
 import qualified Werewolf.Command.Choose    as Choose
@@ -181,20 +182,13 @@ see = See . See.Options <$> playerArgument
 start :: Parser Command
 start = fmap Start $ Start.Options
     <$> (extraRolesOption <|> randomExtraRolesOption)
-    <*> variantOption (mconcat [
+    <*> fmap T.pack (strOption $ mconcat [
         long "variant", short 'v', metavar "VARIANT",
-        value Standard, showDefaultWith $ const "standard",
+        value standardVariantTag, showDefaultWith $ const standardVariantTag,
         help "Specify the game variant"
         ])
     <*> some (T.pack <$> strArgument (metavar "PLAYER..."))
     where
-        variantOption = option $ readerAsk >>= \opt -> case opt of
-            "standard"              -> return Standard
-            "no-role-knowledge"     -> return NoRoleKnowledge
-            "no-role-reveal"        -> return NoRoleReveal
-            "spiteful-villagers"    -> return SpitefulVillagers
-            _                       -> readerError $ "unrecognised variant `" ++ opt ++ "'"
-
         extraRolesOption = fmap (Start.Use . filter (/= T.empty) . T.splitOn "," . T.pack) (strOption $ mconcat
             [ long "extra-roles", short 'e', metavar "ROLE,..."
             , value []
@@ -205,6 +199,8 @@ start = fmap Start $ Start.Options
             [ long "random-extra-roles", short 'r'
             , help "Use random extra roles"
             ]
+
+        standardVariantTag = T.unpack $ standardVariant ^. tag
 
 status :: Parser Command
 status = pure Status

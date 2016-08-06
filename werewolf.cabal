@@ -21,10 +21,12 @@ build-type:     Simple
 extra-source-files:
     CHANGELOG.md
     README.md
+    variant/no-role-knowledge/name.txt
     variant/no-role-knowledge/command/ping/nocturnal-role-pinged.txt
     variant/no-role-knowledge/command/ping/werewolves-pinged.txt
     variant/no-role-knowledge/command/status/current-nocturnal-turn.txt
     variant/no-role-knowledge/engine/new-game/roles-in-game.txt
+    variant/no-role-reveal/name.txt
     variant/no-role-reveal/command/choose/player-shot.txt
     variant/no-role-reveal/command/ping/nocturnal-role-pinged.txt
     variant/no-role-reveal/command/ping/werewolves-pinged.txt
@@ -39,6 +41,8 @@ extra-source-files:
     variant/no-role-reveal/engine/sunrise/player-devoured.txt
     variant/no-role-reveal/engine/sunrise/player-poisoned.txt
     variant/no-role-reveal/engine/sunrise/player-turned-to-stone.txt
+    variant/spiteful-village/name.txt
+    variant/standard/name.txt
     variant/standard/command/boot/player-voted-boot.txt
     variant/standard/command/choose/player-shot.txt
     variant/standard/command/circle/game-circle.txt
@@ -176,6 +180,7 @@ extra-source-files:
     variant/standard/error/command/start/player-names-not-unique.txt
     variant/standard/error/command/start/role-count-restricted.txt
     variant/standard/error/command/start/role-does-not-exist.txt
+    variant/standard/error/command/start/variant-does-not-exist.txt
     variant/standard/error/command/unvote/caller-not-voted.txt
     variant/standard/error/command/vote/caller-already-voted.txt
     variant/standard/error/command/vote/caller-cannot-devour-werewolf.txt
@@ -346,6 +351,7 @@ library
         Game.Werewolf.Player
         Game.Werewolf.Response
         Game.Werewolf.Role
+        Game.Werewolf.Variant
 
     default-language: Haskell2010
     other-extensions:

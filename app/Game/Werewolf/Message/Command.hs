@@ -64,14 +64,15 @@ import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
 import Game.Werewolf.Role                            hiding (name)
+import Game.Werewolf.Variant                            hiding (name)
 import Game.Werewolf.Variant.NoRoleKnowledge.Command as NoRoleKnowledge
 import Game.Werewolf.Variant.NoRoleReveal.Command    as NoRoleReveal
 import Game.Werewolf.Variant.Standard.Command        as Standard
 
 playerQuitMessage :: Player -> Game -> Message
 playerQuitMessage player game
-    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.callerQuitText player
-    | otherwise                             = publicMessage $ Standard.callerQuitText player
+    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.callerQuitText player
+    | otherwise                         = publicMessage $ Standard.callerQuitText player
 
 playerVotedToBootMessage :: Player -> Player -> Message
 playerVotedToBootMessage caller = publicMessage . callerVotedBootText caller
@@ -81,8 +82,8 @@ circleMessage to = privateMessage to . gameCircleText
 
 playerShotMessage :: Player -> Game -> Message
 playerShotMessage player game
-    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.playerShotText player
-    | otherwise                             = publicMessage $ Standard.playerShotText player
+    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.playerShotText player
+    | otherwise                         = publicMessage $ Standard.playerShotText player
 
 gameEndedMessage :: Text -> Message
 gameEndedMessage = publicMessage . gameEndedText
@@ -169,8 +170,8 @@ pingDiurnalRoleMessage role = publicMessage $ diurnalRolePingedText role
 
 pingNocturnalRoleMessage :: Role -> Game -> Message
 pingNocturnalRoleMessage role game
-    | has (variant . _NoRoleKnowledge) game = publicMessage $ NoRoleKnowledge.nocturnalRolePingedText role
-    | has (variant . _NoRoleReveal) game    = publicMessage $ NoRoleReveal.nocturnalRolePingedText role
+    | has (variant . noRoleKnowledge) game  = publicMessage $ NoRoleKnowledge.nocturnalRolePingedText role
+    | has (variant . noRoleReveal) game     = publicMessage $ NoRoleReveal.nocturnalRolePingedText role
     | otherwise                             = publicMessage $ Standard.nocturnalRolePingedText role
 
 pingPlayerMessage :: Text -> Message
@@ -181,8 +182,8 @@ pingVillageMessage = publicMessage villagePingedText
 
 pingWerewolvesMessage :: Game -> Message
 pingWerewolvesMessage game
-    | has (variant . _NoRoleKnowledge) game = publicMessage NoRoleKnowledge.werewolvesPingedText
-    | has (variant . _NoRoleReveal) game    = publicMessage NoRoleReveal.werewolvesPingedText
+    | has (variant . noRoleKnowledge) game  = publicMessage NoRoleKnowledge.werewolvesPingedText
+    | has (variant . noRoleReveal) game     = publicMessage NoRoleReveal.werewolvesPingedText
     | otherwise                             = publicMessage Standard.werewolvesPingedText
 
 deadRaisedMessages :: Game -> [Message]
@@ -203,8 +204,8 @@ currentDiurnalTurnMessage to game = privateMessage to $ Standard.currentDiurnalT
 
 currentNocturnalTurnMessage :: Text -> Game -> Message
 currentNocturnalTurnMessage to game
-    | has (variant . _NoRoleKnowledge) game = privateMessage to $ NoRoleKnowledge.currentNocturnalTurnText game
-    | has (variant . _NoRoleReveal) game    = privateMessage to $ NoRoleReveal.currentNocturnalTurnText game
+    | has (variant . noRoleKnowledge) game  = privateMessage to $ NoRoleKnowledge.currentNocturnalTurnText game
+    | has (variant . noRoleReveal) game     = privateMessage to $ NoRoleReveal.currentNocturnalTurnText game
     | otherwise                             = privateMessage to $ Standard.currentNocturnalTurnText game
 
 gameIsOverMessage :: Text -> Message
@@ -219,7 +220,7 @@ playersInGameMessage to game = privateMessage to $ T.append alivePlayersText' de
         alivePlayersText' = alivePlayersText game
         deadPlayersText'
             | hasn't (players . traverse . dead) game   = T.empty
-            | has (variant . _NoRoleReveal) game        = NoRoleReveal.deadPlayersText game
+            | has (variant . noRoleReveal) game         = NoRoleReveal.deadPlayersText game
             | otherwise                                 = Standard.deadPlayersText game
 
 playerRescindedVoteMessage :: Text -> Player -> Message

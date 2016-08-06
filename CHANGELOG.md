@@ -7,10 +7,15 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Minor*
+
+* Changed name of Spiteful Villagers variant to Spiteful village. ([#242](https://github.com/hjwylde/werewolf/issues/242))
+
 *Revisions*
 
 * Fixed Jester lynched message to be gender neutral. ([#248](https://github.com/hjwylde/werewolf/issues/248))
 * Fixed Medusa description to be gender neutral. ([#247](https://github.com/hjwylde/werewolf/issues/247))
+* Pulled variant information out into external text files. ([#242](https://github.com/hjwylde/werewolf/issues/242))
 
 ### v1.4.0.1
 

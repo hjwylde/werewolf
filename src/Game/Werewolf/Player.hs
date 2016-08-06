@@ -295,7 +295,7 @@ villager = role . allegiance . _Villagers
 werewolf :: Traversal' Player ()
 werewolf = role . allegiance . _Werewolves
 
--- | This 'Traversal' provides the traversal of 'Player' names.
+-- | The traversal of 'Player' names.
 --
 -- @
 -- 'names' = 'traverse' . 'name'
@@ -303,7 +303,7 @@ werewolf = role . allegiance . _Werewolves
 names :: Traversable t => Traversal' (t Player) Text
 names = traverse . name
 
--- | This 'Traversal' provides the traversal of 'Player' roles.
+-- | The traversal of 'Player' roles.
 --
 -- @
 -- 'roles' = 'traverse' . 'role'
@@ -311,7 +311,7 @@ names = traverse . name
 roles :: Traversable t => Traversal' (t Player) Role
 roles = traverse . role
 
--- | This 'Traversal' provides the traversal of 'Player' states.
+-- | The traversal of 'Player' states.
 --
 -- @
 -- 'states' = 'traverse' . 'state'
@@ -319,7 +319,7 @@ roles = traverse . role
 states :: Traversable t => Traversal' (t Player) State
 states = traverse . state
 
--- | This 'Traversal' provides the traversal of 'Player's with the given name.
+-- | The traversal of 'Player's with the given name.
 --
 -- @
 -- 'named' name' = 'filteredBy' . 'name' name'
@@ -327,7 +327,7 @@ states = traverse . state
 named :: Text -> Traversal' Player Player
 named name' = filteredBy name name'
 
--- | This 'Traversal' provides the traversal of 'alphaWolf' 'Player's.
+-- | The traversal of 'alphaWolf' 'Player's.
 --
 -- @
 -- 'alphaWolves' = 'traverse' . 'filtered' ('is' 'alphaWolf')
@@ -335,7 +335,7 @@ named name' = filteredBy name name'
 alphaWolves :: Traversable t => Traversal' (t Player) Player
 alphaWolves = traverse . filtered (is alphaWolf)
 
--- | This 'Traversal' provides the traversal of 'beholder' 'Player's.
+-- | The traversal of 'beholder' 'Player's.
 --
 -- @
 -- 'beholders' = 'traverse' . 'filtered' ('is' 'beholder')
@@ -343,7 +343,7 @@ alphaWolves = traverse . filtered (is alphaWolf)
 beholders :: Traversable t => Traversal' (t Player) Player
 beholders = traverse . filtered (is beholder)
 
--- | This 'Traversal' provides the traversal of 'crookedSenator' 'Player's.
+-- | The traversal of 'crookedSenator' 'Player's.
 --
 -- @
 -- 'crookedSenators' = 'traverse' . 'filtered' ('is' 'crookedSenator')
@@ -351,7 +351,7 @@ beholders = traverse . filtered (is beholder)
 crookedSenators :: Traversable t => Traversal' (t Player) Player
 crookedSenators = traverse . filtered (is crookedSenator)
 
--- | This 'Traversal' provides the traversal of 'dullahan' 'Player's.
+-- | The traversal of 'dullahan' 'Player's.
 --
 -- @
 -- 'dullahans' = 'traverse' . 'filtered' ('is' 'dullahan')
@@ -359,7 +359,7 @@ crookedSenators = traverse . filtered (is crookedSenator)
 dullahans :: Traversable t => Traversal' (t Player) Player
 dullahans = traverse . filtered (is dullahan)
 
--- | This 'Traversal' provides the traversal of 'druid' 'Player's.
+-- | The traversal of 'druid' 'Player's.
 --
 -- @
 -- 'druids' = 'traverse' . 'filtered' ('is' 'druid')
@@ -367,7 +367,7 @@ dullahans = traverse . filtered (is dullahan)
 druids :: Traversable t => Traversal' (t Player) Player
 druids = traverse . filtered (is druid)
 
--- | This 'Traversal' provides the traversal of 'fallenAngel' 'Player's.
+-- | The traversal of 'fallenAngel' 'Player's.
 --
 -- @
 -- 'fallenAngels' = 'traverse' . 'filtered' ('is' 'fallenAngel')
@@ -375,7 +375,7 @@ druids = traverse . filtered (is druid)
 fallenAngels :: Traversable t => Traversal' (t Player) Player
 fallenAngels = traverse . filtered (is fallenAngel)
 
--- | This 'Traversal' provides the traversal of 'hunter' 'Player's.
+-- | The traversal of 'hunter' 'Player's.
 --
 -- @
 -- 'hunters' = 'traverse' . 'filtered' ('is' 'hunter')
@@ -383,7 +383,7 @@ fallenAngels = traverse . filtered (is fallenAngel)
 hunters :: Traversable t => Traversal' (t Player) Player
 hunters = traverse . filtered (is hunter)
 
--- | This 'Traversal' provides the traversal of 'jester' 'Player's.
+-- | The traversal of 'jester' 'Player's.
 --
 -- @
 -- 'jesters' = 'traverse' . 'filtered' ('is' 'jester')
@@ -391,7 +391,7 @@ hunters = traverse . filtered (is hunter)
 jesters :: Traversable t => Traversal' (t Player) Player
 jesters = traverse . filtered (is jester)
 
--- | This 'Traversal' provides the traversal of 'lycan' 'Player's.
+-- | The traversal of 'lycan' 'Player's.
 --
 -- @
 -- 'lycans' = 'traverse' . 'filtered' ('is' 'lycan')
@@ -399,7 +399,7 @@ jesters = traverse . filtered (is jester)
 lycans :: Traversable t => Traversal' (t Player) Player
 lycans = traverse . filtered (is lycan)
 
--- | This 'Traversal' provides the traversal of 'medusa' 'Player's.
+-- | The traversal of 'medusa' 'Player's.
 --
 -- @
 -- 'medusas' = 'traverse' . 'filtered' ('is' 'medusa')
@@ -407,7 +407,7 @@ lycans = traverse . filtered (is lycan)
 medusas :: Traversable t => Traversal' (t Player) Player
 medusas = traverse . filtered (is medusa)
 
--- | This 'Traversal' provides the traversal of 'necromancer' 'Player's.
+-- | The traversal of 'necromancer' 'Player's.
 --
 -- @
 -- 'necromancers' = 'traverse' . 'filtered' ('is' 'necromancer')
@@ -415,7 +415,7 @@ medusas = traverse . filtered (is medusa)
 necromancers :: Traversable t => Traversal' (t Player) Player
 necromancers = traverse . filtered (is necromancer)
 
--- | This 'Traversal' provides the traversal of 'oracle' 'Player's.
+-- | The traversal of 'oracle' 'Player's.
 --
 -- @
 -- 'oracles' = 'traverse' . 'filtered' ('is' 'oracle')
@@ -423,7 +423,7 @@ necromancers = traverse . filtered (is necromancer)
 oracles :: Traversable t => Traversal' (t Player) Player
 oracles = traverse . filtered (is oracle)
 
--- | This 'Traversal' provides the traversal of 'orphan' 'Player's.
+-- | The traversal of 'orphan' 'Player's.
 --
 -- @
 -- 'orphans' = 'traverse' . 'filtered' ('is' 'orphan')
@@ -431,7 +431,7 @@ oracles = traverse . filtered (is oracle)
 orphans :: Traversable t => Traversal' (t Player) Player
 orphans = traverse . filtered (is orphan)
 
--- | This 'Traversal' provides the traversal of 'protector' 'Player's.
+-- | The traversal of 'protector' 'Player's.
 --
 -- @
 -- 'protectors' = 'traverse' . 'filtered' ('is' 'protector')
@@ -439,7 +439,7 @@ orphans = traverse . filtered (is orphan)
 protectors :: Traversable t => Traversal' (t Player) Player
 protectors = traverse . filtered (is protector)
 
--- | This 'Traversal' provides the traversal of 'saint' 'Player's.
+-- | The traversal of 'saint' 'Player's.
 --
 -- @
 -- 'saints' = 'traverse' . 'filtered' ('is' 'saint')
@@ -447,7 +447,7 @@ protectors = traverse . filtered (is protector)
 saints :: Traversable t => Traversal' (t Player) Player
 saints = traverse . filtered (is saint)
 
--- | This 'Traversal' provides the traversal of 'scapegoat' 'Player's.
+-- | The traversal of 'scapegoat' 'Player's.
 --
 -- @
 -- 'scapegoats' = 'traverse' . 'filtered' ('is' 'scapegoat')
@@ -455,7 +455,7 @@ saints = traverse . filtered (is saint)
 scapegoats :: Traversable t => Traversal' (t Player) Player
 scapegoats = traverse . filtered (is scapegoat)
 
--- | This 'Traversal' provides the traversal of 'seer' 'Player's.
+-- | The traversal of 'seer' 'Player's.
 --
 -- @
 -- 'seers' = 'traverse' . 'filtered' ('is' 'seer')
@@ -463,7 +463,7 @@ scapegoats = traverse . filtered (is scapegoat)
 seers :: Traversable t => Traversal' (t Player) Player
 seers = traverse . filtered (is seer)
 
--- | This 'Traversal' provides the traversal of 'simpleVillager' 'Player's.
+-- | The traversal of 'simpleVillager' 'Player's.
 --
 -- @
 -- 'simpleVillagers' = 'traverse' . 'filtered' ('is' 'simpleVillager')
@@ -471,7 +471,7 @@ seers = traverse . filtered (is seer)
 simpleVillagers :: Traversable t => Traversal' (t Player) Player
 simpleVillagers = traverse . filtered (is simpleVillager)
 
--- | This 'Traversal' provides the traversal of 'simpleWerewolf' 'Player's.
+-- | The traversal of 'simpleWerewolf' 'Player's.
 --
 -- @
 -- 'simpleWerewolves' = 'traverse' . 'filtered' ('is' 'simpleWerewolf')
@@ -479,7 +479,7 @@ simpleVillagers = traverse . filtered (is simpleVillager)
 simpleWerewolves :: Traversable t => Traversal' (t Player) Player
 simpleWerewolves = traverse . filtered (is simpleWerewolf)
 
--- | This 'Traversal' provides the traversal of 'spitefulVillager' 'Player's.
+-- | The traversal of 'spitefulVillager' 'Player's.
 --
 -- @
 -- 'spitefulVillagers' = 'traverse' . 'filtered' ('is' 'spitefulVillager')
@@ -487,7 +487,7 @@ simpleWerewolves = traverse . filtered (is simpleWerewolf)
 spitefulVillagers :: Traversable t => Traversal' (t Player) Player
 spitefulVillagers = traverse . filtered (is spitefulVillager)
 
--- | This 'Traversal' provides the traversal of 'trueVillager' 'Player's.
+-- | The traversal of 'trueVillager' 'Player's.
 --
 -- @
 -- 'trueVillagers' = 'traverse' . 'filtered' ('is' 'trueVillager')
@@ -495,7 +495,7 @@ spitefulVillagers = traverse . filtered (is spitefulVillager)
 trueVillagers :: Traversable t => Traversal' (t Player) Player
 trueVillagers = traverse . filtered (is trueVillager)
 
--- | This 'Traversal' provides the traversal of 'villageDrunk' 'Player's.
+-- | The traversal of 'villageDrunk' 'Player's.
 --
 -- @
 -- 'villageDrunks' = 'traverse' . 'filtered' ('is' 'villageDrunk')
@@ -503,7 +503,7 @@ trueVillagers = traverse . filtered (is trueVillager)
 villageDrunks :: Traversable t => Traversal' (t Player) Player
 villageDrunks = traverse . filtered (is villageDrunk)
 
--- | This 'Traversal' provides the traversal of 'witch' 'Player's.
+-- | The traversal of 'witch' 'Player's.
 --
 -- @
 -- 'witches' = 'traverse' . 'filtered' ('is' 'witch')
@@ -511,7 +511,7 @@ villageDrunks = traverse . filtered (is villageDrunk)
 witches :: Traversable t => Traversal' (t Player) Player
 witches = traverse . filtered (is witch)
 
--- | This 'Traversal' provides the traversal of 'zombie' 'Player's.
+-- | The traversal of 'zombie' 'Player's.
 --
 -- @
 -- 'zombies' = 'traverse' . 'filtered' ('is' 'zombie')
@@ -519,7 +519,7 @@ witches = traverse . filtered (is witch)
 zombies :: Traversable t => Traversal' (t Player) Player
 zombies = traverse . filtered (is zombie)
 
--- | This 'Traversal' provides the traversal of 'loner' 'Player's.
+-- | The traversal of 'loner' 'Player's.
 --
 -- @
 -- 'loners' = 'traverse' . 'filtered' . ('is' 'loner')
@@ -527,7 +527,7 @@ zombies = traverse . filtered (is zombie)
 loners :: Traversable t => Traversal' (t Player) Player
 loners = traverse . filtered (is loner)
 
--- | This 'Traversal' provides the traversal of 'villager' 'Player's.
+-- | The traversal of 'villager' 'Player's.
 --
 -- @
 -- 'villagers' = 'traverse' . 'filtered' ('is' 'villager')
@@ -535,7 +535,7 @@ loners = traverse . filtered (is loner)
 villagers :: Traversable t => Traversal' (t Player) Player
 villagers = traverse . filtered (is villager)
 
--- | This 'Traversal' provides the traversal of 'werewolf' 'Player's.
+-- | The traversal of 'werewolf' 'Player's.
 --
 -- @
 -- 'werewolves' = 'traverse' . 'filtered' ('is' 'werewolf')
@@ -543,7 +543,7 @@ villagers = traverse . filtered (is villager)
 werewolves :: Traversable t => Traversal' (t Player) Player
 werewolves = traverse . filtered (is werewolf)
 
--- | This 'Traversal' provides the traversal of 'Alive' 'Player's.
+-- | The traversal of 'Alive' 'Player's.
 --
 -- @
 -- 'alive' = 'filtered' ('has' $ 'state' . '_Alive')
@@ -551,7 +551,7 @@ werewolves = traverse . filtered (is werewolf)
 alive :: Traversal' Player Player
 alive = filtered (has $ state . _Alive)
 
--- | This 'Traversal' provides the traversal of 'Dead' 'Player's.
+-- | The traversal of 'Dead' 'Player's.
 --
 -- @
 -- 'dead' = 'filtered' ('has' $ 'state' . '_Dead')
