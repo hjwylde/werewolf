@@ -7,6 +7,8 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+### v1.5.0.0
+
 *Major*
 
 * Changed name of Spiteful Villagers variant to Spiteful village. ([#242](https://github.com/hjwylde/werewolf/issues/242))
