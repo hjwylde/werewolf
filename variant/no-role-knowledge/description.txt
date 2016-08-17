@@ -1,1 +1,1 @@
-In "No role knowledge", players are not informed of the roles in play at the start of a game. Further, nocturnal player turns are obscured.
+Players are not informed of the roles in play at the start of a game. Further, nocturnal player turns are obscured.

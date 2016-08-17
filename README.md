@@ -93,7 +93,9 @@ Variants alter how the game plays out.
 
 * Standard
 * No role knowledge (players are not informed of the roles in play at the start of a game)
-* No role reveal (player roles are not revealed upon death)
+* No role knowledge or reveal (players are not informed of the roles in play at the start of a game,
+  nor each others roles upon death)
+* No role reveal (players are not informed of each others roles upon death)
 * Spiteful village (the default Villager role becomes the Spiteful Villager)
 
 ### Installing

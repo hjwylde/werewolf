@@ -1,0 +1,1 @@
+Next to them you see a stone statue, cold to the touch. #{humanise player} must have looked into the eyes of the #{humanise medusaRole} at the very end.

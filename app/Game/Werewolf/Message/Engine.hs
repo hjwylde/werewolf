@@ -34,16 +34,18 @@ import Data.Text       (Text)
 import Game.Werewolf.Game
 import Game.Werewolf.Player
 import Game.Werewolf.Response
-import Game.Werewolf.Role                           hiding (name)
-import Game.Werewolf.Variant                        hiding (name)
-import Game.Werewolf.Variant.NoRoleKnowledge.Engine as NoRoleKnowledge
-import Game.Werewolf.Variant.NoRoleReveal.Engine    as NoRoleReveal
-import Game.Werewolf.Variant.Standard.Engine        as Standard
+import Game.Werewolf.Role                                   hiding (name)
+import Game.Werewolf.Variant                                hiding (name)
+import Game.Werewolf.Variant.NoRoleKnowledge.Engine         as NoRoleKnowledge
+import Game.Werewolf.Variant.NoRoleKnowledgeOrReveal.Engine as NoRoleKnowledgeOrReveal
+import Game.Werewolf.Variant.NoRoleReveal.Engine            as NoRoleReveal
+import Game.Werewolf.Variant.Standard.Engine                as Standard
 
 playerBootedMessage :: Player -> Game -> Message
 playerBootedMessage player game
-    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.playerBootedText player
-    | otherwise                         = publicMessage $ Standard.playerBootedText player
+    | has (variant . noRoleKnowledgeOrReveal) game  = publicMessage $ NoRoleKnowledgeOrReveal.playerBootedText player
+    | has (variant . noRoleReveal) game             = publicMessage $ NoRoleReveal.playerBootedText player
+    | otherwise                                     = publicMessage $ Standard.playerBootedText player
 
 gameOverMessages :: Game -> [Message]
 gameOverMessages game
@@ -154,8 +156,9 @@ gameVariantMessage = publicMessage . gameVariantText
 
 rolesInGameMessage :: Maybe Text -> Game -> Message
 rolesInGameMessage mTo game
-    | has (variant . noRoleKnowledge) game  = Message mTo $ NoRoleKnowledge.rolesInGameText game
-    | otherwise                             = Message mTo $ Standard.rolesInGameText game
+    | has (variant . noRoleKnowledge) game          = Message mTo $ NoRoleKnowledge.rolesInGameText game
+    | has (variant . noRoleKnowledgeOrReveal) game  = Message mTo $ NoRoleKnowledgeOrReveal.rolesInGameText game
+    | otherwise                                     = Message mTo $ Standard.rolesInGameText game
 
 newPlayerMessage :: Player -> Message
 newPlayerMessage player = privateMessage (player ^. name) $ newPlayerText player
@@ -168,8 +171,9 @@ dullahanMessage to = privateMessage to . dullahanText
 
 spitefulVillagerKilledMessage :: Text -> Game -> Message
 spitefulVillagerKilledMessage to game
-    | has (variant . noRoleReveal) game = privateMessage to $ NoRoleReveal.spitefulVillagerKilledText game
-    | otherwise                         = privateMessage to $ Standard.spitefulVillagerKilledText game
+    | has (variant . noRoleKnowledgeOrReveal) game  = privateMessage to $ NoRoleKnowledgeOrReveal.spitefulVillagerKilledText game
+    | has (variant . noRoleReveal) game             = privateMessage to $ NoRoleReveal.spitefulVillagerKilledText game
+    | otherwise                                     = privateMessage to $ Standard.spitefulVillagerKilledText game
 
 trueVillagerMessage :: Game -> Message
 trueVillagerMessage = publicMessage . trueVillagerText
@@ -214,44 +218,52 @@ huntersTurnMessages game =
 
 necromancersTurnMessages :: Text -> Game -> [Message]
 necromancersTurnMessages to game
-    | has (variant . noRoleKnowledge) game  =
+    | has (variant . noRoleKnowledge) game          =
         [ privateMessage to necromancersTurnPrivateText ]
-    | has (variant . noRoleReveal) game     =
+    | has (variant . noRoleKnowledgeOrReveal) game  =
         [ privateMessage to necromancersTurnPrivateText ]
-    | otherwise                             =
+    | has (variant . noRoleReveal) game             =
+        [ privateMessage to necromancersTurnPrivateText ]
+    | otherwise                                     =
         [ publicMessage necromancersTurnPublicText
         , privateMessage to necromancersTurnPrivateText
         ]
 
 oraclesTurnMessages :: Text -> Game -> [Message]
 oraclesTurnMessages to game
-    | has (variant . noRoleKnowledge) game  =
+    | has (variant . noRoleKnowledge) game          =
         [ privateMessage to oraclesTurnPrivateText ]
-    | has (variant . noRoleReveal) game     =
+    | has (variant . noRoleKnowledgeOrReveal) game  =
         [ privateMessage to oraclesTurnPrivateText ]
-    | otherwise                             =
+    | has (variant . noRoleReveal) game             =
+        [ privateMessage to oraclesTurnPrivateText ]
+    | otherwise                                     =
         [ publicMessage oraclesTurnPublicText
         , privateMessage to oraclesTurnPrivateText
         ]
 
 orphansTurnMessages :: Text -> Game -> [Message]
 orphansTurnMessages to game
-    | has (variant . noRoleKnowledge) game  =
+    | has (variant . noRoleKnowledge) game          =
         [ privateMessage to orphansTurnPrivateText ]
-    | has (variant . noRoleReveal) game     =
+    | has (variant . noRoleKnowledgeOrReveal) game  =
         [ privateMessage to orphansTurnPrivateText ]
-    | otherwise                             =
+    | has (variant . noRoleReveal) game             =
+        [ privateMessage to orphansTurnPrivateText ]
+    | otherwise                                     =
         [ publicMessage orphansTurnPublicText
         , privateMessage to orphansTurnPrivateText
         ]
 
 protectorsTurnMessages :: Text -> Game -> [Message]
 protectorsTurnMessages to game
-    | has (variant . noRoleKnowledge) game  =
+    | has (variant . noRoleKnowledge) game          =
         [ privateMessage to protectorsTurnPrivateText ]
-    | has (variant . noRoleReveal) game     =
+    | has (variant . noRoleKnowledgeOrReveal) game  =
         [ privateMessage to protectorsTurnPrivateText ]
-    | otherwise                             =
+    | has (variant . noRoleReveal) game             =
+        [ privateMessage to protectorsTurnPrivateText ]
+    | otherwise                                     =
         [ publicMessage protectorsTurnPublicText
         , privateMessage to protectorsTurnPrivateText
         ]
@@ -261,20 +273,23 @@ scapegoatsTurnMessage = publicMessage . scapegoatsTurnText
 
 seersTurnMessages :: Text -> Game -> [Message]
 seersTurnMessages to game
-    | has (variant . noRoleKnowledge) game  =
+    | has (variant . noRoleKnowledge) game          =
         [ privateMessage to seersTurnPrivateText ]
-    | has (variant . noRoleReveal) game     =
+    | has (variant . noRoleKnowledgeOrReveal) game  =
         [ privateMessage to seersTurnPrivateText ]
-    | otherwise                             =
+    | has (variant . noRoleReveal) game             =
+        [ privateMessage to seersTurnPrivateText ]
+    | otherwise                                     =
         [ publicMessage seersTurnPublicText
         , privateMessage to seersTurnPrivateText
         ]
 
 villageDrunksTurnMessages :: Game -> [Message]
 villageDrunksTurnMessages game
-    | has (variant . noRoleKnowledge) game  = []
-    | has (variant . noRoleReveal) game     = []
-    | otherwise                             = [publicMessage villageDrunksTurnText]
+    | has (variant . noRoleKnowledge) game          = []
+    | has (variant . noRoleKnowledgeOrReveal) game  = []
+    | has (variant . noRoleReveal) game             = []
+    | otherwise                                     = [publicMessage villageDrunksTurnText]
 
 sunriseMessage :: Message
 sunriseMessage = publicMessage sunriseText
@@ -295,11 +310,13 @@ firstWerewolvesTurnMessages game =
 
 werewolvesTurnMessages :: [Text] -> Game -> [Message]
 werewolvesTurnMessages tos game
-    | has (variant . noRoleKnowledge) game  =
+    | has (variant . noRoleKnowledge) game          =
         groupMessages tos werewolvesTurnPrivateText
-    | has (variant . noRoleReveal) game     =
+    | has (variant . noRoleKnowledgeOrReveal) game  =
         groupMessages tos werewolvesTurnPrivateText
-    | otherwise                             =
+    | has (variant . noRoleReveal) game             =
+        groupMessages tos werewolvesTurnPrivateText
+    | otherwise                                     =
         publicMessage werewolvesTurnPublicText
         : groupMessages tos werewolvesTurnPrivateText
 
@@ -313,9 +330,10 @@ witchsTurnMessages game = concat
     where
         to              = game ^?! players . witches . name
         wakeUpMessages
-            | has (variant . noRoleKnowledge) game  = []
-            | has (variant . noRoleReveal) game     = []
-            | otherwise                             = [publicMessage witchsTurnText]
+            | has (variant . noRoleKnowledge) game          = []
+            | has (variant . noRoleKnowledgeOrReveal) game  = []
+            | has (variant . noRoleReveal) game             = []
+            | otherwise                                     = [publicMessage witchsTurnText]
         passMessage     = privateMessage to passText
         healMessages
             | game ^. healUsed  = []
@@ -356,18 +374,21 @@ noPlayerLynchedMessage = publicMessage noPlayerLynchedText
 
 werewolfLynchedMessage :: Player -> Game -> Message
 werewolfLynchedMessage player game
-    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.playerLynchedText player
-    | otherwise                         = publicMessage $ Standard.werewolfLynchedText player
+    | has (variant . noRoleKnowledgeOrReveal) game  = publicMessage $ NoRoleKnowledgeOrReveal.playerLynchedText player
+    | has (variant . noRoleReveal) game             = publicMessage $ NoRoleReveal.playerLynchedText player
+    | otherwise                                     = publicMessage $ Standard.werewolfLynchedText player
 
 playerLynchedMessage :: Player -> Game -> Message
 playerLynchedMessage player game
-    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.playerLynchedText player
-    | otherwise                         = publicMessage $ Standard.playerLynchedText player
+    | has (variant . noRoleKnowledgeOrReveal) game  = publicMessage $ NoRoleKnowledgeOrReveal.playerLynchedText player
+    | has (variant . noRoleReveal) game             = publicMessage $ NoRoleReveal.playerLynchedText player
+    | otherwise                                     = publicMessage $ Standard.playerLynchedText player
 
 saintLynchedMessage :: [Player] -> Game -> Message
 saintLynchedMessage voters game
-    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.saintLynchedText voters
-    | otherwise                         = publicMessage $ Standard.saintLynchedText voters
+    | has (variant . noRoleKnowledgeOrReveal) game  = publicMessage $ NoRoleKnowledgeOrReveal.saintLynchedText voters
+    | has (variant . noRoleReveal) game             = publicMessage $ NoRoleReveal.saintLynchedText voters
+    | otherwise                                     = publicMessage $ Standard.saintLynchedText voters
 
 scapegoatLynchedMessage :: Game -> Message
 scapegoatLynchedMessage = publicMessage . scapegoatLynchedText
@@ -380,16 +401,18 @@ noPlayerDevouredMessage = publicMessage noPlayerDevouredText
 
 playerDevouredMessage :: Player -> Game -> Message
 playerDevouredMessage player game
-    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.playerDevouredText player
-    | otherwise                         = publicMessage $ Standard.playerDevouredText player
+    | has (variant . noRoleKnowledgeOrReveal) game  = publicMessage $ NoRoleKnowledgeOrReveal.playerDevouredText player
+    | has (variant . noRoleReveal) game             = publicMessage $ NoRoleReveal.playerDevouredText player
+    | otherwise                                     = publicMessage $ Standard.playerDevouredText player
 
 playerDivinedMessage :: Text -> Player -> Message
 playerDivinedMessage to = privateMessage to . playerDivinedText
 
 playerPoisonedMessage :: Player -> Game -> Message
 playerPoisonedMessage player game
-    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.playerPoisonedText player
-    | otherwise                         = publicMessage $ Standard.playerPoisonedText player
+    | has (variant . noRoleKnowledgeOrReveal) game  = publicMessage $ NoRoleKnowledgeOrReveal.playerPoisonedText player
+    | has (variant . noRoleReveal) game             = publicMessage $ NoRoleReveal.playerPoisonedText player
+    | otherwise                                     = publicMessage $ Standard.playerPoisonedText player
 
 playerSeenMessage :: Text -> Player -> Message
 playerSeenMessage to player
@@ -399,8 +422,9 @@ playerSeenMessage to player
 
 playerTurnedToStoneMessage :: Player -> Game -> Message
 playerTurnedToStoneMessage player game
-    | has (variant . noRoleReveal) game = publicMessage $ NoRoleReveal.playerTurnedToStoneText player
-    | otherwise                         = publicMessage $ Standard.playerTurnedToStoneText player
+    | has (variant . noRoleKnowledgeOrReveal) game  = publicMessage $ NoRoleKnowledgeOrReveal.playerTurnedToStoneText player
+    | has (variant . noRoleReveal) game             = publicMessage $ NoRoleReveal.playerTurnedToStoneText player
+    | otherwise                                     = publicMessage $ Standard.playerTurnedToStoneText player
 
 villageDrunkJoinedVillageMessage :: Text -> Message
 villageDrunkJoinedVillageMessage to = privateMessage to villageDrunkJoinedVillageText
