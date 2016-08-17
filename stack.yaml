@@ -6,3 +6,4 @@ packages:
 - '.'
 extra-deps:
 - interpolate-0.1.0
+- optparse-applicative-0.13.0.0
