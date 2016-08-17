@@ -7,6 +7,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Revisions*
+
+* Bump optparse-applicative max version constraint. ([#256](https://github.com/hjwylde/werewolf/issues/256))
+
 ### v1.5.0.0
 
 *Major*
