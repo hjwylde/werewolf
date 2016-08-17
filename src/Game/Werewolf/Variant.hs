@@ -22,10 +22,11 @@ module Game.Werewolf.Variant (
     -- ** Instances
     allVariants,
 
-    standardVariant, noRoleKnowledgeVariant, noRoleRevealVariant, spitefulVillageVariant,
+    standardVariant, noRoleKnowledgeVariant, noRoleKnowledgeOrRevealVariant, noRoleRevealVariant,
+    spitefulVillageVariant,
 
     -- ** Traversals
-    standard, noRoleKnowledge, noRoleReveal, spitefulVillage,
+    standard, noRoleKnowledge, noRoleKnowledgeOrReveal, noRoleReveal, spitefulVillage,
 ) where
 
 import Control.Lens
@@ -53,6 +54,7 @@ allVariants :: [Variant]
 allVariants =
     [ standardVariant
     , noRoleKnowledgeVariant
+    , noRoleKnowledgeOrRevealVariant
     , noRoleRevealVariant
     , spitefulVillageVariant
     ]
@@ -69,6 +71,13 @@ noRoleKnowledgeVariant = Variant
     { _tag          = "no-role-knowledge"
     , _name         = T.strip [iFile|variant/no-role-knowledge/name.txt|]
     , _description  = T.strip [iFile|variant/no-role-knowledge/description.txt|]
+    }
+
+noRoleKnowledgeOrRevealVariant :: Variant
+noRoleKnowledgeOrRevealVariant = Variant
+    { _tag          = "no-role-knowledge-or-reveal"
+    , _name         = T.strip [iFile|variant/no-role-knowledge-or-reveal/name.txt|]
+    , _description  = T.strip [iFile|variant/no-role-knowledge-or-reveal/description.txt|]
     }
 
 noRoleRevealVariant :: Variant
@@ -93,7 +102,6 @@ spitefulVillageVariant = Variant
 standard :: Traversal' Variant ()
 standard = only standardVariant
 
-
 -- | The traversal of 'noRoleKnowledge' 'Variant's.
 --
 -- @
@@ -102,6 +110,13 @@ standard = only standardVariant
 noRoleKnowledge :: Traversal' Variant ()
 noRoleKnowledge = only noRoleKnowledgeVariant
 
+-- | The traversal of 'noRoleKnowledgeOrReveal' 'Variant's.
+--
+-- @
+-- 'noRoleKnowledgeOrReveal' = 'only' 'noRoleKnowledgeOrRevealVariant'
+-- @
+noRoleKnowledgeOrReveal :: Traversal' Variant ()
+noRoleKnowledgeOrReveal = only noRoleKnowledgeOrRevealVariant
 
 -- | The traversal of 'noRoleReveal' 'Variant's.
 --
@@ -110,7 +125,6 @@ noRoleKnowledge = only noRoleKnowledgeVariant
 -- @
 noRoleReveal :: Traversal' Variant ()
 noRoleReveal = only noRoleRevealVariant
-
 
 -- | The traversal of 'spitefulVillage' 'Variant's.
 --

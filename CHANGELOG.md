@@ -7,6 +7,10 @@ Post v1 a change is further considered breaking if the state file format is inco
 
 ### Upcoming
 
+*Minor*
+
+* Added the No Role Knowledge Or Reveal variant. ([#226](https://github.com/hjwylde/werewolf/issues/226))
+
 *Revisions*
 
 * Bump optparse-applicative max version constraint. ([#256](https://github.com/hjwylde/werewolf/issues/256))

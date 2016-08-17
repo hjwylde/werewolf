@@ -27,6 +27,23 @@ extra-source-files:
     variant/no-role-knowledge/command/ping/werewolves-pinged.txt
     variant/no-role-knowledge/command/status/current-nocturnal-turn.txt
     variant/no-role-knowledge/engine/new-game/roles-in-game.txt
+    variant/no-role-knowledge-or-reveal/description.txt
+    variant/no-role-knowledge-or-reveal/name.txt
+    variant/no-role-knowledge-or-reveal/command/choose/player-shot.txt
+    variant/no-role-knowledge-or-reveal/command/ping/nocturnal-role-pinged.txt
+    variant/no-role-knowledge-or-reveal/command/ping/werewolves-pinged.txt
+    variant/no-role-knowledge-or-reveal/command/quit/caller-quit.txt
+    variant/no-role-knowledge-or-reveal/command/status/current-nocturnal-turn.txt
+    variant/no-role-knowledge-or-reveal/command/status/dead-players.txt
+    variant/no-role-knowledge-or-reveal/engine/general/player-booted.txt
+    variant/no-role-knowledge-or-reveal/engine/general/spiteful-villager-killed.txt
+    variant/no-role-knowledge-or-reveal/engine/lynching/player-lynched.txt
+    variant/no-role-knowledge-or-reveal/engine/lynching/saint-lynched.txt
+    variant/no-role-knowledge-or-reveal/engine/lynching/werewolf-lynched.txt
+    variant/no-role-knowledge-or-reveal/engine/new-game/roles-in-game.txt
+    variant/no-role-knowledge-or-reveal/engine/sunrise/player-devoured.txt
+    variant/no-role-knowledge-or-reveal/engine/sunrise/player-poisoned.txt
+    variant/no-role-knowledge-or-reveal/engine/sunrise/player-turned-to-stone.txt
     variant/no-role-reveal/description.txt
     variant/no-role-reveal/name.txt
     variant/no-role-reveal/command/choose/player-shot.txt
