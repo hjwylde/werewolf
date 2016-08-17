@@ -309,6 +309,8 @@ executable werewolf
         Game.Werewolf.Util
         Game.Werewolf.Variant.NoRoleKnowledge.Command
         Game.Werewolf.Variant.NoRoleKnowledge.Engine
+        Game.Werewolf.Variant.NoRoleKnowledgeOrReveal.Command
+        Game.Werewolf.Variant.NoRoleKnowledgeOrReveal.Engine
         Game.Werewolf.Variant.NoRoleReveal.Command
         Game.Werewolf.Variant.NoRoleReveal.Engine
         Game.Werewolf.Variant.Standard.Command
