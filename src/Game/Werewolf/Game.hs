@@ -131,7 +131,7 @@ makeLenses ''Game
 makePrisms ''Stage
 
 #if __GLASGOW_HASKELL__ >= 800
-activity :: Contravariant f => (Activity -> f Activity) -> Stage -> f Stage
+activity :: (Functor f, Contravariant f) => (Activity -> f Activity) -> Stage -> f Stage
 #else
 activity :: Getter Stage Activity
 #endif
