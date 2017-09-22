@@ -2,7 +2,7 @@ name:           werewolf
 version:        1.5.1.1
 
 author:         Henry J. Wylde
-maintainer:     public@hjwylde.com
+maintainer:     hjwylde@gmail.com
 homepage:       https://github.com/hjwylde/werewolf
 
 synopsis:       A game engine for playing werewolf within an arbitrary chat client
@@ -349,7 +349,7 @@ executable werewolf
         QuasiQuotes,
         Rank2Types
     build-depends:
-        aeson >= 0.8 && < 1.1,
+        aeson >= 0.8 && < 1.2,
         base >= 4.8 && < 5,
         containers == 0.5.*,
         directory > 1.2,
@@ -387,7 +387,7 @@ library
         Rank2Types,
         TemplateHaskell
     build-depends:
-        aeson >= 0.8 && < 1.1,
+        aeson >= 0.8 && < 1.2,
         base >= 4.8 && < 5,
         containers == 0.5.*,
         extra >= 1.4 && < 1.6,
