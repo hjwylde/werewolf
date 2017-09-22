@@ -30,4 +30,4 @@ install:
 - travis_wait stack $ARGS --no-terminal --skip-ghc-check test --only-snapshot
 
 script:
-- stack $ARGS --no-terminal --skip-ghc-check build
+- stack $ARGS --no-terminal --skip-ghc-check test
