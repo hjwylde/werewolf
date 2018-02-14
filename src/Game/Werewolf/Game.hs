@@ -130,11 +130,7 @@ makeLenses ''Game
 
 makePrisms ''Stage
 
-#if __GLASGOW_HASKELL__ >= 800
 activity :: (Functor f, Contravariant f) => (Activity -> f Activity) -> Stage -> f Stage
-#else
-activity :: Getter Stage Activity
-#endif
 activity = to getter
     where
         getter DruidsTurn           = Diurnal
