@@ -3,8 +3,6 @@
 [![Project Status: Active - The project has reached a stable, usable state and is being actively developed.](http://www.repostatus.org/badges/latest/active.svg)](http://www.repostatus.org/#active)
 [![Build Status](https://travis-ci.org/hjwylde/werewolf.svg?branch=master)](https://travis-ci.org/hjwylde/werewolf)
 [![Release](https://img.shields.io/github/release/hjwylde/werewolf.svg)](https://github.com/hjwylde/werewolf/releases/latest)
-[![werewolf on Stackage LTS](https://www.stackage.org/package/werewolf/badge/lts)](https://www.stackage.org/lts/package/werewolf)
-[![werewolf on Stackage Nightly](https://www.stackage.org/package/werewolf/badge/nightly)](https://www.stackage.org/nightly/package/werewolf)
 
 A game engine for playing werewolf within an arbitrary chat client.
 Werewolf is a well known social party game, commonly also called Mafia.
