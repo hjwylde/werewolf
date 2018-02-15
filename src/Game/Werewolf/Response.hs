@@ -35,7 +35,6 @@ module Game.Werewolf.Response (
 import Control.Monad.IO.Class
 
 import           Data.Aeson
-import           Data.Aeson.Types
 import           Data.Text               (Text)
 import qualified Data.Text.Lazy.Encoding as T
 import qualified Data.Text.Lazy.IO       as T
