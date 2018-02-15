@@ -26,8 +26,8 @@ before_install:
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip=1 -C ~/.local/bin '*/stack'
 
 install:
-- travis_wait stack $STACK_ARGS --no-terminal --skip-ghc-check setup
-- travis_wait stack $STACK_ARGS --no-terminal --skip-ghc-check test --only-snapshot
+- travis_wait 30 stack $STACK_ARGS --no-terminal --skip-ghc-check setup
+- travis_wait 30 stack $STACK_ARGS --no-terminal --skip-ghc-check test --only-snapshot
 
 script:
 - stack $STACK_ARGS --no-terminal --skip-ghc-check test
