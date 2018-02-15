@@ -22,9 +22,7 @@ module Werewolf.Options (
 
 import Control.Lens
 
-#if MIN_VERSION_optparse_applicative(0,13,0)
-import Data.Monoid
-#endif
+import           Data.Monoid
 import           Data.Text    (Text)
 import qualified Data.Text    as T
 import           Data.Version (showVersion)
@@ -78,11 +76,7 @@ data Command
 -- | The default preferences.
 --   Limits the help output to 100 columns.
 werewolfPrefs :: ParserPrefs
-#if MIN_VERSION_optparse_applicative(0,13,0)
 werewolfPrefs = prefs $ columns 100 <> showHelpOnEmpty
-#else
-werewolfPrefs = prefs $ columns 100
-#endif
 
 -- | An optparse parser of a werewolf command.
 werewolfInfo :: ParserInfo Options

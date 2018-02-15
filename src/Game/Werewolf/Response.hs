@@ -34,10 +34,7 @@ module Game.Werewolf.Response (
 
 import Control.Monad.IO.Class
 
-import Data.Aeson
-#if !MIN_VERSION_aeson(0,10,0)
-import Data.Aeson.Types
-#endif
+import           Data.Aeson
 import           Data.Text               (Text)
 import qualified Data.Text.Lazy.Encoding as T
 import qualified Data.Text.Lazy.IO       as T
@@ -60,9 +57,7 @@ instance FromJSON Response
 
 instance ToJSON Response where
     toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
     toEncoding  = genericToEncoding defaultOptions
-#endif
 
 -- | A successful, empty response.
 success :: Response
@@ -94,9 +89,7 @@ instance FromJSON Message
 
 instance ToJSON Message where
     toJSON      = genericToJSON defaultOptions
-#if MIN_VERSION_aeson(0,10,0)
     toEncoding  = genericToEncoding defaultOptions
-#endif
 
 -- | Creates a public message with the given text.
 publicMessage :: Text -> Message
