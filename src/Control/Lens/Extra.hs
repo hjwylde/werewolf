@@ -21,7 +21,7 @@ module Control.Lens.Extra (
     filteredBy,
 ) where
 
-import Control.Lens hiding (isn't)
+import Control.Lens hiding (isn't, filteredBy)
 import Control.Monad.State
 
 import Data.Monoid
