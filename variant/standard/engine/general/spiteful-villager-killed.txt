@@ -1,1 +1,1 @@
-Being ethereal seldom has it's benefits. Perhaps however this knowledge of the townsfolks' natures will bring you some joy in the afterlife: #{humanisePlayersWithRoles $ game ^.. players . traverse . alive}.
+Being ethereal seldom has it's benefits. Perhaps however this knowledge of the townsfolks' natures will bring you some joy in the afterlife: #{humanisePlayersWithRoles $ game ^.. (players . traverse . alive)}.
