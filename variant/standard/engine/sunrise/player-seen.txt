@@ -1,1 +1,1 @@
-#{humanise player} is aligned with #{article} #{humanise $ player ^. role . allegiance}.
+#{humanise player} is aligned with #{article} #{humanise $ player ^. (role . allegiance)}.

@@ -1,1 +1,1 @@
-With the #{humanise necromancerRole} gone, there is nothing keeping #{humanise $ game ^.. players . zombies} in this world. They begin to rot and return to whence they came.
+With the #{humanise necromancerRole} gone, there is nothing keeping #{humanise $ game ^.. (players . zombies)} in this world. They begin to rot and return to whence they came.
